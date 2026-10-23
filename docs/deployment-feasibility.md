@@ -1,6 +1,6 @@
 # GitHub + Cloudflare Pages 发布可行性
 
-核查日期：2026-10-23。结论：当前项目可用GitHub仓库管理，再由Cloudflare Pages Git集成发布；图片数量不会阻挡上线。这是发布前的体量调查，Cloudflare 尚未部署；当前仓库准备与构建方式见 DEVELOPMENT.md。
+核查日期：2026-10-23。结论：当前项目可用GitHub仓库管理，再由Cloudflare Pages Git集成发布；图片数量不会阻挡上线。这是发布前的体量调查。维护者现已提供站点地址 https://yixu-wardrobe.9992099.xyz/；当前构建方式见 DEVELOPMENT.md。
 
 ## 实测规模
 

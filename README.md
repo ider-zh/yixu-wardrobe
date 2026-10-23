@@ -4,7 +4,7 @@
 
 衣序是一间可以慢慢逛的线上衣橱。100 套完整搭配，分成 10 组风格；从衣料的层次，到回眸时的笑意，寻找让你想多看一眼的那一套。
 
-[English](README.en.md) · [项目仓库](https://github.com/ider-zh/yixu-wardrobe)
+[在线浏览](https://yixu-wardrobe.9992099.xyz/) · [English](README.en.md) · [项目仓库](https://github.com/ider-zh/yixu-wardrobe)
 
 ![衣序的衣橱与写真浏览界面](docs/images/wardrobe-preview.png)
 
@@ -28,7 +28,9 @@
 
 ## 开始浏览
 
-从仓库页面选择 **Code → Download ZIP**，完整解压后打开 `index.html`。
+打开 [衣序在线衣橱](https://yixu-wardrobe.9992099.xyz/)，即可浏览、筛选和收藏喜欢的搭配。
+
+也可以离线浏览：从仓库页面选择 **Code → Download ZIP**，完整解压后打开 `index.html`。
 
 无需注册或安装依赖。请保留解压后的文件结构，图片与网页需要放在一起。
 

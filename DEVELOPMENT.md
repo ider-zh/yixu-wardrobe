@@ -40,7 +40,7 @@ node scripts/build.mjs
 
 ## 托管准备
 
-[GitHub + Cloudflare Pages 可行性调查](docs/deployment-feasibility.md)记录了图片体量、官方限制和性能考虑。若另行授权部署，可使用 Cloudflare Pages Git 集成：
+[GitHub + Cloudflare Pages 可行性调查](docs/deployment-feasibility.md)记录了图片体量、官方限制和性能考虑。维护者已提供线上地址：[衣序在线衣橱](https://yixu-wardrobe.9992099.xyz/)。Cloudflare Pages Git 集成使用以下设置：
 
 - 框架：None。
 - 构建命令：`node scripts/build.mjs`。

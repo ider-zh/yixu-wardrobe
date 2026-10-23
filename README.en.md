@@ -4,7 +4,7 @@ Dress an ordinary moment in something you love.
 
 Yixu is a wardrobe to wander through at your own pace: 100 complete looks across ten style collections. Explore the layers of an outfit, the turn of a silhouette, or a smile that makes you look twice.
 
-[简体中文](README.md) · [Repository](https://github.com/ider-zh/yixu-wardrobe)
+[Explore online](https://yixu-wardrobe.9992099.xyz/) · [简体中文](README.md) · [Repository](https://github.com/ider-zh/yixu-wardrobe)
 
 ![The Yixu wardrobe and photography gallery](docs/images/wardrobe-preview.png)
 
@@ -28,7 +28,9 @@ Keyboard shortcuts: `/` for search, `←` and `→` for adjacent looks in detail
 
 ## Start browsing
 
-On the repository page, choose **Code → Download ZIP**. Extract the complete folder and open `index.html`.
+Visit the [Yixu online wardrobe](https://yixu-wardrobe.9992099.xyz/) to browse, filter and save your favorite looks.
+
+To browse offline, choose **Code → Download ZIP** on the repository page. Extract the complete folder and open `index.html`.
 
 No account or dependency installation is needed. Keep the extracted files together so the gallery can find its images.
 
