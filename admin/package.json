@@ -1,0 +1,6 @@
+{
+  "name": "yixu-admin",
+  "private": true,
+  "type": "module",
+  "devDependencies": { "linkedom": "0.18.12" }
+}

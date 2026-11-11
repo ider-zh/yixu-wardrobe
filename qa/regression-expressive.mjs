@@ -331,8 +331,23 @@ check('all 100 records have local, distinct-edition image paths and nine shots',
     assert.equal(look.versions.v2.shots.length, 9);
   }
 });
+check('guarded try-on bridge carries exact look, edition and montage/panel without requiring the network module', () => {
+  const received=[];
+  context.window.WardrobeTryOn={setContext(value){received.push(JSON.parse(JSON.stringify(value)));},track(){}};
+  for(const look of context.window.WARDROBE.looks){
+    for(const edition of ['v1','v2']){
+      a.switchEdition(edition);a.openDetail(look.id);
+      for(let shot=0;shot<=9;shot++){
+        a.setView(shot);
+        assert.deepEqual(received.at(-1),{look_id:look.id,edition,shot_index:shot});
+      }
+    }
+  }
+  delete context.window.WardrobeTryOn;
+  a.openDetail(100); // The unchanged offline app must also work with no bridge.
+});
 check('page and styles have no remote dependencies', () => {
-  const styles = ['style.css', 'expressive.css'].map(file => fs.readFileSync(path.join(root, file), 'utf8')).join('\n');
+  const styles = ['style.css', 'expressive.css', 'tryon.css'].map(file => fs.readFileSync(path.join(root, file), 'utf8')).join('\n');
   assert.ok(!/<(?:script|link)[^>]+(?:src|href)=["'](?:https?:)?\/\//i.test(html));
   assert.ok(!/@import\s|url\(\s*["']?(?:https?:)?\/\//i.test(styles));
   assert.ok(!/\b(?:fetch|XMLHttpRequest|WebSocket)\b/.test(app));
@@ -342,3 +357,7 @@ console.log('Synthetic DOM regression: ' + checks.length + ' checks passed.');
 
 // Keep asset integrity and HTTP coverage in the existing CI entry point.
 await import('./regression-assets.mjs');
+// Existing workflow entry point also verifies the application without deployment.
+if (process.env.GITHUB_ACTIONS === 'true' && process.env.YIXU_VERIFY_CHILD !== '1') {
+  await import('../scripts/verify-application.mjs');
+}

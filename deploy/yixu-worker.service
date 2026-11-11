@@ -1,0 +1,27 @@
+[Unit]
+Description=Yixu image worker
+After=network-online.target yixu-egress.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=yixu
+Group=yixu
+WorkingDirectory=@@BACKEND_ROOT@@
+EnvironmentFile=@@RUNTIME_ENV@@
+Environment=PYTHONDONTWRITEBYTECODE=1
+Environment=OMP_NUM_THREADS=1
+Environment=OPENBLAS_NUM_THREADS=1
+ExecStart=@@BACKEND_ROOT@@/.venv/bin/python -m backend.worker
+Restart=on-failure
+RestartSec=3
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=@@DATA_ROOT@@
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#f3f0e7">
+  <title>衣序 · 管理工作台</title>
+  <link rel="stylesheet" href="./admin.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到主要内容</a>
+  <header class="site-header"><a class="brand" href="/" aria-label="衣序管理首页"><span>衣序</span><small>THE WARDROBE / ADMIN</small></a></header>
+  <main id="main">
+    <div class="page-heading"><p class="eyebrow">BEHIND THE WARDROBE</p><h1>管理工作台<span>.</span></h1><p class="muted">记录真实使用，照看每一次生成。</p></div>
+    <div class="connection-bar"><p id="notice" role="status" aria-live="polite">正在连接管理服务…</p><button id="reconnect" class="text-button" type="button">重新连接</button></div>
+    <p id="error" role="alert" tabindex="-1" hidden></p>
+    <section id="login-panel" class="panel login-panel" aria-labelledby="login-title" hidden>
+      <p class="eyebrow">PRIVATE ACCESS</p><h2 id="login-title">管理员登录</h2>
+      <p class="muted">使用服务首次初始化时自动创建的管理员凭据。初始密码仅保存在服务器私有文件中，请向部署运维人员获取；此处不提供注册。</p>
+      <form id="login-form">
+        <label for="login-username">用户名</label><input id="login-username" name="username" autocomplete="username" required>
+        <label for="login-password">密码</label><input id="login-password" name="password" type="password" autocomplete="current-password" required>
+        <button type="submit">登录工作台 <span aria-hidden="true">↗</span></button>
+      </form>
+    </section>
+    <div id="workspace" hidden>
+      <div class="session-bar"><span id="provider-summary">尚未读取配置，不能确认生成可用。</span><button id="logout" class="outline" type="button">退出登录</button></div>
+      <nav class="section-nav" aria-label="管理导航"><a href="#overview">使用概览</a><a href="#results">生成结果</a><a href="#settings">服务设置</a><a href="#account">账户安全</a></nav>
+      <section id="overview" class="panel" aria-labelledby="overview-title">
+        <div class="section-heading"><div><p class="eyebrow">THE REAL PICTURE</p><h2 id="overview-title">使用概览</h2></div><button id="refresh-overview" class="outline" type="button">刷新概览 ↻</button></div>
+        <p class="muted">来自服务端记录，非独立访客估算。任务状态与存储数量分别统计；无记录时显示 0。</p>
+        <dl id="metrics" class="metrics">
+          <div><dt>页面访问事件</dt><dd data-metric="visits">—</dd></div>
+          <div><dt>造型打开事件</dt><dd data-metric="look_opens">—</dd></div>
+          <div><dt>试穿任务总数</dt><dd data-metric="tryons_total">—</dd></div>
+          <div><dt>正在排队</dt><dd data-metric="queued">—</dd></div>
+          <div><dt>处理中</dt><dd data-metric="running">—</dd></div>
+          <div><dt>生成成功</dt><dd data-metric="succeeded">—</dd></div>
+          <div><dt>生成失败</dt><dd data-metric="failed">—</dd></div>
+          <div><dt>状态待确认</dt><dd data-metric="unknown">—</dd></div>
+          <div><dt>当前结果数</dt><dd data-metric="result_count">—</dd></div>
+          <div><dt>结果存储大小</dt><dd data-metric="result_bytes">—</dd></div>
+        </dl>
+        <div class="overview-details"><section aria-labelledby="popular-title"><h3 id="popular-title">热门造型</h3><ol id="popular-looks"></ol></section><section aria-labelledby="jobs-title"><h3 id="jobs-title">最近任务</h3><p class="muted">状态待确认的外部请求不会自动重放；这里不显示原始照片。</p><ul id="recent-jobs" class="job-list"></ul></section></div>
+      </section>
+      <section id="results" class="panel" aria-labelledby="results-title">
+        <div class="section-heading"><div><p class="eyebrow">GENERATED, NOT ORIGINAL</p><h2 id="results-title">生成结果</h2></div><button id="refresh-results" class="outline" type="button">刷新结果 ↻</button></div>
+        <p class="muted">只展示已生成的 AI 试穿图，不含上传的原始照片。缩略图与大图均需管理员会话；被用户删除或全局保留规则移除的结果将不再可用。</p>
+        <p id="results-empty" class="empty" hidden>暂无生成结果。真实完成的试穿将在这里出现。</p>
+        <div id="results-grid" class="results-grid"></div>
+        <button id="load-more-results" class="outline load-more" type="button" hidden>继续加载结果 ↓</button>
+      </section>
+      <section id="settings" class="panel" aria-labelledby="settings-title">
+        <div class="section-heading"><div><p class="eyebrow">PROVIDER RUNTIME</p><h2 id="settings-title">生成服务设置</h2></div><button id="refresh-settings" class="outline" type="button">重新读取设置 ↻</button></div>
+        <p id="provider-status" class="provider-status" role="status">尚未读取配置，不能确认生成可用。</p>
+        <p class="muted">只修改服务运行参数；保存不会发送生成请求，也不会验证付费调用。服务是否可用还取决于网络、密钥权限与人脸检测器。</p>
+        <form id="settings-form" autocomplete="off">
+          <fieldset id="settings-fields" disabled><legend class="sr-only">服务运行参数</legend>
+            <div class="form-grid">
+              <div><label for="provider-model">模型标识</label><input id="provider-model" name="model" required spellcheck="false"></div>
+              <div><label class="check-label" for="provider-enabled"><input id="provider-enabled" name="enabled" type="checkbox">允许服务接受生成请求</label></div>
+              <div><label for="provider-api-base">API 地址（HTTPS）</label><input id="provider-api-base" name="api_base" type="url" required spellcheck="false" autocapitalize="none"></div>
+              <div><label for="provider-proxy">专用代理地址</label><input id="provider-proxy" name="proxy_url" type="url" required spellcheck="false" autocapitalize="none"><p class="field-hint">仅支持显式本机 HTTP 代理，不回退直连；地址中不可带凭据。</p></div>
+              <div class="full-width"><label for="provider-key">替换项目 API 密钥</label><input id="provider-key" name="api_key" type="password" autocomplete="new-password" spellcheck="false" autocapitalize="none" aria-describedby="key-help key-state"><p id="key-state" class="field-hint">密钥状态尚未读取。</p><p id="key-help" class="field-hint">留空保留现有密钥。现有密钥不可回读，提交后清空输入；请勿使用助手或命令行工具的身份凭据。</p><label class="check-label"><input id="clear-provider-key" name="clear_api_key" type="checkbox">明确清除现有密钥（停止可用的生成配置）</label></div>
+              <div data-runtime-option="size" hidden><label for="provider-size">生成画面尺寸</label><select id="provider-size" name="size"><option value="1024x1536">1024 × 1536 · 竖向</option><option value="1024x1024">1024 × 1024 · 方形</option><option value="1536x1024">1536 × 1024 · 横向</option></select></div>
+              <div data-runtime-option="quality" hidden><label for="provider-quality">生成质量</label><select id="provider-quality" name="quality"><option value="low">低</option><option value="medium">中</option><option value="high">高</option><option value="auto">自动</option></select></div>
+              <div data-runtime-option="provider_timeout_seconds" hidden><label for="provider-timeout">请求超时（秒）</label><input id="provider-timeout" name="provider_timeout_seconds" type="number" min="1" max="3600" step="1"><p class="field-hint">这是网络等待上限，不是生成次数限制；未知调用不会自动重试。</p></div>
+            </div>
+            <button type="submit">保存运行设置 ↗</button>
+          </fieldset>
+        </form>
+      </section>
+      <section id="account" class="panel account-panel" aria-labelledby="account-title">
+        <p class="eyebrow">ACCOUNT SECURITY</p><h2 id="account-title">修改管理员密码</h2>
+        <p class="muted">修改后所有旧会话失效，需要重新登录。本页面不展示初始密码，也不会创建新账户。</p>
+        <form id="password-form">
+          <label for="current-password">当前密码</label><input id="current-password" name="current_password" type="password" autocomplete="current-password" required maxlength="1024">
+          <label for="new-password">新密码</label><input id="new-password" name="new_password" type="password" autocomplete="new-password" required minlength="16" maxlength="1024" aria-describedby="password-help">
+          <p id="password-help" class="field-hint">至少 16 个字符，建议使用密码管理器创建并保存独立密码。</p>
+          <label for="confirm-password">再次输入新密码</label><input id="confirm-password" type="password" autocomplete="new-password" required minlength="16" maxlength="1024">
+          <button type="submit">修改密码并重新登录 ↗</button>
+        </form>
+      </section>
+    </div>
+    <aside class="privacy-note">仅管理员可访问生成结果。原始照片和衍生输入不可在此查看，最迟于接收后 1 小时删除。生成结果全局保留最新 1000 张，先入先出，无时间到期规则。</aside>
+  </main>
+  <footer><span class="brand-name">衣序</span><span>穿行于日常，停留在喜欢。</span><span>独立管理入口 · admin.8882088.xyz</span></footer>
+  <noscript><p>管理工作台需要 JavaScript。请启用后刷新；未加载时不会展示私有数据。</p></noscript>
+  <script type="module" src="./app.mjs"></script>
+</body>
+</html>

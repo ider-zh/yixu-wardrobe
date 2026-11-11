@@ -147,6 +147,7 @@ function setView(view) {
   const current=versionOf(byId.get(state.active));const names=['完整九宫格',...current.shots.map(s=>s.title)];
   $('view-name').textContent=names[view]||'写真';const shot=current.shots[view-1];$('view-moment').textContent=state.version==='v2'?(shot?[shot.emotion,shot.pose,shot.framing].filter(Boolean).join(' · '):current.summary):'';
   const look=byId.get(state.active);image.alt=look.title+' · '+names[view];
+  window.WardrobeTryOn?.setContext?.({look_id:look.id,edition:state.version,shot_index:view});
 }
 function updateDetailActions() {
   const l=byId.get(state.active);if(!l)return;
@@ -172,6 +173,7 @@ function openDetail(id) {
   $('original-link').hidden=!versionOf(l).ready;$('download-link').hidden=!versionOf(l).ready;
   $('view-selector').innerHTML=[0,1,2,3,4,5,6,7,8,9].map(v=>'<button data-view="'+v+'" aria-label="'+esc(v?(versionOf(l).shots[v-1]?.title||'写真'+v):'完整九宫格')+'" aria-pressed="'+!v+'">'+(v?String(v).padStart(2,'0'):'九宫格')+'</button>').join('');
   $('view-selector').hidden=!versionOf(l).ready;setView(0);updateDetailActions();
+  window.WardrobeTryOn?.track?.('look_open',{look_id:id,edition:state.version});
   const list=detailList(),position=list.findIndex(x=>x.id===id);
   $('detail-position').textContent=(position+1)+' / '+list.length;
   $('previous-look').disabled=position<=0;$('next-look').disabled=position>=list.length-1;
@@ -210,7 +212,7 @@ document.querySelectorAll('dialog').forEach(dialog=>dialog.addEventListener('cli
 document.addEventListener('keydown',e=>{
   const editable=e.target.matches('input,textarea,select,[contenteditable]');
   if(e.key==='/'&&!editable&&!document.querySelector('dialog[open]')){e.preventDefault();$('search').focus();$('search').scrollIntoView({block:'center',behavior:'smooth'});}
-  if($('detail-dialog').open&&!$('edition-compare-dialog').open&&!$('compare-dialog').open&&!editable){if(e.key==='ArrowRight'){e.preventDefault();navigateLook(1);}if(e.key==='ArrowLeft'){e.preventDefault();navigateLook(-1);}}
+  if($('detail-dialog').open&&!$('tryon-dialog')?.open&&!$('edition-compare-dialog').open&&!$('compare-dialog').open&&!editable){if(e.key==='ArrowRight'){e.preventDefault();navigateLook(1);}if(e.key==='ArrowLeft'){e.preventDefault();navigateLook(-1);}}
 });
 window.addEventListener('storage',e=>{if(e.key!==storageKey)return;try{const values=JSON.parse(e.newValue||'[]');if(!Array.isArray(values))return;favorites.clear();values.filter(id=>byId.has(id)).forEach(id=>favorites.add(id));updateCounts();renderGallery();if(state.active)updateDetailActions();}catch{}});
 document.querySelectorAll('[data-edition]').forEach(b=>b.addEventListener('click',()=>switchEdition(b.dataset.edition)));updateEditionUI();

@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import vm from 'node:vm';
+import {fileURLToPath} from 'node:url';
+const root=fileURLToPath(new URL('../',import.meta.url));
+assert.equal(process.argv.length,4,'Usage: node scripts/export-catalog.mjs --output FILE');
+assert.equal(process.argv[2],'--output');
+const output=path.resolve(process.argv[3]);
+const context={window:{}};
+vm.runInNewContext(fs.readFileSync(path.join(root,'catalog.js'),'utf8'),context,{timeout:1000});
+const data=context.window.WARDROBE;
+assert.equal(data.looks.length,100);
+fs.mkdirSync(path.dirname(output),{recursive:true});
+fs.writeFileSync(output,JSON.stringify(data)+'\n',{mode:0o600});
+console.log(JSON.stringify({outfits:data.looks.length,exported:true}));

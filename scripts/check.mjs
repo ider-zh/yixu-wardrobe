@@ -62,8 +62,11 @@ for (const version of ['v1', 'v2']) {
 const html = read('index.html');
 const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]);
 assert.equal(ids.length, new Set(ids).size);
-for (const match of read('app.js').matchAll(/\$\('([^']+)'\)/g)) {
-  assert.ok(ids.includes(match[1]), `Missing UI target: ${match[1]}`);
+for(const file of ['app.js','tryon.js']) {
+  new vm.Script(read(file),{filename:file});
+  for (const match of read(file).matchAll(/\$\('([^']+)'\)/g)) {
+    assert.ok(ids.includes(match[1]), `Missing UI target: ${match[1]}`);
+  }
 }
 for (const match of html.matchAll(/(?:src|href)="([^"]+)"/g)) {
   const target = match[1];

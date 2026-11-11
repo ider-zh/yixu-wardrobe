@@ -11,7 +11,7 @@ assert.equal(path.basename(output), 'public');
 assert.ok(!fs.existsSync(output) || !fs.lstatSync(output).isSymbolicLink());
 fs.rmSync(output, {recursive: true, force: true});
 fs.mkdirSync(output);
-const files = ['index.html', 'app.js', 'catalog.js', 'style.css', 'expressive.css', 'favicon.svg'];
+const files = ['index.html', 'app.js', 'catalog.js', 'style.css', 'expressive.css', 'tryon.js', 'tryon.css', 'favicon.svg'];
 for (const folder of ['images', 'images-v2']) {
   fs.mkdirSync(path.join(output, folder));
   const names = fs.readdirSync(path.join(root, folder));
@@ -23,5 +23,5 @@ for (const name of files) {
   fs.copyFileSync(path.join(root, name), path.join(output, name));
   bytes += fs.statSync(path.join(output, name)).size;
 }
-assert.equal(files.length, 206);
+assert.equal(files.length, 208);
 console.log(JSON.stringify({output: 'public/', files: files.length, bytes}));

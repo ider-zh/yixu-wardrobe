@@ -16,10 +16,13 @@ function run(script, cwd = root) {
 }
 const build = run('scripts/build.mjs');
 assert.equal(build.status, 0, build.stderr);
-assert.equal(JSON.parse(build.stdout).files, 206);
+assert.equal(JSON.parse(build.stdout).files, 208);
 const output = path.join(root, 'public');
 const files = fs.readdirSync(output, {recursive: true}).filter(name => fs.statSync(path.join(output, name)).isFile());
-assert.equal(files.length, 206);
+assert.equal(files.length, 208);
+const expected=['index.html','app.js','catalog.js','style.css','expressive.css','tryon.js','tryon.css','favicon.svg',...['images','images-v2'].flatMap(folder=>Array.from({length:100},(_,i)=>`${folder}/look-${String(i+1).padStart(3,'0')}.webp`))];
+assert.deepEqual([...files].sort(),expected.sort(),'Explicit public allowlist excludes backend/admin/private files');
+for(const asset of ['tryon.js','tryon.css'])assert.equal(digest(fs.readFileSync(path.join(output,asset))),digest(fs.readFileSync(path.join(root,asset))));
 assert.equal(files.filter(name => name.endsWith('.webp')).length, 200);
 assert.ok(!files.some(name => /\.(?:png|jpe?g)$/i.test(name)));
 const manifest = JSON.parse(fs.readFileSync(path.join(root, 'image-manifest-all.json'), 'utf8'));
@@ -32,7 +35,7 @@ console.log('PASS static output contains 200 matching WebP files and the ICP foo
 // Exercise the actual validation CLI in an isolated copy, never mutate source.
 const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'yixu-assets-'));
 try {
-  for (const name of ['scripts', 'images', 'images-v2', 'docs', 'catalog.js', 'app.js', 'index.html', 'style.css', 'expressive.css', 'favicon.svg', 'README.md', 'README.en.md', 'DEVELOPMENT.md', 'AGENTS.md', 'image-manifest-all.json']) {
+  for (const name of ['scripts', 'images', 'images-v2', 'docs', 'catalog.js', 'app.js', 'index.html', 'style.css', 'expressive.css', 'tryon.js', 'tryon.css', 'favicon.svg', 'README.md', 'README.en.md', 'DEVELOPMENT.md', 'AGENTS.md', 'image-manifest-all.json']) {
     fs.cpSync(path.join(root, name), path.join(fixture, name), {recursive: true});
   }
   const control = run('scripts/check.mjs', fixture);
@@ -60,6 +63,15 @@ try {
     fs.writeFileSync(manifestFile, originalManifest);
     console.log('PASS validator rejects ' + name);
   }
+  const tryonFile=path.join(fixture,'tryon.js');
+  const source=fs.readFileSync(tryonFile,'utf8');
+  for(const [name,change] of [['missing try-on UI target',"\n$('nonexistent-tryon-target');\n"],['broken try-on JavaScript','\nconst = ;\n']]){
+    fs.writeFileSync(tryonFile,source+change);
+    const rejected=run('scripts/check.mjs',fixture);
+    assert.notEqual(rejected.status,0,'Validator must reject '+name);
+    fs.writeFileSync(tryonFile,source);
+    console.log('PASS validator rejects '+name);
+  }
 } finally {
   fs.rmSync(fixture, {recursive: true, force: true});
 }
@@ -86,4 +98,4 @@ try {
     await stopped;
   }
 }
-console.log('Asset regression: 6 checks passed.');
+console.log('Asset regression: 8 checks passed.');

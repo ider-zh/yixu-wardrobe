@@ -1,0 +1,20 @@
+[project]
+name = "yixu-backend"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = ["fastapi", "uvicorn", "httpx2", "openai", "pillow", "python-multipart", "opencv-python-headless", "argon2-cffi"]
+
+[dependency-groups]
+dev = ["pytest", "ruff", "mypy", "types-Pillow"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests/backend"]
+pythonpath = ["."]
+
+[tool.mypy]
+python_version = "3.12"
+check_untyped_defs = true
+ignore_missing_imports = true
+
+[tool.ruff]
+line-length = 100
