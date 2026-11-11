@@ -4,7 +4,7 @@ Dress an ordinary moment in something you love.
 
 Yixu is a wardrobe to wander through at your own pace: 100 complete looks across ten style collections. Explore the layers of an outfit, the turn of a silhouette, or a smile that makes you look twice.
 
-[Explore online](https://yixu-wardrobe.9992099.xyz/) · [简体中文](README.md) · [Repository](https://github.com/ider-zh/yixu-wardrobe)
+[Explore online](https://www.8882088.xyz/) · [简体中文](README.md) · [Repository](https://github.com/ider-zh/yixu-wardrobe)
 
 ![The Yixu wardrobe and photography gallery](docs/images/wardrobe-preview.webp)
 
@@ -28,7 +28,7 @@ Keyboard shortcuts: `/` for search, `←` and `→` for adjacent looks in detail
 
 ## Start browsing
 
-Visit the [Yixu online wardrobe](https://yixu-wardrobe.9992099.xyz/) to browse, filter and save your favorite looks.
+Visit the [Yixu online wardrobe](https://www.8882088.xyz/) to browse, filter and save your favorite looks.
 
 To browse offline, choose **Code → Download ZIP** on the repository page. Extract the complete folder and open `index.html`.
 
@@ -44,7 +44,9 @@ Favorites stay in the current browser. The gallery does not upload your choices.
 
 The character and outfit imagery are generative artwork for styling inspiration and visual enjoyment. Details may vary between photographs.
 
-The current version's footer displays the ICP filing number [浙ICP备2026098002号](https://beian.miit.gov.cn/). The online address above is unchanged; these repository updates do not mean a new domain has been deployed.
+The website is now live over HTTPS and displays the ICP filing number [浙ICP备2026098002号](https://beian.miit.gov.cn/). HTTP redirects to HTTPS; automated certificate renewal is configured and its rehearsal passed.
+
+[Personal-photo AI try-on and first-party analytics](docs/ai-tryon-backend-design.md) are currently a design only, not a live feature. The current website does not accept selfies.
 
 ---
 

@@ -4,7 +4,7 @@
 
 衣序是一间可以慢慢逛的线上衣橱。100 套完整搭配，分成 10 组风格；从衣料的层次，到回眸时的笑意，寻找让你想多看一眼的那一套。
 
-[在线浏览](https://yixu-wardrobe.9992099.xyz/) · [English](README.en.md) · [项目仓库](https://github.com/ider-zh/yixu-wardrobe)
+[在线浏览](https://www.8882088.xyz/) · [English](README.en.md) · [项目仓库](https://github.com/ider-zh/yixu-wardrobe)
 
 ![衣序的衣橱与写真浏览界面](docs/images/wardrobe-preview.webp)
 
@@ -28,7 +28,7 @@
 
 ## 开始浏览
 
-打开 [衣序在线衣橱](https://yixu-wardrobe.9992099.xyz/)，即可浏览、筛选和收藏喜欢的搭配。
+打开 [衣序在线衣橱](https://www.8882088.xyz/)，即可浏览、筛选和收藏喜欢的搭配。
 
 也可以离线浏览：从仓库页面选择 **Code → Download ZIP**，完整解压后打开 `index.html`。
 
@@ -44,7 +44,9 @@
 
 人物与服装画面采用生成式创作，供穿搭灵感与视觉欣赏；不同画面中的细节可能略有变化。
 
-当前版本页脚展示备案号 [浙ICP备2026098002号](https://beian.miit.gov.cn/)。上方在线地址保持不变；这些仓库更新不代表新域名已部署。
+当前站点已通过 HTTPS 上线，页脚展示备案号 [浙ICP备2026098002号](https://beian.miit.gov.cn/)。HTTP 自动跳转到 HTTPS，证书自动续期已配置并通过演练。
+
+后续的[个人照片 AI 试穿与第一方统计后台](docs/ai-tryon-backend-design.md)目前仅为设计，尚未上线；当前网站仍不接收自拍。
 
 ---
 

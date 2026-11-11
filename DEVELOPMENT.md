@@ -68,9 +68,11 @@ node scripts/build.mjs
 
 构建会替换专用的 `public/` 输出目录，只复制网页必需的 206 个文件，不包含文档、测试和生成记录。该目录不提交到 Git。GitHub Actions 执行同样的检查与构建，只有读取权限，不发布站点或 Release。
 
-## 托管准备
+## 当前托管与静态托管参考
 
-[GitHub + Cloudflare Pages 可行性调查](docs/deployment-feasibility.md)保留了 2026-10-23 的体量、官方限制和性能调查，并追加 2026-11-11 的图片更新；本次未重新核验云服务商限制或线上性能。维护者已提供线上地址：[衣序在线衣橱](https://yixu-wardrobe.9992099.xyz/)，在新域名实际部署前保持不变。当前版本页脚使用备案号 [浙ICP备2026098002号](https://beian.miit.gov.cn/)。Cloudflare Pages Git 集成使用以下设置：
+[衣序在线衣橱](https://www.8882088.xyz/)现已直连部署，使用 Nginx 提供已逐文件核验的静态构建，HTTP 跳转 HTTPS，Certbot 自动续期及续期后重载已配置，并以实际 systemd 服务完成续期演练。私人运维资料和凭据保留在服务器私有目录，不进入本仓库。当前版本页脚使用备案号 [浙ICP备2026098002号](https://beian.miit.gov.cn/)。
+
+[GitHub + Cloudflare Pages 可行性调查](docs/deployment-feasibility.md)保留了 2026-10-23 的历史调查和 2026-11-11 的图片更新，不作为当前主站部署方式。以下 Cloudflare Pages Git 集成配置仅作替代静态托管参考；本次未重新核验其云服务商限制或线上性能：
 
 - 框架：None。
 - 构建命令：`node scripts/build.mjs`。
@@ -78,3 +80,7 @@ node scripts/build.mjs
 - 根目录：仓库根目录。
 
 源码推送与 Cloudflare 部署分别报告，仓库存在及 CI 通过都不代表网站已经上线。
+
+## 后续后台设计（未实现）
+
+见[匿名 AI 试穿与第一方 Web Analytics 后台设计](docs/ai-tryon-backend-design.md)。方案保留静态衣柜和本地收藏，拟增加同源轻量后台、任务队列、本地人像检测、私有 WebP 结果及受限出站代理；未开放自拍上传或收费模型调用。实施前应根据新的明确授权，窄化更新 `AGENTS.md` 中原先禁止分析与上传的规则，并完成方案中的资格、隐私和预算条件。
