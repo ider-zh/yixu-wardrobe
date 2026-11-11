@@ -6,7 +6,7 @@ Yixu is a wardrobe to wander through at your own pace: 100 complete looks across
 
 [Explore online](https://yixu-wardrobe.9992099.xyz/) · [简体中文](README.md) · [Repository](https://github.com/ider-zh/yixu-wardrobe)
 
-![The Yixu wardrobe and photography gallery](docs/images/wardrobe-preview.png)
+![The Yixu wardrobe and photography gallery](docs/images/wardrobe-preview.webp)
 
 ## Two ways to see a look
 
@@ -34,13 +34,17 @@ To browse offline, choose **Code → Download ZIP** on the repository page. Extr
 
 No account or dependency installation is needed. Keep the extracted files together so the gallery can find its images.
 
-If photos do not appear, check that the whole archive was extracted, rather than copying only the HTML file. Original images are large and may take a moment to load.
+If photos do not appear, check that the whole archive was extracted, rather than copying only the HTML file. The repository's 200 photos are now same-dimension lossy WebP (quality 85, compression level 6): their combined size fell from 531,661,790 to 48,176,224 bytes (about 48.18 MB), a 90.94% reduction, with a maximum of 384,636 bytes per image. This is not the full site size.
+
+The runtime set still contains 206 files. Photos stay alongside the website under the relative paths `images/` and `images-v2/`, with no object storage or external CDN dependency. The documentation preview has also been converted to WebP.
 
 ## Your favorites and the images
 
 Favorites stay in the current browser. The gallery does not upload your choices. Changing browsers, opening the gallery from a different address or clearing browser data may remove or separate your favorites.
 
 The character and outfit imagery are generative artwork for styling inspiration and visual enjoyment. Details may vary between photographs.
+
+The current version's footer displays the ICP filing number [浙ICP备2026098002号](https://beian.miit.gov.cn/). The online address above is unchanged; these repository updates do not mean a new domain has been deployed.
 
 ---
 

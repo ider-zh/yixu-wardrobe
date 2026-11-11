@@ -90,6 +90,23 @@ const a = context.window.__audit;
 const checks = [];
 function check(name, fn) { fn(); checks.push(name); }
 
+check('footer shows the exact ICP number linked to the ministry lookup', () => {
+  const footer = html.match(/<footer\b[^>]*>([\s\S]*?)<\/footer>/)?.[1];
+  assert.ok(footer, 'A visible page footer is required');
+  assert.match(footer, /<a\b[^>]*href="https:\/\/beian\.miit\.gov\.cn\/"[^>]*>浙ICP备2026098002号<\/a>/);
+});
+
+check('gallery and hero use only local WebP photography', () => {
+  for (const look of context.window.WARDROBE.looks) {
+    for (const version of ['v1', 'v2']) {
+      assert.match(look.versions[version].image, /^images(?:-v2)?\/look-\d{3}\.webp$/);
+    }
+  }
+  const heroes = [...html.matchAll(/<img\b[^>]*\bid="hero-image-\d"[^>]*\bsrc="([^"]+)"/g)];
+  assert.equal(heroes.length, 2);
+  for (const match of heroes) assert.match(match[1], /^images-v2\/look-\d{3}\.webp$/);
+});
+
 check('unified catalog has ten collections of ten and curated cross-collection order', () => {
   const data = context.window.WARDROBE;
   assert.equal(data.looks.length, 100);
@@ -189,18 +206,18 @@ check('look 100 is searchable and its two editions, panels and navigation are co
   assert.equal(node('previous-look').disabled, true);
   assert.equal(node('next-look').disabled, true);
   a.switchEdition('v1');
-  assert.equal(node('detail-image').src, 'images/look-100.png');
-  assert.equal(node('download-link').href, 'images/look-100.png');
+  assert.equal(node('detail-image').src, 'images/look-100.webp');
+  assert.equal(node('download-link').href, 'images/look-100.webp');
   a.switchEdition('v2');
-  assert.equal(node('detail-image').src, 'images-v2/look-100.png');
+  assert.equal(node('detail-image').src, 'images-v2/look-100.webp');
   for(let panel=1;panel<=9;panel++){
     a.setView(panel);
     assert.equal(node('view-name').textContent,look.versions.v2.shots[panel-1].title);
     assert.ok(node('view-moment').textContent.includes(look.versions.v2.shots[panel-1].emotion));
   }
   node('edition-compare').events.click[0]();
-  assert.match(node('edition-comparison-content').innerHTML,/images\/look-100\.png/);
-  assert.match(node('edition-comparison-content').innerHTML,/images-v2\/look-100\.png/);
+  assert.match(node('edition-comparison-content').innerHTML,/images\/look-100\.webp/);
+  assert.match(node('edition-comparison-content').innerHTML,/images-v2\/look-100\.webp/);
   node('edition-compare-dialog').close();
   a.resetFilters();
   a.openDetail(100);
@@ -250,15 +267,15 @@ check('edition change with edition-only query does not create position zero', ()
   assert.equal(node('detail-position').textContent, '70 / 100');
 });
 check('open detail links, filename and shot description track edition', () => {
-  assert.equal(node('detail-image').src, 'images/look-070.png');
-  assert.equal(node('original-link').href, 'images/look-070.png');
-  assert.equal(node('download-link').href, 'images/look-070.png');
-  assert.match(node('download-link').download, /-v1-/);
+  assert.equal(node('detail-image').src, 'images/look-070.webp');
+  assert.equal(node('original-link').href, 'images/look-070.webp');
+  assert.equal(node('download-link').href, 'images/look-070.webp');
+  assert.match(node('download-link').download, /-v1-.*\.webp$/);
   assert.equal(node('view-moment').textContent, '');
   a.switchEdition('v2');
-  assert.equal(node('detail-image').src, 'images-v2/look-070.png');
-  assert.equal(node('download-link').href, 'images-v2/look-070.png');
-  assert.match(node('download-link').download, /-v2-/);
+  assert.equal(node('detail-image').src, 'images-v2/look-070.webp');
+  assert.equal(node('download-link').href, 'images-v2/look-070.webp');
+  assert.match(node('download-link').download, /-v2-.*\.webp$/);
   a.setView(5);
   assert.ok(node('view-moment').textContent.includes(a.byId.get(70).versions.v2.shots[4].pose));
 });
@@ -273,9 +290,9 @@ check('favorites are shared by outfit ID across both editions', () => {
 });
 check('open comparison updates image paths when edition changes', () => {
   a.openComparison();
-  assert.match(node('comparison-content').innerHTML, /images-v2\/look-070\.png/);
+  assert.match(node('comparison-content').innerHTML, /images-v2\/look-070\.webp/);
   a.switchEdition('v1');
-  assert.match(node('comparison-content').innerHTML, /images\/look-071\.png/);
+  assert.match(node('comparison-content').innerHTML, /images\/look-071\.webp/);
   assert.ok(!node('comparison-content').innerHTML.includes('images-v2/'));
   node('compare-dialog').close();
 });
@@ -308,8 +325,8 @@ check('all 100 records have local, distinct-edition image paths and nine shots',
   assert.equal(new Set(looks.map(look => look.id)).size, 100);
   for (const look of looks) {
     const id = String(look.id).padStart(3, '0');
-    assert.equal(look.versions.v1.image, 'images/look-' + id + '.png');
-    assert.equal(look.versions.v2.image, 'images-v2/look-' + id + '.png');
+    assert.equal(look.versions.v1.image, 'images/look-' + id + '.webp');
+    assert.equal(look.versions.v2.image, 'images-v2/look-' + id + '.webp');
     assert.equal(look.versions.v1.shots.length, 9);
     assert.equal(look.versions.v2.shots.length, 9);
   }
@@ -322,3 +339,6 @@ check('page and styles have no remote dependencies', () => {
 });
 for (const name of checks) console.log('PASS ' + name);
 console.log('Synthetic DOM regression: ' + checks.length + ' checks passed.');
+
+// Keep asset integrity and HTTP coverage in the existing CI entry point.
+await import('./regression-assets.mjs');

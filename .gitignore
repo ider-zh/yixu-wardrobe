@@ -14,9 +14,9 @@
 !/serve.mjs
 !/image-manifest-all.json
 !/images/
-!/images/look-*.png
+!/images/look-*.webp
 !/images-v2/
-!/images-v2/look-*.png
+!/images-v2/look-*.webp
 !/scripts/
 !/scripts/*.mjs
 !/.github/
@@ -24,7 +24,8 @@
 !/.github/workflows/check.yml
 !/qa/
 !/qa/regression-expressive.mjs
+!/qa/regression-assets.mjs
 !/docs/
 !/docs/deployment-feasibility.md
 !/docs/images/
-!/docs/images/wardrobe-preview.png
+!/docs/images/wardrobe-preview.webp

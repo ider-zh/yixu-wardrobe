@@ -12,7 +12,7 @@ body[data-edition=v2] .card-tags{color:#8b6252}body[data-edition=v2] .hero-index
 .site-header nav{gap:22px}.header-editions{display:flex;gap:2px;border:1px solid var(--line);padding:3px}
 .header-editions button{font-size:11px;padding:6px 10px;white-space:nowrap}.header-editions button.active{color:var(--paper-light);background:var(--green)}
 .hero{border-bottom:1px solid var(--line)}.hero-description{margin-bottom:30px}.edition-toolbar{justify-content:flex-start}
-footer>span{font-family:var(--serif);font-size:12px;letter-spacing:2px;color:var(--muted)}
+footer{flex-wrap:wrap;gap:18px}footer>span{font-family:var(--serif);font-size:12px;letter-spacing:2px;color:var(--muted)}footer>.icp-link{font-size:12px;white-space:nowrap;text-underline-offset:4px}footer>.icp-link:hover{text-decoration:underline}
 @media(max-width:1000px){.brand-en{display:none}.site-header nav{gap:16px}}
 @media(max-width:520px){.site-header{height:72px;gap:10px}.site-header nav{gap:11px}.site-header .collection-link{display:none}.header-editions{padding:2px;gap:1px}.header-editions button{font-size:10px;padding:6px 7px}.site-header nav button span{margin-left:3px}.hero{padding-top:28px}.completion-note{font-size:9px;max-width:none}.edition-switch button{font-size:12px;padding:10px 8px}.brand-mark{font-size:24px}footer>span{font-size:9px;letter-spacing:1px}}
 

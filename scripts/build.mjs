@@ -16,7 +16,7 @@ for (const folder of ['images', 'images-v2']) {
   fs.mkdirSync(path.join(output, folder));
   const names = fs.readdirSync(path.join(root, folder));
   assert.equal(names.length, 100);
-  for (let id = 1; id <= 100; id++) files.push(`${folder}/look-${String(id).padStart(3, '0')}.png`);
+  for (let id = 1; id <= 100; id++) files.push(`${folder}/look-${String(id).padStart(3, '0')}.webp`);
 }
 let bytes = 0;
 for (const name of files) {

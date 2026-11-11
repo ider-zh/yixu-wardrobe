@@ -168,7 +168,7 @@ function openDetail(id) {
   $('detail-scene').textContent='写真场景 / '+l.scene;
   $('detail-image').hidden=!versionOf(l).ready;$('detail-photo-frame').classList.toggle('pending',!versionOf(l).ready);
   if(versionOf(l).ready)$('detail-image').src=versionOf(l).image;else $('detail-image').removeAttribute('src');
-  $('original-link').href=versionOf(l).image;$('download-link').href=versionOf(l).image;$('download-link').download='LOOK-'+number(id)+'-'+state.version+'-'+l.title+'.png';
+  $('original-link').href=versionOf(l).image;$('download-link').href=versionOf(l).image;$('download-link').download='LOOK-'+number(id)+'-'+state.version+'-'+l.title+'.webp';
   $('original-link').hidden=!versionOf(l).ready;$('download-link').hidden=!versionOf(l).ready;
   $('view-selector').innerHTML=[0,1,2,3,4,5,6,7,8,9].map(v=>'<button data-view="'+v+'" aria-label="'+esc(v?(versionOf(l).shots[v-1]?.title||'写真'+v):'完整九宫格')+'" aria-pressed="'+!v+'">'+(v?String(v).padStart(2,'0'):'九宫格')+'</button>').join('');
   $('view-selector').hidden=!versionOf(l).ready;setView(0);updateDetailActions();

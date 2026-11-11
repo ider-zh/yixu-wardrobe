@@ -16,12 +16,41 @@ node serve.mjs
 
 - `index.html`、`app.js`、`style.css`、`expressive.css`：页面、交互与样式。
 - `catalog.js`：100 套服装的完整前台资料。修改文案、分类或镜头描述时编辑此文件；保持服装 ID、顺序和图片对应关系。
-- `images/`、`images-v2/`：造型与生动写真，各 100 张九宫格 PNG。内部 v1/v2 标记用于对应关系，界面使用“造型”和“生动”。
+- `images/`、`images-v2/`：造型与生动写真，各 100 张原尺寸有损 WebP 九宫格（质量 85，压缩级别 6）。内部 v1/v2 标记用于对应关系，界面使用“造型”和“生动”；运行时继续使用这两个相对目录，不依赖对象存储或外部 CDN。
 - `image-manifest-all.json`：200 张图的尺寸、字节数和 SHA-256。替换图片时审阅并更新对应清单。
-- `qa/regression-expressive.mjs`：使用实际应用代码和合成 DOM 检查交互。
+- `docs/images/wardrobe-preview.webp`：文档预览图，不进入网页运行集合。
+- `qa/regression-expressive.mjs`：使用实际应用代码和合成 DOM 检查交互，结束后调用资源回归，现有 CI 入口会同时运行两组检查。
+- `qa/regression-assets.mjs`：可独立运行的构建产物、图片完整性拒绝和 HTTP 类型回归。
 - `scripts/`：无外部依赖的校验和静态输出脚本。
 
 本地生成提示词、原始来源记录、历史草稿及完整 ZIP 不属于公开仓库内容；`.gitignore` 使用文件清单控制提交范围。
+
+## 图片压缩与复现
+
+2026-11-11，200 张运行时写真由 PNG 转为原尺寸有损 WebP，使用 FFmpeg 的 `libwebp` 编码器，质量 85、压缩级别 6，不缩放。图片合计从 531,661,790 字节降至 48,176,224 字节（约 48.18 MB），减少 90.94%，单张最大 384,636 字节。该图片总数不含文档预览；当前构建的完整站点为 206 个文件、48,579,000 字节（约 48.58 MB）。
+
+原始 PNG 保留在 Git 历史中，不在当前图片目录中。以下 Bash 命令从已知包含原始 PNG 的提交读取源文件，在单独目录重建写真和文档预览，不覆盖当前资产；需要 Git 和带 `libwebp` 编码器的 FFmpeg。这些是维护工具，不是网站运行依赖。
+
+```bash
+set -euo pipefail
+source_revision=3495260326e5cb72120ed165bab0910c8ee34d9d
+output_dir="$PWD/webp-rebuilt"
+git ls-tree -r --name-only "$source_revision" -- images/ images-v2/ docs/images/ |
+while IFS= read -r source; do
+  case "$source" in
+    *.png)
+      target="$output_dir/${source%.png}.webp"
+      mkdir -p "$(dirname "$target")"
+      git show "$source_revision:$source" |
+        ffmpeg -hide_banner -loglevel error -n -i pipe:0 \
+          -c:v libwebp -lossless 0 -quality 85 -compression_level 6 \
+          -frames:v 1 -f webp "$target"
+      ;;
+  esac
+done
+```
+
+编码器版本变化可能影响输出字节；复现后应核对尺寸和画面，不能假定生成结果与清单哈希自动一致。正式替换时同步修改 `catalog.js` 和清单，并运行以下校验；不要把重建目录作为额外运行资产发布。
 
 ## 验证与构建
 
@@ -31,16 +60,17 @@ node serve.mjs
 node --check app.js
 node scripts/check.mjs
 node qa/regression-expressive.mjs
+node qa/regression-assets.mjs
 node scripts/build.mjs
 ```
 
-检查覆盖 100 套、10 组各 10 套、200 张图片的签名与 SHA-256、资源和文档链接。交互回归检查筛选、季节单选、写真切换、收藏、对比与详情导航；布局、焦点和原生弹窗行为仍需浏览器验证。
+检查覆盖 100 套、10 组各 10 套、200 张图片的 RIFF/WebP 与 VP8 头、RIFF/块长度、文件字节数、头部尺寸与清单一致性及 SHA-256，以及资源和文档链接。图片校验仅接受单帧、单个 VP8 块的简单有损 WebP，不是支持所有 WebP 变体的通用解码器。资源回归另查构建产物、重算哈希后的坏签名/长度/尺寸拒绝、图片哈希变化拒绝，以及 HTTP 预览的 `image/webp` 类型和实际字节。交互回归检查筛选、季节单选、写真切换、收藏、对比与详情导航；布局、焦点和原生弹窗行为仍需浏览器验证。
 
 构建会替换专用的 `public/` 输出目录，只复制网页必需的 206 个文件，不包含文档、测试和生成记录。该目录不提交到 Git。GitHub Actions 执行同样的检查与构建，只有读取权限，不发布站点或 Release。
 
 ## 托管准备
 
-[GitHub + Cloudflare Pages 可行性调查](docs/deployment-feasibility.md)记录了图片体量、官方限制和性能考虑。维护者已提供线上地址：[衣序在线衣橱](https://yixu-wardrobe.9992099.xyz/)。Cloudflare Pages Git 集成使用以下设置：
+[GitHub + Cloudflare Pages 可行性调查](docs/deployment-feasibility.md)保留了 2026-10-23 的体量、官方限制和性能调查，并追加 2026-11-11 的图片更新；本次未重新核验云服务商限制或线上性能。维护者已提供线上地址：[衣序在线衣橱](https://yixu-wardrobe.9992099.xyz/)，在新域名实际部署前保持不变。当前版本页脚使用备案号 [浙ICP备2026098002号](https://beian.miit.gov.cn/)。Cloudflare Pages Git 集成使用以下设置：
 
 - 框架：None。
 - 构建命令：`node scripts/build.mjs`。
