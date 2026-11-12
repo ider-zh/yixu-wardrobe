@@ -31,6 +31,8 @@
 !/docs/
 !/docs/deployment-feasibility.md
 !/docs/ai-tryon-backend-design.md
+!/docs/external-agent-sop.md
+!/docs/content-publishing-plan.md
 !/docs/images/
 !/docs/images/wardrobe-preview.webp
 # Backend and admin source only; runtime data, credentials, models and venv stay ignored.
