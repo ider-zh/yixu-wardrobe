@@ -37,6 +37,20 @@ for (const photo of content.publicAssets) {
 assert.match(fs.readFileSync(path.join(output, 'index.html'), 'utf8'), /浙ICP备2026098002号/);
 console.log('PASS static output contains only allowlisted expressive assets, public model references and the ICP footer');
 
+// Candidate builds must not overwrite arbitrary nonempty directories or replace
+// the currently served output before an explicit activation.
+const buildScratch=fs.mkdtempSync(path.join(os.tmpdir(),'yixu-build-'));
+try {
+  const candidate=path.join(buildScratch,'candidate');
+  const staged=spawnSync(process.execPath,['scripts/build.mjs','--output',candidate],{cwd:root,encoding:'utf8'});
+  assert.equal(staged.status,0,staged.stderr);
+  const original=fs.readFileSync(path.join(candidate,'catalog.js'));
+  const rejected=spawnSync(process.execPath,['scripts/build.mjs','--output',candidate],{cwd:root,encoding:'utf8'});
+  assert.notEqual(rejected.status,0,'Nonempty explicit output must be rejected');
+  assert.deepEqual(fs.readFileSync(path.join(candidate,'catalog.js')),original);
+  assert.deepEqual(fs.readFileSync(path.join(output,'catalog.js')),original,'Staging must not replace served output');
+} finally {fs.rmSync(buildScratch,{recursive:true,force:true});}
+
 // Exercise the actual validation CLI in an isolated copy, never mutate source.
 const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'yixu-assets-'));
 try {

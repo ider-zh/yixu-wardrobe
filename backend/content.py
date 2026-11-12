@@ -8,14 +8,16 @@ import copy
 import hashlib
 import io
 import json
+import re
 import sqlite3
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from pathlib import PurePosixPath
 from typing import Literal
+from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, HTTPException, Query
 from PIL import Image
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from starlette.responses import Response
 
 from .files import atomic_write
@@ -147,11 +149,101 @@ class Batch(Strict):
     schema_version: Literal[1]
     batch_id: str = Field(pattern=r"^\d{4}-\d{2}-\d{2}-[A-Za-z0-9_-]+$")
     publish_date: date
+    published_at: datetime | None = Field(
+        default=None,
+        description="Timezone-aware publication instant on publish_date in Asia/Shanghai; omitted means local midnight.",
+    )
+    cover_look_id: int | None = Field(
+        default=None,
+        strict=True,
+        ge=1,
+        le=2_147_483_647,
+        description="Homepage cover ID belonging to this batch; omitted means its first look.",
+    )
     timezone: Literal["Asia/Shanghai"]
     title: str = Field(min_length=1, max_length=200)
     region: Region
     research: Research
     looks: list[BatchLook] = Field(min_length=1)
+
+    @field_validator("published_at", mode="before")
+    @classmethod
+    def publication_timestamp(cls, value):
+        if value is not None and (
+            not isinstance(value, str)
+            or not re.fullmatch(
+                r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|[+-]\d{2}:\d{2})",
+                value,
+            )
+        ):
+            raise ValueError("Expected a timezone-aware ISO publication timestamp")
+        return value
+
+    @model_validator(mode="after")
+    def publication_metadata(self):
+        if self.published_at is not None and self.published_at.utcoffset() is None:
+            raise ValueError("Publication timestamp requires a timezone")
+        if self.published_at is not None:
+            try:
+                local_date = self.published_at.astimezone(ZoneInfo(self.timezone)).date()
+            except OverflowError as error:
+                raise ValueError("Publication timestamp is outside the supported range") from error
+            if local_date != self.publish_date:
+                raise ValueError("Publication timestamp must match the Shanghai publication date")
+        if self.cover_look_id is not None and self.cover_look_id not in {
+            look.id for look in self.looks
+        }:
+            raise ValueError("Cover must belong to this batch")
+        return self
+
+    def publication_time(self):
+        value = self.published_at or datetime.combine(
+            self.publish_date, datetime.min.time(), ZoneInfo(self.timezone)
+        )
+        return value.astimezone(UTC).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+
+
+def publication_projection(looks, batches, legacy_order):
+    """Deterministic feed selection; source file mtimes never affect publication."""
+    ordered_batches = sorted(
+        batches, key=lambda batch: (batch["published_at"], batch["batch_id"]), reverse=True
+    )
+    published_ids = [key for batch in ordered_batches for key in sorted(batch["look_ids"])]
+    legacy_ids = sorted(look["id"] for look in looks if look["id"] not in published_ids)
+    latest_order = published_ids + legacy_ids
+    featured = (
+        ordered_batches[0]["cover_look_id"]
+        if ordered_batches
+        else next(iter(legacy_order), next(iter(latest_order), None))
+    )
+    home = {
+        "featured_look_id": featured,
+        "recent_look_ids": [key for key in latest_order if key != featured][:6],
+        "latest_batch_id": ordered_batches[0]["batch_id"] if ordered_batches else None,
+    }
+    return ordered_batches, latest_order, home
+
+
+def restore_publication_projection(snapshot):
+    """Upgrade a verified archived snapshot without changing its source revision."""
+    batches = snapshot.get("batches", [])
+    for batch in batches:
+        if not batch.get("published_at"):
+            batch["published_at"] = (
+                datetime.fromisoformat(batch["publish_date"] + "T00:00:00+08:00")
+                .astimezone(UTC)
+                .isoformat(timespec="milliseconds")
+                .replace("+00:00", "Z")
+            )
+        batch.setdefault("cover_look_id", batch["look_ids"][0])
+    by_id = {key: batch for batch in batches for key in batch["look_ids"]}
+    for look in snapshot["looks"]:
+        look["published_at"] = by_id.get(look["id"], {}).get("published_at")
+    batches, latest_order, home = publication_projection(
+        snapshot["looks"], batches, snapshot.get("displayOrder", [])
+    )
+    snapshot.update(batches=batches, latestOrder=latest_order, home=home)
+    return snapshot
 
 
 class ContentService:
@@ -210,7 +302,7 @@ class ContentService:
                 }
                 if len(records) != len(ids):
                     raise ValueError("Incomplete archived revision")
-                self._snapshot, self._records = snapshot, records
+                self._snapshot, self._records = restore_publication_projection(snapshot), records
 
     def _read_json(self, path):
         if path.is_symlink() or not path.is_file() or path.stat().st_size > 8 * 1024 * 1024:
@@ -301,7 +393,8 @@ class ContentService:
                         (asset_id, record["sha256"], json.dumps(record)),
                     )
                 db.execute(
-                    "INSERT OR IGNORE INTO revisions VALUES (?,?)",
+                    "INSERT INTO revisions VALUES (?,?) "
+                    "ON CONFLICT(revision) DO UPDATE SET snapshot=excluded.snapshot",
                     (revision, json.dumps({**snapshot, "_asset_ids": list(records)})),
                 )
                 db.execute("INSERT OR REPLACE INTO active VALUES (1,?)", (revision,))
@@ -373,6 +466,8 @@ class ContentService:
                 raise ValueError("Invalid baseline grid/category")
             version["image"] = asset["file"]
             look["image"], look["ready"] = asset["file"], True
+            # Legacy publication dates are unknown, including after image revisions.
+            look["published_at"] = None
             ids.add(key)
             looks.append(look)
         if not set(range(1, 101)).issubset(ids):
@@ -412,6 +507,7 @@ class ContentService:
                     ready=True,
                     batch_id=batch.batch_id,
                     publish_date=batch.publish_date.isoformat(),
+                    published_at=batch.publication_time(),
                     region=batch.region.model_dump(),
                     editorialOrder=item.id,
                     versions={
@@ -433,11 +529,16 @@ class ContentService:
                 batch.model_dump(mode="json", exclude={"looks"})
                 | {
                     "look_ids": [item.id for item in batch.looks],
+                    "published_at": batch.publication_time(),
+                    "cover_look_id": batch.cover_look_id or batch.looks[0].id,
                 }
             )
-            dates.add(batch.publish_date)
             batch_ids.add(batch.batch_id)
-        display = [i for batch in reversed(batches) for i in batch["look_ids"]]
+            dates.add(batch.publish_date)
+        batches, latest_order, home = publication_projection(
+            looks, batches, baseline.get("displayOrder", [])
+        )
+        display = [i for batch in batches for i in batch["look_ids"]]
         display += [i for i in baseline.get("displayOrder", []) if i in ids and i not in display]
         display += [look["id"] for look in looks if look["id"] not in display]
         editorial_order = {key: index + 1 for index, key in enumerate(display)}
@@ -447,6 +548,8 @@ class ContentService:
             "schema_version": 1,
             "categoryOrder": categories,
             "displayOrder": display,
+            "latestOrder": latest_order,
+            "home": home,
             "looks": looks,
             "models": list(model_map.values()),
             "batches": batches,
@@ -589,6 +692,18 @@ class ContentService:
         def catalog():
             return self.catalog()
 
+        @router.get("/home")
+        def home():
+            snapshot = self.catalog()
+            selection = snapshot["home"]
+            by_id = {look["id"]: look for look in snapshot["looks"]}
+            return {
+                **selection,
+                "revision": snapshot["revision"],
+                "featured": by_id.get(selection["featured_look_id"]),
+                "recent": [by_id[key] for key in selection["recent_look_ids"]],
+            }
+
         @router.get("/looks")
         def looks(
             offset: int = Query(0, ge=0),
@@ -597,10 +712,12 @@ class ContentService:
             category: str | None = None,
             region: str | None = None,
             q: str | None = Query(None, max_length=200),
+            order: Literal["latest", "curated"] = "latest",
         ):
             snapshot = self.catalog()
             by_id = {look["id"]: look for look in snapshot["looks"]}
-            items = [by_id[key] for key in snapshot["displayOrder"]]
+            order_key = "latestOrder" if order == "latest" else "displayOrder"
+            items = [by_id[key] for key in snapshot[order_key]]
             items = [
                 look
                 for look in items

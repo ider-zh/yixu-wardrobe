@@ -12,7 +12,7 @@ const nodes = new Map(), seasonRadios = [], documentEvents = {}, windowEvents = 
 function node(id) {
   if (nodes.has(id)) return nodes.get(id);
   const element = {
-    id, dataset: {}, open: false, hidden: false, value: '', checked: false,
+    id, dataset: {}, open: false, hidden: false, value: '', checked: false, children: [],
     disabled: false, textContent: '', innerHTML: '', attrs: {}, events: {},
     style: { setProperty(key, value) { this[key] = value; } },
     classList: { toggle() {}, add() {}, remove() {} },
@@ -37,15 +37,17 @@ for (const match of html.matchAll(/<input\b[^>]*>/g)) {
 const dialogs=['detail-dialog','compare-dialog','about-dialog','tryon-dialog'].map(node);
 const storage=new Map([['wardrobe99:favorites:v1','[9999]']]);
 const context={
-  window:{addEventListener(type,callback){windowEvents[type]=callback;}},
+  window:{addEventListener(type,callback){windowEvents[type]=callback;},scrollTo(){},matchMedia(){return {matches:false,addEventListener(){}};}},
   document:{body:{dataset:{}},getElementById:node,
     querySelectorAll(selector){if(selector==='input[name="season"]')return seasonRadios;if(selector==='dialog')return dialogs;return [];},
     querySelector(selector){return selector==='dialog[open]'?dialogs.find(d=>d.open)||null:null;},
     addEventListener(type,callback){(documentEvents[type]??=[]).push(callback);}},
   localStorage:{getItem:key=>storage.get(key),setItem:(key,value)=>storage.set(key,value)},
-  location:{hash:'',protocol:'file:',href:'file:///offline/index.html'},URL,console,setTimeout:()=>1,clearTimeout(){}
+  location:{hash:'#/looks',protocol:'file:',href:'file:///offline/index.html#/looks'},URL,URLSearchParams,console,setTimeout:()=>1,clearTimeout(){}
 };
+context.history={pushState(_state,_title,hash){context.location.hash=hash;},replaceState(_state,_title,hash){context.location.hash=hash;}};
 vm.createContext(context);vm.runInContext(fs.readFileSync(path.join(root,'catalog.js'),'utf8'),context);
+context.window.WARDROBE.revision='synthetic-static-revision';
 const app=fs.readFileSync(path.join(root,'app.js'),'utf8');
 const instrumented=app.replace(/\}\)\(\);\s*$/,`window.__audit={state,byId,favorites,compare,openDetail,setView,toggleFavorite,toggleCompare,openComparison,refreshFilters,renderGallery,navigateLook,resetFilters,adoptCatalog,hydrateCatalog,imageFailed,setImage,publicSource,getFiltered:()=>filtered};})();`);
 vm.runInContext(instrumented,context);
@@ -55,13 +57,14 @@ function check(name,fn){fn();checks.push(name);}
 check('footer preserves the linked exact ICP number',()=>assert.match(html,/<a\b[^>]*href="https:\/\/beian\.miit\.gov\.cn\/"[^>]*>浙ICP备2026098002号<\/a>/));
 check('public UI has no archived edition controls or fixed capacity labels',()=>{
   assert.doesNotMatch(html,/data-edition|edition-compare|百套|>100<|THE ORIGINAL/);
-  assert.equal(a.state.version,'v2');assert.equal(node('hero-total').textContent,baseline.looks.length);
+  assert.equal(a.state.version,'v2');assert.equal(node('hero-total').textContent,baseline.looks.length+' 套穿搭，持续更新');
   for(const look of context.window.WARDROBE.looks){assert.deepEqual(Object.keys(look.versions),['v2']);assert.equal(look.versions.v2.shots.length,9);}
   assert.doesNotMatch(node('gallery').innerHTML,/images\/look-/);
 });
 check('offline snapshot preserves curated category exploration without fixed category sizes',()=>{
   for(const category of baseline.categoryOrder){a.state.category=category;a.refreshFilters();assert.ok(a.getFiltered().every(l=>l.category===category));}
-  a.resetFilters();assert.deepEqual(Array.from(a.getFiltered(),l=>l.id),baseline.displayOrder);
+  a.resetFilters();assert.equal(a.state.sort,'latest');assert.deepEqual(Array.from(a.getFiltered(),l=>l.id),baseline.looks.map(l=>l.id).sort((a,b)=>b-a));
+  a.state.sort='curated';a.refreshFilters();assert.deepEqual(Array.from(a.getFiltered(),l=>l.id),baseline.displayOrder);
   assert.equal(node('result-count').textContent,baseline.looks.length+' 套造型');
 });
 function season(value){const target=seasonRadios.find(r=>r.value===value);target.checked=true;node('season').events.change[0]({target});}
@@ -83,7 +86,7 @@ check('comparison details outside the filter retain valid full-list navigation',
   a.toggleCompare(70);a.toggleCompare(71);a.state.query='丝绒';a.refreshFilters();a.openComparison();
   assert.doesNotMatch(node('comparison-content').innerHTML,/images\/look-/);
   node('comparison-content').events.click[0]({target:{closest:()=>({dataset:{compareDetail:'70'}})}});
-  assert.equal(node('detail-position').textContent,'70 / '+baseline.looks.length);a.navigateLook(1);assert.equal(a.state.active,71);a.navigateLook(-1);assert.equal(a.state.active,70);
+  assert.equal(node('detail-position').textContent,(baseline.looks.length-70+1)+' / '+baseline.looks.length);a.navigateLook(1);assert.equal(a.state.active,69);a.navigateLook(-1);assert.equal(a.state.active,70);
   a.state.query=a.byId.get(70).title;a.refreshFilters();a.openDetail(70);assert.equal(node('detail-position').textContent,'1 / 1');
 });
 check('favorites preserve unknown IDs through toggles and cross-tab updates',()=>{
@@ -114,7 +117,12 @@ await a.hydrateCatalog();
 check('online catalog hydration adopts new IDs and model registry without leaking visitor credentials',()=>{
   assert.equal(fetchCalls.length,1);assert.equal(fetchCalls[0].url,'/api/content/catalog');assert.equal(fetchCalls[0].options.credentials,'omit');
   assert.equal(a.byId.size,baseline.looks.length+2);assert.ok(a.byId.has(102));assert.equal(a.favorites.has(9999),true);assert.equal(a.favorites.has(101),true);
-  assert.match(node('model-filter').innerHTML,/female-02/);assert.match(node('region-filter').innerHTML,/成都/);assert.equal(node('hero-total').textContent,baseline.looks.length+2);
+  assert.match(node('model-filter').innerHTML,/female-02/);assert.match(node('region-filter').innerHTML,/成都/);assert.equal(node('hero-total').textContent,(baseline.looks.length+2)+' 套穿搭，持续更新');
+});
+context.fetch=async()=>({ok:true,json:async()=>({...baseline,revision:'older-server-revision'})});await a.hydrateCatalog();
+check('a stale API cannot replace a newer built snapshot or its latest hero',()=>{
+  assert.ok(a.byId.has(102));assert.equal(node('hero-detail').dataset.open,102);
+  assert.equal(node('catalog-status').textContent,'内容同步中，当前展示已发布版本');
 });
 check('model, region, latest batch and newest ordering use live data',()=>{
   a.resetFilters();node('model-filter').events.change[0]({target:{value:'female-02'}});assert.deepEqual(Array.from(a.getFiltered(),l=>l.id),[102]);

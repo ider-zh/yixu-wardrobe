@@ -133,6 +133,18 @@ def create_app(
 
     app.state.content = content = ContentService(settings)
     app.include_router(content.router())
+
+    @app.get("/api/content/publication")
+    def publication():
+        from .publication import publication_status
+
+        catalog = content.catalog() if content.ready else {}
+        return {
+            **publication_status(settings.data_dir, catalog),
+            "home": catalog.get("home"),
+            "look_count": len(catalog.get("looks", [])),
+        }
+
     from .cdn import CdnService
     from .cdn_worker import CdnWorker
 

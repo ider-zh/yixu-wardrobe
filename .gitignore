@@ -73,6 +73,8 @@
 !/qa/regression-ci.mjs
 !/qa/regression-integration.mjs
 !/qa/regression-content.mjs
+!/qa/regression-homepage.mjs
+!/qa/regression-release.mjs
 !/deploy/
 !/deploy/*.py
 !/deploy/*.service

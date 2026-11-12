@@ -433,6 +433,35 @@
       "title": "Publish Date",
       "type": "string"
     },
+    "published_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Timezone-aware publication instant on publish_date in Asia/Shanghai; omitted means local midnight.",
+      "title": "Published At"
+    },
+    "cover_look_id": {
+      "anyOf": [
+        {
+          "maximum": 2147483647,
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Homepage cover ID belonging to this batch; omitted means its first look.",
+      "title": "Cover Look Id"
+    },
     "timezone": {
       "const": "Asia/Shanghai",
       "title": "Timezone",

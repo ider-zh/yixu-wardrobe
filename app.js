@@ -9,8 +9,15 @@ const storageKey = 'wardrobe99:favorites:v1';
 let saved = [];
 try { const value = JSON.parse(localStorage.getItem(storageKey) || '[]'); if (Array.isArray(value)) saved = value.filter(id => Number.isSafeInteger(id) && id > 0); } catch {}
 const favorites = new Set(saved), compare = new Set();
-const state = {category:'', season:'', query:'', model:'', region:'', latestOnly:false, favoritesOnly:false, sort:'curated', limit:24, active:null, view:0, version:'v2'};
-let filtered = [], toastTimer;
+const state = {category:'', season:'', query:'', model:'', region:'', latestOnly:false, favoritesOnly:false, sort:'latest', page:'home', limit:24, active:null, view:0, version:'v2'};
+let filtered = [], toastTimer, detailReturnRoute = '#/home', routing = false, detailNavigation = null;
+const snapshotRevision = window.WARDROBE?.revision;
+function latestLooks() {
+  const rank = new Map((data.latestOrder || []).map((id,index)=>[id,index]));
+  return [...looks].sort((a,b)=> rank.has(a.id)&&rank.has(b.id) ? rank.get(a.id)-rank.get(b.id) : rank.has(a.id) ? -1 : rank.has(b.id) ? 1 : String(b.published_at||b.publish_date||'').localeCompare(String(a.published_at||a.publish_date||''))||b.id-a.id);
+}
+function publication(look) { return look.publish_date || (look.published_at ? look.published_at.slice(0,10) : '历史档案'); }
+function featuredLook() { return byId.get(data.home?.featured_look_id) || latestLooks()[0]; }
 const heart = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 5.6c-2.2-2.5-5.9-1.8-8.5 1-2.6-2.8-6.3-3.5-8.5-1-3.2 3.5.3 8 8.5 13.5 8.2-5.5 11.7-10 8.5-13.5Z"/></svg>';
 const comparison = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3H3v18h6M15 3h6v18h-6M12 2v20"/></svg>';
 // The server provides only registered public assets. Never accept a private API
@@ -47,7 +54,7 @@ function imageFailed(event) {
 document.addEventListener('error',imageFailed,true);
 window.WardrobeImages={set:setImage};
 function latestBatch() {
-  return looks.filter(l=>l.batch_id&&l.publish_date).sort((a,b)=>b.publish_date.localeCompare(a.publish_date)||b.id-a.id)[0]?.batch_id || '';
+  return data.home?.latest_batch_id || latestLooks().find(l=>l.batch_id)?.batch_id || '';
 }
 function modelName(id) { return models.find(model=>model.id===id)?.name || id; }
 function adoptCatalog(candidate) {
@@ -55,7 +62,7 @@ function adoptCatalog(candidate) {
   const next=[], seen=new Set();
   for(const look of candidate.looks){
     const v=look?.versions?.v2;
-    if(!Number.isSafeInteger(look?.id)||look.id<1||seen.has(look.id)||!v||v.ready===false||typeof look.title!=='string'||!Array.isArray(v.shots)||v.shots.length!==9||!v.shots.every(shot=>shot&&typeof shot.title==='string')||(v.moods!==undefined&&!Array.isArray(v.moods))||(look.region!=null&&typeof look.region!=='string'&&typeof look.region?.city!=='string')||['publish_date','batch_id','model_id'].some(key=>look[key]!=null&&typeof look[key]!=='string')||['palette','tags','details','pieces'].some(key=>look[key]!==undefined&&!Array.isArray(look[key]))||!publicSource(v.source_url||v.image))return false;
+    if(!Number.isSafeInteger(look?.id)||look.id<1||seen.has(look.id)||!v||v.ready===false||typeof look.title!=='string'||!Array.isArray(v.shots)||v.shots.length!==9||!v.shots.every(shot=>shot&&typeof shot.title==='string')||(v.moods!==undefined&&!Array.isArray(v.moods))||(look.region!=null&&typeof look.region!=='string'&&typeof look.region?.city!=='string')||['published_at','publish_date','batch_id','model_id'].some(key=>look[key]!=null&&typeof look[key]!=='string')||['palette','tags','details','pieces'].some(key=>look[key]!==undefined&&!Array.isArray(look[key]))||!publicSource(v.source_url||v.image))return false;
     seen.add(look.id);next.push({...look,region:typeof look.region==='string'?look.region:(look.region?.city||''),pieces:Array.isArray(look.pieces)?look.pieces:[],details:Array.isArray(look.details)?look.details:[],versions:{v2:{...v,ready:true}}});
   }
   data={...candidate,looks:next};looks=next;byId.clear();looks.forEach(l=>byId.set(l.id,l));
@@ -67,10 +74,10 @@ function adoptCatalog(candidate) {
   if(state.region&&!looks.some(l=>l.region===state.region))state.region='';
   if(state.latestOnly&&!latestBatch())state.latestOnly=false;
   for(const id of compare)if(!byId.has(id))compare.delete(id);
-  buildCategories();buildContentFilters();updateEditionUI();refreshFilters();renderCompareTray();
-  if($('detail-dialog').open){if(byId.has(state.active)){const view=state.view;openDetail(state.active);setView(view);}else{$('detail-dialog').close();state.active=null;}}
+  buildCategories();buildContentFilters();updateEditionUI();renderModels();refreshFilters();renderCompareTray();
+  if($('detail-dialog').open){if(byId.has(state.active)){const view=state.view;openDetail(state.active,true);setView(view);}else{$('detail-dialog').close();state.active=null;}}
   if($('compare-dialog').open){if(compare.size>=2)openComparison();else $('compare-dialog').close();}
-  const initial=/^#look-(\d+)$/.exec(location.hash);if(!state.active&&initial&&byId.has(Number(initial[1])))openDetail(Number(initial[1]));
+  routeFromURL(false);
   return true;
 }
 function buildContentFilters(){
@@ -82,8 +89,11 @@ async function hydrateCatalog(){
   if(!['http:','https:'].includes(location.protocol)||typeof fetch!=='function')return;
   try{
     const response=await fetch('/api/content/catalog',{credentials:'omit',cache:'no-cache',headers:{Accept:'application/json'}});
-    if(!response.ok||!adoptCatalog(await response.json()))throw new Error('catalog');
-    $('catalog-status').textContent='内容已更新';
+    if(!response.ok)throw new Error('catalog');
+    const candidate=await response.json();
+    if(snapshotRevision && candidate.revision && snapshotRevision!==candidate.revision){$('catalog-status').textContent='内容同步中，当前展示已发布版本';return;}
+    if(!adoptCatalog(candidate))throw new Error('catalog');
+    $('catalog-status').textContent='';
   }catch{$('catalog-status').textContent='正在浏览本地内容快照';}
 }
 function notify(message) {
@@ -99,15 +109,38 @@ function photo(look, alt) {
 }
 function updateEditionUI(){
  $('completion-note').textContent=looks.length+' 套生动穿搭';
- $('hero-total').textContent=looks.length;
- const candidates=[13,70,40,1,99].map(id=>byId.get(id)).filter(Boolean);
- const unique=[...new Set([...candidates,...looks])].slice(0,2);
- for(let i=0;i<2;i++){
-   const img=$('hero-image-'+i),look=unique[i];if(!look){img.parentElement.hidden=true;continue;}
-   img.parentElement.hidden=false;const v=versionOf(look),p=v.previewPanel||1;setImage(img,v);
-   img.alt=look.title+' · '+(v.shots[p-1]?.title||'生动写真');
-   img.parentElement.style.setProperty('--panel-x',-((p-1)%3)*100+'%');img.parentElement.style.setProperty('--panel-y',-Math.floor((p-1)/3)*100+'%');
- }
+ $('hero-total').textContent=looks.length+' 套穿搭，持续更新';
+ const look=featuredLook();
+ $('latest-feature').hidden=!look;
+ if(!look){$('recent-gallery').innerHTML='';$('recent-gallery').parentElement.hidden=true;return;}
+ const v=versionOf(look),p=Math.min(9,Math.max(1,v.previewPanel||1));
+ $('hero-title').textContent=look.title;
+ $('hero-publication').textContent=publication(look)+' · LOOK '+number(look.id);
+ $('hero-kicker').innerHTML='<span class="small-line"></span>'+((look.published_at||look.publish_date)?'最新一期 / THE LATEST EDIT':'历史精选 / FROM THE ARCHIVE');
+ $('hero-meta').textContent=[look.region,look.model_id?modelName(look.model_id):'',look.category].filter(Boolean).join(' / ');
+ $('hero-description').textContent=look.description||v.summary||'';
+ $('hero-detail').dataset.open=look.id;$('hero-detail').disabled=false;
+ $('hero-photo-button').dataset.open=look.id;$('hero-photo-button').disabled=false;
+ $('hero-photo-button').setAttribute('aria-label','查看 '+look.title+' 的九宫格');
+ $('hero-favorite').dataset.favorite=look.id;
+ const liked=favorites.has(look.id);$('hero-favorite').textContent=liked?'♥ 已收藏':'♡ 收藏这套';$('hero-favorite').setAttribute('aria-pressed',String(liked));
+ const image=$('hero-image-0');setImage(image,v);image.alt=look.title+' · '+(v.shots[p-1]?.title||'生动写真');
+ image.parentElement.style.setProperty('--panel-x',-((p-1)%3)*100+'%');image.parentElement.style.setProperty('--panel-y',-Math.floor((p-1)/3)*100+'%');
+ $('hero-edition-note').textContent='LOOK '+number(look.id)+' / '+(v.shots[p-1]?.title||'生动写真');
+ const recentIds=Array.isArray(data.home?.recent_look_ids)?data.home.recent_look_ids:null;
+ const recent=(recentIds?recentIds.map(id=>byId.get(id)).filter(Boolean):latestLooks()).filter(l=>l.id!==look.id).slice(0,6);
+ $('recent-gallery').innerHTML=recent.map(renderCard).join('');
+ $('recent-note').textContent=recent.some(l=>!l.published_at&&!l.publish_date)?'最新一期之后，接着翻阅历史档案。':'';
+ $('recent-gallery').parentElement.hidden=!recent.length;
+}
+function renderModels(){
+ $('model-gallery').innerHTML=models.map(model=>{
+   const owned=latestLooks().filter(look=>look.model_id===model.id),cover=owned[0];
+   if(!cover)return '';
+   const href='#/looks?model='+encodeURIComponent(model.id);
+   return '<article class="model-card"><a href="'+href+'" aria-label="查看 '+esc(model.name)+' 的穿搭">'+photo(cover,model.name+' · '+cover.title)+'</a><p class="eyebrow">'+esc(model.id)+'</p><h2>'+esc(model.name)+'</h2><p>'+owned.length+' 套已发布穿搭</p><a class="model-looks-link" href="'+href+'">查看她的穿搭 ↗</a></article>';
+ }).join('');
+ $('models-empty').hidden=!!$('model-gallery').children.length;
 }
 function saveFavorites() {
   try { localStorage.setItem(storageKey,JSON.stringify([...favorites])); }
@@ -118,6 +151,7 @@ function toggleFavorite(id) {
   saveFavorites(); updateCounts();
   if (state.favoritesOnly || state.sort === 'favorites') renderGallery(); else syncCardButtons(id);
   if (state.active === id) updateDetailActions();
+  updateEditionUI();
 }
 function toggleCompare(id) {
   if (compare.has(id)) compare.delete(id);
@@ -148,29 +182,29 @@ function buildCategories() {
 
 }
 function matchLooks() {
-  const q = state.query.trim().toLocaleLowerCase(),latest=state.latestOnly?latestBatch():'';
+  const q = state.query.trim().toLocaleLowerCase(),latest=state.latestOnly?latestBatch():'',latestRank=new Map(latestLooks().map((look,index)=>[look.id,index]));
   filtered = looks.filter(l => {
     if (state.category && l.category !== state.category) return false;
     if (state.season && l.season !== state.season) return false;
     if (state.model && l.model_id !== state.model) return false;
     if (state.region && l.region !== state.region) return false;
     if (state.latestOnly && l.batch_id !== latest) return false;
-    if (state.favoritesOnly && !favorites.has(l.id)) return false;
+    if ((state.page==='favorites'||state.favoritesOnly) && !favorites.has(l.id)) return false;
     if (q) {
       const terms = [number(l.id),String(l.id),l.title,l.category,l.season,l.description,l.region,modelName(l.model_id),...(l.tags||[]),...(l.pieces||[]).map(p=>p.name),...(l.details||[]),versionOf(l).story,versionOf(l).summary,...(versionOf(l).moods||[]),...(versionOf(l).shots||[]).flatMap(s=>[s.title,s.emotion,s.pose])].join(' ').toLocaleLowerCase();
       return q.split(/\s+/).every(word=>terms.includes(word));
     }
     return true;
-  }).sort((a,b) => state.version==='v2'&&versionOf(a).ready!==versionOf(b).ready ? Number(versionOf(b).ready)-Number(versionOf(a).ready) : state.sort==='latest' ? String(b.publish_date||'').localeCompare(String(a.publish_date||''))||b.id-a.id : state.sort==='curated' ? (a.editorialOrder??a.id)-(b.editorialOrder??b.id) : state.sort==='pieces' ? b.pieces.length-a.pieces.length || a.id-b.id : state.sort==='favorites' ? Number(favorites.has(b.id))-Number(favorites.has(a.id)) || a.id-b.id : a.id-b.id);
+  }).sort((a,b) => state.version==='v2'&&versionOf(a).ready!==versionOf(b).ready ? Number(versionOf(b).ready)-Number(versionOf(a).ready) : state.sort==='latest' ? latestRank.get(a.id)-latestRank.get(b.id) : state.sort==='curated' ? (a.editorialOrder??a.id)-(b.editorialOrder??b.id) : state.sort==='pieces' ? b.pieces.length-a.pieces.length || a.id-b.id : state.sort==='favorites' ? Number(favorites.has(b.id))-Number(favorites.has(a.id)) || a.id-b.id : a.id-b.id);
 }
 function refreshFilters() {
   state.limit=24;
   $('model-filter').value=state.model;$('region-filter').value=state.region;$('latest-only').checked=state.latestOnly;
-  document.querySelectorAll('input[name="season"]').forEach(input=>{input.checked=input.value===state.season;}); $('search').value=state.query; $('favorites-only').checked=state.favoritesOnly; $('sort').value=state.sort;
+  document.querySelectorAll('input[name="season"]').forEach(input=>{input.checked=input.value===state.season;}); $('search').value=state.query; $('favorites-only').checked=state.page==='favorites'||state.favoritesOnly; $('favorites-only').disabled=state.page==='favorites'; $('sort').value=state.sort;
   document.querySelectorAll('[data-category]').forEach(b=>{const active=b.dataset.category===state.category;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});
-  renderGallery(); renderActiveFilters();
+  renderGallery(); renderActiveFilters();syncArchiveURL();
 }
-function resetFilters() { Object.assign(state,{category:'',season:'',query:'',model:'',region:'',latestOnly:false,favoritesOnly:false,sort:'curated'});refreshFilters(); }
+function resetFilters() { Object.assign(state,{category:'',season:'',query:'',model:'',region:'',latestOnly:false,favoritesOnly:false,sort:'latest'});refreshFilters(); }
 function renderActiveFilters() {
   const entries=[];
   if(state.category)entries.push(['category',state.category]);
@@ -179,12 +213,13 @@ function renderActiveFilters() {
   if(state.region)entries.push(['region',state.region]);
   if(state.latestOnly)entries.push(['latestOnly','最新批次']);
   if(state.query)entries.push(['query','“'+state.query+'”']);
-  if(state.favoritesOnly)entries.push(['favoritesOnly','我的收藏']);
+  if(state.favoritesOnly&&state.page!=='favorites')entries.push(['favoritesOnly','我的收藏']);
+  $('filter-count').textContent=entries.length?'('+entries.length+')':'';
   $('active-filters').innerHTML=entries.map(([key,label])=>'<button class="filter-pill" data-clear="'+key+'" aria-label="清除'+esc(label)+'筛选">'+esc(label)+' <span aria-hidden="true">×</span></button>').join('');
 }
 function renderCard(l,index) {
   const liked=favorites.has(l.id), picked=compare.has(l.id);
-  return '<article class="look-card" style="animation-delay:'+Math.min(index,8)*25+'ms" data-look-card="'+l.id+'"><div class="image-zone"><button class="look-photo-button" data-open="'+l.id+'" aria-label="查看 '+esc(l.title)+' 的九宫格写真和搭配设计">'+(versionOf(l).ready?photo(l):'<div class="card-pending"><span>'+number(l.id)+'</span><small>写真准备中</small></div>')+'<span class="card-number">'+number(l.id)+'</span>'+'<span class="open-caption">查看写真与设计 <span>↗</span></span></button><div class="card-actions"><button class="icon-button favorite'+(liked?' selected':'')+'" data-favorite="'+l.id+'" aria-pressed="'+liked+'" aria-label="'+(liked?'取消收藏':'收藏')+' '+esc(l.title)+'">'+heart+'</button><button class="icon-button compare'+(picked?' selected':'')+'" data-compare="'+l.id+'" aria-pressed="'+picked+'" aria-label="'+(picked?'移出对比':'加入对比')+' '+esc(l.title)+'">'+comparison+'</button></div></div><div class="card-meta"><div class="card-topline"><span>'+esc(l.category)+' / '+esc(l.season)+' · '+l.pieces.length+' 件搭配</span><div class="palette" aria-label="造型配色">'+palette(l)+'</div></div><button class="card-title" data-open="'+l.id+'">'+esc(l.title)+'</button><p class="card-tags">'+(state.version==='v2'?(versionOf(l).moods||l.tags||[]):(l.tags||[])).slice(0,4).map(esc).join(' · ')+'</p></div></article>';
+  return '<article class="look-card" style="animation-delay:'+Math.min(index,8)*25+'ms" data-look-card="'+l.id+'"><div class="image-zone"><button class="look-photo-button" data-open="'+l.id+'" aria-label="查看 '+esc(l.title)+' 的九宫格写真和搭配设计">'+(versionOf(l).ready?photo(l):'<div class="card-pending"><span>'+number(l.id)+'</span><small>写真准备中</small></div>')+'<span class="card-number">'+number(l.id)+'</span>'+'<span class="open-caption">查看写真与设计 <span>↗</span></span></button><div class="card-actions"><button class="icon-button favorite'+(liked?' selected':'')+'" data-favorite="'+l.id+'" aria-pressed="'+liked+'" aria-label="'+(liked?'取消收藏':'收藏')+' '+esc(l.title)+'">'+heart+'</button><button class="icon-button compare'+(picked?' selected':'')+'" data-compare="'+l.id+'" aria-pressed="'+picked+'" aria-label="'+(picked?'移出对比':'加入对比')+' '+esc(l.title)+'">'+comparison+'</button></div></div><div class="card-meta"><div class="card-topline"><span>'+esc(l.category)+' / '+esc(l.season)+' · '+l.pieces.length+' 件搭配</span><div class="palette" aria-label="造型配色">'+palette(l)+'</div></div><button class="card-title" data-open="'+l.id+'">'+esc(l.title)+'</button><p class="card-publication">'+esc(publication(l))+'</p><p class="card-tags">'+(state.version==='v2'?(versionOf(l).moods||l.tags||[]):(l.tags||[])).slice(0,4).map(esc).join(' · ')+'</p></div></article>';
 }
 function renderGallery() {
   matchLooks();
@@ -200,19 +235,19 @@ function delegatedActions(event) {
   const opener=event.target.closest('[data-open]');if(opener)openDetail(Number(opener.dataset.open));
 }
 $('gallery').addEventListener('click',delegatedActions);
+$('home-page').addEventListener('click',delegatedActions);
 $('category-list').addEventListener('click',event=>{const button=event.target.closest('[data-category]');if(button){state.category=button.dataset.category;refreshFilters();}});
 $('model-filter').addEventListener('change',e=>{state.model=e.target.value;refreshFilters();});
 $('region-filter').addEventListener('change',e=>{state.region=e.target.value;refreshFilters();});
 $('latest-only').addEventListener('change',e=>{state.latestOnly=e.target.checked;refreshFilters();});
 $('active-filters').addEventListener('click',e=>{const b=e.target.closest('[data-clear]');if(!b)return;state[b.dataset.clear]=['favoritesOnly','latestOnly'].includes(b.dataset.clear)?false:'';refreshFilters();});
 $('season').addEventListener('change',e=>{if(e.target.name!=='season')return;state.season=e.target.value;refreshFilters();});
-$('search').addEventListener('input',e=>{state.query=e.target.value;state.limit=24;renderGallery();renderActiveFilters();});
+$('search').addEventListener('input',e=>{state.query=e.target.value;state.limit=24;renderGallery();renderActiveFilters();syncArchiveURL();});
 $('favorites-only').addEventListener('change',e=>{state.favoritesOnly=e.target.checked;refreshFilters();});
 $('sort').addEventListener('change',e=>{state.sort=e.target.value;refreshFilters();});
 $('reset-filters').addEventListener('click',resetFilters);$('empty-reset').addEventListener('click',resetFilters);
-$('header-favorites').addEventListener('click',()=>{resetFilters();state.favoritesOnly=true;refreshFilters();$('collection').scrollIntoView({behavior:'smooth'});});
 $('load-more').addEventListener('click',()=>{const previous=state.limit;state.limit+=24;renderGallery();document.querySelector('[data-look-card="'+filtered[previous]?.id+'"] .look-photo-button')?.focus({preventScroll:true});});
-function detailList() { return filtered.some(look=>look.id===state.active)?filtered:looks; }
+function detailList() { return detailNavigation ? detailNavigation.map(id=>byId.get(id)).filter(Boolean) : latestLooks(); }
 function setView(view) {
   state.view=view;
   const frame=$('detail-photo-frame'),image=$('detail-image');
@@ -232,8 +267,12 @@ function updateDetailActions() {
   $('detail-compare').textContent=c?'− 移出对比':'+ 加入对比';
   $('detail-compare').setAttribute('aria-pressed',String(c));
 }
-function openDetail(id) {
-  const l=byId.get(id);if(!l)return;state.active=id;
+function openDetail(id,preserveNavigation=false) {
+  const l=byId.get(id);if(!l)return;
+  if(!preserveNavigation||!detailNavigation)detailNavigation=((state.page==='looks'||state.page==='favorites')&&filtered.some(look=>look.id===id)?filtered:latestLooks()).map(look=>look.id);
+  if(!$('detail-dialog').open&&!/^#look-/.test(location.hash))detailReturnRoute=location.hash||'#/home';
+  if(location.hash!=='#look-'+id)history.pushState(null,'','#look-'+id);
+  state.active=id;
   $('detail-number').textContent='LOOK '+number(id)+' / '+l.category+' / '+l.season;
   $('detail-title').textContent=l.title;$('detail-story').hidden=state.version!=='v2';$('detail-story-title').textContent=versionOf(l).story;$('detail-story-summary').textContent=versionOf(l).summary;
   $('detail-palette').innerHTML=palette(l);
@@ -261,7 +300,7 @@ $('detail-favorite').addEventListener('click',()=>toggleFavorite(state.active));
 $('detail-compare').addEventListener('click',()=>toggleCompare(state.active));
 function navigateLook(direction) {
   const list=detailList(),index=list.findIndex(l=>l.id===state.active);
-  if(index+direction>=0 && index+direction<list.length)openDetail(list[index+direction].id);
+  if(index+direction>=0 && index+direction<list.length)openDetail(list[index+direction].id,true);
 }
 $('previous-look').addEventListener('click',()=>navigateLook(-1));$('next-look').addEventListener('click',()=>navigateLook(1));
 function renderCompareTray() {
@@ -282,14 +321,49 @@ function openComparison() {
 $('open-compare').addEventListener('click',openComparison);$('close-compare').addEventListener('click',()=>$('compare-dialog').close());
 $('comparison-content').addEventListener('click',e=>{const b=e.target.closest('[data-compare-detail]');if(b){$('compare-dialog').close();openDetail(Number(b.dataset.compareDetail));}});
 $('about-button').addEventListener('click',()=>$('about-dialog').showModal());$('close-about').addEventListener('click',()=>$('about-dialog').close());
-$('about-to-gallery').addEventListener('click',()=>{$('about-dialog').close();$('collection').scrollIntoView({behavior:'smooth'});});
+$('about-to-gallery').addEventListener('click',()=>{$('about-dialog').close();location.hash='#/looks';});
 document.querySelectorAll('dialog').forEach(dialog=>dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}}));
 document.addEventListener('keydown',e=>{
   const editable=e.target.matches('input,textarea,select,[contenteditable]');
-  if(e.key==='/'&&!editable&&!document.querySelector('dialog[open]')){e.preventDefault();$('search').focus();$('search').scrollIntoView({block:'center',behavior:'smooth'});}
+  if(e.key==='/'&&!editable&&!document.querySelector('dialog[open]')){e.preventDefault();if(!['looks','favorites'].includes(state.page)){history.pushState(null,'','#/looks');routeFromURL(false);}$('search').focus();$('search').scrollIntoView({block:'center',behavior:'smooth'});}
   if($('detail-dialog').open&&!$('tryon-dialog')?.open&&!$('compare-dialog').open&&!editable){if(e.key==='ArrowRight'){e.preventDefault();navigateLook(1);}if(e.key==='ArrowLeft'){e.preventDefault();navigateLook(-1);}}
 });
-window.addEventListener('storage',e=>{if(e.key!==storageKey)return;try{const values=JSON.parse(e.newValue||'[]');if(!Array.isArray(values))return;favorites.clear();values.filter(id=>Number.isSafeInteger(id)&&id>0).forEach(id=>favorites.add(id));updateCounts();renderGallery();if(state.active)updateDetailActions();}catch{}});
+window.addEventListener('storage',e=>{if(e.key!==storageKey)return;try{const values=JSON.parse(e.newValue||'[]');if(!Array.isArray(values))return;favorites.clear();values.filter(id=>Number.isSafeInteger(id)&&id>0).forEach(id=>favorites.add(id));updateCounts();renderGallery();updateEditionUI();if(state.active)updateDetailActions();}catch{}});
+function archiveRoute(){
+ const params=new URLSearchParams();
+ for(const [key,value] of [['category',state.category],['season',state.season],['q',state.query],['model',state.model],['region',state.region],['latest',state.latestOnly?'1':''],['saved',state.favoritesOnly&&state.page!=='favorites'?'1':''],['sort',state.sort==='latest'?'':state.sort]])if(value)params.set(key,value);
+ return '#/'+state.page+(params.size?'?'+params:'');
+}
+function syncArchiveURL(){if(!routing&&['looks','favorites'].includes(state.page)&&!$('detail-dialog').open)history.replaceState(null,'',archiveRoute());}
+function routeFromURL(scroll=true){
+ const detail=/^#look-(\d+)$/.exec(location.hash);
+ if(detail){const id=Number(detail[1]);if(byId.has(id)){openDetail(id,$('detail-dialog').open);return;}notify('这套穿搭暂未发布');}
+ const route=/^#\/(home|looks|models|favorites)(?:\?(.*))?$/.exec(location.hash),page=route?.[1]||'home';
+ routing=true;
+ state.page=page;
+ if($('detail-dialog').open)$('detail-dialog').close();state.active=null;
+ $('home-page').hidden=page!=='home';$('models-page').hidden=page!=='models';$('collection').hidden=!['looks','favorites'].includes(page);$('closing-note').hidden=page!=='home';
+ $('collection-title').innerHTML=(page==='favorites'?'我的收藏':'全部穿搭')+'<span class="heading-period">.</span>';
+ document.querySelectorAll('[data-page]').forEach(link=>{if(link.dataset.page===page)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');});
+ if(['looks','favorites'].includes(page)){
+  const params=new URLSearchParams(route?.[2]||'');
+  Object.assign(state,{category:params.get('category')||'',season:params.get('season')||'',query:params.get('q')||'',model:params.get('model')||'',region:params.get('region')||'',latestOnly:params.get('latest')==='1',favoritesOnly:page==='favorites'||params.get('saved')==='1',sort:['latest','curated','id','pieces','favorites'].includes(params.get('sort'))?params.get('sort'):'latest'});
+  refreshFilters();
+ }
+ if($('filter-dialog').open)$('filter-dialog').close();
+ routing=false;
+ if(scroll)window.scrollTo({top:0,behavior:'instant'});
+}
+$('detail-dialog').addEventListener('close',()=>{
+ if($('detail-dialog').open)return;
+ state.active=null;detailNavigation=null;
+ if(/^#look-/.test(location.hash)){history.replaceState(null,'',detailReturnRoute);routeFromURL(false);}
+});
+window.addEventListener('hashchange',()=>routeFromURL());
+$('open-filters').addEventListener('click',()=>{$('filter-dialog').showModal();});
+$('close-filters').addEventListener('click',()=>$('filter-dialog').close());
+$('apply-filters').addEventListener('click',()=>$('filter-dialog').close());
+window.matchMedia('(min-width: 801px)').addEventListener('change',event=>{if(event.matches&&$('filter-dialog').open)$('filter-dialog').close();});
 adoptCatalog(window.WARDROBE || {looks:[],categoryOrder:[]});updateCounts();
 hydrateCatalog();
 })();

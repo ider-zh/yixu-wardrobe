@@ -8,6 +8,29 @@ const object = value => value && typeof value === 'object' && !Array.isArray(val
 const text = value => typeof value === 'string' && value.trim().length > 0;
 const assetId = value => typeof value === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(value);
 const fail = (condition, message) => assert.ok(condition, message);
+const compare = (a, b) => a < b ? -1 : a > b ? 1 : 0;
+
+function publicationTime(batch) {
+  const value = batch.published_at ?? batch.publish_date + 'T00:00:00+08:00';
+  fail(typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|[+-]\d{2}:\d{2})$/.test(value), 'Timezone-aware publication timestamp required');
+  const parsed = Date.parse(value);
+  const day = value.slice(0, 10);
+  fail(!Number.isNaN(parsed) && new Date(day + 'T00:00:00Z').toISOString().slice(0, 10) === day && Number(value.slice(11, 13)) < 24 && Number(value.slice(14, 16)) < 60 && Number(value.slice(17, 19)) < 60, 'Invalid publication timestamp');
+  fail(new Date(parsed + 8 * 3600000).toISOString().slice(0, 10) === batch.publish_date, 'Publication timestamp must match the Shanghai publication date');
+  return new Date(parsed).toISOString();
+}
+
+export function publicationProjection(looks, batches, legacyOrder) {
+  const orderedBatches = [...batches].sort((a, b) => compare(b.published_at, a.published_at) || compare(b.batch_id, a.batch_id));
+  const publishedIds = orderedBatches.flatMap(batch => [...batch.look_ids].sort((a, b) => a - b));
+  const publishedSet = new Set(publishedIds);
+  const latestOrder = [...publishedIds, ...looks.filter(look => !publishedSet.has(look.id)).map(look => look.id).sort((a, b) => a - b)];
+  const featured = orderedBatches[0]?.cover_look_id ?? legacyOrder[0] ?? latestOrder[0] ?? null;
+  return {
+    orderedBatches, latestOrder,
+    home: {featured_look_id: featured, recent_look_ids: latestOrder.filter(id => id !== featured).slice(0, 6), latest_batch_id: orderedBatches[0]?.batch_id ?? null},
+  };
+}
 
 export function localFile(root, relative) {
   fail(typeof relative === 'string' && /^[A-Za-z0-9_./-]+$/.test(relative), 'Invalid resource path');
@@ -112,6 +135,7 @@ export function loadContent(root) {
       model_reference_sha256: input.model_reference_sha256 ?? null,
       batch_id: batch?.batch_id ?? input.batch_id ?? null,
       publish_date: batch?.publish_date ?? input.publish_date ?? null,
+      published_at: batch ? publicationTime(batch) : null,
       region: structuredClone(batch?.region ?? input.region ?? null),
       image: source, source_url: source, ready: true,
       versions: {v2: {
@@ -136,6 +160,7 @@ export function loadContent(root) {
     fail(!fs.lstatSync(directory).isSymbolicLink(), 'Symlink batch directory');
     for (const name of fs.readdirSync(directory).filter(name => name.endsWith('.json')).sort()) {
       const batch = json('content/batches/' + name);
+      fail(object(batch) && Object.keys(batch).every(key => ['schema_version', 'batch_id', 'publish_date', 'published_at', 'cover_look_id', 'timezone', 'title', 'region', 'research', 'looks'].includes(key)), 'Unknown batch metadata');
       fail(batch.schema_version === 1 && assetId(batch.batch_id) && !batchIds.has(batch.batch_id), 'Invalid or duplicate batch');
       fail(/^\d{4}-\d{2}-\d{2}$/.test(batch.publish_date || '') && !Number.isNaN(Date.parse(batch.publish_date + 'T00:00:00Z')) && new Date(batch.publish_date + 'T00:00:00Z').toISOString().slice(0,10) === batch.publish_date, 'Invalid publication date');
       fail(!dates.has(batch.publish_date) && batch.batch_id.startsWith(batch.publish_date+'-') && name === batch.batch_id+'.json', 'Batch date or filename conflicts');
@@ -149,16 +174,18 @@ export function loadContent(root) {
       fail(batch.research.weather.forecast_date === batch.publish_date, 'Weather must cover the publication date');
       fail([batch.research.checked_at,batch.research.weather.checked_at].every(time=>typeof time==='string' && /(?:Z|[+-]\d\d:\d\d)$/.test(time) && !Number.isNaN(Date.parse(time))), 'Timezone-aware research times required');
       fail(Array.isArray(batch.looks) && batch.looks.length > 0, 'Empty batch');
+      const publishedAt = publicationTime(batch);
+      fail(batch.cover_look_id == null || (Number.isSafeInteger(batch.cover_look_id) && batch.looks.some(look => look.id === batch.cover_look_id)), 'Cover must belong to this batch');
       batchIds.add(batch.batch_id);
       dates.add(batch.publish_date);
       for (const look of batch.looks) addLook(look, batch);
-      batches.push({batch_id: batch.batch_id, publish_date: batch.publish_date, title: batch.title, region: structuredClone(batch.region), look_ids: batch.looks.map(look => look.id)});
+      batches.push({batch_id: batch.batch_id, publish_date: batch.publish_date, published_at: publishedAt, cover_look_id: batch.cover_look_id ?? batch.looks[0].id, title: batch.title, region: structuredClone(batch.region), look_ids: batch.looks.map(look => look.id)});
     }
   }
   const published = [...looks.values()];
-  const orderedBatches = [...batches].sort((a, b) => b.publish_date.localeCompare(a.publish_date) || b.batch_id.localeCompare(a.batch_id));
   const legacyOrder = base.displayOrder || base.looks.map(look => look.id);
   fail(Array.isArray(legacyOrder) && legacyOrder.length === base.looks.length && new Set(legacyOrder).size === legacyOrder.length && legacyOrder.every(id => base.looks.some(look => look.id === id)), 'Invalid curated baseline order');
+  const {orderedBatches, latestOrder, home} = publicationProjection(published, batches, legacyOrder);
   const displayOrder = [...orderedBatches.flatMap(batch => batch.look_ids), ...legacyOrder];
   displayOrder.forEach((id, i) => { looks.get(id).editorialOrder = i + 1; });
   const publicModels = [...models.values()].filter(model=>model.reference.visibility==='public').map(model => ({
@@ -166,10 +193,10 @@ export function loadContent(root) {
     look_count: published.filter(look => look.model_id === model.model_id).length,
     ...(model.reference.visibility === 'public' ? {reference: {...model.reference, image_url: model.reference.file, source_url: model.reference.file}} : {}),
   }));
-  const revision = digest(Buffer.from(JSON.stringify(sources.sort((a, b) => a[0].localeCompare(b[0])))));
+  const revision = digest(Buffer.from(JSON.stringify(sources.sort((a, b) => compare(a[0], b[0])))));
   return {
     catalog: {schema_version: 1, revision, target: published.length, generated: published.length, expressiveGenerated: published.length,
-      planned: published.length, categoryOrder: [...base.categoryOrder], displayOrder, looks: published,
+      planned: published.length, categoryOrder: [...base.categoryOrder], displayOrder, latestOrder, home, looks: published,
       models: publicModels, batches: orderedBatches},
     assets: [...assets.values()],
     publicAssets: [...assets.values()].filter(asset => asset.visibility === 'public'),

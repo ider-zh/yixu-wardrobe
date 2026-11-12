@@ -85,6 +85,7 @@ export function createAdminApp({ document, fetch, confirm }) {
     $('#models-grid').replaceChildren();
     $('#cdn-jobs').replaceChildren();
     $('#content-status').textContent = '尚未读取资源状态。';
+    $('#publication-status').textContent = '尚未核对网站发布状态。';
     $('#cdn-status').textContent = '尚未读取 CDN 配置。';
     $('#cdn-progress').textContent = '尚无同步进度。';
     $('#models-status').textContent = '尚未读取模特。';
@@ -260,6 +261,13 @@ export function createAdminApp({ document, fetch, confirm }) {
       const data = await request('/content/overview');
       $('#content-status').textContent = data.content_ready ? `活动版本：${data.revision || '未提供'} · ${data.look_count} 套穿搭 · ${data.model_count} 位模特` : '公开内容尚未就绪；原有内容服务继续独立运行。';
       if (data.import_error) $('#content-status').append(node('span', ` · 内容接收异常：${data.import_error}`));
+      const publication = data.publication;
+      const featured = data.home?.featured_look_id;
+      const featureText = featured ? `首页主推：${featured}${data.featured_title ? `「${data.featured_title}」` : ''}` : '尚无首页主推';
+      $('#publication-status').textContent = publication?.status === 'verified'
+        ? `${featureText} · 网站交付已验证：${timeText(publication.verified_at)}。已核对当时的 API、静态快照及主推图片；CDN 状态独立显示。`
+        : `${featureText} · 网站交付尚未验证。服务端导入成功不代表首页与图片已对外可用，需通过交付命令验收。`;
+
       const cdn = data.cdn;
       $('#cdn-status').textContent = cdn.config.configured ? `已配置图床接口（${cdn.config.adapter}）；图片逐张校验后使用 CDN。` : 'CDN 未配置；未同步图片继续使用项目图片 URL。';
       document.querySelectorAll('[data-cdn-metric]').forEach(element => { element.textContent = String(cdn.counts[element.dataset.cdnMetric] ?? 0); });
@@ -296,6 +304,7 @@ export function createAdminApp({ document, fetch, confirm }) {
       if (!cdn.jobs.length) $('#cdn-jobs').append(node('li', '暂无同步任务', 'muted'));
     } catch (error) {
       $('#content-status').textContent = '资源状态读取失败，请单独刷新；其他工作台模块可继续使用。';
+      $('#publication-status').textContent = '网站发布状态未能核对，请重试。';
       throw error;
     }
   }

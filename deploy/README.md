@@ -101,3 +101,72 @@ For the same entry point locally, run `node qa/regression-ci.mjs`. A real Chromi
 These are three distinct evidence levels: synthetic-provider/API fixtures, real local handlers/model inference, and the deployed HTTPS service. Only an explicitly authorized paid pilot can establish actual provider quality; passing CI is not that pilot.
 
 The private operations record owns real host addresses, node configuration, service state, credential-delivery paths, measured capacity, deployment receipts and rollback commands; they are intentionally absent from this public guide.
+
+## Opt-in local delivery and publication proof
+
+The new homepage uses the explicit `catalog.home.featured_look_id`. A Git commit,
+API import and CDN upload are separate states. The public
+`GET /api/content/publication` and authenticated content overview report **not
+verified** until the delivery command has actually checked the running origin.
+They expose no runtime paths, credentials or private user data. A successful
+receipt describes checks at its timestamp, not continuous uptime monitoring.
+
+Use this only for an already authorized local installation with an existing owned
+API service. Supply the origin, exact service and private persistent state:
+
+```sh
+node scripts/release.mjs \
+  --public-url "$PUBLIC_ORIGIN" \
+  --api-unit yixu-local-api.service \
+  --data-dir "$PRIVATE_STATE" \
+  --systemd-user
+```
+
+The default stages and validates without publishing or restarting. The source
+must be fully committed and clean, including visible untracked source/manifest
+files. The generated candidate is separate from the live `public/`; source checks,
+all declared WebP signatures/dimensions/hashes, and the candidate content revision
+must pass before replacement. To perform the authorized local cutover, repeat with
+`--activate`. Only the explicitly named `yixu-*api` unit is restarted. Do not point
+this at an unrelated unit. The static server must serve this checkout's `public/`,
+and the API unit must use this checkout's manifests/resources and the same private
+state directory.
+
+After cutover, the command checks the public origin's active API revision, API
+homepage featured ID, static snapshot revision and featured ID, served HTML and
+application bytes, and the featured image's local source URL, WebP MIME, byte count
+and SHA-256. It never requires a CDN or sends a paid generation request. Only then
+is a mode-0600 `publication.json` receipt written outside the repository. The admin
+panel displays that proof separately from CDN synchronization counts. Its proof
+matches the active revision and featured image; replacing content invalidates old
+proof automatically.
+
+Failed preparation leaves the current static site and previous proof unchanged.
+If restart or origin verification fails after activation, the previous static
+output is restored and current proof is marked unverified; the earlier receipt is
+preserved as `publication.previous.json`. Private content/user databases are never
+rolled back. The API may already have imported a new valid revision, so inspect
+and correct the reported mismatch, then run delivery again. During the two static
+directory renames there can be a brief missing-root interval. This small local
+cutover is not a zero-downtime immutable backend release manager. A killed process
+can leave `release.lock`; inspect its mode-0600 owner file and the process before
+manually removing a stale lock. No Git hook or host-wide configuration is installed.
+
+For explicitly enabled local automatic delivery, the same command accepts
+`--activate --watch` (default interval five seconds, configurable with
+`--interval-seconds 5`). A supervisor can run that foreground command as a dedicated
+user service. It observes only the current checkout's committed HEAD, skips dirty
+worktrees, runs deliveries serially and uses the same exclusive release lock.
+It does not pull Git, edit source, push commits or modify a production host. Each
+HEAD is attempted once per watcher run; failures are recorded privately in
+`release-watch.json` and do not cause restart loops. Correct/commit the source or
+restart the watcher after manual review to retry that HEAD. An unchanged HEAD
+already recorded in a verified receipt is skipped. Stop the watcher before
+changing deployment configuration. The GitHub workflow remains validation-only.
+
+Regression evidence for these boundaries is provided by:
+
+```sh
+node --test qa/regression-release.mjs
+.venv/bin/python -m pytest tests/backend/test_release_publication.py
+```

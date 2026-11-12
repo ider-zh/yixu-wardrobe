@@ -357,15 +357,16 @@ try {
   }
   uploadError=null;jobs=[];
   await evaluate('localStorage.setItem("wardrobe99:favorites:v1","[9999,101]")');
-  await load();await wait('document.getElementById("catalog-status").textContent === "内容已更新"');
+  await load();await wait('window.WARDROBE.looks.some(look=>look.id===102)');
+  await evaluate('location.hash="#/looks"');await wait('!document.getElementById("collection").hidden');
   assert.equal(await evaluate('document.querySelectorAll("[data-edition]").length'),0);
-  assert.equal(await evaluate('Number(document.getElementById("hero-total").textContent)'),catalogFixture.looks.length);
+  assert.equal(await evaluate('parseInt(document.getElementById("hero-total").textContent,10)'),catalogFixture.looks.length);
   const catalogRequest=requests.filter(r=>r.url==='/api/content/catalog').at(-1);
   assert.equal(catalogRequest.headers.cookie,undefined,'Public catalog must omit the private visitor credential');
   await evaluate('document.getElementById("model-filter").value="female-02";document.getElementById("model-filter").dispatchEvent(new Event("change",{bubbles:true}))');
-  assert.deepEqual(await evaluate('[...document.querySelectorAll("[data-look-card]")].map(el=>Number(el.dataset.lookCard))'),[102]);
-  await evaluate('document.querySelector("[data-look-card] img").dispatchEvent(new Event("error"))');
-  await wait('document.querySelector("[data-look-card] img").getAttribute("src") === "/api/content/assets/fixture-102" && document.querySelector("[data-look-card] img").naturalWidth > 0');
+  assert.deepEqual(await evaluate('[...document.querySelectorAll("#gallery [data-look-card]")].map(el=>Number(el.dataset.lookCard))'),[102]);
+  await evaluate('document.querySelector("#gallery [data-look-card] img").dispatchEvent(new Event("error"))');
+  await wait('document.querySelector("#gallery [data-look-card] img").getAttribute("src") === "/api/content/assets/fixture-102" && document.querySelector("#gallery [data-look-card] img").naturalWidth > 0');
   await evaluate(`document.querySelector('[data-open="102"]').click();document.querySelector('[data-view="7"]').click();document.getElementById('detail-tryon').click()`);
   assert.match(await evaluate('document.getElementById("tryon-context").textContent'),/102.*生动.*07/,'Hydrated look and model use the live try-on index');
   await evaluate('document.getElementById("tryon-close").click();document.getElementById("detail-image").dispatchEvent(new Event("error"))');
@@ -377,7 +378,7 @@ try {
   assert.equal(await evaluate('document.getElementById("detail-photo-frame").dataset.imageStatus'),'图片暂不可用');
   assert.deepEqual(await evaluate('JSON.parse(localStorage.getItem("wardrobe99:favorites:v1"))'),[9999,101]);
   await evaluate('document.getElementById("close-detail").click();document.getElementById("reset-filters").click();document.getElementById("latest-only").click()');
-  assert.deepEqual(await evaluate('[...document.querySelectorAll("[data-look-card]")].map(el=>Number(el.dataset.lookCard))'),[102]);
+  assert.deepEqual(await evaluate('[...document.querySelectorAll("#gallery [data-look-card]")].map(el=>Number(el.dataset.lookCard))'),[102]);
   for(const viewport of viewports){await setViewport(viewport);assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth+1'),'Dynamic filters fit the viewport');}
   await client('Emulation.clearDeviceMetricsOverride');
   assert.ok(!requests.some(r=>/^\/images\/look-/.test(r.url)),'Archived v1 photography is never requested by the public page');

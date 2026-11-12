@@ -8,8 +8,9 @@ Yixu is a wardrobe to wander through at your own pace. Starting with 100 complet
 
 ## Take your time choosing
 
-- **Browse by style and season.** Explore Everyday Elegance, Urban Layers, Vintage Academia, Utility Streetwear, Modern Chinese and other collections, with spring/autumn, summer, winter or all-season filters.
-- **Discover new content.** Filter by model, region or the latest batch, or sort by publication date. Historical photographs are not assigned to a newly registered model without checking their identity.
+- **Start with the latest issue.** The homepage features the newest published outfit, followed by recent additions. Dates come from publication records; historical outfits are not assigned invented dates.
+- **Browse your way.** In 全部穿搭 (All looks), filter by style, season, model or region. Newest publications appear first, with curated exploration available as an alternative.
+- **Follow a model.** The 模特 (Models) page shows each model's published outfits. Historical photographs are not assigned to a newly registered model without checking their identity.
 - **Find a favorite.** Search names, numbers, garments, materials or moods. The gallery labels are Chinese: try 丝绒 for velvet, 百褶裙 for pleated skirts or 惊喜 for surprise.
 - **Look closer.** Open an outfit's expressive nine-photo grid. Select 01–09 to explore one moment, then read the garment list and styling notes.
 - **Keep a look.** Save favorites with the heart, compare two or three outfits, or choose 保存图片 to download. Existing numbers and favorites stay associated with their outfits.

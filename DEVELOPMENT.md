@@ -19,6 +19,16 @@ node scripts/build.mjs
 
 后端依赖与启动见 [backend/README.md](backend/README.md)。生产经 Nginx 将同源 `/api/` 转发至仅监听 loopback 的单进程 API；管理域沿用独立会话和 Host/CSRF 校验。
 
+## 最新一期与浏览结构
+
+首页、全部穿搭、模特和收藏分别使用 hash 路由，继续支持静态部署与直接打开文件。首页最新一期不受衣橱中的风格、季节、搜索或收藏筛选影响；下方最近更新最多六套，排除首屏套装。完整衣橱默认最新发布，分类是筛选条件，手机端使用筛选弹窗。历史 `#look-编号` 链接继续打开相同套装，关闭详情返回之前的页面及筛选。旧收藏存储键和编号保持不变。
+
+Node 构建和 Python API 都生成 `catalog.home`：`featured_look_id`、`recent_look_ids`、`latest_batch_id`，以及完整的 `latestOrder`。首页和默认列表共用这套顺序，`displayOrder` 保留风格漫游顺序。历史基线没有发布日期时使用 `null`，排在有发布记录的内容之后，不根据图片修改时间推断上新。
+
+前端从构建快照立即呈现内容，API 与快照均有 `revision` 时只接受相同内容版本；不同版本显示同步状态并保留快照，避免旧进程的 100 套目录覆盖新构建的 101 套。同一内容版本仍可更新经过验证的 CDN 地址。完成交付后刷新页面取得相应版本的快照。
+
+构建先在同一文件系统暂存完整输出，再切换专用 `public/`，写入失败时保留旧输出。`node scripts/build.mjs --output 空的候选目录` 只生成候选，不触碰当前网站；显式目标非空时拒绝写入。交付命令和可选的本地提交观察器见 [部署说明](deploy/README.md)。普通 CI 不部署站点。
+
 ## 内容源与文件
 
 - `content/catalog.json`：从原目录迁移的生动基线，保留 1—100 编号、分类、单品与镜头；未核对的模特归属为 `null`。总容量不再限制为 100。
@@ -52,6 +62,7 @@ node scripts/build.mjs
 
 ```text
 GET /api/content/catalog
+GET /api/content/home
 GET /api/content/looks?offset=0&limit=24&model=female-01&region=杭州&q=针织
 GET /api/content/looks/{look_id}
 GET /api/content/models

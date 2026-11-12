@@ -4,7 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
-import {loadContent} from '../scripts/content-lib.mjs';
+import {loadContent, publicationProjection} from '../scripts/content-lib.mjs';
 
 const root = fileURLToPath(new URL('../',import.meta.url));
 const fixture = fs.mkdtempSync(path.join(os.tmpdir(),'yixu-content-'));
@@ -45,6 +45,13 @@ try {
   assert.equal(fresh.versions.v2.source_url,relative);
   assert.equal(fresh.versions.v2.shots.length,9);
   assert.equal(after.catalog.displayOrder[0],nextId);
+  assert.equal(after.catalog.latestOrder[0],nextId);
+  assert.equal(after.catalog.home.featured_look_id,nextId);
+  assert.equal(after.catalog.home.latest_batch_id,batchId);
+  assert.equal(after.catalog.home.recent_look_ids.length,6);
+  assert.ok(!after.catalog.home.recent_look_ids.includes(nextId));
+  assert.equal(fresh.published_at,new Date(publishDate+'T00:00:00+08:00').toISOString());
+  assert.deepEqual(publicationProjection([],[],[]).home,{featured_look_id:null,recent_look_ids:[],latest_batch_id:null});
   assert.equal(after.catalog.looks.find(look=>look.id===1).versions.v2.image,before.catalog.looks[0].versions.v2.image);
   assert.equal(loadContent(fixture).catalog.revision,after.catalog.revision,'Same source is deterministic');
   console.log('PASS new daily expressive-only outfit, second model, stable legacy IDs and source URL without CDN');
@@ -65,6 +72,9 @@ try {
     ['missing shot',b=>{b.looks[0].shots.pop();}],
     ['path traversal',b=>{b.looks[0].asset.file='../private.webp';}],
     ['missing research',b=>{b.research.trend_sources=[];}],
+    ['naive publication timestamp',b=>{b.published_at=b.publish_date+'T09:00:00';}],
+    ['publication date mismatch',b=>{b.published_at=b.publish_date+'T23:00:00Z';}],
+    ['cover outside batch',b=>{b.cover_look_id=1;}],
   ]) {
     const changed=structuredClone(batch);mutate(changed);write(batchPath,changed);
     assert.throws(()=>loadContent(fixture),undefined,label);

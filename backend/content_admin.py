@@ -17,12 +17,26 @@ def create_content_admin_router(service, content, admin):
     def overview(request: Request):
         admin.session(request, required=True)
         catalog = content.catalog() if content.ready else {}
+        from .publication import publication_status
+
+        home = catalog.get("home") or {}
+        featured = next(
+            (
+                item
+                for item in catalog.get("looks", [])
+                if item["id"] == home.get("featured_look_id")
+            ),
+            None,
+        )
         return {
             "revision": catalog.get("revision"),
             "content_ready": content.ready,
             "import_error": getattr(content, "import_error", None),
             "look_count": len(catalog.get("looks", [])),
             "model_count": len(content.admin_models()) if content.ready else 0,
+            "home": home,
+            "featured_title": featured.get("title") if featured else None,
+            "publication": publication_status(request.app.state.settings.data_dir, catalog),
             "cdn": service.overview(),
         }
 

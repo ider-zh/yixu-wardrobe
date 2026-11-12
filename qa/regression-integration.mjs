@@ -216,13 +216,17 @@ test('real content API hydrates the actual gallery with source URLs, v2-only dat
   const storage = new Map([['wardrobe99:favorites:v1','[9999,1]']]);
   let accepted;
   window.WARDROBE={looks:[],categoryOrder:[]};
+  window.matchMedia=()=>({matches:false,addEventListener(){}});
+  window.scrollTo=()=>{};
   window.WardrobeTryOn={setCatalog:data=>{accepted=data;},setContext(){},track(){}};
+  const location={protocol:'https:',href:'https://localhost/#/looks',hash:'#/looks'};
+  const history={pushState(_state,_title,hash){location.hash=hash;},replaceState(_state,_title,hash){location.hash=hash;}};
   const source = fs.readFileSync(path.join(root,'app.js'),'utf8').replace("}catch{$('catalog-status')", "}catch(error){window.__hydrationError=String(error);$('catalog-status')");
   vm.runInNewContext(source,{
-    document,window,fetch:b.fetch,location:{protocol:'https:',href:'https://localhost/',hash:''},URL,
+    document,window,fetch:b.fetch,location,history,URL,URLSearchParams,
     localStorage:{getItem:key=>storage.get(key),setItem:(key,value)=>storage.set(key,value)},setTimeout,clearTimeout,
   });
-  await wait(()=>document.getElementById('catalog-status').textContent==='内容已更新' || window.__hydrationError);
+  await wait(()=>accepted?.revision===ready.body.revision || window.__hydrationError);
   assert.equal(window.__hydrationError,undefined);
   assert.deepEqual(Array.from(accepted.looks,look=>look.id),ready.body.looks.map(look=>look.id));
   assert.equal(accepted.models[0].model_id,'female-01');
