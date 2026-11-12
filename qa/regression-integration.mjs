@@ -224,7 +224,7 @@ test('real content API hydrates the actual gallery with source URLs, v2-only dat
   });
   await wait(()=>document.getElementById('catalog-status').textContent==='内容已更新' || window.__hydrationError);
   assert.equal(window.__hydrationError,undefined);
-  assert.equal(accepted.looks.length,100);
+  assert.deepEqual(Array.from(accepted.looks,look=>look.id),ready.body.looks.map(look=>look.id));
   assert.equal(accepted.models[0].model_id,'female-01');
   assert.ok(accepted.looks.every(look=>Object.keys(look.versions).join(',')==='v2'));
   assert.ok(accepted.looks.every(look=>look.versions.v2.image===look.versions.v2.source_url && look.versions.v2.source_url.startsWith('/api/content/assets/')));

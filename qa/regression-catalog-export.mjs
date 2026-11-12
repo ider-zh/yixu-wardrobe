@@ -11,12 +11,16 @@ try {
  const r=spawnSync(process.execPath,['scripts/export-catalog.mjs','--output',output],{cwd:root,encoding:'utf8',timeout:10000});
  assert.equal(r.status,0,'catalog export must succeed: '+r.stderr);
  const data=JSON.parse(fs.readFileSync(output,'utf8'));
- assert.equal(data.looks.length,100);
+ const baseline=JSON.parse(fs.readFileSync(path.join(root,'content/catalog.json'),'utf8'));
+ const batches=fs.readdirSync(path.join(root,'content/batches')).filter(name=>name.endsWith('.json'))
+   .map(name=>JSON.parse(fs.readFileSync(path.join(root,'content/batches',name),'utf8')));
+ const expectedIds=[...baseline.looks,...batches.flatMap(batch=>batch.looks)].map(look=>look.id).sort((a,b)=>a-b);
+ assert.deepEqual(data.looks.map(look=>look.id).sort((a,b)=>a-b),expectedIds);
  assert.equal(data.looks[0].id,1);
  assert.equal(data.looks[0].versions.v1,undefined);
  assert.equal(data.looks[0].versions.v2.image,'images-v2/look-001.webp');
  assert.equal(data.looks[0].versions.v2.shots.length,9);
- assert.equal(data.target,100);
+ assert.equal(data.target,expectedIds.length);
  assert.ok(!fs.readFileSync(output,'utf8').includes('window.WARDROBE'));
  assert.ok(data.models.some(model=>model.model_id==='female-01'));
  console.log('PASS exported content is expressive-only JSON with historical IDs and model registry');
