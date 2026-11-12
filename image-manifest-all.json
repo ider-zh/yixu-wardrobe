@@ -1802,5 +1802,16 @@
       "bytes": 317852,
       "sha256": "4a97c013ae778fd9ea5cb4b7ffd618d5c9c75085ed2dd2b98ed56407260d81b6"
     }
+  ],
+  "modelBases": [
+    {
+      "id": "female-01",
+      "title": "女模特 01 · 五视角换装基础体",
+      "file": "assets/model-bases/female-01.webp",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 71786,
+      "sha256": "dc0a221ff81250415bcfa3b320bc916dc02e2873f030e707083928505ca75066"
+    }
   ]
 }

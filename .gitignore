@@ -17,6 +17,9 @@
 !/images/look-*.webp
 !/images-v2/
 !/images-v2/look-*.webp
+!/assets/
+!/assets/model-bases/
+!/assets/model-bases/female-01.webp
 !/scripts/
 !/scripts/*.mjs
 !/.github/

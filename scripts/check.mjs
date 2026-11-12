@@ -13,6 +13,23 @@ vm.runInNewContext(read('catalog.js'), context, {timeout: 1000});
 const catalog = JSON.parse(JSON.stringify(context.window.WARDROBE));
 const expectedIds = Array.from({length: 100}, (_, i) => i + 1);
 const sorted = values => [...values].sort((a, b) => a - b);
+function verifyImage(record) {
+  const bytes = fs.readFileSync(path.join(root, record.file));
+  // These assets are single-frame, lossy WebP (RIFF + one VP8 chunk).
+  assert.ok(bytes.length >= 30, `Truncated WebP: ${record.file}`);
+  assert.equal(bytes.toString('ascii', 0, 4), 'RIFF');
+  assert.equal(bytes.toString('ascii', 8, 16), 'WEBPVP8 ');
+  assert.equal(bytes.readUInt32LE(4) + 8, bytes.length);
+  const chunkBytes = bytes.readUInt32LE(16);
+  assert.equal(20 + chunkBytes + (chunkBytes % 2), bytes.length);
+  assert.equal(bytes.subarray(23, 26).toString('hex'), '9d012a');
+  assert.equal(bytes.length, record.bytes);
+  assert.equal(bytes.readUInt16LE(26) & 0x3fff, record.width);
+  assert.equal(bytes.readUInt16LE(28) & 0x3fff, record.height);
+  const digest = crypto.createHash('sha256').update(bytes).digest('hex');
+  assert.equal(digest, record.sha256, `Image changed: ${record.file}`);
+  return {bytes: bytes.length, digest};
+}
 assert.equal(catalog.target, 100);
 assert.equal(catalog.looks.length, 100);
 assert.equal(catalog.generated, 100);
@@ -39,26 +56,17 @@ for (const version of ['v1', 'v2']) {
     assert.equal(photo.shots.length, 9);
     const record = manifest[version].find(item => item.id === look.id);
     assert.equal(record.file, expected);
-    const bytes = fs.readFileSync(path.join(root, expected));
-    // These assets are single-frame, lossy WebP (RIFF + one VP8 chunk).
-    assert.ok(bytes.length >= 30, `Truncated WebP: ${expected}`);
-    assert.equal(bytes.toString('ascii', 0, 4), 'RIFF');
-    assert.equal(bytes.toString('ascii', 8, 16), 'WEBPVP8 ');
-    assert.equal(bytes.readUInt32LE(4) + 8, bytes.length);
-    const chunkBytes = bytes.readUInt32LE(16);
-    assert.equal(20 + chunkBytes + (chunkBytes % 2), bytes.length);
-    assert.equal(bytes.subarray(23, 26).toString('hex'), '9d012a');
-    assert.equal(bytes.length, record.bytes);
-    assert.equal(bytes.readUInt16LE(26) & 0x3fff, record.width);
-    assert.equal(bytes.readUInt16LE(28) & 0x3fff, record.height);
-    const digest = crypto.createHash('sha256').update(bytes).digest('hex');
-    assert.equal(digest, record.sha256, `Image changed: ${expected}`);
+    const {bytes, digest} = verifyImage(record);
     assert.ok(!hashes.has(digest), `Repeated image: ${expected}`);
     hashes.add(digest);
     images++;
-    imageBytes += bytes.length;
+    imageBytes += bytes;
   }
 }
+assert.equal(manifest.modelBases.length, 1);
+assert.equal(manifest.modelBases[0].id, 'female-01');
+assert.equal(manifest.modelBases[0].file, 'assets/model-bases/female-01.webp');
+const modelBaseBytes = verifyImage(manifest.modelBases[0]).bytes;
 const html = read('index.html');
 const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]);
 assert.equal(ids.length, new Set(ids).size);
@@ -82,4 +90,4 @@ for (const name of ['README.md', 'README.en.md', 'DEVELOPMENT.md']) {
     assert.ok(fs.existsSync(path.join(root, target)), `Missing documentation link: ${name} -> ${target}`);
   }
 }
-console.log(JSON.stringify({outfits: 100, collections: 10, images, imageBytes, sha256: 'passed', links: 'passed'}));
+console.log(JSON.stringify({outfits: 100, collections: 10, images, imageBytes, modelBases: manifest.modelBases.length, modelBaseBytes, sha256: 'passed', links: 'passed'}));

@@ -36,7 +36,7 @@ No account or dependency installation is needed. Keep the extracted files togeth
 
 If photos do not appear, check that the whole archive was extracted, rather than copying only the HTML file. The repository's 200 photos are now same-dimension lossy WebP (quality 85, compression level 6): their combined size fell from 531,661,790 to 48,176,224 bytes (about 48.18 MB), a 90.94% reduction, with a maximum of 384,636 bytes per image. This is not the full site size.
 
-The runtime set still contains 206 files. Photos stay alongside the website under the relative paths `images/` and `images-v2/`, with no object storage or external CDN dependency. The documentation preview has also been converted to WebP.
+The static build contains 209 files. Photos stay alongside the website under the relative paths `images/` and `images-v2/`, with no object storage or external CDN dependency. A [five-view female model base](assets/model-bases/female-01.webp) is also included as a reference asset for future outfit work. The documentation preview has also been converted to WebP.
 
 ## Your favorites and the images
 
