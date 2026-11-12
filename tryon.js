@@ -46,13 +46,23 @@ $('tryon-consent').addEventListener('change',syncControls);
 dialog.addEventListener('close',clearPhoto);
 const byId = new Map((window.WARDROBE?.looks || []).map(look => [look.id, look]));
 const analyticsEvents=new Set(['page_view','look_open','tryon_open']);
+function randomId() {
+  if(typeof crypto.randomUUID==='function')return crypto.randomUUID();
+  // getRandomValues is also available on ordinary LAN HTTP origins.
+  const bytes=crypto.getRandomValues(new Uint8Array(16));
+  bytes[6]=(bytes[6]&15)|64;bytes[8]=(bytes[8]&63)|128;
+  const hex=Array.from(bytes,byte=>byte.toString(16).padStart(2,'0')).join('');
+  return [hex.slice(0,8),hex.slice(8,12),hex.slice(12,16),hex.slice(16,20),hex.slice(20)].join('-');
+}
 function track(event,context={}) {
   if(!session||!analyticsEvents.has(event))return;
-  const payload={event,event_id:crypto.randomUUID()};
-  if(Number.isInteger(context.look_id)&&byId.has(context.look_id))payload.look_id=context.look_id;
-  if(['v1','v2'].includes(context.edition))payload.edition=context.edition;
-  if(Number.isInteger(context.shot_index)&&context.shot_index>=1&&context.shot_index<=9)payload.shot_index=context.shot_index;
-  api('/api/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).catch(()=>{});
+  try {
+    const payload={event,event_id:randomId()};
+    if(Number.isInteger(context.look_id)&&byId.has(context.look_id))payload.look_id=context.look_id;
+    if(['v1','v2'].includes(context.edition))payload.edition=context.edition;
+    if(Number.isInteger(context.shot_index)&&context.shot_index>=1&&context.shot_index<=9)payload.shot_index=context.shot_index;
+    api('/api/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).catch(()=>{});
+  }catch { /* Observation must not interrupt browsing or opening a dialog. */ }
 }
 window.WardrobeTryOn = {track,setCatalog(catalog) {
   byId.clear();for(const look of catalog.looks||[])byId.set(look.id,look);
@@ -184,7 +194,7 @@ $('tryon-submit').addEventListener('click',async()=>{
     }
     const form=new FormData();form.append('photo',file);
     for(const [key,value] of Object.entries(context))form.append(key,String(value));
-    form.append('idempotency_key',crypto.randomUUID());form.append('disclosure_version',session.disclosure.version);
+    form.append('idempotency_key',randomId());form.append('disclosure_version',session.disclosure.version);
     $('tryon-status').textContent='正在发送，请勿重复提交…';
     const job=await api('/api/tryons',{method:'POST',body:form});
     jobs=[job,...jobs.filter(item=>item.id!==job.id)];renderJobs();

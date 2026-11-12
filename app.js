@@ -121,7 +121,7 @@ function updateEditionUI(){
  $('hero-description').textContent=look.description||v.summary||'';
  $('hero-detail').dataset.open=look.id;$('hero-detail').disabled=false;
  $('hero-photo-button').dataset.open=look.id;$('hero-photo-button').disabled=false;
- $('hero-photo-button').setAttribute('aria-label','查看 '+look.title+' 的九宫格');
+ $('hero-photo-button').setAttribute('aria-label','查看 '+look.title+' 的穿搭详情');
  $('hero-favorite').dataset.favorite=look.id;
  const liked=favorites.has(look.id);$('hero-favorite').textContent=liked?'♥ 已收藏':'♡ 收藏这套';$('hero-favorite').setAttribute('aria-pressed',String(liked));
  const image=$('hero-image-0');setImage(image,v);image.alt=look.title+' · '+(v.shots[p-1]?.title||'生动写真');

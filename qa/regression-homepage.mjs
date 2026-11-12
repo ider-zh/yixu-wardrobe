@@ -24,6 +24,12 @@ const requested=[];
 const server=http.createServer((req,res)=>{
  requested.push(req.url);
  if(req.url==='/api/content/catalog'){res.setHeader('Content-Type','application/json');res.setHeader('Cache-Control','no-store');res.end(JSON.stringify(apiCatalog));return;}
+ if(req.url==='/api/bootstrap'){
+  res.setHeader('Content-Type','application/json');res.end(JSON.stringify({csrf_token:'fixture-csrf',visitor:{id:'fixture'},generation_available:false,disclosure:{accepted:false,version:'fixture-v1',title:'照片用途',items:['照片交由第三方 AI 生成试穿图，结果可供后台评估。']}}));return;
+ }
+ if(req.url==='/api/tryons'||req.url.startsWith('/api/tryons?')||req.url==='/api/events'){
+  res.setHeader('Content-Type','application/json');res.end(JSON.stringify(req.url==='/api/events'?{accepted:true}:{items:[],has_more:false}));return;
+ }
  if(req.url.startsWith('/api/')){res.statusCode=503;res.setHeader('Content-Type','application/json');res.end('{"error":{"code":"fixture_unavailable","message":"测试服务未配置"}}');return;}
  let relative;try{relative=decodeURIComponent(new URL(req.url,'http://fixture').pathname);}catch{res.statusCode=400;res.end();return;}
  const target=path.resolve(output,'.'+(relative==='/'?'/index.html':relative));
@@ -51,10 +57,23 @@ try{
  const navigate=async(url=origin)=>{await client('Page.navigate',{url});await wait('document.readyState==="complete" && !!document.querySelector("#hero-detail")?.dataset.open');};
  const route=async hash=>{await evaluate(`location.hash=${JSON.stringify(hash)}`);await wait(`location.hash===${JSON.stringify(hash)}`);await evaluate('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');};
  const noOverflow=async label=>assert.ok(await evaluate('document.documentElement.scrollWidth<=innerWidth+1'),label+' has no horizontal overflow');
+ const activate=async(selector,touch=false)=>{
+  const point=await evaluate(`(()=>{const e=document.querySelector(${JSON.stringify(selector)});const r=e.getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2};})()`);
+  if(touch){
+   await client('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[point]});
+   await client('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+  }else{
+   await client('Input.dispatchMouseEvent',{type:'mousePressed',button:'left',clickCount:1,...point});
+   await client('Input.dispatchMouseEvent',{type:'mouseReleased',button:'left',clickCount:1,...point});
+  }
+ };
  await client('Page.enable');await client('Runtime.enable');
+ // LAN HTTP lacks secure-context randomUUID even though getRandomValues works.
+ // Use the same capability boundary on loopback so this check runs in every CI.
+ await client('Page.addScriptToEvaluateOnNewDocument',{source:'Object.defineProperty(globalThis.crypto,"randomUUID",{value:undefined,configurable:true});'});
  for(const viewport of [{width:390,height:844},{width:1440,height:900}]){
   await client('Emulation.setDeviceMetricsOverride',{...viewport,deviceScaleFactor:1,mobile:viewport.width<600});
-  await navigate();await wait('document.getElementById("hero-image-0").naturalWidth>0');
+  await navigate();await wait('document.getElementById("hero-image-0").naturalWidth>0 && !document.getElementById("tryon-refresh").disabled');
   assert.equal(await evaluate('document.getElementById("hero-title").textContent'),featured.title);
   assert.equal(await evaluate('Number(document.getElementById("hero-detail").dataset.open)'),featured.id);
   const bounds=await evaluate(`['hero-title','hero-detail','hero-photo-button'].map(id=>{const rect=document.getElementById(id).getBoundingClientRect();return {id,top:rect.top,bottom:rect.bottom,left:rect.left,right:rect.right,width:rect.width,height:rect.height};})`);
@@ -62,6 +81,19 @@ try{
   const recent=await evaluate('[...document.querySelectorAll("#recent-gallery [data-look-card]")].map(card=>Number(card.dataset.lookCard))');
   assert.deepEqual(recent,catalog.home.recent_look_ids);assert.ok(!recent.includes(featured.id));
   await noOverflow('Homepage '+viewport.width);
+  for(const selector of ['#hero-photo-button','#hero-detail']){
+   await activate(selector,viewport.width<801);
+   await wait('document.getElementById("detail-dialog").open');
+   assert.equal(await evaluate('document.getElementById("detail-title").textContent'),featured.title,'Home action opens its featured outfit without a reload');
+   await evaluate('document.getElementById("close-detail").click()');
+   await wait('!document.getElementById("detail-dialog").open');
+  }
+  assert.match(await evaluate('document.getElementById("hero-detail").textContent'),/查看穿搭/);
+  await evaluate('document.getElementById("hero-detail").focus()');
+  await client('Input.dispatchKeyEvent',{type:'keyDown',key:'Enter',code:'Enter',windowsVirtualKeyCode:13,text:'\r',unmodifiedText:'\r'});
+  await client('Input.dispatchKeyEvent',{type:'keyUp',key:'Enter',code:'Enter',windowsVirtualKeyCode:13});
+  await wait('document.getElementById("detail-dialog").open');
+  await evaluate('document.getElementById("close-detail").click()');await wait('!document.getElementById("detail-dialog").open');
   if(process.env.YIXU_SCREENSHOT_DIR){fs.mkdirSync(process.env.YIXU_SCREENSHOT_DIR,{recursive:true,mode:0o700});const image=await client('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(process.env.YIXU_SCREENSHOT_DIR,`home-${viewport.width}.png`),Buffer.from(image.data,'base64'),{mode:0o600});}
   await evaluate('document.querySelector("[data-page=looks]").click()');await wait('!document.getElementById("collection").hidden');
   const archiveIds=await evaluate('[...document.querySelectorAll("#gallery [data-look-card]")].map(card=>Number(card.dataset.lookCard))');assert.deepEqual(archiveIds,catalog.latestOrder.slice(0,24));
@@ -79,6 +111,11 @@ try{
   assert.equal(await evaluate('Number(document.getElementById("hero-detail").dataset.open)'),featured.id,'Archive filters cannot change the home hero');
   console.log(`PASS ${viewport.width}×${viewport.height}: first-screen loaded hero, six nonduplicated recent looks, latest archive, filter route, detail Back and no overflow`);
  }
+ await evaluate('window.__randomValues=crypto.getRandomValues;Object.defineProperty(crypto,"getRandomValues",{value(){throw Error("Synthetic analytics failure");},configurable:true})');
+ await activate('#hero-detail');await wait('document.getElementById("detail-dialog").open');
+ await evaluate('Object.defineProperty(crypto,"getRandomValues",{value:window.__randomValues,configurable:true});delete window.__randomValues;document.getElementById("close-detail").click()');
+ await wait('!document.getElementById("detail-dialog").open');
+ console.log('PASS homepage photo/button touch, mouse and keyboard actions on LAN crypto capabilities; failed analytics cannot block details');
  // Enter a comparison detail outside the current archive selection, then cross
  // into an ID that matches the filter. Prev/next must retain the original list.
  for(const id of [70,71]){await route('#/looks?q='+id);await evaluate(`document.querySelector('#gallery [data-compare="${id}"]').click()`);}

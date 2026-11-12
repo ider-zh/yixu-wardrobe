@@ -97,6 +97,7 @@ try {
   const evaluate=async expression=>{const r=await client('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw Error(r.exceptionDetails.text+' '+JSON.stringify(r.exceptionDetails.exception));return r.result.value;};
   const wait=async expression=>{for(let n=0;n<100;n++){if(await evaluate(expression))return;await new Promise(r=>setTimeout(r,30));}throw Error('DOM condition timed out: '+expression);};
   const load=async()=>{await client('Page.navigate',{url:origin});await wait('document.readyState === "complete"');};
+  await client('Page.addScriptToEvaluateOnNewDocument',{source:'Object.defineProperty(globalThis.crypto,"randomUUID",{value:undefined,configurable:true});'});
   await load();
   assert.ok(requests.some(r=>r.url==='/api/bootstrap'), 'Page load must securely bootstrap a visitor without requiring a try-on click');
   await wait('document.getElementById("tryon-availability")?.textContent.includes("暂不可用")');
@@ -204,7 +205,7 @@ try {
   const multipart=await new Request(origin,{method:'POST',headers:{'content-type':upload[0].headers['content-type']},body:upload[0].body}).formData();
   assert.deepEqual([...multipart.keys()].sort(),['disclosure_version','edition','idempotency_key','look_id','photo','shot_index']);
   assert.equal(multipart.get('look_id'),'100');assert.equal(multipart.get('edition'),'v2');assert.equal(multipart.get('shot_index'),'4');
-  assert.equal(multipart.get('disclosure_version'),'test-v1');assert.match(multipart.get('idempotency_key'),/^[a-f0-9-]{36}$/);
+  assert.equal(multipart.get('disclosure_version'),'test-v1');assert.match(multipart.get('idempotency_key'),/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/);
   assert.equal(multipart.get('photo').type,'image/png');assert.ok(multipart.get('photo').size>0);
   assert.equal(await evaluate('localStorage.length+sessionStorage.length'),0,'No browser credential/photo persistence');
   assert.equal(await evaluate('document.getElementById("tryon-local-preview").hasAttribute("src")'),false,'Release local photo after submission');
@@ -292,6 +293,7 @@ try {
   for(const req of events){
     assert.equal(req.headers['x-csrf-token'],'test-csrf');assert.match(req.headers.cookie||'',/visitor_fixture=/);
     const payload=JSON.parse(req.body);assert.ok(['page_view','look_open','tryon_open'].includes(payload.event));
+    assert.match(payload.event_id,/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/);
     assert.ok(Object.keys(payload).every(key=>['event','event_id','look_id','edition','shot_index'].includes(key)));
     assert.ok(!req.body.toString().includes('secret'));assert.ok(!req.body.toString().includes('private'));
   }
