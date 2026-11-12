@@ -4,7 +4,7 @@ const $ = id => document.getElementById(id);
 const dialog = $('tryon-dialog');
 let session = null, currentContext = null, frozen = null, sessionRevision = 0;
 let reconnecting = false, recoveryNotice = '';
-const recoveryMessage = '会话或安全凭证已失效，请点击刷新重新连接；不会自动重试任何照片提交。若本站 Cookie 已丢失，原试穿记录无法恢复。';
+const recoveryMessage = '连接已失效，请刷新重连。未自动重试照片提交；若访问凭证丢失，原记录无法恢复。';
 function clearSession() {
   sessionRevision++;session=null;clearTimeout(pollTimer);refreshAgain=false;
   jobs=[];visiblePages=1;renderJobs();clearPhoto();
@@ -112,7 +112,7 @@ function jobRoute(job,suffix='') {return '/api/tryons/'+encodeURIComponent(job.i
 function safeResultURL(job,kind) {const value=job[kind+'_url'];return value===jobRoute(job,'/'+(kind==='image'?'image':'download'))?value:null;}
 function renderJobs() {
   const list=$('tryon-jobs');list.replaceChildren();
-  if(!jobs.length){list.append(element('p','还没有试穿记录。打开一套造型，点击「试穿这套」开始。'));return;}
+  if(!jobs.length){list.append(element('p','还没有试穿记录。打开一套造型，点击「拍照试穿」开始。'));return;}
   for(const job of jobs){
     const card=element('article',undefined,'tryon-job');card.dataset.jobId=job.id;
     const look=byId.get(job.look_id);
@@ -121,18 +121,17 @@ function renderJobs() {
     if(job.status==='queued'&&Number.isInteger(job.queue_position))status+=' · 前方 '+job.queue_position+' 个任务';
     card.append(element('p',status,'tryon-job-status'));
     if(job.error_message||job.error_code)card.append(element('p',[job.error_code,job.error_message].filter(Boolean).join(' · '),'tryon-job-error'));
-    if(activeStatuses.has(job.status)&&job.original_expires_at){const date=new Date(job.original_expires_at);if(!Number.isNaN(date.getTime()))card.append(element('p','输入最晚保留至 '+date.toLocaleString()+'；过期不会自动生成。','tryon-hint'));}
     if(job.status==='succeeded'){
       const imageURL=safeResultURL(job,'image'),downloadURL=safeResultURL(job,'download');
       if(imageURL){
         const image=element('img');image.src=imageURL;image.alt='AI 生成试穿结果 · LOOK '+job.look_id;image.loading='lazy';
-        image.addEventListener('error',()=>{image.hidden=true;card.append(element('p','结果暂时无法读取，可能已被删除或按 FIFO 淘汰。请刷新确认。'));});card.append(image);
+        image.addEventListener('error',()=>{image.hidden=true;card.append(element('p','结果暂时无法读取，请刷新确认。'));});card.append(image);
       }
       if(downloadURL){const link=element('a','下载结果 ↓','outline-button');link.href=downloadURL;link.download='tryon-'+job.id+'.webp';card.append(link);}
     }
     const remove=element('button',activeStatuses.has(job.status)?'取消试穿 / 删除结果':'删除生成结果','text-button');remove.dataset.jobDelete=job.id;
     remove.addEventListener('click',async()=>{
-      if(!confirm('取消这次试穿或删除生成结果？试穿记录仍会保留；执行中的外部调用不能撤回，结果将不再保留。'))return;
+      if(!confirm('取消或删除后不再保留结果，试穿记录仍会保留。已开始的生成无法撤回，确认继续？'))return;
       remove.disabled=true;
       try {await api(jobRoute(job),{method:'DELETE'});await refreshJobs();}
       catch(error){$('tryon-jobs-status').textContent=error.message;remove.disabled=false;}
@@ -155,7 +154,7 @@ async function refreshJobs() {
     }
     jobs=[...new Map(collected.map(job=>[job.id,job])).values()];renderJobs();
     $('tryon-more-note').hidden=!response.has_more;$('tryon-more').hidden=!response.has_more;
-    $('tryon-jobs-status').textContent='进度已更新；记录由服务器保存，重新打开页面可恢复（需保留本站 Cookie）。'+recoveryNotice;
+    $('tryon-jobs-status').textContent='进度已更新。'+recoveryNotice;
   } catch(error){$('tryon-jobs-status').textContent='进度暂未更新：'+error.message+' 当前内容可能不是最新状态。';}
   finally {
     refreshing=false;$('tryon-refresh').disabled=false;$('tryon-more').disabled=false;
@@ -197,7 +196,7 @@ async function bootstrap(explicit=false) {
   const previousVisitor=session?.visitor?.id, pages=visiblePages;
   if(explicit){
     clearSession();
-    recoveryNotice='若本站 Cookie 已丢失，原试穿记录无法恢复；不会自动重试照片提交。';
+    recoveryNotice='访问凭证丢失后，原记录无法恢复；未自动重试照片提交。';
   }
   $('tryon-refresh').disabled=true;
   try {
@@ -205,7 +204,7 @@ async function bootstrap(explicit=false) {
     session = await api('/api/bootstrap');
     if(previousVisitor&&previousVisitor===session.visitor?.id)visiblePages=pages;
     track('page_view');if(currentContext)track('look_open',currentContext);
-    $('tryon-disclosure-title').textContent=session.disclosure.title||'试穿前请了解';
+    $('tryon-disclosure-title').textContent=session.disclosure.title||'照片用途';
     $('tryon-disclosure-items').replaceChildren();
     for(const item of session.disclosure.items||[]){const li=document.createElement('li');li.textContent=item;$('tryon-disclosure-items').append(li);}
     $('tryon-consent-label').hidden=Boolean(session.disclosure.accepted);syncControls();

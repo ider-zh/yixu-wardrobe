@@ -20,7 +20,7 @@ assert.ok(chrome, 'Real DOM tests require Chromium; set CHROME_BIN (no productio
 let available = false, jobs = [], accept = false, uploadError = null, uploadErrorStatus=503, bootstrapError = null, paginate=false, holdList=false, heldList=null;
 const requests = [];
 const bootstrap = () => ({csrf_token:'test-csrf',visitor:{id:'test-visitor'},generation_available:available,
-  disclosure:{version:'test-v1',title:'试穿前请了解',items:['外部服务处理照片；开发者管理员可查看生成结果。'],accepted:accept},
+  disclosure:{version:'test-v1',title:'照片用途',items:['照片交由第三方 AI 生成试穿图，结果可供后台评估。'],accepted:accept},
   original_retention_seconds:3600,result_max_count:1000});
 const server = http.createServer(async (req,res) => {
   const chunks=[]; for await (const chunk of req) chunks.push(chunk);
@@ -121,8 +121,10 @@ try {
   assert.equal(await evaluate('document.getElementById("detail-title").textContent'),before,'Try-on modal blocks underlying detail keyboard navigation');
   console.log('PASS frozen look/edition/panel, all nine choices from montage 0, selected-panel handoff and modal keyboard guard');
   const disclosure=await evaluate('document.getElementById("tryon-disclosure")?.textContent || ""');
-  assert.match(disclosure,/外部/,'Disclose external processing');assert.match(disclosure,/管理员.*生成/);
-  assert.match(disclosure,/1 小时/);assert.match(disclosure,/1000/);assert.match(disclosure,/不设时间/);
+  assert.match(disclosure,/第三方 AI/,'Disclose external processing');assert.match(disclosure,/后台评估/);
+  assert.equal(await evaluate('document.querySelectorAll("#tryon-disclosure li").length'),1,'Single concise photo-purpose notice');
+  assert.match(disclosure,/本人同意.*同意上述用途/);
+  assert.doesNotMatch(disclosure,/1 小时|一小时|1000|FIFO|Cookie|幂等|持久队列/);
   assert.equal(await evaluate('document.getElementById("tryon-camera").getAttribute("capture")'),'user');
   assert.equal(await evaluate('document.getElementById("tryon-album").hasAttribute("capture")'),false);
   const choosePhoto=async id=>evaluate(`(async()=>{
@@ -153,6 +155,7 @@ try {
   assert.equal(await evaluate('document.getElementById("tryon-local-preview").hasAttribute("src")'),false,'Release local photo after submission');
   console.log('PASS active consent before multipart upload, frozen context, random idempotency, camera/album local preview and no photo storage');
   await wait('document.getElementById("tryon-jobs")?.textContent.includes("前方 7")');
+  assert.doesNotMatch(await evaluate('document.getElementById("tryon-jobs").textContent'),/输入最晚保留至|2026|服务器|Cookie/,'Queue cards show progress, not input lifecycle mechanics');
   await load();
   await wait('document.getElementById("tryon-jobs")?.textContent.includes("前方 7")');
   await evaluate('document.getElementById("tryon-history").click()');
@@ -165,13 +168,20 @@ try {
   assert.equal(await evaluate('document.querySelector("[data-job-id] img").getAttribute("src")'),'/api/tryons/fixture-job-1/image');
   const downloaded=await evaluate(`(async()=>{const r=await fetch(document.querySelector('[data-job-id] a[download]').href,{credentials:'same-origin'});return {status:r.status,type:r.headers.get('content-type'),disposition:r.headers.get('content-disposition'),bytes:(await r.arrayBuffer()).byteLength};})()`);
   assert.equal(downloaded.status,200);assert.equal(downloaded.type,'image/webp');assert.match(downloaded.disposition,/attachment/);assert.ok(downloaded.bytes>0);
+  await evaluate('document.querySelector("[data-job-id] img").dispatchEvent(new Event("error"))');
+  assert.equal(await evaluate('document.querySelector("[data-job-id] img").hidden'),true);
+  assert.match(await evaluate('document.getElementById("tryon-jobs").textContent'),/结果暂时无法读取.*刷新/);
+  assert.doesNotMatch(await evaluate('document.getElementById("tryon-jobs").textContent'),/FIFO|淘汰|1000/);
   for(const [status,message] of [['unknown','不自动重试'],['needs_photo','重新选择'],['expired','过期'],['failed','失败'],['canceled','取消'],['validating','检查'],['generating','生成'],['postprocessing','处理']]){
     jobs[0]={...jobs[0],status,image_url:null,download_url:null};
     await evaluate('document.getElementById("tryon-refresh").click()');
     await wait('document.getElementById("tryon-jobs").textContent.includes('+JSON.stringify(message)+')');
   }
   assert.equal(requests.filter(r=>r.url==='/api/tryons'&&r.method==='POST').length,1,'State refresh never resubmits generation');
-  await evaluate('window.confirm=()=>true;document.querySelector("[data-job-delete]").click()');
+  await evaluate('window.confirm=message=>{window.deleteNotice=message;return true;};document.querySelector("[data-job-delete]").click()');
+  const deleteNotice=await evaluate('window.deleteNotice');
+  assert.match(deleteNotice,/记录.*保留/);assert.match(deleteNotice,/生成无法撤回/);
+  assert.doesNotMatch(deleteNotice,/外部调用/);
   await wait('document.getElementById("tryon-jobs").textContent.includes("还没有试穿记录")');
   assert.equal(jobs.length,0);assert.equal(requests.filter(r=>r.method==='DELETE').length,1);
   const deleteIndex=requests.findIndex(r=>r.method==='DELETE');assert.ok(requests.slice(deleteIndex+1).some(r=>r.url==='/api/tryons'&&r.method==='GET'),'Deletion verified by reading owner list back');
@@ -252,7 +262,7 @@ try {
     await wait('document.getElementById("tryon-jobs-status").textContent.includes("进度已更新")');
     assert.equal(requests.filter(r=>r.url==='/api/bootstrap').length,boots+1);
     assert.equal(requests.filter(r=>r.method==='POST'&&r.url==='/api/tryons').length,before+1,'Explicit reconnect never replays the photo');
-    assert.match(await evaluate('document.getElementById("tryon-jobs-status").textContent'),/Cookie.*无法恢复/);
+    assert.match(await evaluate('document.getElementById("tryon-jobs-status").textContent'),/访问凭证.*无法恢复/);
     assert.equal(await evaluate('localStorage.length+sessionStorage.length'),0);
   }
   console.log('PASS 401/session and 403/CSRF photo failures purge private/local/consent state, explicit bootstrap renews without mutation replay');

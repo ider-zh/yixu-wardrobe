@@ -75,6 +75,34 @@ async function publicUI(t) {
   return { ...b, document, window, $ };
 }
 
+test('photo try-on copy stays brief before and after real API bootstrap', async t => {
+  const staticDOM = parseHTML(fs.readFileSync(path.join(root, 'index.html'), 'utf8')).document;
+  const purpose = '照片交由第三方 AI 生成试穿图，结果可供后台评估。';
+  const assertBriefCopy = document => {
+    assert.match(document.getElementById('detail-tryon').textContent, /^拍照试穿/);
+    assert.equal(document.getElementById('tryon-title').textContent, '拍照试穿');
+    assert.equal(document.getElementById('tryon-disclosure-title').textContent, '照片用途');
+    assert.deepEqual([...document.querySelectorAll('#tryon-disclosure li')].map(li => li.textContent), [purpose], 'One purpose notice, not static/API duplicates');
+    assert.match(document.getElementById('tryon-consent-label').textContent, /本人同意.*同意上述用途/);
+    assert.doesNotMatch(document.getElementById('tryon-dialog').textContent, /1 小时|一小时|1000|FIFO|持久队列|Cookie|CSRF|幂等|服务器|输入最晚保留至/);
+  };
+  assertBriefCopy(staticDOM);
+  assert.equal(Boolean(staticDOM.getElementById('tryon-consent').checked), false);
+  const h = await publicUI(t);
+  assertBriefCopy(h.document);
+  assert.equal(Boolean(h.$('tryon-consent').checked), false, 'Bootstrap cannot grant consent');
+  assert.equal(h.$('tryon-submit').disabled, true, 'No photo/consent means no submission');
+  assert.match(h.$('tryon-jobs-status').textContent, /^进度已更新。/);
+  const disclosure = (await h.rpc({ path: 'https://localhost/api/bootstrap' })).body.disclosure;
+  assert.equal(disclosure.accepted, false);
+  assert.deepEqual(disclosure.items, [purpose]);
+  h.$('tryon-refresh').click();
+  await wait(() => !h.$('tryon-refresh').disabled);
+  assertBriefCopy(h.document);
+  assert.match(h.$('tryon-jobs-status').textContent, /访问凭证.*无法恢复/);
+  assert.equal(h.calls.filter(c => c.method === 'POST' && c.path === '/api/tryons').length, 0);
+});
+
 test('cookie loss: explicit refresh renews bootstrap, clears private/consent/photo state and cannot recover old history', async t => {
   const h = await publicUI(t);
   const bootstraps=h.calls.filter(c => c.path === '/api/bootstrap').length;
@@ -92,7 +120,7 @@ test('cookie loss: explicit refresh renews bootstrap, clears private/consent/pho
   assert.equal(h.$('tryon-consent').checked, false);
   assert.equal(h.$('tryon-local-preview').hasAttribute('src'), false);
   assert.equal(h.$('tryon-consent-label').hidden, false);
-  assert.match(h.$('tryon-jobs-status').textContent, /Cookie.*无法恢复/);
+  assert.match(h.$('tryon-jobs-status').textContent, /访问凭证.*无法恢复/);
   assert.equal(h.calls.filter(c => c.method === 'POST' && c.path === '/api/tryons').length, 0);
 });
 

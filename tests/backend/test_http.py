@@ -31,6 +31,41 @@ def test_bootstrap_is_automatic_private_host_bound_session(tmp_path: Path):
         assert c.get("/api/bootstrap", headers={"host": "unknown.invalid"}).status_code == 421
 
 
+def test_disclosure_is_concise_and_legacy_acceptance_does_not_carry_over(tmp_path):
+    from backend.app import create_app
+    from backend.settings import Settings
+
+    app = create_app(Settings(data_dir=tmp_path))
+    with TestClient(app, base_url="https://localhost") as c:
+        b = c.get("/api/bootstrap").json()
+        disclosure = b["disclosure"]
+        assert disclosure["title"] == "照片用途"
+        assert disclosure["items"] == ["照片交由第三方 AI 生成试穿图，结果可供后台评估。"]
+        assert disclosure["version"] != "2026-11-11-v1"
+        assert disclosure["accepted"] is False
+        headers = {"Origin": "https://localhost", "X-CSRF-Token": b["csrf_token"]}
+        # A receipt for the old wording must never be attached to the new copy.
+        with app.state.store.connect() as db:
+            db.execute(
+                "UPDATE visitors SET accepted=? WHERE id=?",
+                ("2026-11-11-v1", b["visitor"]["id"]),
+            )
+        assert c.get("/api/bootstrap").json()["disclosure"]["accepted"] is False
+        assert (
+            c.post(
+                "/api/disclosure/accept", json={"version": "2026-11-11-v1"}, headers=headers
+            ).status_code
+            == 409
+        )
+        assert (
+            c.post(
+                "/api/disclosure/accept", json={"version": disclosure["version"]}, headers=headers
+            ).status_code
+            == 200
+        )
+        assert c.get("/api/bootstrap").json()["disclosure"]["accepted"] is True
+
+
 def test_consent_requires_session_csrf_and_exact_origin(tmp_path):
     from backend.app import create_app
     from backend.settings import Settings

@@ -9,16 +9,11 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from .settings import Settings
 from .store import Store
 
-DISCLOSURE_VERSION = "2026-11-11-v1"
+DISCLOSURE_VERSION = "2026-11-12-v2"
 DISCLOSURE = {
     "version": DISCLOSURE_VERSION,
-    "title": "AI 试穿与照片使用说明",
-    "items": [
-        "照片将传送至外部 OpenAI 服务进行处理。",
-        "开发者管理员可以查看生成结果（不能查看原始照片）。",
-        "原始照片及衍生输入最多保留一小时；结果按全站最新 1000 张保存。",
-        "AI 生成可能不准确；仅上传已获本人同意的照片。",
-    ],
+    "title": "照片用途",
+    "items": ["照片交由第三方 AI 生成试穿图，结果可供后台评估。"],
 }
 
 
