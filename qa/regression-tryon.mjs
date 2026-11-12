@@ -19,6 +19,7 @@ const chrome = candidates.find(p => fs.existsSync(p));
 assert.ok(chrome, 'Real DOM tests require Chromium; set CHROME_BIN (no production dependency).');
 let available = false, jobs = [], accept = false, uploadError = null, uploadErrorStatus=503, bootstrapError = null, paginate=false, holdList=false, heldList=null;
 const requests = [];
+let resultImage = null; // Browser-encoded synthetic WebP; never a provider output.
 const bootstrap = () => ({csrf_token:'test-csrf',visitor:{id:'test-visitor'},generation_available:available,
   disclosure:{version:'test-v1',title:'照片用途',items:['照片交由第三方 AI 生成试穿图，结果可供后台评估。'],accepted:accept},
   original_retention_seconds:3600,result_max_count:1000});
@@ -42,10 +43,10 @@ const server = http.createServer(async (req,res) => {
     if(req.url==='/api/tryons/fixture-job-1'&&req.method==='DELETE'){
       assert.equal(req.headers['x-csrf-token'],'test-csrf');jobs=[];res.end('{"deleted":true}');return;
     }
-    if(req.url==='/api/tryons/fixture-job-1/image'||req.url==='/api/tryons/fixture-job-1/download'){
+    if(req.url==='/api/tryons/fixture-job-1/image'||req.url==='/api/tryons/fixture-job-1/download'||/^\/api\/tryons\/fixture-aspect-\d+-(portrait|landscape|square)\/(image|download)$/.test(req.url)){
       assert.match(req.headers.cookie||'',/visitor_fixture=/);res.setHeader('Content-Type','image/webp');
       if(req.url.endsWith('/download'))res.setHeader('Content-Disposition','attachment; filename="synthetic-test-output.webp"');
-      res.end(fs.readFileSync(path.join(root,'images/look-001.webp')));return;
+      res.end(resultImage || fs.readFileSync(path.join(root,'images/look-001.webp')));return;
     }
     if(req.url==='/api/events') {res.end('{"accepted":true}');return;}
     if(req.url==='/api/disclosure/accept' && req.method==='POST') {
@@ -127,12 +128,59 @@ try {
   assert.doesNotMatch(disclosure,/1 小时|一小时|1000|FIFO|Cookie|幂等|持久队列/);
   assert.equal(await evaluate('document.getElementById("tryon-camera").getAttribute("capture")'),'user');
   assert.equal(await evaluate('document.getElementById("tryon-album").hasAttribute("capture")'),false);
-  const choosePhoto=async id=>evaluate(`(async()=>{
-    const canvas=document.createElement('canvas');canvas.width=8;canvas.height=8;
+  const choosePhoto=async (id,width=8,height=8)=>evaluate(`(async()=>{
+    const canvas=document.createElement('canvas');canvas.width=${width};canvas.height=${height};
     const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
     const transfer=new DataTransfer();transfer.items.add(new File([blob],'synthetic-test-only.png',{type:'image/png'}));
     const input=document.getElementById(${JSON.stringify(id)});input.files=transfer.files;input.dispatchEvent(new Event('change',{bubbles:true}));
   })()`);
+  const viewports=[{width:320,height:800},{width:390,height:844},{width:1280,height:900}];
+  const shapes=[{name:'portrait',width:600,height:1200},{name:'landscape',width:1200,height:600},{name:'square',width:900,height:900}];
+  const aspectFailures=[];
+  let aspectChecks=0;
+  const setViewport=async viewport=>{
+    await client('Emulation.setDeviceMetricsOverride',{...viewport,deviceScaleFactor:1,mobile:viewport.width<600});
+    await evaluate('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');
+  };
+  const assertImageGeometry=async (selector,shape,viewport,source,maxHeight)=>{
+    await wait(`document.querySelector(${JSON.stringify(selector)})?.naturalWidth === ${shape.width} && document.querySelector(${JSON.stringify(selector)}).naturalHeight === ${shape.height} && !document.querySelector(${JSON.stringify(selector)}).hidden`);
+    const geometry=await evaluate(`(()=>{
+      const image=document.querySelector(${JSON.stringify(selector)}),rect=image.getBoundingClientRect();
+      const parent=image.parentElement,bounds=parent.getBoundingClientRect(),style=getComputedStyle(parent);
+      return {naturalWidth:image.naturalWidth,naturalHeight:image.naturalHeight,width:rect.width,height:rect.height,
+        left:rect.left,right:rect.right,viewportWidth:innerWidth,
+        contentLeft:bounds.left+parseFloat(style.borderLeftWidth)+parseFloat(style.paddingLeft),
+        contentRight:bounds.right-parseFloat(style.borderRightWidth)-parseFloat(style.paddingRight)};
+    })()`);
+    aspectChecks++;
+    console.log('ASPECT '+JSON.stringify({source,shape:shape.name,viewport:viewport.width,...geometry}));
+    try {
+      assert.equal(geometry.naturalWidth,shape.width,'Decoded fixture width');
+      assert.equal(geometry.naturalHeight,shape.height,'Decoded fixture height');
+      assert.ok(geometry.width>0&&geometry.height>0,'Image has visible layout dimensions');
+      // Allow at most one CSS pixel of rounding, not stretched boxes hidden by object-fit.
+      assert.ok(Math.abs(geometry.width-geometry.height*shape.width/shape.height)<=1,
+        `Natural ratio ${shape.width}/${shape.height} must match displayed ${geometry.width}/${geometry.height}`);
+      assert.ok(geometry.height<=maxHeight+1,'Image respects its height cap');
+      assert.ok(geometry.left>=geometry.contentLeft-1&&geometry.right<=geometry.contentRight+1,'Image stays inside parent content width');
+      assert.ok(geometry.left>=-1&&geometry.right<=geometry.viewportWidth+1,'Image stays inside viewport width');
+    } catch(error) {
+      aspectFailures.push(`${source}/${shape.name}/${viewport.width}: ${error.message}`);
+    }
+  };
+  for(const viewport of viewports){
+    await setViewport(viewport);
+    for(const id of ['tryon-camera','tryon-album'])for(const shape of shapes){
+      await choosePhoto(id,shape.width,shape.height);
+      await assertImageGeometry('#tryon-local-preview',shape,viewport,id,240);
+      assert.match(await evaluate('document.getElementById("tryon-local-preview").src'),/^blob:/,'Every preview stays local');
+    }
+    // The intentional nine-panel crop must remain three times the reference frame.
+    await wait('document.getElementById("tryon-reference-image").naturalWidth > 0');
+    const crop=await evaluate(`(()=>{const frame=document.getElementById('tryon-reference').getBoundingClientRect(),image=document.getElementById('tryon-reference-image').getBoundingClientRect();return {width:image.width/frame.width,height:image.height/frame.height};})()`);
+    assert.ok(Math.abs(crop.width-3)<.01&&Math.abs(crop.height-3)<.01,'Reference keeps its intentional 3x3 crop');
+  }
+  await client('Emulation.clearDeviceMetricsOverride');
   await choosePhoto('tryon-album');
   await wait('document.getElementById("tryon-local-preview")?.naturalWidth === 8 && !document.getElementById("tryon-local-preview").hidden');
   assert.match(await evaluate('document.getElementById("tryon-local-preview").src'),/^blob:/,'Preview stays local');
@@ -168,6 +216,29 @@ try {
   assert.equal(await evaluate('document.querySelector("[data-job-id] img").getAttribute("src")'),'/api/tryons/fixture-job-1/image');
   const downloaded=await evaluate(`(async()=>{const r=await fetch(document.querySelector('[data-job-id] a[download]').href,{credentials:'same-origin'});return {status:r.status,type:r.headers.get('content-type'),disposition:r.headers.get('content-disposition'),bytes:(await r.arrayBuffer()).byteLength};})()`);
   assert.equal(downloaded.status,200);assert.equal(downloaded.type,'image/webp');assert.match(downloaded.disposition,/attachment/);assert.ok(downloaded.bytes>0);
+  for(const viewport of viewports){
+    await setViewport(viewport);
+    for(const shape of shapes){
+      const dataURL=await evaluate(`(()=>{const canvas=document.createElement('canvas');canvas.width=${shape.width};canvas.height=${shape.height};const context=canvas.getContext('2d');context.fillStyle='#526b85';context.fillRect(0,0,canvas.width,canvas.height);return canvas.toDataURL('image/webp');})()`);
+      assert.match(dataURL,/^data:image\/webp;base64,/,'Result fixture is actual browser-encoded WebP');
+      resultImage=Buffer.from(dataURL.split(',')[1],'base64');
+      // Unique owner-safe URLs avoid Chromium reusing a still-live decoded image.
+      const id=`fixture-aspect-${viewport.width}-${shape.name}`;
+      jobs[0]={...jobs[0],id,image_url:`/api/tryons/${id}/image`,download_url:`/api/tryons/${id}/download`};
+      await evaluate('document.getElementById("tryon-refresh").click()');
+      await wait('document.querySelector("[data-job-id] img") && !document.getElementById("tryon-refresh").disabled');
+      await evaluate('document.querySelector("[data-job-id] img").scrollIntoView()');
+      await assertImageGeometry('[data-job-id] img',shape,viewport,'result',560);
+    }
+  }
+  await client('Emulation.clearDeviceMetricsOverride');
+  resultImage=null;
+  jobs[0]={...jobs[0],id:'fixture-job-1',image_url:'/api/tryons/fixture-job-1/image',download_url:'/api/tryons/fixture-job-1/download'};
+  await evaluate('document.getElementById("tryon-refresh").click()');
+  await wait('document.querySelector("[data-job-id=fixture-job-1] img")?.naturalWidth > 0');
+  assert.equal(aspectChecks,viewports.length*shapes.length*3,'Every camera, album and result shape/viewport was measured');
+  assert.deepEqual(aspectFailures,[],'Try-on image geometry must preserve intrinsic aspect ratio without overflow');
+  console.log(`PASS ${aspectChecks} real Chromium camera/album/result aspect-ratio and bounds checks; intentional reference crop preserved`);
   await evaluate('document.querySelector("[data-job-id] img").dispatchEvent(new Event("error"))');
   assert.equal(await evaluate('document.querySelector("[data-job-id] img").hidden'),true);
   assert.match(await evaluate('document.getElementById("tryon-jobs").textContent'),/结果暂时无法读取.*刷新/);

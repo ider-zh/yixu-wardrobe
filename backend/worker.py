@@ -7,15 +7,24 @@ from .files import atomic_write, sync_dir
 from .images import labelled_webp
 from .settings import RuntimeFile
 
-PROMPT_VERSION = "yixu-tryon-v1"
+PROMPT_VERSION = "yixu-tryon-v2-anatomy"
 PROMPT = (
-    "Image 1 is the only source of person identity: preserve their face, facial features, "
-    "skin tone, hair, expression and body proportions. Image 2 is a single outfit/style "
-    "reference; never copy its person identity. Dress the person from Image 1 in the "
-    "clothes shown in Image 2, preserving garment details with realistic fit, folds and lighting. "
-    "Produce one portrait photograph, one person, one frame, no collage or montage. "
-    "Do not invent extra people or text. Do not change their identity. "
-    "This is a consented virtual clothing try-on, not a real photograph."
+    "Create one photorealistic virtual try-on with coherent human anatomy. "
+    "Image 1 is the only source of person identity: preserve their facial features and "
+    "geometry, skin tone, hair, expression and recognizable appearance. Image 2 is an "
+    "outfit reference only; never copy its person identity or paste its body underneath "
+    "the first person's head. Re-render the outfit completely with its garment details, "
+    "realistic fabric, fit, folds, occlusion and consistent lighting. "
+    "Reconstruct the neck, shoulders, torso and visible limbs as one coherent body, "
+    "keeping the person's body build and a natural head-to-shoulder and head-to-body scale. "
+    "Do not mechanically preserve a close-up crop as the body layout: adjust camera distance "
+    "and framing when needed to leave enough room for proportionate shoulders and torso. "
+    "For an existing full-body view, preserve its body shape and pose rather than "
+    "inventing a different physique. Keep the face structurally faithful; never stretch or squash "
+    "the face, head or body to fill the output canvas. Avoid an oversized head, undersized "
+    "shoulders, a pasted-on face, malformed hands, or duplicate limbs. "
+    "Produce one person in one natural portrait photograph, no collage, montage, extra "
+    "people or text. This is a consented AI clothing try-on, not a real photograph."
 )
 
 

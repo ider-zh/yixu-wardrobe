@@ -10,7 +10,11 @@ from openai import DefaultHttpxClient, OpenAI
 from backend.settings import Runtime
 
 
-def test_actual_sdk_edit_wire_uses_two_images_n1_and_zero_retries():
+@pytest.mark.parametrize(
+    ("model", "quality"),
+    [("gpt-image-1.5", "medium"), ("gpt-image-2.6-sunburst", "high")],
+)
+def test_actual_sdk_edit_wire_uses_two_images_n1_and_zero_retries(model, quality):
     from backend.provider import OpenAIProvider
 
     seen = []
@@ -34,7 +38,7 @@ def test_actual_sdk_edit_wire_uses_two_images_n1_and_zero_retries():
         )
 
     provider = OpenAIProvider(client_factory=client_factory)
-    runtime = Runtime(enabled=True, api_key="test-only-project-key")
+    runtime = Runtime(enabled=True, api_key="test-only-project-key", model=model, quality=quality)
     output = provider.generate(
         photo=image,
         reference=picture("blue"),
@@ -48,13 +52,16 @@ def test_actual_sdk_edit_wire_uses_two_images_n1_and_zero_retries():
     body = req.content
     assert body.count(b'name="image[]"') == 2
     for name, value in [
-        ("model", "gpt-image-1.5"),
+        ("model", model),
         ("n", "1"),
         ("size", "1024x1536"),
-        ("quality", "medium"),
+        ("quality", quality),
     ]:
         assert f'name="{name}"\r\n\r\n{value}'.encode() in body
     assert b"private-selfie" not in body
+    if model.startswith("gpt-image-2"):
+        for unsupported in ("strength", "denoising_strength", "input_fidelity"):
+            assert f'name="{unsupported}"'.encode() not in body
     assert provider.configured(runtime)
     assert not provider.configured(Runtime())
 

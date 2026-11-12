@@ -68,7 +68,7 @@ class Runtime(BaseModel):
     proxy_url: str = "http://127.0.0.1:7890"
     api_key: str = Field(default="", max_length=4096, repr=False)
     size: Literal["1024x1536", "1024x1024", "1536x1024"] = "1024x1536"
-    quality: Literal["low", "medium", "high", "auto"] = "medium"
+    quality: Literal["low", "medium", "high", "auto"] = "high"
     provider_timeout_seconds: int = Field(default=180, ge=1, le=3600)
 
     @field_validator("api_base")
