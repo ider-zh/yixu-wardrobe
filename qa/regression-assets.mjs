@@ -6,6 +6,7 @@ import path from 'node:path';
 import {spawn, spawnSync} from 'node:child_process';
 import {once} from 'node:events';
 import {fileURLToPath} from 'node:url';
+import {loadContent} from '../scripts/content-lib.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const digest = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
@@ -16,26 +17,30 @@ function run(script, cwd = root) {
 }
 const build = run('scripts/build.mjs');
 assert.equal(build.status, 0, build.stderr);
-assert.equal(JSON.parse(build.stdout).files, 209);
+const content = loadContent(root);
+const expected=['index.html','app.js','catalog.js','style.css','expressive.css','tryon.js','tryon.css','favicon.svg',...new Set(content.publicAssets.map(asset => asset.file))];
+assert.equal(JSON.parse(build.stdout).files, expected.length);
 const output = path.join(root, 'public');
 const files = fs.readdirSync(output, {recursive: true}).filter(name => fs.statSync(path.join(output, name)).isFile());
-assert.equal(files.length, 209);
-const expected=['index.html','app.js','catalog.js','style.css','expressive.css','tryon.js','tryon.css','favicon.svg','assets/model-bases/female-01.webp',...['images','images-v2'].flatMap(folder=>Array.from({length:100},(_,i)=>`${folder}/look-${String(i+1).padStart(3,'0')}.webp`))];
+assert.equal(files.length, expected.length);
 assert.deepEqual([...files].sort(),expected.sort(),'Explicit public allowlist excludes backend/admin/private files');
 for(const asset of ['tryon.js','tryon.css'])assert.equal(digest(fs.readFileSync(path.join(output,asset))),digest(fs.readFileSync(path.join(root,asset))));
-assert.equal(files.filter(name => name.endsWith('.webp')).length, 201);
+assert.equal(files.filter(name => name.endsWith('.webp')).length, new Set(content.publicAssets.map(asset => asset.file)).size);
+assert.ok(!files.some(name => name.startsWith('images/')), 'Archived styling must not enter public output');
+const snapshot = fs.readFileSync(path.join(output,'catalog.js'),'utf8');
+assert.ok(!snapshot.includes('"v1"') && !snapshot.includes('"images/'), 'Offline public snapshot contains expressive content only');
 assert.ok(!files.some(name => /\.(?:png|jpe?g)$/i.test(name)));
 const manifest = JSON.parse(fs.readFileSync(path.join(root, 'image-manifest-all.json'), 'utf8'));
-for (const photo of [...manifest.v1, ...manifest.v2, ...manifest.modelBases]) {
+for (const photo of content.publicAssets) {
   assert.equal(digest(fs.readFileSync(path.join(output, photo.file))), photo.sha256);
 }
 assert.match(fs.readFileSync(path.join(output, 'index.html'), 'utf8'), /浙ICP备2026098002号/);
-console.log('PASS static output contains 200 gallery WebP files, one model base and the ICP footer');
+console.log('PASS static output contains only allowlisted expressive assets, public model references and the ICP footer');
 
 // Exercise the actual validation CLI in an isolated copy, never mutate source.
 const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'yixu-assets-'));
 try {
-  for (const name of ['scripts', 'images', 'images-v2', 'assets', 'docs', 'catalog.js', 'app.js', 'index.html', 'style.css', 'expressive.css', 'tryon.js', 'tryon.css', 'favicon.svg', 'README.md', 'README.en.md', 'DEVELOPMENT.md', 'AGENTS.md', 'image-manifest-all.json']) {
+  for (const name of ['scripts', 'content', 'backend', 'deploy', 'images', 'images-v2', 'assets', 'docs', 'catalog.js', 'app.js', 'index.html', 'style.css', 'expressive.css', 'tryon.js', 'tryon.css', 'favicon.svg', 'README.md', 'README.en.md', 'DEVELOPMENT.md', 'AGENTS.md', 'image-manifest-all.json']) {
     fs.cpSync(path.join(root, name), path.join(fixture, name), {recursive: true});
   }
   const control = run('scripts/check.mjs', fixture);

@@ -1,95 +1,119 @@
 # 衣序开发说明
 
-仓库：[ider-zh/yixu-wardrobe](https://github.com/ider-zh/yixu-wardrobe)。用户使用说明见 [中文 README](README.md) 和 [English README](README.en.md)，维护授权见 [AGENTS.md](AGENTS.md)。
+仓库：[ider-zh/yixu-wardrobe](https://github.com/ider-zh/yixu-wardrobe)。用户说明见 [README](README.md) / [English](README.en.md)，维护授权见 [AGENTS.md](AGENTS.md)。
 
-## 内容生产与待实施改造
+## 运行与职责
 
-外部 agent 的日更操作见[热点穿搭生产 SOP](docs/external-agent-sop.md)，后台职责、代码驱动内容、资源 API 与自动 CDN 同步的实施顺序见[内容发布开发计划](docs/content-publishing-plan.md)。新增内容目标为每日一个批次、仅生动九宫格，首位模特使用现有 female-01 基础体；历史造型归档保留但目标公开网站不展示。CDN 未就绪时使用项目图片公开 URL，同步验证后逐图切换，失败可回退；用户私有数据不进入公共资源同步范围。
+前端为静态 HTML/CSS/JavaScript，后端复用 Python/FastAPI/SQLite。内容由外部 agent 按[热点穿搭 SOP](docs/external-agent-sop.md)更新项目中的清单及最终 WebP；后台负责访问分析、资源 API、用户穿搭观察、系统模特预览及 CDN 同步观察，不提供另一套穿搭编辑来源。
 
-两份文档描述的是待实施流程。当前代码仍固定 100 套、双写真与本地图片，尚无动态内容接收或 CDN 同步入口；下文对应现有运行版本。首次日更追加前须先完成动态内容与资源 API 改造，不应把文档示例当作已存在的脚本或接口。
+当前源码已实现动态内容、仅生动展示、项目图片 URL、同步队列和后台观察；尚未选定真实图床，也未因源码开发部署线上站点。[实施计划](docs/content-publishing-plan.md)记录验收范围与后续接入工作。
 
-## 本地运行
-
-项目为无依赖的静态 HTML/CSS/JavaScript 网站。完整下载后可直接打开 `index.html`。需要 HTTP 预览时，使用 Node.js 22 或更新版本：
+静态浏览使用 Node.js 22 或更新版本：
 
 ```sh
-node serve.mjs
-```
-
-打开 http://127.0.0.1:4219，结束进程停止服务。无需 npm 安装。
-
-## 文件与修改
-
-- `index.html`、`app.js`、`style.css`、`expressive.css`：页面、交互与样式。
-- `catalog.js`：100 套服装的完整前台资料。修改文案、分类或镜头描述时编辑此文件；保持服装 ID、顺序和图片对应关系。
-- `images/`、`images-v2/`：造型与生动写真，各 100 张原尺寸有损 WebP 九宫格（质量 85，压缩级别 6）。内部 v1/v2 标记用于对应关系，界面使用“造型”和“生动”；运行时继续使用这两个相对目录，不依赖对象存储或外部 CDN。
-- `assets/model-bases/female-01.webp`：女模特 01 的正面、前侧、侧面、后侧和背面五视角基础体参考图，保持完整画幅与标注；作为资源随构建分发，尚未接入页面交互。
-- `image-manifest-all.json`：200 张写真及 `modelBases` 基础体参考图的尺寸、字节数和 SHA-256。替换图片时审阅并更新对应清单。
-- `docs/images/wardrobe-preview.webp`：文档预览图，不进入网页运行集合。
-- `qa/regression-expressive.mjs`：使用实际应用代码和合成 DOM 检查交互，结束后调用资源回归，现有 CI 入口会同时运行两组检查。
-- `qa/regression-assets.mjs`：可独立运行的构建产物、图片完整性拒绝和 HTTP 类型回归。
-- `scripts/`：无外部依赖的校验和静态输出脚本。
-
-本地生成提示词、原始来源记录、历史草稿及完整 ZIP 不属于公开仓库内容；`.gitignore` 使用文件清单控制提交范围。
-
-## 图片压缩与复现
-
-2026-11-11，200 张运行时写真由 PNG 转为原尺寸有损 WebP，使用 FFmpeg 的 `libwebp` 编码器，质量 85、压缩级别 6，不缩放。图片合计从 531,661,790 字节降至 48,176,224 字节（约 48.18 MB），减少 90.94%，单张最大 384,636 字节。该图片总数不含文档预览和基础体参考图。
-
-2026-11-12，新增用户提供的女模特五视角换装基础体。使用 Pillow 的 WebP 编码器以 `quality=85, method=6` 转码，不缩放、不裁剪、不重绘，保留 1536 × 1024 尺寸；文件从 PNG 的 2,035,562 字节压缩至 WebP 的 71,786 字节，减少 96.47%。仅提交 WebP，原始 PNG 不进入 Git。该图单独记录在清单的 `modelBases` 中，不计入 100 套服装或 200 张写真。当前构建为 209 个文件、48,670,228 字节。
-
-200 张写真的原始 PNG 保留在 Git 历史中，不在当前图片目录中。以下 Bash 命令从已知包含原始 PNG 的提交读取源文件，在单独目录重建写真和文档预览，不覆盖当前资产；需要 Git 和带 `libwebp` 编码器的 FFmpeg。这些是维护工具，不是网站运行依赖。
-
-```bash
-set -euo pipefail
-source_revision=3495260326e5cb72120ed165bab0910c8ee34d9d
-output_dir="$PWD/webp-rebuilt"
-git ls-tree -r --name-only "$source_revision" -- images/ images-v2/ docs/images/ |
-while IFS= read -r source; do
-  case "$source" in
-    *.png)
-      target="$output_dir/${source%.png}.webp"
-      mkdir -p "$(dirname "$target")"
-      git show "$source_revision:$source" |
-        ffmpeg -hide_banner -loglevel error -n -i pipe:0 \
-          -c:v libwebp -lossless 0 -quality 85 -compression_level 6 \
-          -frames:v 1 -f webp "$target"
-      ;;
-  esac
-done
-```
-
-编码器版本变化可能影响输出字节；复现后应核对尺寸和画面，不能假定生成结果与清单哈希自动一致。正式替换时同步修改 `catalog.js` 和清单，并运行以下校验；不要把重建目录作为额外运行资产发布。
-
-## 验证与构建
-
-推送前运行：
-
-```sh
-node --check app.js
 node scripts/check.mjs
-node qa/regression-expressive.mjs
-node qa/regression-assets.mjs
 node scripts/build.mjs
 ```
 
-检查覆盖 100 套、10 组各 10 套、200 张写真及基础体参考图的 RIFF/WebP 与 VP8 头、RIFF/块长度、文件字节数、头部尺寸与清单一致性及 SHA-256，以及资源和文档链接。图片校验仅接受单帧、单个 VP8 块的简单有损 WebP，不是支持所有 WebP 变体的通用解码器。资源回归另查构建产物、重算哈希后的坏签名/长度/尺寸拒绝、图片哈希变化拒绝，以及 HTTP 预览的 `image/webp` 类型和实际字节。交互回归检查筛选、季节单选、写真切换、收藏、对比与详情导航；布局、焦点和原生弹窗行为仍需浏览器验证。
+完整复制生成的 `public/` 后直接打开 `public/index.html` 即可离线浏览。根目录 `index.html` + 冻结的 `catalog.js` 仍能浏览初始快照；日更内容的离线快照由构建从清单生成。需要调试源码 HTTP 行为时可运行 `node serve.mjs`，该开发服务器只用于本机，公开部署应仅提供 `public/` 与受控 API。
 
-构建会替换专用的 `public/` 输出目录，只复制网页和基础体资源的 209 个文件，不包含文档、测试和生成记录。该目录不提交到 Git。GitHub Actions 执行同样的检查与构建，只有读取权限，不发布站点或 Release。
+后端依赖与启动见 [backend/README.md](backend/README.md)。生产经 Nginx 将同源 `/api/` 转发至仅监听 loopback 的单进程 API；管理域沿用独立会话和 Host/CSRF 校验。
 
-## 当前托管与静态托管参考
+## 内容源与文件
 
-[衣序在线衣橱](https://www.8882088.xyz/)现已直连部署，使用 Nginx 提供已逐文件核验的静态构建，HTTP 跳转 HTTPS，Certbot 自动续期及续期后重载已配置，并以实际 systemd 服务完成续期演练。私人运维资料和凭据保留在服务器私有目录，不进入本仓库。当前版本页脚使用备案号 [浙ICP备2026098002号](https://beian.miit.gov.cn/)。
+- `content/catalog.json`：从原目录迁移的生动基线，保留 1—100 编号、分类、单品与镜头；未核对的模特归属为 `null`。总容量不再限制为 100。
+- `content/models.json`：系统模特注册。`female-01` 使用 `assets/model-bases/female-01.webp` 五视角基础体；其他模特通过清单更新。
+- `content/batches/*.json`：每日一个批次，仅 `v2` 生动。包含实际热点来源、地区、天气依据、模特参考哈希、完整穿搭、九镜头及图片元数据。
+- `content/batch.schema.json`：由后端 `Batch` 模型导出的 JSON Schema。修改模型后同步更新该文件；Node 校验和后端导入都必须接受有效交付并拒绝不完整内容。
+- `assets/looks/YYYY-MM-DD/*.webp`：外部 agent 的最终公开图片。只提交最终 WebP，不提交生成母本、完整提示词或私人调研记录。
+- `catalog.js`、`images/`、`images-v2/`、`image-manifest-all.json`：冻结迁移资料及历史图片完整性基线。公开构建不复制历史 `images/` 或旧 catalog，而是生成仅生动的快照。
+- `scripts/content-lib.mjs`：清单读取、引用和 WebP 校验、离线快照资料生成。`scripts/check.mjs` 继续校验 200 张历史图片并校验所有新增清单资源。
+- `backend/content.py`：验证候选内容，归档公开 WebP，原子激活版本，提供只读资源接口；坏候选保留上一有效版本。
+- `backend/cdn.py` / `cdn_worker.py`：可替换图床接口、持久队列、核对和迁移；API 生命周期运行后台同步，不需要外部 agent 直传。
+- `admin/`：既有分析、用户成品与质量观察，以及新增系统模特和内容/CDN 状态。
 
-[GitHub + Cloudflare Pages 可行性调查](docs/deployment-feasibility.md)保留了 2026-10-23 的历史调查和 2026-11-11 的图片更新，不作为当前主站部署方式。以下 Cloudflare Pages Git 集成配置仅作替代静态托管参考；本次未重新核验其云服务商限制或线上性能：
+外部 agent 的内容变更通常只需要新增批次 JSON 与最终 WebP；新增模特时再更新模型注册。新编号不得与基线或其他批次重复。使用新资源修订与新 `asset_id` 修改图片，已发布的资源身份不能替换为其他字节。
 
-- 框架：None。
-- 构建命令：`node scripts/build.mjs`。
-- 输出目录：`public`。
-- 根目录：仓库根目录。
+本地生成记录、用户数据、凭据和归档目录不进入 Git。`.gitignore` 使用白名单；新资源只开放指定公开目录，不扩大到任意服务器文件。
 
-源码推送与 Cloudflare 部署分别报告，仓库存在及 CI 通过都不代表网站已经上线。
+## 资源接口与本地图片
 
-## 后续后台设计（未实现）
+生产环境显式配置：
 
-见[匿名 AI 试穿与第一方 Web Analytics 后台设计](docs/ai-tryon-backend-design.md)。方案保留静态衣柜和本地收藏，拟增加同源轻量后台、任务队列、本地人像检测、私有 WebP 结果及受限出站代理；未开放自拍上传或收费模型调用。实施前应根据新的明确授权，窄化更新 `AGENTS.md` 中原先禁止分析与上传的规则，并完成方案中的资格、隐私和预算条件。
+- `YIXU_CONTENT_ROOT`：版本化 `content/` 的绝对目录。
+- `YIXU_IMAGE_ROOT`：能够解析清单相对图片路径的只读项目资源根目录，不是私有用户数据目录。
+- `YIXU_DATA_DIR`：独立于代码发布目录的持久私有数据目录。
+
+未显式传入 `Settings.content_root` 的旧测试/兼容 catalog 可以继续使用原来的受控目录流程；正式动态部署应设置以上路径，避免依赖工作目录推断。
+
+接收新代码与资源后重启应用，构造阶段自动验证并导入候选版本。有效内容复制到 `YIXU_DATA_DIR/public-content/assets/<sha256>.webp`，数据库和活动指针保存在该独立目录内。源文件校验或导入失败时不替换已有可见版本，后台显示 `content_validation_failed`。源码推送本身不安装部署钩子，也不代表服务器已收到版本。
+
+公开读取：
+
+```text
+GET /api/content/catalog
+GET /api/content/looks?offset=0&limit=24&model=female-01&region=杭州&q=针织
+GET /api/content/looks/{look_id}
+GET /api/content/models
+GET /api/content/batches
+GET /api/content/assets/{asset_id}
+GET /api/content/assets/{asset_id}/download
+```
+
+完整快照用于前端初始化，列表接口提供分页与过滤。接口仅返回活动版本的 `v2` 和允许公开的资源。`image_url` 默认等于项目图片 `source_url`，例如 `/api/content/assets/look-001-v2-r1`；具体资产 ID 以清单为准。该 URL 返回已归档的同一份 WebP，不暴露文件系统路径。CDN 验证后逐图优先返回 CDN URL，前端失败时单次回退到 `source_url`。
+
+新试穿只接受可见的生动内容，按本地归档裁切实际镜头，在接收任务时冻结参考输入；旧任务保留原记录。收藏仍在浏览器本地，接口分页或不完整列表不能清除未知收藏编号。
+
+## 图床接口与同步状态
+
+尚未选定真实免费图床。默认状态是“未配置”，所有图片继续使用项目 URL；这一状态不会阻塞新内容展示。后台显示活动内容版本、真实任务数量、字节数和同步结果，不伪造已上传比例。
+
+当前通用接入约定是向明确配置的 HTTPS 地址 `PUT` 原始 `image/webp`，发送 `X-Asset-ID`、`X-Content-SHA256` 以及可选 Bearer 凭据，成功响应 JSON `{ "id": "远端标识", "url": "https://允许的域名/图片.webp" }`。它不等于已接入任一家图床；选择平台后按该平台实际协议实现相同的上传与读取接口。
+
+操作方在私有环境调用 `CdnService(YIXU_DATA_DIR).configure(...)`，写入私有 `cdn-config.json`，配置字段为 `upload_url`、`allowed_hosts`、`token`、`timeout_seconds`。不把实际配置、账户或密钥写入仓库；后台只读脱敏配置状态，当前不提供通用凭据编辑页面。外部 agent 无需这些凭据。
+
+上传只处理内容服务明确传入的公开白名单，不扫描用户目录，不同步 v1、自拍或私人试穿结果。远端返回必须满足 HTTPS 主机白名单、无重定向、真实 WebP、尺寸、字节数与哈希一致。当前接入不支持图床重压缩变体；需要变体时先扩展并验证接入约定。
+
+网络读取有字节、像素、socket 超时及传输截止限制；操作方应按选定平台继续验证真实连通与故障行为。上传与崩溃恢复使用进程锁和持久状态；结果未知不自动重传。明确失败可重试，已有远端对象标识的未知任务可仅重新核对，不重新上传。
+
+管理接口均要求管理域、有效登录与修改请求的 CSRF：
+
+```text
+GET  /api/admin/content/overview
+GET  /api/admin/content/models
+POST /api/admin/content/cdn/jobs/{job_id}/retry
+POST /api/admin/content/cdn/jobs/{job_id}/verify
+POST /api/admin/content/cdn/migrate
+```
+
+迁移请求体为 `{ "asset_ids": ["已登记的公开资源编号"] }`。切换默认配置只影响新资产，旧副本继续可用；显式迁移从本地归档创建当前图床的任务，新副本验证前不撤掉旧链接。私有参考图只显示状态，不产生公开预览 URL。用户自拍仍禁止管理员读取。
+
+## 验证与构建
+
+推送前必需：
+
+```sh
+node scripts/check.mjs
+node qa/regression-expressive.mjs
+node scripts/build.mjs
+```
+
+完整本地 CI 入口：
+
+```sh
+node qa/regression-ci.mjs
+```
+
+该入口检查历史与新增资源的签名、尺寸和 SHA-256，运行后端、类型和格式检查、管理界面、真实 Chromium、实际前端到 ASGI、目录导出和部署模板回归。没有真实图床调用或付费生图。新增内容回归在临时目录内测试第 101 套、第二位模特、仅生动、源 URL、引用错误及路径拒绝，不生成虚构生产内容。
+
+构建先验证候选，再替换专用 `public/`。它仅复制页面代码、公开资产并生成离线 catalog，不包含后台、私有数据、原始生成记录或历史造型。文件数量与图片清单动态计算，不再锁定 209 个文件。首次基线的公开图片为 100 张生动九宫格和一张模特基础体。
+
+如仅导出 JSON，运行 `node scripts/export-catalog.mjs --output 输出路径`。后端 schema 改动后重新导出 `Batch.model_json_schema()` 到 `content/batch.schema.json`。
+
+## 历史图片与部署
+
+200 张历史写真于 2026-11-11 从 PNG 转为原尺寸有损 WebP，FFmpeg/libwebp 质量 85、压缩级别 6，总计 48,176,224 字节；原始 PNG 保留在 Git 历史。新增基础体为 1536 × 1024、71,786 字节，未裁剪。新图片采用同样的 WebP 质量起点，实际尺寸和哈希以各自清单为准，不依赖编码器跨版本字节一致。
+
+生产模板及验证步骤见 [deploy/README.md](deploy/README.md)，私人照片处理规则见[试穿实施说明](docs/ai-tryon-backend-design.md)。[Cloudflare 可行性调查](docs/deployment-feasibility.md)是历史参考，不代表当前部署方案。
+
+GitHub Actions 只有读权限，只校验和构建。源码推送、CI、服务端接收、CDN 同步和网站上线分别报告。部署和外部服务配置按项目授权单独执行，本次开发不改变既有主站或私人服务配置。

@@ -1,46 +1,113 @@
 (() => {
 'use strict';
-const data = window.WARDROBE || {looks:[], target:100, generated:0};
-const looks = data.looks, byId = new Map(looks.map(l => [l.id,l]));
+let data = {}, looks = [], categories = [], models = [];
+const byId = new Map();
 const $ = id => document.getElementById(id);
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const number = id => String(id).padStart(3,'0');
 const storageKey = 'wardrobe99:favorites:v1';
 let saved = [];
-try { const value = JSON.parse(localStorage.getItem(storageKey) || '[]'); if (Array.isArray(value)) saved = value.filter(id => Number.isInteger(id) && byId.has(id)); } catch {}
+try { const value = JSON.parse(localStorage.getItem(storageKey) || '[]'); if (Array.isArray(value)) saved = value.filter(id => Number.isSafeInteger(id) && id > 0); } catch {}
 const favorites = new Set(saved), compare = new Set();
-const state = {category:'', season:'', query:'', favoritesOnly:false, sort:'curated', limit:24, active:null, view:0, version:'v2'};
+const state = {category:'', season:'', query:'', model:'', region:'', latestOnly:false, favoritesOnly:false, sort:'curated', limit:24, active:null, view:0, version:'v2'};
 let filtered = [], toastTimer;
 const heart = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 5.6c-2.2-2.5-5.9-1.8-8.5 1-2.6-2.8-6.3-3.5-8.5-1-3.2 3.5.3 8 8.5 13.5 8.2-5.5 11.7-10 8.5-13.5Z"/></svg>';
 const comparison = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3H3v18h6M15 3h6v18h-6M12 2v20"/></svg>';
-const categoryOrder = data.categoryOrder;
-const categories = categoryOrder.filter(c => looks.some(l => l.category === c));
+// The server provides only registered public assets. Never accept a private API
+// URL, credentials, traversal, query, or an arbitrary cross-origin fallback.
+function publicSource(value, download = false) {
+  if(typeof value !== 'string' || /[\\?#%]/.test(value) || value.split('/').some(part=>part==='.'||part==='..'))return '';
+  const clean=value.replace(/^\//,'');
+  if(/^(?:images-v2|assets\/(?:looks|model-bases))\/[a-zA-Z0-9_./-]+\.webp$/.test(clean))return value;
+  if(new RegExp('^/api/content/assets/[a-zA-Z0-9_-]+'+(download?'(?:/download)?':'')+'$').test(value))return value;
+  return '';
+}
+function imageURL(version) {
+  const source=publicSource(version.source_url || version.image);
+  const preferred=version.image_url || version.image;
+  if(preferred===source)return source;
+  try { const url=new URL(preferred,location.href); if(url.protocol==='https:'&&!url.username&&!url.password)return url.href; } catch {}
+  return source;
+}
+function imageAttributes(version) {
+  return 'src="'+esc(imageURL(version))+'" data-source="'+esc(publicSource(version.source_url || version.image))+'" data-public-image="true"';
+}
+function setImage(image,version) {
+  image.hidden=false; image.dataset.source=publicSource(version.source_url || version.image);
+  image.dataset.publicImage='true'; delete image.dataset.fallback; delete image.dataset.failed;
+  image.parentElement.classList.remove('image-unavailable'); image.src=imageURL(version);
+}
+function imageFailed(event) {
+  const image=event.target;if(image?.dataset?.publicImage!=='true')return;
+  const source=publicSource(image.dataset.source);
+  if(!image.dataset.fallback && source && image.getAttribute('src')!==source){image.dataset.fallback='true';image.src=source;return;}
+  image.dataset.failed='true';image.hidden=true;
+  image.parentElement.classList.add('image-unavailable');image.parentElement.setAttribute('data-image-status','图片暂不可用');
+}
+document.addEventListener('error',imageFailed,true);
+window.WardrobeImages={set:setImage};
+function latestBatch() {
+  return looks.filter(l=>l.batch_id&&l.publish_date).sort((a,b)=>b.publish_date.localeCompare(a.publish_date)||b.id-a.id)[0]?.batch_id || '';
+}
+function modelName(id) { return models.find(model=>model.id===id)?.name || id; }
+function adoptCatalog(candidate) {
+  if(!candidate || !Array.isArray(candidate.looks)||!Array.isArray(candidate.categoryOrder)||!candidate.categoryOrder.every(c=>typeof c==='string')||(candidate.models!==undefined&&(!Array.isArray(candidate.models)||!candidate.models.every(m=>m&&typeof (m.model_id||m.id)==='string'&&typeof m.name==='string'))))return false;
+  const next=[], seen=new Set();
+  for(const look of candidate.looks){
+    const v=look?.versions?.v2;
+    if(!Number.isSafeInteger(look?.id)||look.id<1||seen.has(look.id)||!v||v.ready===false||typeof look.title!=='string'||!Array.isArray(v.shots)||v.shots.length!==9||!v.shots.every(shot=>shot&&typeof shot.title==='string')||(v.moods!==undefined&&!Array.isArray(v.moods))||(look.region!=null&&typeof look.region!=='string'&&typeof look.region?.city!=='string')||['publish_date','batch_id','model_id'].some(key=>look[key]!=null&&typeof look[key]!=='string')||['palette','tags','details','pieces'].some(key=>look[key]!==undefined&&!Array.isArray(look[key]))||!publicSource(v.source_url||v.image))return false;
+    seen.add(look.id);next.push({...look,region:typeof look.region==='string'?look.region:(look.region?.city||''),pieces:Array.isArray(look.pieces)?look.pieces:[],details:Array.isArray(look.details)?look.details:[],versions:{v2:{...v,ready:true}}});
+  }
+  data={...candidate,looks:next};looks=next;byId.clear();looks.forEach(l=>byId.set(l.id,l));
+  models=Array.isArray(data.models)?data.models.map(model=>({...model,id:model.model_id||model.id})):[];
+  categories=[...new Set([...(data.categoryOrder||[]),...looks.map(l=>l.category)])].filter(c=>looks.some(l=>l.category===c));
+  window.WARDROBE=data;window.WardrobeTryOn?.setCatalog?.(data);
+  if(state.category&&!categories.includes(state.category))state.category='';
+  if(state.model&&!looks.some(l=>l.model_id===state.model))state.model='';
+  if(state.region&&!looks.some(l=>l.region===state.region))state.region='';
+  if(state.latestOnly&&!latestBatch())state.latestOnly=false;
+  for(const id of compare)if(!byId.has(id))compare.delete(id);
+  buildCategories();buildContentFilters();updateEditionUI();refreshFilters();renderCompareTray();
+  if($('detail-dialog').open){if(byId.has(state.active)){const view=state.view;openDetail(state.active);setView(view);}else{$('detail-dialog').close();state.active=null;}}
+  if($('compare-dialog').open){if(compare.size>=2)openComparison();else $('compare-dialog').close();}
+  const initial=/^#look-(\d+)$/.exec(location.hash);if(!state.active&&initial&&byId.has(Number(initial[1])))openDetail(Number(initial[1]));
+  return true;
+}
+function buildContentFilters(){
+  $('model-filter').innerHTML='<option value="">全部模特</option>'+[...new Set(looks.map(l=>l.model_id).filter(Boolean))].map(id=>'<option value="'+esc(id)+'">'+esc(modelName(id))+'</option>').join('');
+  $('region-filter').innerHTML='<option value="">全部地区</option>'+[...new Set(looks.map(l=>l.region).filter(Boolean))].sort().map(region=>'<option value="'+esc(region)+'">'+esc(region)+'</option>').join('');
+  $('latest-only').disabled=!latestBatch();
+}
+async function hydrateCatalog(){
+  if(!['http:','https:'].includes(location.protocol)||typeof fetch!=='function')return;
+  try{
+    const response=await fetch('/api/content/catalog',{credentials:'omit',cache:'no-cache',headers:{Accept:'application/json'}});
+    if(!response.ok||!adoptCatalog(await response.json()))throw new Error('catalog');
+    $('catalog-status').textContent='内容已更新';
+  }catch{$('catalog-status').textContent='正在浏览本地内容快照';}
+}
 function notify(message) {
   clearTimeout(toastTimer); $('toast').textContent = message; $('toast').hidden = false;
   toastTimer = setTimeout(() => { $('toast').hidden = true; }, 2800);
 }
 function palette(look) { return (look.palette || []).filter(c => /^#[0-9a-f]{6}$/i.test(c)).map(c => '<span class="color-swatch" style="background:'+c+'" title="'+c+'"></span>').join(''); }
-function versionOf(look) { return look.versions[state.version]; }
+function versionOf(look) { return look.versions.v2; }
 function photo(look, alt) {
  const v=versionOf(look),p=Math.min(9,Math.max(1,v.previewPanel||1)),next=p%9+1;
  const x=-((p-1)%3)*100,y=-Math.floor((p-1)/3)*100,nx=-((next-1)%3)*100,ny=-Math.floor((next-1)/3)*100;
- return '<div class="photo-window" style="--panel-x:'+x+'%;--panel-y:'+y+'%;--next-x:'+nx+'%;--next-y:'+ny+'%"><img src="'+esc(v.image)+'" alt="'+esc(alt || look.title+' · '+(v.shots[p-1]?.title||'写真'))+'" loading="lazy" decoding="async"></div>';
+ return '<div class="photo-window" style="--panel-x:'+x+'%;--panel-y:'+y+'%;--next-x:'+nx+'%;--next-y:'+ny+'%"><img '+imageAttributes(v)+' alt="'+esc(alt || look.title+' · '+(v.shots[p-1]?.title||'写真'))+'" loading="lazy" decoding="async"></div>';
 }
 function updateEditionUI(){
- document.body.dataset.edition=state.version;
- document.querySelectorAll('[data-edition]').forEach(b=>{const active=b.dataset.edition===state.version;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});
- $('completion-note').textContent=state.version==='v2'?'生动':'造型';
- $('hero-kicker').textContent=state.version==='v2'?'A LITTLE CLOSER':'THE WARDROBE';
- const candidates=[13,70,40,1,99].map(id=>byId.get(id)).filter(l=>l&&versionOf(l).ready);
- const unique=[...new Set([...candidates,...looks.filter(l=>versionOf(l).ready)])].slice(0,2);
- for(let i=0;i<2;i++){const img=$('hero-image-'+i),look=unique[i];if(!look){img.parentElement.hidden=true;continue;}img.parentElement.hidden=false;const v=versionOf(look),p=v.previewPanel||1;img.hidden=false;img.src=v.image;img.alt=look.title+' · '+(v.shots[p-1]?.title||'造型');img.parentElement.style.setProperty('--panel-x',-((p-1)%3)*100+'%');img.parentElement.style.setProperty('--panel-y',-Math.floor((p-1)/3)*100+'%');}
- $('hero-edition-note').textContent=state.version==='v2'?'A LITTLE CLOSER':'THE WARDROBE INDEX';
-}
-function switchEdition(version){
- if(!['v1','v2'].includes(version))return;state.version=version;state.limit=24;
- updateEditionUI();renderGallery();renderActiveFilters();renderCompareTray();
- if($('detail-dialog').open&&state.active)openDetail(state.active);
- if($('compare-dialog').open)openComparison();
+ $('completion-note').textContent=looks.length+' 套生动穿搭';
+ $('hero-total').textContent=looks.length;
+ const candidates=[13,70,40,1,99].map(id=>byId.get(id)).filter(Boolean);
+ const unique=[...new Set([...candidates,...looks])].slice(0,2);
+ for(let i=0;i<2;i++){
+   const img=$('hero-image-'+i),look=unique[i];if(!look){img.parentElement.hidden=true;continue;}
+   img.parentElement.hidden=false;const v=versionOf(look),p=v.previewPanel||1;setImage(img,v);
+   img.alt=look.title+' · '+(v.shots[p-1]?.title||'生动写真');
+   img.parentElement.style.setProperty('--panel-x',-((p-1)%3)*100+'%');img.parentElement.style.setProperty('--panel-y',-Math.floor((p-1)/3)*100+'%');
+ }
 }
 function saveFavorites() {
   try { localStorage.setItem(storageKey,JSON.stringify([...favorites])); }
@@ -78,35 +145,39 @@ function syncCardButtons(id) {
 function buildCategories() {
   const entries = [{name:'',label:'全部造型',count:looks.length},...categories.map(name => ({name,label:name,count:looks.filter(l=>l.category===name).length}))];
   $('category-list').innerHTML = entries.map(c=>'<button class="category-button'+(!c.name?' active':'')+'" data-category="'+esc(c.name)+'" aria-pressed="'+!c.name+'"><span>'+esc(c.label)+'</span><span class="cat-count">'+String(c.count).padStart(2,'0')+'</span></button>').join('');
-  $('category-list').addEventListener('click',event=>{
-    const button = event.target.closest('[data-category]'); if(!button)return;
-    state.category = button.dataset.category; refreshFilters();
-  });
+
 }
 function matchLooks() {
-  const q = state.query.trim().toLocaleLowerCase();
+  const q = state.query.trim().toLocaleLowerCase(),latest=state.latestOnly?latestBatch():'';
   filtered = looks.filter(l => {
     if (state.category && l.category !== state.category) return false;
     if (state.season && l.season !== state.season) return false;
+    if (state.model && l.model_id !== state.model) return false;
+    if (state.region && l.region !== state.region) return false;
+    if (state.latestOnly && l.batch_id !== latest) return false;
     if (state.favoritesOnly && !favorites.has(l.id)) return false;
     if (q) {
-      const terms = [number(l.id),String(l.id),l.title,l.category,l.season,l.description,...(l.tags||[]),...(l.pieces||[]).map(p=>p.name),...(l.details||[]),versionOf(l).story,versionOf(l).summary,...(versionOf(l).moods||[]),...(versionOf(l).shots||[]).flatMap(s=>[s.title,s.emotion,s.pose])].join(' ').toLocaleLowerCase();
+      const terms = [number(l.id),String(l.id),l.title,l.category,l.season,l.description,l.region,modelName(l.model_id),...(l.tags||[]),...(l.pieces||[]).map(p=>p.name),...(l.details||[]),versionOf(l).story,versionOf(l).summary,...(versionOf(l).moods||[]),...(versionOf(l).shots||[]).flatMap(s=>[s.title,s.emotion,s.pose])].join(' ').toLocaleLowerCase();
       return q.split(/\s+/).every(word=>terms.includes(word));
     }
     return true;
-  }).sort((a,b) => state.version==='v2'&&versionOf(a).ready!==versionOf(b).ready ? Number(versionOf(b).ready)-Number(versionOf(a).ready) : state.sort==='curated' ? a.editorialOrder-b.editorialOrder : state.sort==='pieces' ? b.pieces.length-a.pieces.length || a.id-b.id : state.sort==='favorites' ? Number(favorites.has(b.id))-Number(favorites.has(a.id)) || a.id-b.id : a.id-b.id);
+  }).sort((a,b) => state.version==='v2'&&versionOf(a).ready!==versionOf(b).ready ? Number(versionOf(b).ready)-Number(versionOf(a).ready) : state.sort==='latest' ? String(b.publish_date||'').localeCompare(String(a.publish_date||''))||b.id-a.id : state.sort==='curated' ? (a.editorialOrder??a.id)-(b.editorialOrder??b.id) : state.sort==='pieces' ? b.pieces.length-a.pieces.length || a.id-b.id : state.sort==='favorites' ? Number(favorites.has(b.id))-Number(favorites.has(a.id)) || a.id-b.id : a.id-b.id);
 }
 function refreshFilters() {
   state.limit=24;
+  $('model-filter').value=state.model;$('region-filter').value=state.region;$('latest-only').checked=state.latestOnly;
   document.querySelectorAll('input[name="season"]').forEach(input=>{input.checked=input.value===state.season;}); $('search').value=state.query; $('favorites-only').checked=state.favoritesOnly; $('sort').value=state.sort;
   document.querySelectorAll('[data-category]').forEach(b=>{const active=b.dataset.category===state.category;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});
   renderGallery(); renderActiveFilters();
 }
-function resetFilters() { Object.assign(state,{category:'',season:'',query:'',favoritesOnly:false,sort:'curated'});refreshFilters(); }
+function resetFilters() { Object.assign(state,{category:'',season:'',query:'',model:'',region:'',latestOnly:false,favoritesOnly:false,sort:'curated'});refreshFilters(); }
 function renderActiveFilters() {
   const entries=[];
   if(state.category)entries.push(['category',state.category]);
   if(state.season)entries.push(['season',state.season]);
+  if(state.model)entries.push(['model',modelName(state.model)]);
+  if(state.region)entries.push(['region',state.region]);
+  if(state.latestOnly)entries.push(['latestOnly','最新批次']);
   if(state.query)entries.push(['query','“'+state.query+'”']);
   if(state.favoritesOnly)entries.push(['favoritesOnly','我的收藏']);
   $('active-filters').innerHTML=entries.map(([key,label])=>'<button class="filter-pill" data-clear="'+key+'" aria-label="清除'+esc(label)+'筛选">'+esc(label)+' <span aria-hidden="true">×</span></button>').join('');
@@ -129,7 +200,11 @@ function delegatedActions(event) {
   const opener=event.target.closest('[data-open]');if(opener)openDetail(Number(opener.dataset.open));
 }
 $('gallery').addEventListener('click',delegatedActions);
-$('active-filters').addEventListener('click',e=>{const b=e.target.closest('[data-clear]');if(!b)return;state[b.dataset.clear]=b.dataset.clear==='favoritesOnly'?false:'';refreshFilters();});
+$('category-list').addEventListener('click',event=>{const button=event.target.closest('[data-category]');if(button){state.category=button.dataset.category;refreshFilters();}});
+$('model-filter').addEventListener('change',e=>{state.model=e.target.value;refreshFilters();});
+$('region-filter').addEventListener('change',e=>{state.region=e.target.value;refreshFilters();});
+$('latest-only').addEventListener('change',e=>{state.latestOnly=e.target.checked;refreshFilters();});
+$('active-filters').addEventListener('click',e=>{const b=e.target.closest('[data-clear]');if(!b)return;state[b.dataset.clear]=['favoritesOnly','latestOnly'].includes(b.dataset.clear)?false:'';refreshFilters();});
 $('season').addEventListener('change',e=>{if(e.target.name!=='season')return;state.season=e.target.value;refreshFilters();});
 $('search').addEventListener('input',e=>{state.query=e.target.value;state.limit=24;renderGallery();renderActiveFilters();});
 $('favorites-only').addEventListener('change',e=>{state.favoritesOnly=e.target.checked;refreshFilters();});
@@ -168,8 +243,8 @@ function openDetail(id) {
   $('detail-design').innerHTML=l.details.map(d=>'<li>'+esc(d)+'</li>').join('');
   $('detail-scene').textContent='写真场景 / '+l.scene;
   $('detail-image').hidden=!versionOf(l).ready;$('detail-photo-frame').classList.toggle('pending',!versionOf(l).ready);
-  if(versionOf(l).ready)$('detail-image').src=versionOf(l).image;else $('detail-image').removeAttribute('src');
-  $('original-link').href=versionOf(l).image;$('download-link').href=versionOf(l).image;$('download-link').download='LOOK-'+number(id)+'-'+state.version+'-'+l.title+'.webp';
+  if(versionOf(l).ready)setImage($('detail-image'),versionOf(l));else $('detail-image').removeAttribute('src');
+  $('original-link').href=imageURL(versionOf(l));$('download-link').href=publicSource(versionOf(l).download_url,true)||publicSource(versionOf(l).source_url||versionOf(l).image);$('download-link').download='LOOK-'+number(id)+'-'+state.version+'-'+l.title+'.webp';
   $('original-link').hidden=!versionOf(l).ready;$('download-link').hidden=!versionOf(l).ready;
   $('view-selector').innerHTML=[0,1,2,3,4,5,6,7,8,9].map(v=>'<button data-view="'+v+'" aria-label="'+esc(v?(versionOf(l).shots[v-1]?.title||'写真'+v):'完整九宫格')+'" aria-pressed="'+!v+'">'+(v?String(v).padStart(2,'0'):'九宫格')+'</button>').join('');
   $('view-selector').hidden=!versionOf(l).ready;setView(0);updateDetailActions();
@@ -212,17 +287,9 @@ document.querySelectorAll('dialog').forEach(dialog=>dialog.addEventListener('cli
 document.addEventListener('keydown',e=>{
   const editable=e.target.matches('input,textarea,select,[contenteditable]');
   if(e.key==='/'&&!editable&&!document.querySelector('dialog[open]')){e.preventDefault();$('search').focus();$('search').scrollIntoView({block:'center',behavior:'smooth'});}
-  if($('detail-dialog').open&&!$('tryon-dialog')?.open&&!$('edition-compare-dialog').open&&!$('compare-dialog').open&&!editable){if(e.key==='ArrowRight'){e.preventDefault();navigateLook(1);}if(e.key==='ArrowLeft'){e.preventDefault();navigateLook(-1);}}
+  if($('detail-dialog').open&&!$('tryon-dialog')?.open&&!$('compare-dialog').open&&!editable){if(e.key==='ArrowRight'){e.preventDefault();navigateLook(1);}if(e.key==='ArrowLeft'){e.preventDefault();navigateLook(-1);}}
 });
-window.addEventListener('storage',e=>{if(e.key!==storageKey)return;try{const values=JSON.parse(e.newValue||'[]');if(!Array.isArray(values))return;favorites.clear();values.filter(id=>byId.has(id)).forEach(id=>favorites.add(id));updateCounts();renderGallery();if(state.active)updateDetailActions();}catch{}});
-document.querySelectorAll('[data-edition]').forEach(b=>b.addEventListener('click',()=>switchEdition(b.dataset.edition)));updateEditionUI();
-$('edition-compare').addEventListener('click',()=>{
- const l=byId.get(state.active);if(!l)return;
- $('edition-comparison-content').innerHTML=['v1','v2'].map(key=>{const v=l.versions[key];return '<figure><figcaption>'+(key==='v1'?'造型':'生动')+'</figcaption>'+(v.ready?'<a href="'+esc(v.image)+'" target="_blank" rel="noopener"><img src="'+esc(v.image)+'" alt="'+esc(l.title)+(key==='v1'?'造型':'生动')+'"></a>':'<p>写真准备中</p>')+'</figure>';}).join('');
- $('edition-compare-title').textContent=l.title+' · 生动 / 造型';$('edition-compare-dialog').showModal();
-});
-$('close-edition-compare').addEventListener('click',()=>$('edition-compare-dialog').close());
-buildCategories();updateCounts();renderGallery();
-const initial=/^#look-(\d{1,3})$/.exec(location.hash);
-if(initial&&byId.has(Number(initial[1])))openDetail(Number(initial[1]));
+window.addEventListener('storage',e=>{if(e.key!==storageKey)return;try{const values=JSON.parse(e.newValue||'[]');if(!Array.isArray(values))return;favorites.clear();values.filter(id=>Number.isSafeInteger(id)&&id>0).forEach(id=>favorites.add(id));updateCounts();renderGallery();if(state.active)updateDetailActions();}catch{}});
+adoptCatalog(window.WARDROBE || {looks:[],categoryOrder:[]});updateCounts();
+hydrateCatalog();
 })();

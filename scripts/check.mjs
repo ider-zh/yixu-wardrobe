@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import {fileURLToPath} from 'node:url';
+import {loadContent} from './content-lib.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const read = name => fs.readFileSync(path.join(root, name), 'utf8').replace(/^\uFEFF/, '');
@@ -67,6 +68,13 @@ assert.equal(manifest.modelBases.length, 1);
 assert.equal(manifest.modelBases[0].id, 'female-01');
 assert.equal(manifest.modelBases[0].file, 'assets/model-bases/female-01.webp');
 const modelBaseBytes = verifyImage(manifest.modelBases[0]).bytes;
+const content = loadContent(root);
+assert.ok(content.catalog.looks.length >= 100, 'Historical outfits must remain available');
+for (const id of expectedIds) {
+  const current = content.catalog.looks.find(look => look.id === id);
+  assert.ok(current, `Missing historical outfit ${id}`);
+}
+assert.ok(content.catalog.looks.every(look => !look.versions.v1), 'Public catalog must hide historical styling');
 const html = read('index.html');
 const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]);
 assert.equal(ids.length, new Set(ids).size);
@@ -90,4 +98,4 @@ for (const name of ['README.md', 'README.en.md', 'DEVELOPMENT.md']) {
     assert.ok(fs.existsSync(path.join(root, target)), `Missing documentation link: ${name} -> ${target}`);
   }
 }
-console.log(JSON.stringify({outfits: 100, collections: 10, images, imageBytes, modelBases: manifest.modelBases.length, modelBaseBytes, sha256: 'passed', links: 'passed'}));
+console.log(JSON.stringify({outfits: content.catalog.looks.length, collections: content.catalog.categoryOrder.length, archiveImages: images, imageBytes, publicAssets: content.publicAssets.length, modelBases: manifest.modelBases.length, modelBaseBytes, sha256: 'passed', links: 'passed'}));

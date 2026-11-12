@@ -2,27 +2,26 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {loadContent} from './content-lib.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const output = path.join(root, 'public');
+// Validate the complete candidate before replacing the disposable public output.
+const content = loadContent(root);
 // Only this dedicated generated directory can be replaced.
 assert.equal(path.dirname(output), path.resolve(root));
 assert.equal(path.basename(output), 'public');
 assert.ok(!fs.existsSync(output) || !fs.lstatSync(output).isSymbolicLink());
 fs.rmSync(output, {recursive: true, force: true});
 fs.mkdirSync(output);
-const files = ['index.html', 'app.js', 'catalog.js', 'style.css', 'expressive.css', 'tryon.js', 'tryon.css', 'favicon.svg', 'assets/model-bases/female-01.webp'];
-for (const folder of ['images', 'images-v2']) {
-  fs.mkdirSync(path.join(output, folder));
-  const names = fs.readdirSync(path.join(root, folder));
-  assert.equal(names.length, 100);
-  for (let id = 1; id <= 100; id++) files.push(`${folder}/look-${String(id).padStart(3, '0')}.webp`);
-}
+const files = ['index.html', 'app.js', 'style.css', 'expressive.css', 'tryon.js', 'tryon.css', 'favicon.svg', ...new Set(content.publicAssets.map(asset => asset.file))];
 let bytes = 0;
 for (const name of files) {
   fs.mkdirSync(path.dirname(path.join(output, name)), {recursive: true});
   fs.copyFileSync(path.join(root, name), path.join(output, name));
   bytes += fs.statSync(path.join(output, name)).size;
 }
-assert.equal(files.length, 209);
-console.log(JSON.stringify({output: 'public/', files: files.length, bytes}));
+const snapshot = 'window.WARDROBE = ' + JSON.stringify(content.catalog) + ';\n';
+fs.writeFileSync(path.join(output, 'catalog.js'), snapshot);
+bytes += Buffer.byteLength(snapshot);
+console.log(JSON.stringify({output: 'public/', files: files.length + 1, bytes, outfits: content.catalog.looks.length, revision: content.catalog.revision}));

@@ -2,52 +2,40 @@
 
 Dress an ordinary moment in something you love.
 
-Yixu is a wardrobe to wander through at your own pace: 100 complete looks across ten style collections. Explore the layers of an outfit, the turn of a silhouette, or a smile that makes you look twice.
+Yixu is a wardrobe to wander through at your own pace. Starting with 100 complete looks, its expressive photography brings movement, emotion and smiles to everyday styling.
 
 [Explore online](https://www.8882088.xyz/) · [简体中文](README.md) · [Repository](https://github.com/ider-zh/yixu-wardrobe)
 
-![The Yixu wardrobe and photography gallery](docs/images/wardrobe-preview.webp)
-
-## Two ways to see a look
-
-**生动 · Expressive** brings out movement, emotion and connection: a walk together, a conversation that turns into laughter, a glance back.
-
-**造型 · Styling** focuses on silhouette, texture and layers, with full-length, side, back and close views.
-
-Switch between them in the header. Open a look to view both photography styles together.
-
 ## Take your time choosing
 
-- **Browse by style.** Ten collections, with ten looks each: Everyday Elegance, Urban Layers, Vintage Academia, Utility Streetwear, Modern Chinese, Romantic Craft, Occasionwear, Outdoor Utility, Travel and Holiday, and Winter Layers.
-- **Choose a season.** Select spring/autumn, summer, winter or all-season with one click. Choose 全部 to see every season.
-- **Find what you have in mind.** Search look names, numbers, garments, materials or moods. The gallery labels are in Chinese; try 丝绒 for velvet, 百褶裙 for pleated skirts, or 惊喜 for surprise.
-- **Look a little closer.** Open an outfit for its nine-photo grid. Select 01–09 to explore a single moment, then read the garment list and styling notes.
-- **Keep your favorites.** Use the heart to save a look, compare two or three outfits, or choose 保存图片 to download its contact sheet.
+- **Browse by style and season.** Explore Everyday Elegance, Urban Layers, Vintage Academia, Utility Streetwear, Modern Chinese and other collections, with spring/autumn, summer, winter or all-season filters.
+- **Discover new content.** Filter by model, region or the latest batch, or sort by publication date. Historical photographs are not assigned to a newly registered model without checking their identity.
+- **Find a favorite.** Search names, numbers, garments, materials or moods. The gallery labels are Chinese: try 丝绒 for velvet, 百褶裙 for pleated skirts or 惊喜 for surprise.
+- **Look closer.** Open an outfit's expressive nine-photo grid. Select 01–09 to explore one moment, then read the garment list and styling notes.
+- **Keep a look.** Save favorites with the heart, compare two or three outfits, or choose 保存图片 to download. Existing numbers and favorites stay associated with their outfits.
 
 Keyboard shortcuts: `/` for search, `←` and `→` for adjacent looks in details, and `Esc` to close a dialog.
 
+The public interface shows only 生动 · Expressive. Historical 造型 · Styling photographs and metadata remain archived in the project and are excluded from the public build and browsing controls.
+
 ## Start browsing
 
-Visit the [Yixu online wardrobe](https://www.8882088.xyz/) to browse, filter and save your favorite looks.
+Visit the [Yixu online wardrobe](https://www.8882088.xyz/) to browse, filter and save looks. Source updates and live deployments are separate; deployment determines which features are available online.
 
-To browse offline, choose **Code → Download ZIP** on the repository page. Extract the complete folder and open `index.html`.
+The frontend reads updates from the resource interface. Until a CDN is configured and each image is verified, it uses project WebP images. Verified CDN images are preferred, with project images retained as a loading fallback.
 
-No account or dependency installation is needed. Keep the extracted files together so the gallery can find its images.
+For offline browsing, copy the complete built `public/` folder and open its `index.html`. No browser extension or account is required. Keep the folder structure intact; see [Development notes](DEVELOPMENT.md) for building the offline package. Opening the source root's `index.html` directly still shows the frozen initial wardrobe snapshot.
 
-If photos do not appear, check that the whole archive was extracted, rather than copying only the HTML file. The repository's 200 photos are now same-dimension lossy WebP (quality 85, compression level 6): their combined size fell from 531,661,790 to 48,176,224 bytes (about 48.18 MB), a 90.94% reduction, with a maximum of 384,636 bytes per image. This is not the full site size.
+The 200 historical photographs are same-dimension WebP totaling 48,176,224 bytes (about 48.18 MB). The public build packages only displayable images declared by the content manifests, excluding archived styling photographs. A [five-view female model base](assets/model-bases/female-01.webp) provides the reference for future outfit creation with system model 01.
 
-The static build contains 209 files. Photos stay alongside the website under the relative paths `images/` and `images-v2/`, with no object storage or external CDN dependency. A [five-view female model base](assets/model-bases/female-01.webp) is also included as a reference asset for future outfit work. The documentation preview has also been converted to WebP.
+## Favorites and photos
 
-## Your favorites and the images
+Favorites remain in the current browser; favorite selections are not uploaded. Switching browsers or addresses, or clearing browser data, may remove or separate them.
 
-Favorites stay in the current browser. The gallery does not upload your choices. Changing browsers, opening the gallery from a different address or clearing browser data may remove or separate your favorites.
+Online photo try-on requires an available backend and generation service. A photo is uploaded only after selecting a reference and explicitly accepting its disclosed use. Results are available to their owner through the existing browser credential; administrators may assess generated results during development. User photos, private try-on results and credentials never enter public image hosting or project source. Offline browsing does not provide online try-on.
 
-The character and outfit imagery are generative artwork for styling inspiration and visual enjoyment. Details may vary between photographs.
+Character and outfit images are generative artwork for styling inspiration and visual enjoyment. Details may vary; images do not establish actual size or fit.
 
-The website is now live over HTTPS and displays the ICP filing number [浙ICP备2026098002号](https://beian.miit.gov.cn/). HTTP redirects to HTTPS; automated certificate renewal is configured and its rehearsal passed.
+The main website uses HTTPS and displays ICP filing number [浙ICP备2026098002号](https://beian.miit.gov.cn/).
 
-[Personal-photo AI try-on and first-party analytics](docs/ai-tryon-backend-design.md) are currently a design only, not a live feature. The current website does not accept selfies.
-
----
-
-For project structure and further development, see [Development notes](DEVELOPMENT.md).
+For maintenance or daily outfit production by an external agent, see [Development notes](DEVELOPMENT.md) and the [content production SOP](docs/external-agent-sop.md).

@@ -4,14 +4,11 @@ import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 
-// Runs the actual static app against a deliberately small synthetic DOM.
-// This checks state transitions; browser layout, focus and native Escape still
-// require the separate real-browser verification.
+// State and data-boundary regression for the actual app. The Chromium suite
+// separately verifies layout, native events, private uploads, and modal focus.
 const root = fileURLToPath(new URL('../', import.meta.url));
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-const nodes = new Map();
-const editions = [];
-const seasonRadios = [];
+const nodes = new Map(), seasonRadios = [], documentEvents = {}, windowEvents = {};
 function node(id) {
   if (nodes.has(id)) return nodes.get(id);
   const element = {
@@ -19,345 +16,132 @@ function node(id) {
     disabled: false, textContent: '', innerHTML: '', attrs: {}, events: {},
     style: { setProperty(key, value) { this[key] = value; } },
     classList: { toggle() {}, add() {}, remove() {} },
-    parentElement: { hidden: false, style: { setProperty(key, value) { this[key] = value; } } },
+    parentElement: { hidden: false, attrs:{}, classList:{add(){},remove(){}},setAttribute(key,value){this.attrs[key]=value;},style: { setProperty(key, value) { this[key] = value; } } },
     addEventListener(type, callback) { (this.events[type] ??= []).push(callback); },
     setAttribute(key, value) { this.attrs[key] = value; },
-    removeAttribute(key) { delete this.attrs[key]; },
-    showModal() { this.open = true; },
-    close() { this.open = false; },
+    getAttribute(key) { return this[key] ?? this.attrs[key] ?? null; },
+    removeAttribute(key) { delete this.attrs[key];delete this[key]; },
+    showModal() { this.open = true; },close() { this.open = false; },
     focus() {}, scrollIntoView() {},
     getBoundingClientRect() { return { left: 0, right: 100, top: 0, bottom: 100 }; }
-  };
-  nodes.set(id, element);
-  return element;
+  };nodes.set(id, element);return element;
 }
 for (const match of html.matchAll(/id="([^"]+)"/g)) node(match[1]);
-for (const match of html.matchAll(/<button[^>]*data-edition="([^"]+)"[^>]*>/g)) {
-  const button = node('edition-button-' + editions.length);
-  button.dataset.edition = match[1];
-  editions.push(button);
-}
 for (const match of html.matchAll(/<input\b[^>]*>/g)) {
   const markup = match[0];
   if (!/\btype="radio"/.test(markup) || !/\bname="season"/.test(markup)) continue;
   const radio = node('season-radio-' + seasonRadios.length);
-  radio.type = 'radio';
-  radio.name = 'season';
-  radio.value = markup.match(/\bvalue="([^"]*)"/)?.[1] ?? '';
-  radio.checked = /\bchecked(?:\s|>|=)/.test(markup);
-  seasonRadios.push(radio);
+  radio.name='season';radio.value=markup.match(/\bvalue="([^"]*)"/)?.[1]??'';
+  radio.checked=/\bchecked(?:\s|>|=)/.test(markup);seasonRadios.push(radio);
 }
-const dialogs = ['detail-dialog', 'compare-dialog', 'about-dialog', 'edition-compare-dialog'].map(node);
-const documentEvents = {};
-const windowEvents = {};
-const storage = new Map();
-const context = {
-  window: { addEventListener(type, callback) { windowEvents[type] = callback; } },
-  document: {
-    body: { dataset: {} },
-    getElementById: node,
-    querySelectorAll(selector) {
-      if (selector === '[data-edition]') return editions;
-      if (selector === 'input[name="season"]') return seasonRadios;
-      if (selector === 'dialog') return dialogs;
-      return [];
-    },
-    querySelector(selector) {
-      return selector === 'dialog[open]' ? dialogs.find(dialog => dialog.open) || null : null;
-    },
-    addEventListener(type, callback) { (documentEvents[type] ??= []).push(callback); }
-  },
-  localStorage: {
-    getItem: key => storage.get(key),
-    setItem: (key, value) => storage.set(key, value)
-  },
-  location: { hash: '' },
-  console,
-  setTimeout: () => 1,
-  clearTimeout() {}
+const dialogs=['detail-dialog','compare-dialog','about-dialog','tryon-dialog'].map(node);
+const storage=new Map([['wardrobe99:favorites:v1','[9999]']]);
+const context={
+  window:{addEventListener(type,callback){windowEvents[type]=callback;}},
+  document:{body:{dataset:{}},getElementById:node,
+    querySelectorAll(selector){if(selector==='input[name="season"]')return seasonRadios;if(selector==='dialog')return dialogs;return [];},
+    querySelector(selector){return selector==='dialog[open]'?dialogs.find(d=>d.open)||null:null;},
+    addEventListener(type,callback){(documentEvents[type]??=[]).push(callback);}},
+  localStorage:{getItem:key=>storage.get(key),setItem:(key,value)=>storage.set(key,value)},
+  location:{hash:'',protocol:'file:',href:'file:///offline/index.html'},URL,console,setTimeout:()=>1,clearTimeout(){}
 };
-vm.createContext(context);
-vm.runInContext(fs.readFileSync(path.join(root, 'catalog.js'), 'utf8'), context);
-const app = fs.readFileSync(path.join(root, 'app.js'), 'utf8');
-assert.match(app, /\}\)\(\);\s*$/);
-const instrumented = app.replace(/\}\)\(\);\s*$/, `window.__audit = {
-  state, byId, favorites, compare, openDetail, switchEdition, setView,
-  toggleFavorite, toggleCompare, openComparison, refreshFilters,
-  renderGallery, navigateLook, resetFilters, getFiltered: () => filtered
-};})();`);
-vm.runInContext(instrumented, context);
-const a = context.window.__audit;
-const checks = [];
-function check(name, fn) { fn(); checks.push(name); }
-
-check('footer shows the exact ICP number linked to the ministry lookup', () => {
-  const footer = html.match(/<footer\b[^>]*>([\s\S]*?)<\/footer>/)?.[1];
-  assert.ok(footer, 'A visible page footer is required');
-  assert.match(footer, /<a\b[^>]*href="https:\/\/beian\.miit\.gov\.cn\/"[^>]*>浙ICP备2026098002号<\/a>/);
+vm.createContext(context);vm.runInContext(fs.readFileSync(path.join(root,'catalog.js'),'utf8'),context);
+const app=fs.readFileSync(path.join(root,'app.js'),'utf8');
+const instrumented=app.replace(/\}\)\(\);\s*$/,`window.__audit={state,byId,favorites,compare,openDetail,setView,toggleFavorite,toggleCompare,openComparison,refreshFilters,renderGallery,navigateLook,resetFilters,adoptCatalog,hydrateCatalog,imageFailed,setImage,publicSource,getFiltered:()=>filtered};})();`);
+vm.runInContext(instrumented,context);
+const a=context.window.__audit,baseline=JSON.parse(JSON.stringify(context.window.WARDROBE));
+const checks=[];
+function check(name,fn){fn();checks.push(name);}
+check('footer preserves the linked exact ICP number',()=>assert.match(html,/<a\b[^>]*href="https:\/\/beian\.miit\.gov\.cn\/"[^>]*>浙ICP备2026098002号<\/a>/));
+check('public UI has no archived edition controls or fixed capacity labels',()=>{
+  assert.doesNotMatch(html,/data-edition|edition-compare|百套|>100<|THE ORIGINAL/);
+  assert.equal(a.state.version,'v2');assert.equal(node('hero-total').textContent,baseline.looks.length);
+  for(const look of context.window.WARDROBE.looks){assert.deepEqual(Object.keys(look.versions),['v2']);assert.equal(look.versions.v2.shots.length,9);}
+  assert.doesNotMatch(node('gallery').innerHTML,/images\/look-/);
 });
-
-check('gallery and hero use only local WebP photography', () => {
-  for (const look of context.window.WARDROBE.looks) {
-    for (const version of ['v1', 'v2']) {
-      assert.match(look.versions[version].image, /^images(?:-v2)?\/look-\d{3}\.webp$/);
-    }
-  }
-  const heroes = [...html.matchAll(/<img\b[^>]*\bid="hero-image-\d"[^>]*\bsrc="([^"]+)"/g)];
-  assert.equal(heroes.length, 2);
-  for (const match of heroes) assert.match(match[1], /^images-v2\/look-\d{3}\.webp$/);
+check('offline snapshot preserves curated category exploration without fixed category sizes',()=>{
+  for(const category of baseline.categoryOrder){a.state.category=category;a.refreshFilters();assert.ok(a.getFiltered().every(l=>l.category===category));}
+  a.resetFilters();assert.deepEqual(Array.from(a.getFiltered(),l=>l.id),baseline.displayOrder);
+  assert.equal(node('result-count').textContent,baseline.looks.length+' 套造型');
 });
-
-check('unified catalog has ten collections of ten and curated cross-collection order', () => {
-  const data = context.window.WARDROBE;
-  assert.equal(data.looks.length, 100);
-  assert.equal(data.categoryOrder.length, 10);
-  assert.equal(new Set(data.categoryOrder).size, 10);
-  assert.equal(new Set(data.displayOrder).size, 100);
-  assert.deepEqual(Array.from(data.displayOrder).sort((a,b) => a-b), Array.from({length:100},(_,i) => i+1));
-  for (const category of data.categoryOrder) {
-    assert.equal(data.looks.filter(look => look.category === category).length, 10);
-    a.state.category = category;
-    a.refreshFilters();
-    assert.equal(a.getFiltered().length, 10);
-    assert.ok(a.getFiltered().every(look => look.category === category));
-  }
-  a.resetFilters();
-  assert.equal(a.state.sort, 'curated');
-  assert.equal(a.state.version, 'v2');
-  assert.deepEqual(Array.from(a.getFiltered(), look => look.id), Array.from(data.displayOrder));
-  assert.equal(new Set(a.getFiltered().slice(0,10).map(look => look.category)).size, 10);
-  assert.equal(node('result-count').textContent, '100 套造型');
+function season(value){const target=seasonRadios.find(r=>r.value===value);target.checked=true;node('season').events.change[0]({target});}
+check('native season radio changes, clear pills, and reset keep selected state consistent',()=>{
+  assert.deepEqual(seasonRadios.map(r=>r.value),['','春秋','夏季','冬季','四季']);
+  for(const value of ['夏季','冬季','春秋','四季','']){season(value);assert.deepEqual(seasonRadios.filter(r=>r.checked).map(r=>r.value),[value]);assert.ok(a.getFiltered().every(l=>!value||l.season===value));}
+  season('冬季');assert.match(node('active-filters').innerHTML,/data-clear="season"/);
+  node('active-filters').events.click[0]({target:{closest:()=>({dataset:{clear:'season'}})}});
+  assert.equal(a.state.season,'');season('春秋');node('reset-filters').events.click[0]();assert.equal(a.state.season,'');
 });
-check('legacy new-batch filters and badges are absent', () => {
-  assert.ok(!Object.hasOwn(a.state, 'newOnly'));
-  assert.ok(!/newOnly|new-only|只看新增|初选九套|\bNEW\b/.test(html + '\n' + app));
-  assert.ok(!node('category-list').innerHTML.includes('初选'));
+check('old ID search, all nine panels, download and detail navigation stay associated',()=>{
+  const look=a.byId.get(100);for(const query of ['100',look.title]){a.state.query=query;a.refreshFilters();assert.deepEqual(Array.from(a.getFiltered(),l=>l.id),[100]);}
+  a.openDetail(100);assert.equal(node('detail-position').textContent,'1 / 1');assert.equal(node('previous-look').disabled,true);assert.equal(node('next-look').disabled,true);
+  assert.equal(node('detail-image').src,look.versions.v2.image);assert.equal(node('download-link').href,look.versions.v2.source_url||look.versions.v2.image);assert.match(node('download-link').download,/-v2-.*\.webp$/);
+  for(let panel=1;panel<=9;panel++){a.setView(panel);assert.equal(node('view-name').textContent,look.versions.v2.shots[panel-1].title);assert.ok(node('view-moment').textContent.includes(look.versions.v2.shots[panel-1].emotion));}
+  a.resetFilters();a.openDetail(100);const ids=Array.from(a.getFiltered(),l=>l.id),index=ids.indexOf(100);a.navigateLook(1);assert.equal(a.state.active,ids[index+1]);a.navigateLook(-1);assert.equal(a.state.active,100);
 });
-function assertSeason(value) {
-  assert.equal(a.state.season, value);
-  assert.deepEqual(seasonRadios.filter(radio => radio.checked).map(radio => radio.value), [value]);
-  const expected = context.window.WARDROBE.displayOrder
-    .filter(id => !value || a.byId.get(id).season === value);
-  assert.deepEqual(Array.from(a.getFiltered(), look => look.id), Array.from(expected));
-  assert.equal(node('result-count').textContent, expected.length + ' 套造型');
+check('comparison details outside the filter retain valid full-list navigation',()=>{
+  a.toggleCompare(70);a.toggleCompare(71);a.state.query='丝绒';a.refreshFilters();a.openComparison();
+  assert.doesNotMatch(node('comparison-content').innerHTML,/images\/look-/);
+  node('comparison-content').events.click[0]({target:{closest:()=>({dataset:{compareDetail:'70'}})}});
+  assert.equal(node('detail-position').textContent,'70 / '+baseline.looks.length);a.navigateLook(1);assert.equal(a.state.active,71);a.navigateLook(-1);assert.equal(a.state.active,70);
+  a.state.query=a.byId.get(70).title;a.refreshFilters();a.openDetail(70);assert.equal(node('detail-position').textContent,'1 / 1');
+});
+check('favorites preserve unknown IDs through toggles and cross-tab updates',()=>{
+  assert.equal(a.favorites.has(9999),true);a.toggleFavorite(70);assert.deepEqual(JSON.parse(storage.get('wardrobe99:favorites:v1')),[9999,70]);
+  windowEvents.storage({key:'wardrobe99:favorites:v1',newValue:'[9999,70,101,-1,"102"]'});assert.deepEqual(Array.from(a.favorites),[9999,70,101]);
+});
+check('catalog text is escaped as text in cards and filters',()=>{
+  const look=a.byId.get(70),previous=look.title;look.title='<img src=x onerror=evil()> & "test"';a.resetFilters();a.state.limit=1000;a.renderGallery();assert.ok(!node('gallery').innerHTML.includes(look.title));assert.match(node('gallery').innerHTML,/&lt;img src=x onerror=evil\(\)&gt;/);look.title=previous;
+});
+check('try-on bridge carries exact expressive look and montage/panel context offline',()=>{
+  const received=[];context.window.WardrobeTryOn={setContext(value){received.push(JSON.parse(JSON.stringify(value)));},track(){}};
+  for(const look of baseline.looks){a.openDetail(look.id);for(let shot=0;shot<=9;shot++){a.setView(shot);assert.deepEqual(received.at(-1),{look_id:look.id,edition:'v2',shot_index:shot});}}
+});
+check('try-on and comparison modals block underlying detail keyboard navigation',()=>{
+  a.resetFilters();a.openDetail(70);const before=a.state.active;node('tryon-dialog').open=true;
+  documentEvents.keydown[0]({key:'ArrowRight',target:{matches:()=>false},preventDefault(){throw Error('Underlying navigation intercepted modal key');}});assert.equal(a.state.active,before);node('tryon-dialog').open=false;
+});
+const dynamic=JSON.parse(JSON.stringify(baseline));
+dynamic.models=[{model_id:'female-01',name:'01 号模特'},{model_id:'female-02',name:'02 号模特'}];
+for(const [id,model,region,date] of [[101,'female-01','上海','2026-11-12'],[102,'female-02','成都','2026-11-13']]){
+  const look=JSON.parse(JSON.stringify(dynamic.looks[0]));Object.assign(look,{id,title:'新增穿搭 '+id,editorialOrder:id,model_id:model,region:{country:'中国',city:region},publish_date:date,batch_id:date+'-01'});
+  Object.assign(look.versions.v2,{image:'https://cdn.example/'+id+'.webp',image_url:'https://cdn.example/'+id+'.webp',source_url:'/api/content/assets/look-'+id,download_url:'/api/content/assets/look-'+id+'/download'});dynamic.looks.push(look);
 }
-function changeSeason(value) {
-  const target = seasonRadios.find(radio => radio.value === value);
-  assert.ok(target, 'Season radio exists: ' + value);
-  // A single bubbled change must update results immediately. The app's
-  // refresh synchronizes the whole radio group, including clear/reset flows.
-  target.checked = true;
-  assert.equal(node('season').events.change.length, 1);
-  node('season').events.change[0]({ target });
-}
-check('season controls are five native radios with a default all option', () => {
-  assert.match(html, /<fieldset\b[^>]*class="season-filter"[^>]*><legend>穿着季节<\/legend>/);
-  assert.ok(!/<select\b[^>]*(?:id|name)="season"/.test(html));
-  assert.ok(!/第一版|第二版/.test(html));
-  assert.deepEqual(seasonRadios.map(radio => radio.value), ['', '春秋', '夏季', '冬季', '四季']);
-  assertSeason('');
+let fetchCalls=[];
+context.location={protocol:'https:',href:'https://wardrobe.example/',hash:''};
+context.fetch=async(url,options)=>{fetchCalls.push({url,options});return{ok:true,json:async()=>dynamic};};
+await a.hydrateCatalog();
+check('online catalog hydration adopts new IDs and model registry without leaking visitor credentials',()=>{
+  assert.equal(fetchCalls.length,1);assert.equal(fetchCalls[0].url,'/api/content/catalog');assert.equal(fetchCalls[0].options.credentials,'omit');
+  assert.equal(a.byId.size,baseline.looks.length+2);assert.ok(a.byId.has(102));assert.equal(a.favorites.has(9999),true);assert.equal(a.favorites.has(101),true);
+  assert.match(node('model-filter').innerHTML,/female-02/);assert.match(node('region-filter').innerHTML,/成都/);assert.equal(node('hero-total').textContent,baseline.looks.length+2);
 });
-check('one season change filters immediately and leaves exactly one selected radio', () => {
-  for (const value of ['夏季', '冬季', '春秋', '四季', '']) {
-    changeSeason(value);
-    assertSeason(value);
-  }
-  const before = a.state.season;
-  node('season').events.change[0]({target:{name:'unrelated',value:'冬季'}});
-  assert.equal(a.state.season,before);
+check('model, region, latest batch and newest ordering use live data',()=>{
+  a.resetFilters();node('model-filter').events.change[0]({target:{value:'female-02'}});assert.deepEqual(Array.from(a.getFiltered(),l=>l.id),[102]);
+  a.resetFilters();node('region-filter').events.change[0]({target:{value:'上海'}});assert.deepEqual(Array.from(a.getFiltered(),l=>l.id),[101]);
+  a.resetFilters();node('latest-only').events.change[0]({target:{checked:true}});assert.deepEqual(Array.from(a.getFiltered(),l=>l.id),[102]);
+  a.resetFilters();a.state.sort='latest';a.refreshFilters();assert.deepEqual(Array.from(a.getFiltered().slice(0,2),l=>l.id),[102,101]);
+  a.state.favoritesOnly=true;a.refreshFilters();assert.ok(a.getFiltered().some(l=>l.id===101));
+  a.resetFilters();a.openDetail(102);assert.equal(node('detail-image').src,'https://cdn.example/102.webp');assert.equal(node('download-link').href,'/api/content/assets/look-102/download');
 });
-check('season clear pill and reset button both restore the complete collection', () => {
-  changeSeason('冬季');
-  assert.match(node('active-filters').innerHTML, /data-clear="season"/);
-  node('active-filters').events.click[0]({
-    target:{closest:() => ({dataset:{clear:'season'}})}
-  });
-  assertSeason('');
-  assert.ok(!node('active-filters').innerHTML.includes('data-clear="season"'));
-  changeSeason('春秋');
-  node('reset-filters').events.click[0]();
-  assertSeason('');
-  assert.equal(a.state.sort,'curated');
+check('CDN images fall back once to allowlisted public sources and surface final errors',()=>{
+  const image=node('image-fixture');a.setImage(image,a.byId.get(102).versions.v2);a.imageFailed({target:image});assert.equal(image.src,'/api/content/assets/look-102');assert.equal(image.dataset.fallback,'true');
+  a.imageFailed({target:image});assert.equal(image.hidden,true);assert.equal(image.dataset.failed,'true');assert.equal(image.parentElement.attrs['data-image-status'],'图片暂不可用');
+  for(const value of ['/api/tryons/private/image','/api/admin/config','https://other.example/a.webp','images-v2/../private.webp','/images-v2/%2e%2e/private.webp','//evil.example/a.webp'])assert.equal(a.publicSource(value),'');
+  const malicious=JSON.parse(JSON.stringify(dynamic));malicious.looks.at(-1).versions.v2.source_url='/api/tryons/private/image';assert.equal(a.adoptCatalog(malicious),false);assert.ok(a.byId.has(102));
 });
-check('switching photography styles preserves season and matching outfits', () => {
-  changeSeason('夏季');
-  const expected = Array.from(a.getFiltered(),look=>look.id);
-  for(const version of ['v1','v2']){
-    const button = editions.find(item=>item.dataset.edition===version);
-    button.events.click[0]();
-    assert.equal(a.state.version,version);
-    assertSeason('夏季');
-    assert.deepEqual(Array.from(a.getFiltered(),look=>look.id),expected);
-  }
-  node('reset-filters').events.click[0]();
-  assertSeason('');
+context.fetch=async()=>{throw Error('offline');};await a.hydrateCatalog();
+check('missing or malformed API preserves the full usable snapshot',()=>{
+  assert.equal(a.byId.size,baseline.looks.length+2);assert.equal(node('catalog-status').textContent,'正在浏览本地内容快照');assert.equal(a.adoptCatalog({looks:[{id:103}]}),false);assert.ok(a.byId.has(102));
 });
-
-check('look 100 is searchable and its two editions, panels and navigation are complete', () => {
-  const look = a.byId.get(100);
-  assert.ok(look);
-  for (const query of ['100', look.title]) {
-    a.state.query = query;
-    a.refreshFilters();
-    assert.deepEqual(Array.from(a.getFiltered(), item => item.id), [100]);
-  }
-  a.openDetail(100);
-  assert.equal(node('detail-position').textContent, '1 / 1');
-  assert.equal(node('previous-look').disabled, true);
-  assert.equal(node('next-look').disabled, true);
-  a.switchEdition('v1');
-  assert.equal(node('detail-image').src, 'images/look-100.webp');
-  assert.equal(node('download-link').href, 'images/look-100.webp');
-  a.switchEdition('v2');
-  assert.equal(node('detail-image').src, 'images-v2/look-100.webp');
-  for(let panel=1;panel<=9;panel++){
-    a.setView(panel);
-    assert.equal(node('view-name').textContent,look.versions.v2.shots[panel-1].title);
-    assert.ok(node('view-moment').textContent.includes(look.versions.v2.shots[panel-1].emotion));
-  }
-  node('edition-compare').events.click[0]();
-  assert.match(node('edition-comparison-content').innerHTML,/images\/look-100\.webp/);
-  assert.match(node('edition-comparison-content').innerHTML,/images-v2\/look-100\.webp/);
-  node('edition-compare-dialog').close();
-  a.resetFilters();
-  a.openDetail(100);
-  const expected = Array.from(context.window.WARDROBE.displayOrder);
-  const index = expected.indexOf(100);
-  assert.equal(node('detail-position').textContent, (index+1)+' / 100');
-  a.navigateLook(1);
-  assert.equal(a.state.active, expected[index+1]);
-  a.navigateLook(-1);
-  assert.equal(a.state.active, 100);
-  node('detail-dialog').close();
+check('an intentionally empty valid catalog renders gracefully without deleting favorites',()=>{
+  a.adoptCatalog({looks:[],categoryOrder:[],models:[]});assert.equal(a.byId.size,0);assert.equal(node('empty-state').hidden,false);assert.equal(a.favorites.has(9999),true);assert.equal(a.favorites.has(101),true);assert.equal(node('detail-dialog').open,false);
+  a.adoptCatalog(baseline);assert.equal(a.byId.size,baseline.looks.length);
 });
-
-// Reproduces the reported defect through the real comparison click handler:
-// selected outfits remain available when the current gallery filter excludes them.
-check('filtered gallery -> comparison detail -> valid full-list navigation', () => {
-  a.toggleCompare(70);
-  a.toggleCompare(71);
-  a.state.query = '丝绒';
-  a.refreshFilters();
-  a.openComparison();
-  node('comparison-content').events.click[0]({
-    target: { closest: () => ({ dataset: { compareDetail: '70' } }) }
-  });
-  assert.equal(node('detail-position').textContent, '70 / 100');
-  a.navigateLook(1);
-  assert.equal(a.state.active, 71);
-  assert.equal(node('detail-position').textContent, '71 / 100');
-  a.navigateLook(-1);
-  assert.equal(a.state.active, 70);
+check('page styles and scripts retain local dependencies for direct offline opening',()=>{
+  const styles=['style.css','expressive.css','tryon.css'].map(file=>fs.readFileSync(path.join(root,file),'utf8')).join('\n');assert.doesNotMatch(html,/<(?:script|link)[^>]+(?:src|href)=["'](?:https?:)?\/\//i);assert.doesNotMatch(styles,/@import\s|url\(\s*["']?(?:https?:)?\/\//i);
 });
-check('in-filter detail retains filtered navigation bounds', () => {
-  a.state.query = a.byId.get(70).title;
-  a.refreshFilters();
-  a.openDetail(70);
-  assert.equal(node('detail-position').textContent, '1 / 1');
-  assert.equal(node('previous-look').disabled, true);
-  assert.equal(node('next-look').disabled, true);
-});
-check('edition change with edition-only query does not create position zero', () => {
-  a.switchEdition('v2');
-  a.state.query = a.byId.get(70).versions.v2.story;
-  a.refreshFilters();
-  a.openDetail(70);
-  assert.equal(node('detail-position').textContent, '1 / 1');
-  a.switchEdition('v1');
-  assert.equal(node('detail-position').textContent, '70 / 100');
-});
-check('open detail links, filename and shot description track edition', () => {
-  assert.equal(node('detail-image').src, 'images/look-070.webp');
-  assert.equal(node('original-link').href, 'images/look-070.webp');
-  assert.equal(node('download-link').href, 'images/look-070.webp');
-  assert.match(node('download-link').download, /-v1-.*\.webp$/);
-  assert.equal(node('view-moment').textContent, '');
-  a.switchEdition('v2');
-  assert.equal(node('detail-image').src, 'images-v2/look-070.webp');
-  assert.equal(node('download-link').href, 'images-v2/look-070.webp');
-  assert.match(node('download-link').download, /-v2-.*\.webp$/);
-  a.setView(5);
-  assert.ok(node('view-moment').textContent.includes(a.byId.get(70).versions.v2.shots[4].pose));
-});
-check('favorites are shared by outfit ID across both editions', () => {
-  a.toggleFavorite(70);
-  a.switchEdition('v1');
-  assert.equal(a.favorites.has(70), true);
-  assert.equal(node('detail-favorite').attrs['aria-pressed'], 'true');
-  a.switchEdition('v2');
-  assert.equal(a.favorites.has(70), true);
-  assert.deepEqual(JSON.parse(storage.get('wardrobe99:favorites:v1')), [70]);
-});
-check('open comparison updates image paths when edition changes', () => {
-  a.openComparison();
-  assert.match(node('comparison-content').innerHTML, /images-v2\/look-070\.webp/);
-  a.switchEdition('v1');
-  assert.match(node('comparison-content').innerHTML, /images\/look-071\.webp/);
-  assert.ok(!node('comparison-content').innerHTML.includes('images-v2/'));
-  node('compare-dialog').close();
-});
-check('nested two-edition modal blocks underlying detail arrow navigation', () => {
-  node('edition-compare').events.click[0]();
-  const before = a.state.active;
-  let prevented = false;
-  documentEvents.keydown[0]({
-    key: 'ArrowRight', target: { matches: () => false },
-    preventDefault() { prevented = true; }
-  });
-  assert.equal(a.state.active, before);
-  assert.equal(prevented, false);
-  node('edition-compare-dialog').close();
-});
-check('catalog HTML text is escaped, not interpreted as markup', () => {
-  const look = a.byId.get(70), previous = look.title;
-  look.title = '<img src=x onerror=evil()> & "test"';
-  a.state.query = '';
-  a.state.limit = 100;
-  a.renderGallery();
-  const rendered = node('gallery').innerHTML;
-  assert.ok(!rendered.includes(look.title));
-  assert.ok(rendered.includes('&lt;img src=x onerror=evil()&gt;'));
-  look.title = previous;
-});
-check('all 100 records have local, distinct-edition image paths and nine shots', () => {
-  const looks = context.window.WARDROBE.looks;
-  assert.equal(looks.length, 100);
-  assert.equal(new Set(looks.map(look => look.id)).size, 100);
-  for (const look of looks) {
-    const id = String(look.id).padStart(3, '0');
-    assert.equal(look.versions.v1.image, 'images/look-' + id + '.webp');
-    assert.equal(look.versions.v2.image, 'images-v2/look-' + id + '.webp');
-    assert.equal(look.versions.v1.shots.length, 9);
-    assert.equal(look.versions.v2.shots.length, 9);
-  }
-});
-check('guarded try-on bridge carries exact look, edition and montage/panel without requiring the network module', () => {
-  const received=[];
-  context.window.WardrobeTryOn={setContext(value){received.push(JSON.parse(JSON.stringify(value)));},track(){}};
-  for(const look of context.window.WARDROBE.looks){
-    for(const edition of ['v1','v2']){
-      a.switchEdition(edition);a.openDetail(look.id);
-      for(let shot=0;shot<=9;shot++){
-        a.setView(shot);
-        assert.deepEqual(received.at(-1),{look_id:look.id,edition,shot_index:shot});
-      }
-    }
-  }
-  delete context.window.WardrobeTryOn;
-  a.openDetail(100); // The unchanged offline app must also work with no bridge.
-});
-check('page and styles have no remote dependencies', () => {
-  const styles = ['style.css', 'expressive.css', 'tryon.css'].map(file => fs.readFileSync(path.join(root, file), 'utf8')).join('\n');
-  assert.ok(!/<(?:script|link)[^>]+(?:src|href)=["'](?:https?:)?\/\//i.test(html));
-  assert.ok(!/@import\s|url\(\s*["']?(?:https?:)?\/\//i.test(styles));
-  assert.ok(!/\b(?:fetch|XMLHttpRequest|WebSocket)\b/.test(app));
-});
-for (const name of checks) console.log('PASS ' + name);
-console.log('Synthetic DOM regression: ' + checks.length + ' checks passed.');
-
-// Keep asset integrity and HTTP coverage in the existing CI entry point.
+for(const name of checks)console.log('PASS '+name);
+console.log('Synthetic DOM regression: '+checks.length+' checks passed.');
 await import('./regression-assets.mjs');
-// Existing workflow entry point also verifies the application without deployment.
-if (process.env.GITHUB_ACTIONS === 'true' && process.env.YIXU_VERIFY_CHILD !== '1') {
-  await import('../scripts/verify-application.mjs');
-}
+if(process.env.GITHUB_ACTIONS==='true'&&process.env.YIXU_VERIFY_CHILD!=='1')await import('../scripts/verify-application.mjs');

@@ -82,6 +82,13 @@ export function createAdminApp({ document, fetch, confirm }) {
     $('#popular-looks').replaceChildren();
     $('#recent-jobs').replaceChildren();
     $('#results-grid').replaceChildren();
+    $('#models-grid').replaceChildren();
+    $('#cdn-jobs').replaceChildren();
+    $('#content-status').textContent = '尚未读取资源状态。';
+    $('#cdn-status').textContent = '尚未读取 CDN 配置。';
+    $('#cdn-progress').textContent = '尚无同步进度。';
+    $('#models-status').textContent = '尚未读取模特。';
+    document.querySelectorAll('[data-cdn-metric]').forEach(element => { element.textContent = '—'; });
     $('#results-empty').hidden = true;
     $('#load-more-results').hidden = true;
     resultOffset = 0;
@@ -247,8 +254,83 @@ export function createAdminApp({ document, fetch, confirm }) {
     $('#notice').textContent = '概览已更新。';
   }
   $('#refresh-overview').addEventListener('click', () => run(loadOverview));
+  const cdnStatusNames = { queued: '待同步', uploading: '上传中', verified: '已验证', failed: '失败', unknown: '待人工核对', unconfigured: '未配置' };
+  async function loadContent() {
+    try {
+      const data = await request('/content/overview');
+      $('#content-status').textContent = data.content_ready ? `活动版本：${data.revision || '未提供'} · ${data.look_count} 套穿搭 · ${data.model_count} 位模特` : '公开内容尚未就绪；原有内容服务继续独立运行。';
+      if (data.import_error) $('#content-status').append(node('span', ` · 内容接收异常：${data.import_error}`));
+      const cdn = data.cdn;
+      $('#cdn-status').textContent = cdn.config.configured ? `已配置图床接口（${cdn.config.adapter}）；图片逐张校验后使用 CDN。` : 'CDN 未配置；未同步图片继续使用项目图片 URL。';
+      document.querySelectorAll('[data-cdn-metric]').forEach(element => { element.textContent = String(cdn.counts[element.dataset.cdnMetric] ?? 0); });
+      const size = value => `${(Number(value || 0) / 1048576).toFixed(2)} MiB`;
+      $('#cdn-progress').textContent = cdn.total ? `已验证 ${cdn.counts.verified} / ${cdn.total} 张（${Math.round(cdn.counts.verified / cdn.total * 100)}%） · ${size(cdn.verified_bytes)} / ${size(cdn.bytes)}${cdn.last_success ? ` · 最近成功：${timeText(cdn.last_success * 1000)}` : ''}` : '暂无公开图片同步任务；不显示估计进度。';
+      $('#cdn-jobs').replaceChildren(...cdn.jobs.map(job => {
+        const item = node('li');
+        item.append(node('strong', job.asset_id), node('span', cdnStatusNames[job.status] || job.status, 'status-chip'), node('p', `版本 ${job.revision} · 尝试 ${job.attempts} 次 · ${size(job.bytes)}`, 'muted'));
+        if (job.error) item.append(node('p', job.error, 'job-error'));
+        if (job.status === 'failed' && job.provider_id === cdn.config.provider_id) {
+          const retry = node('button', '重试同步', 'outline');
+          retry.type = 'button';
+          retry.dataset.cdnRetry = String(job.id);
+          retry.addEventListener('click', () => run(async () => {
+            await request(`/content/cdn/jobs/${encodeURIComponent(job.id)}/retry`, { method: 'POST' });
+            await loadContent();
+            $('#notice').textContent = '失败资源已重新排队；项目图片仍可使用。';
+          }));
+          item.append(retry);
+        }
+        if (job.status === 'unknown' && job.remote_id && job.provider_id === cdn.config.provider_id) {
+          const verify = node('button', '仅核对远端文件', 'outline');
+          verify.type = 'button';
+          verify.dataset.cdnVerify = String(job.id);
+          verify.addEventListener('click', () => run(async () => {
+            const result = await request(`/content/cdn/jobs/${encodeURIComponent(job.id)}/verify`, { method: 'POST' });
+            await loadContent();
+            $('#notice').textContent = result.verified ? '远端文件已验证；没有重新上传。' : '远端文件仍未通过校验；没有重新上传，请继续人工核对。';
+          }));
+          item.append(verify);
+        }
+        return item;
+      }));
+      if (!cdn.jobs.length) $('#cdn-jobs').append(node('li', '暂无同步任务', 'muted'));
+    } catch (error) {
+      $('#content-status').textContent = '资源状态读取失败，请单独刷新；其他工作台模块可继续使用。';
+      throw error;
+    }
+  }
+  async function loadModels() {
+    try {
+      const data = await request('/content/models');
+      $('#models-grid').replaceChildren(...data.models.map(model => {
+        const card = node('article', undefined, 'model-card');
+        card.append(node('h3', `${model.name} · ${model.model_id}`));
+        const reference = model.reference;
+        const source = reference?.source_url || model.source_url;
+        if (reference?.asset_id && source === `/api/admin/content/models/${encodeURIComponent(model.model_id)}/reference`) {
+          const image = node('img');
+          image.src = source;
+          image.alt = `${model.name} 基础体多视角参考`;
+          image.setAttribute('loading', 'lazy');
+          image.setAttribute('referrerpolicy', 'no-referrer');
+          image.addEventListener('error', () => { image.removeAttribute('src'); image.replaceWith(node('p', '基础体预览无法加载，请核对资源状态。', 'preview-error')); }, { once: true });
+          card.append(image);
+        } else card.append(node('p', '未提供可公开预览的基础体资源。', 'muted'));
+        const viewNames = { front: '正面', 'three-quarter-front': '前侧', side: '侧面', 'three-quarter-back': '后侧', back: '背面' };
+        card.append(node('p', `登记视角：${(model.views || []).map(view => viewNames[view] || view).join('、') || '未登记'}`));
+        card.append(node('p', `关联生动穿搭：${Number.isInteger(model.expressive_count) ? model.expressive_count : '未提供'} · ${model.enabled === false ? '已停用' : '已启用'}`, 'muted'));
+        return card;
+      }));
+      $('#models-status').textContent = data.models.length ? `已登记 ${data.models.length} 位系统模特；内容由项目清单维护。` : '当前没有可预览的系统模特。';
+    } catch (error) {
+      $('#models-status').textContent = '模特资料读取失败，请单独刷新；其他工作台模块可继续使用。';
+      throw error;
+    }
+  }
+  $('#refresh-content').addEventListener('click', () => run(loadContent));
+  $('#refresh-models').addEventListener('click', () => run(loadModels));
   async function loadDashboard() {
-    const sections = await Promise.allSettled([loadOverview(), loadResults(), loadSettings()]);
+    const sections = await Promise.allSettled([loadOverview(), loadResults(), loadSettings(), loadContent(), loadModels()]);
     const failures = sections.filter(section => section.status === 'rejected');
     if (failures.length) throw (failures.find(section => section.reason.sessionExpired) || failures[0]).reason;
     $('#notice').textContent = '工作台已更新。数据来自服务端；外部生成尚未在此验证。';

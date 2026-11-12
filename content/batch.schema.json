@@ -1,0 +1,474 @@
+{
+  "$defs": {
+    "Asset": {
+      "additionalProperties": false,
+      "properties": {
+        "asset_id": {
+          "pattern": "^[A-Za-z0-9_-]{1,128}$",
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "file": {
+          "title": "File",
+          "type": "string"
+        },
+        "mime": {
+          "const": "image/webp",
+          "title": "Mime",
+          "type": "string"
+        },
+        "width": {
+          "maximum": 8000,
+          "minimum": 32,
+          "title": "Width",
+          "type": "integer"
+        },
+        "height": {
+          "maximum": 8000,
+          "minimum": 32,
+          "title": "Height",
+          "type": "integer"
+        },
+        "bytes": {
+          "maximum": 52428800,
+          "minimum": 1,
+          "title": "Bytes",
+          "type": "integer"
+        },
+        "sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "visibility": {
+          "enum": [
+            "public",
+            "private"
+          ],
+          "title": "Visibility",
+          "type": "string"
+        },
+        "layout": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Layout"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "asset_id",
+        "file",
+        "mime",
+        "width",
+        "height",
+        "bytes",
+        "sha256",
+        "visibility"
+      ],
+      "title": "Asset",
+      "type": "object"
+    },
+    "BatchLook": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maximum": 2147483647,
+          "minimum": 1,
+          "title": "Id",
+          "type": "integer"
+        },
+        "model_id": {
+          "title": "Model Id",
+          "type": "string"
+        },
+        "model_reference_sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Model Reference Sha256",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "category": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Category",
+          "type": "string"
+        },
+        "season": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Season",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "pieces": {
+          "items": {
+            "$ref": "#/$defs/Piece"
+          },
+          "minItems": 1,
+          "title": "Pieces",
+          "type": "array"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Tags",
+          "type": "array"
+        },
+        "mood": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Mood",
+          "type": "string"
+        },
+        "scene": {
+          "maxLength": 1000,
+          "minLength": 1,
+          "title": "Scene",
+          "type": "string"
+        },
+        "edition": {
+          "const": "v2",
+          "title": "Edition",
+          "type": "string"
+        },
+        "asset": {
+          "$ref": "#/$defs/Asset"
+        },
+        "shots": {
+          "items": {
+            "$ref": "#/$defs/Shot"
+          },
+          "maxItems": 9,
+          "minItems": 9,
+          "title": "Shots",
+          "type": "array"
+        },
+        "palette": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Palette",
+          "type": "array"
+        },
+        "details": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Details",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "model_id",
+        "model_reference_sha256",
+        "title",
+        "category",
+        "season",
+        "description",
+        "pieces",
+        "tags",
+        "mood",
+        "scene",
+        "edition",
+        "asset",
+        "shots"
+      ],
+      "title": "BatchLook",
+      "type": "object"
+    },
+    "Layout": {
+      "additionalProperties": false,
+      "properties": {
+        "rows": {
+          "const": 3,
+          "title": "Rows",
+          "type": "integer"
+        },
+        "columns": {
+          "const": 3,
+          "title": "Columns",
+          "type": "integer"
+        },
+        "preview_panel": {
+          "maximum": 9,
+          "minimum": 1,
+          "title": "Preview Panel",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "rows",
+        "columns",
+        "preview_panel"
+      ],
+      "title": "Layout",
+      "type": "object"
+    },
+    "Piece": {
+      "additionalProperties": false,
+      "properties": {
+        "role": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Role",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "role",
+        "name"
+      ],
+      "title": "Piece",
+      "type": "object"
+    },
+    "Region": {
+      "additionalProperties": false,
+      "properties": {
+        "country": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Country",
+          "type": "string"
+        },
+        "city": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "City",
+          "type": "string"
+        }
+      },
+      "required": [
+        "country",
+        "city"
+      ],
+      "title": "Region",
+      "type": "object"
+    },
+    "Research": {
+      "additionalProperties": false,
+      "properties": {
+        "checked_at": {
+          "format": "date-time",
+          "title": "Checked At",
+          "type": "string"
+        },
+        "trend_sources": {
+          "items": {
+            "$ref": "#/$defs/Source"
+          },
+          "minItems": 2,
+          "title": "Trend Sources",
+          "type": "array"
+        },
+        "weather": {
+          "$ref": "#/$defs/Weather"
+        }
+      },
+      "required": [
+        "checked_at",
+        "trend_sources",
+        "weather"
+      ],
+      "title": "Research",
+      "type": "object"
+    },
+    "Shot": {
+      "additionalProperties": false,
+      "properties": {
+        "index": {
+          "maximum": 9,
+          "minimum": 1,
+          "title": "Index",
+          "type": "integer"
+        },
+        "title": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "emotion": {
+          "maxLength": 1000,
+          "minLength": 1,
+          "title": "Emotion",
+          "type": "string"
+        },
+        "pose": {
+          "maxLength": 1000,
+          "minLength": 1,
+          "title": "Pose",
+          "type": "string"
+        },
+        "framing": {
+          "maxLength": 1000,
+          "minLength": 1,
+          "title": "Framing",
+          "type": "string"
+        }
+      },
+      "required": [
+        "index",
+        "title",
+        "emotion",
+        "pose",
+        "framing"
+      ],
+      "title": "Shot",
+      "type": "object"
+    },
+    "Source": {
+      "additionalProperties": false,
+      "properties": {
+        "url": {
+          "title": "Url",
+          "type": "string"
+        },
+        "published_at": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "format": "date-time",
+              "type": "string"
+            }
+          ],
+          "title": "Published At"
+        },
+        "summary": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "title": "Summary",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url",
+        "published_at",
+        "summary"
+      ],
+      "title": "Source",
+      "type": "object"
+    },
+    "Weather": {
+      "additionalProperties": false,
+      "properties": {
+        "url": {
+          "title": "Url",
+          "type": "string"
+        },
+        "forecast_date": {
+          "format": "date",
+          "title": "Forecast Date",
+          "type": "string"
+        },
+        "checked_at": {
+          "format": "date-time",
+          "title": "Checked At",
+          "type": "string"
+        },
+        "summary": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "title": "Summary",
+          "type": "string"
+        },
+        "styling_reason": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "title": "Styling Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url",
+        "forecast_date",
+        "checked_at",
+        "summary",
+        "styling_reason"
+      ],
+      "title": "Weather",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "batch_id": {
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}-[A-Za-z0-9_-]+$",
+      "title": "Batch Id",
+      "type": "string"
+    },
+    "publish_date": {
+      "format": "date",
+      "title": "Publish Date",
+      "type": "string"
+    },
+    "timezone": {
+      "const": "Asia/Shanghai",
+      "title": "Timezone",
+      "type": "string"
+    },
+    "title": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Title",
+      "type": "string"
+    },
+    "region": {
+      "$ref": "#/$defs/Region"
+    },
+    "research": {
+      "$ref": "#/$defs/Research"
+    },
+    "looks": {
+      "items": {
+        "$ref": "#/$defs/BatchLook"
+      },
+      "minItems": 1,
+      "title": "Looks",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "batch_id",
+    "publish_date",
+    "timezone",
+    "title",
+    "region",
+    "research",
+    "looks"
+  ],
+  "title": "Batch",
+  "type": "object"
+}

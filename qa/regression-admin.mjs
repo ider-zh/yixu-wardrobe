@@ -34,7 +34,10 @@ async function harness(routes = {}, transport = null) {
 }
 
 const emptyOverview = () => ({ visits: 0, look_opens: 0, tryons_total: 0, queued: 0, running: 0, succeeded: 0, failed: 0, unknown: 0, result_count: 0, result_bytes: 0, popular_looks: [], recent_jobs: [] });
+const emptyContent = () => ({ revision: 'fixture-revision', content_ready: true, import_error: null, look_count: 100, model_count: 1, cdn: { config: { configured: false, provider_id: null }, counts: { queued: 0, uploading: 0, verified: 0, failed: 0, unknown: 0, unconfigured: 101 }, total: 101, bytes: 10000, verified_bytes: 0, last_success: null, jobs: [] } });
 const sessionRoutes = () => ({
+  'GET /api/admin/content/overview': emptyContent(),
+  'GET /api/admin/content/models': { models: [] },
   'GET /api/admin/overview': emptyOverview(),
   'GET /api/admin/results?offset=0&limit=24': { items: [], has_more: false },
   'GET /api/admin/settings': { model: '', api_base: '', proxy_url: '', api_key_configured: false, enabled: false },
@@ -396,6 +399,8 @@ test('rendered login, analytics and logout work over native HTTP with a fixture 
         return send({ authenticated: true, csrf_token: token });
       }
       if (!authenticated) return send({ error: { code: 'auth', message: 'Fixture login required' } }, 401);
+      if (request.url === '/api/admin/content/overview') return send(emptyContent());
+      if (request.url === '/api/admin/content/models') return send({ models: [] });
       if (request.url === '/api/admin/overview') return send({ ...emptyOverview(), visits: 42 });
       if (request.url === '/api/admin/results?offset=0&limit=24') return send({ items: [], has_more: false });
       if (request.url === '/api/admin/settings') return send({ model: '', api_base: '', proxy_url: '', api_key_configured: false, enabled: false });
@@ -459,4 +464,56 @@ test('private bootstrap shows login without requesting admin data or exposing fi
   assert.ok(h.document.querySelector('script[type="module"][src="./app.mjs"]'));
   assert.equal(h.document.querySelectorAll('script[src^="http"],link[href^="http"],form[action*="signup"]').length, 0);
   assert.match(h.document.body.textContent, /原始照片.*不可/);
+});
+
+test('public content observation uses real progress, safe models, scoped retry and purges on logout', async () => {
+  const routes = sessionRoutes();
+  const data = emptyContent();
+  data.cdn.config = { configured: true, provider_id: 'fixture-provider', adapter: 'generic-http-put' };
+  data.cdn.total = 4;
+  data.cdn.counts = { queued: 0, uploading: 0, verified: 1, failed: 1, unknown: 2, unconfigured: 0 };
+  data.cdn.jobs = [
+    { id: 1, provider_id: 'fixture-provider', asset_id: 'fixture-look-v2', revision: 'fixture-revision', status: 'failed', attempts: 1, bytes: 1000, error: '<script>fixture error</script>' },
+    { id: 2, provider_id: 'fixture-provider', asset_id: 'fixture-unknown', revision: 'fixture-revision', status: 'unknown', attempts: 1, bytes: 1000, remote_id: 'fixture-object' },
+    { id: 3, provider_id: 'fixture-provider', asset_id: 'fixture-unrecorded', revision: 'fixture-revision', status: 'unknown', attempts: 1, bytes: 1000 },
+  ];
+  routes['GET /api/admin/content/overview'] = data;
+  routes['GET /api/admin/content/models'] = { models: [
+    { model_id: 'female-01', name: '01 号模特', views: ['front', 'side', 'back'], expressive_count: 0, reference: { asset_id: 'fixture-reference', source_url: '/api/admin/content/models/female-01/reference' } },
+    { model_id: 'fixture-private-model', name: '无公开预览', views: [], reference: { asset_id: 'fixture-private', source_url: '/api/admin/originals/private.webp' } },
+  ] };
+  routes['POST /api/admin/content/cdn/jobs/1/retry'] = { queued: true };
+  routes['POST /api/admin/content/cdn/jobs/2/verify'] = { verified: false };
+  const h = await harness(routes);
+  await login(h);
+  assert.match(h.document.querySelector('#content-status').textContent, /100 套.*1 位/);
+  assert.match(h.document.querySelector('#cdn-progress').textContent, /1 \/ 4 张（25%）/);
+  assert.equal(h.document.querySelector('[data-cdn-metric="unknown"]').textContent, '2');
+  assert.equal(h.document.querySelectorAll('[data-cdn-retry]').length, 1);
+  assert.equal(h.document.querySelectorAll('[data-cdn-verify]').length, 1);
+  assert.equal(h.document.querySelector('#cdn-jobs script'), null);
+  assert.equal(h.document.querySelectorAll('#models-grid img').length, 1);
+  assert.equal(h.document.querySelector('#models-grid img').src, '/api/admin/content/models/female-01/reference');
+  assert.match(h.document.querySelector('#models-grid').textContent, /关联生动穿搭：0/);
+  await h.fire('[data-cdn-retry="1"]', 'click');
+  assert.equal(h.requests.find(r => r.url.endsWith('/jobs/1/retry')).headers['X-CSRF-Token'], 'fixture-authenticated');
+  await h.fire('[data-cdn-verify="2"]', 'click');
+  assert.match(h.document.querySelector('#notice').textContent, /没有重新上传/);
+  await h.fire('#logout', 'click');
+  assert.equal(h.document.querySelector('#models-grid').textContent, '');
+  assert.equal(h.document.querySelector('#cdn-jobs').textContent, '');
+  assert.equal(h.document.querySelector('[data-cdn-metric="verified"]').textContent, '—');
+});
+
+test('new content failures remain independent from analytics, results and provider settings', async () => {
+  const routes = sessionRoutes();
+  routes['GET /api/admin/content/overview'] = () => json({ detail: 'content observation unavailable' }, 503);
+  routes['GET /api/admin/content/models'] = () => json({ detail: 'models observation unavailable' }, 503);
+  const h = await harness(routes);
+  await login(h);
+  assert.equal(h.document.querySelector('[data-metric="visits"]').textContent, '0');
+  assert.equal(h.document.querySelector('#results-empty').hidden, false);
+  assert.match(h.document.querySelector('#provider-status').textContent, /未配置/);
+  assert.match(h.document.querySelector('#content-status').textContent, /读取失败/);
+  assert.match(h.document.querySelector('#models-status').textContent, /读取失败/);
 });

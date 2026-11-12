@@ -159,5 +159,7 @@ def crop_reference(settings, look_id, edition, shot_index):
                 )
             )
         )
-    except (AttributeError, OSError, KeyError, StopIteration, ValueError, HTTPException):
+    except StopIteration:
+        raise HTTPException(422, "invalid_selection:Selected look is unavailable") from None
+    except (AttributeError, OSError, KeyError, ValueError, HTTPException):
         raise HTTPException(503, "catalog_unavailable:Selected reference is unavailable") from None

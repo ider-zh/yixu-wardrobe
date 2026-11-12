@@ -21,7 +21,15 @@ def main():
     root = Path(sys.argv[1])
     if not root.is_dir() or any(root.iterdir()):
         raise ValueError("UI bridge requires an empty disposable directory")
-    app = create_app(Settings(data_dir=root))
+    # An explicit public source root is only used by content integration tests.
+    source = Path(sys.argv[2]) if len(sys.argv) > 2 else None
+    app = create_app(
+        Settings(
+            data_dir=root,
+            content_root=source / "content" if source else None,
+            catalog_image_root=source,
+        )
+    )
     with TestClient(app, base_url="https://localhost") as client:
         for line in sys.stdin:
             data = json.loads(line)
@@ -57,8 +65,10 @@ def main():
                 raise ValueError("Unknown bridge control")
             else:
                 response = client.request(
-                    data.get("method", "GET"), data["path"],
-                    headers=data.get("headers", {}), json=data.get("body"),
+                    data.get("method", "GET"),
+                    data["path"],
+                    headers=data.get("headers", {}),
+                    json=data.get("body"),
                 )
                 result = {"status": response.status_code, "body": response.json()}
             print(json.dumps(result), flush=True)

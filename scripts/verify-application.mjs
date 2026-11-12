@@ -40,6 +40,7 @@ try {
   run(process.execPath, ['--test', 'qa/regression-admin.mjs']);
   run(process.execPath, ['qa/regression-integration.mjs']);
   run(process.execPath, ['qa/regression-catalog-export.mjs']);
+  run(process.execPath, ['qa/regression-content.mjs']);
   run(process.execPath, ['qa/regression-deploy.mjs']);
   console.log('YIXU full application verification passed');
 } finally {

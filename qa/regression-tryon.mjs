@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import http from 'node:http';
+import vm from 'node:vm';
 import {spawn} from 'node:child_process';
 import {once} from 'node:events';
 import {fileURLToPath} from 'node:url';
@@ -19,6 +20,7 @@ const chrome = candidates.find(p => fs.existsSync(p));
 assert.ok(chrome, 'Real DOM tests require Chromium; set CHROME_BIN (no production dependency).');
 let available = false, jobs = [], accept = false, uploadError = null, uploadErrorStatus=503, bootstrapError = null, paginate=false, holdList=false, heldList=null;
 const requests = [];
+let catalogFixture=null;
 let resultImage = null; // Browser-encoded synthetic WebP; never a provider output.
 const bootstrap = () => ({csrf_token:'test-csrf',visitor:{id:'test-visitor'},generation_available:available,
   disclosure:{version:'test-v1',title:'照片用途',items:['照片交由第三方 AI 生成试穿图，结果可供后台评估。'],accepted:accept},
@@ -29,6 +31,12 @@ const server = http.createServer(async (req,res) => {
   requests.push({url:req.url,method:req.method,headers:req.headers,body});
   if (req.url.startsWith('/api/')) {
     res.setHeader('Content-Type','application/json');res.setHeader('Cache-Control','no-store');
+    if(req.url==='/api/content/catalog'&&catalogFixture){res.end(JSON.stringify(catalogFixture));return;}
+    if(/^\/api\/content\/assets\/fixture-10[12](?:\/download)?$/.test(req.url)){
+      res.setHeader('Content-Type','image/webp');
+      if(req.url.endsWith('/download'))res.setHeader('Content-Disposition','attachment; filename="fixture-look.webp"');
+      res.end(fs.readFileSync(path.join(root,'images-v2/look-001.webp')));return;
+    }
     if (req.url==='/api/bootstrap') {
       if(bootstrapError){res.statusCode=503;res.end(JSON.stringify(bootstrapError));return;}
       res.setHeader('Set-Cookie','visitor_fixture=test-only; HttpOnly; SameSite=Strict; Path=/');
@@ -104,16 +112,15 @@ try {
   available=true;
   await load();
   await wait('document.getElementById("tryon-availability")?.textContent.includes("已连接")');
-  await evaluate('document.querySelector("[data-edition=v1]").click()');
   await evaluate('document.getElementById("search").value="100";document.getElementById("search").dispatchEvent(new Event("input",{bubbles:true}));document.querySelector("[data-open=\\"100\\"]").click()');
   await evaluate('document.getElementById("detail-tryon").click()');
   assert.equal(await evaluate('document.getElementById("tryon-panel")?.value'),'0','Montage 0 requires explicit panel selection, never silently use panel 1');
   assert.equal(await evaluate('document.getElementById("tryon-panel").options.length'),10,'All nine panels plus explicit unselected montage state');
-  assert.match(await evaluate('document.getElementById("tryon-context").textContent'), /100.*造型/);
+  assert.match(await evaluate('document.getElementById("tryon-context").textContent'), /100.*生动/);
   await evaluate('document.getElementById("tryon-panel").value="9";document.getElementById("tryon-panel").dispatchEvent(new Event("change",{bubbles:true}))');
-  assert.match(await evaluate('document.getElementById("tryon-context").textContent'), /100.*造型.*09/);
-  await evaluate('document.querySelector("[data-edition=v2]").click();document.querySelector("[data-view=\\"4\\"]").click()');
-  assert.match(await evaluate('document.getElementById("tryon-context").textContent'), /100.*造型.*09/,'Open request stays frozen when gallery edition or panel changes');
+  assert.match(await evaluate('document.getElementById("tryon-context").textContent'), /100.*生动.*09/);
+  await evaluate('document.querySelector("[data-view=\\"4\\"]").click()');
+  assert.match(await evaluate('document.getElementById("tryon-context").textContent'), /100.*生动.*09/,'Open request stays frozen when the underlying panel changes');
   await evaluate('document.getElementById("tryon-close").click();document.getElementById("detail-tryon").click()');
   assert.equal(await evaluate('document.getElementById("tryon-panel").value'),'4');
   assert.match(await evaluate('document.getElementById("tryon-context").textContent'), /100.*生动.*04/);
@@ -337,6 +344,44 @@ try {
     assert.equal(await evaluate('localStorage.length+sessionStorage.length'),0);
   }
   console.log('PASS 401/session and 403/CSRF photo failures purge private/local/consent state, explicit bootstrap renews without mutation replay');
+  // Exercise the same shipped page with a server-only full catalog revision.
+  // No fixture content is written to the repository or treated as AI output.
+  const snapshot={window:{}};vm.runInNewContext(fs.readFileSync(path.join(root,'catalog.js'),'utf8'),snapshot);
+  catalogFixture=JSON.parse(JSON.stringify(snapshot.window.WARDROBE));
+  catalogFixture.models=[{model_id:'female-01',name:'01 号模特'},{model_id:'female-02',name:'02 号模特'}];
+  for(const id of [101,102]){
+    const look=JSON.parse(JSON.stringify(catalogFixture.looks[0]));
+    Object.assign(look,{id,title:'动态穿搭 '+id,model_id:id===101?'female-01':'female-02',region:{country:'中国',city:id===101?'上海':'成都'},batch_id:'fixture-'+id,publish_date:id===101?'2026-11-12':'2026-11-13',editorialOrder:id});
+    look.versions={v2:{...look.versions.v2,image:'https://cdn.invalid/'+id+'.webp',image_url:'https://cdn.invalid/'+id+'.webp',source_url:'/api/content/assets/fixture-'+id,download_url:'/api/content/assets/fixture-'+id+'/download'}};
+    catalogFixture.looks.push(look);
+  }
+  uploadError=null;jobs=[];
+  await evaluate('localStorage.setItem("wardrobe99:favorites:v1","[9999,101]")');
+  await load();await wait('document.getElementById("catalog-status").textContent === "内容已更新"');
+  assert.equal(await evaluate('document.querySelectorAll("[data-edition]").length'),0);
+  assert.equal(await evaluate('Number(document.getElementById("hero-total").textContent)'),catalogFixture.looks.length);
+  const catalogRequest=requests.filter(r=>r.url==='/api/content/catalog').at(-1);
+  assert.equal(catalogRequest.headers.cookie,undefined,'Public catalog must omit the private visitor credential');
+  await evaluate('document.getElementById("model-filter").value="female-02";document.getElementById("model-filter").dispatchEvent(new Event("change",{bubbles:true}))');
+  assert.deepEqual(await evaluate('[...document.querySelectorAll("[data-look-card]")].map(el=>Number(el.dataset.lookCard))'),[102]);
+  await evaluate('document.querySelector("[data-look-card] img").dispatchEvent(new Event("error"))');
+  await wait('document.querySelector("[data-look-card] img").getAttribute("src") === "/api/content/assets/fixture-102" && document.querySelector("[data-look-card] img").naturalWidth > 0');
+  await evaluate(`document.querySelector('[data-open="102"]').click();document.querySelector('[data-view="7"]').click();document.getElementById('detail-tryon').click()`);
+  assert.match(await evaluate('document.getElementById("tryon-context").textContent'),/102.*生动.*07/,'Hydrated look and model use the live try-on index');
+  await evaluate('document.getElementById("tryon-close").click();document.getElementById("detail-image").dispatchEvent(new Event("error"))');
+  await wait('document.getElementById("detail-image").getAttribute("src") === "/api/content/assets/fixture-102" && document.getElementById("detail-image").naturalWidth > 0');
+  const publicDownload=await evaluate('(async()=>{const r=await fetch(document.getElementById("download-link").href);return {status:r.status,type:r.headers.get("content-type"),disposition:r.headers.get("content-disposition"),bytes:(await r.arrayBuffer()).byteLength};})()');
+  assert.equal(publicDownload.status,200);assert.equal(publicDownload.type,'image/webp');assert.match(publicDownload.disposition,/attachment/);assert.ok(publicDownload.bytes>0);
+  await evaluate('document.getElementById("detail-image").dispatchEvent(new Event("error"))');
+  assert.equal(await evaluate('document.getElementById("detail-image").hidden'),true);
+  assert.equal(await evaluate('document.getElementById("detail-photo-frame").dataset.imageStatus'),'图片暂不可用');
+  assert.deepEqual(await evaluate('JSON.parse(localStorage.getItem("wardrobe99:favorites:v1"))'),[9999,101]);
+  await evaluate('document.getElementById("close-detail").click();document.getElementById("reset-filters").click();document.getElementById("latest-only").click()');
+  assert.deepEqual(await evaluate('[...document.querySelectorAll("[data-look-card]")].map(el=>Number(el.dataset.lookCard))'),[102]);
+  for(const viewport of viewports){await setViewport(viewport);assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth+1'),'Dynamic filters fit the viewport');}
+  await client('Emulation.clearDeviceMetricsOverride');
+  assert.ok(!requests.some(r=>/^\/images\/look-/.test(r.url)),'Archived v1 photography is never requested by the public page');
+  console.log('PASS real Chromium API hydration above 100, second model, preserved unknown favorites, latest filters, public download and one-shot CDN fallback at mobile/desktop widths');
 } finally {
   if(client&&socket?.readyState===1)await Promise.race([client('Browser.close').catch(()=>{}),new Promise(resolve=>setTimeout(resolve,1000))]);
   if(processChrome.exitCode===null&&processChrome.signalCode===null){const exit=once(processChrome,'exit');try{process.kill(-processChrome.pid,'SIGTERM');}catch(error){if(error.code!=='ESRCH')throw error;}await exit;}

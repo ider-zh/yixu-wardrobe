@@ -1,14 +1,14 @@
 import secrets
 from typing import Literal
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field
 
 
 class Event(BaseModel):
     model_config = ConfigDict(extra="forbid")
     event: Literal["page_view", "look_open", "tryon_open"]
-    look_id: int | None = Field(default=None, ge=1, le=100)
+    look_id: int | None = Field(default=None, ge=1, le=2_147_483_647)
     edition: Literal["v1", "v2"] | None = None
     shot_index: int | None = Field(default=None, ge=1, le=9)
     event_id: str | None = Field(
@@ -16,12 +16,24 @@ class Event(BaseModel):
     )
 
 
-def router(store, require_visitor, clock):
+def router(store, require_visitor, clock, content=None):
     routes = APIRouter()
 
     @routes.post("/api/events")
     def event(request: Request, data: Event):
         visitor = require_visitor(request, True)
+        if (
+            content is not None
+            and content.enabled
+            and (
+                data.edition == "v1"
+                or (
+                    data.look_id is not None
+                    and not any(look["id"] == data.look_id for look in content.catalog()["looks"])
+                )
+            )
+        ):
+            raise HTTPException(422, "invalid_selection:Public look is unavailable")
         with store.connect() as db:
             db.execute(
                 "INSERT OR IGNORE INTO events "

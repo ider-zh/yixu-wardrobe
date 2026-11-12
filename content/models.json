@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "models": [
+    {
+      "model_id": "female-01",
+      "name": "01 号模特",
+      "reference": {
+        "asset_id": "model-female-01-reference-r1",
+        "file": "assets/model-bases/female-01.webp",
+        "mime": "image/webp",
+        "width": 1536,
+        "height": 1024,
+        "bytes": 71786,
+        "sha256": "dc0a221ff81250415bcfa3b320bc916dc02e2873f030e707083928505ca75066",
+        "visibility": "public"
+      },
+      "views": [
+        "front",
+        "three-quarter-front",
+        "side",
+        "three-quarter-back",
+        "back"
+      ]
+    }
+  ]
+}

@@ -1,5 +1,29 @@
 # Deployment source and verified preparation
 
+## Dynamic content release settings
+
+The source now supports expressive-only content manifests and a public CDN queue.
+This source update does not install a live deployment hook or select an image host.
+For an authorized release, set `YIXU_CONTENT_ROOT` to the release's `content/`,
+`YIXU_IMAGE_ROOT` to the read-only project resource root that resolves manifest
+paths, and retain the existing `YIXU_DATA_DIR` outside releases. Deploy only the
+generated `public/` to the main static root; archived `images/`, content manifests,
+backend code and private state do not belong in that root.
+
+At API startup, complete local content is verified and activated, public images
+are copied to the durable content-addressed archive, and allowlisted assets are
+enqueued for CDN synchronization. The archive API serves local WebP immediately;
+CDN absence or failure does not block browsing. The API lifespan runs the public
+CDN worker, so no additional service unit is needed. The private try-on worker
+remains separately supervised and uses the same release/settings. A code/resource
+delivery must restart owned processes at the controlled boundary described below;
+a Git push alone does not prove the server received or imported that revision.
+
+Verify `/api/content/catalog`, a returned `source_url`, authenticated model preview
+on the admin origin, and `/api/admin/content/overview`. With no image host configured,
+expect an honest unconfigured status and working source URLs. Only an explicitly
+configured real image host can establish actual CDN delivery; test fixtures do not.
+
 These templates add a private API/worker and an independently authenticated admin origin without replacing the static wardrobe. They contain no account keys, node endpoints, passwords or generated photos. Generated deployment files, the catalog, model, virtual environment and runtime state stay out of Git.
 
 ## Rendered configuration

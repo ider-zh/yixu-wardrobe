@@ -2,7 +2,7 @@
 'use strict';
 const $ = id => document.getElementById(id);
 const dialog = $('tryon-dialog');
-let session = null, currentContext = null, frozen = null, sessionRevision = 0;
+let session = null, currentContext = null, frozen = null, frozenLook = null, sessionRevision = 0;
 let reconnecting = false, recoveryNotice = '';
 const recoveryMessage = '连接已失效，请刷新重连。未自动重试照片提交；若访问凭证丢失，原记录无法恢复。';
 function clearSession() {
@@ -54,27 +54,31 @@ function track(event,context={}) {
   if(Number.isInteger(context.shot_index)&&context.shot_index>=1&&context.shot_index<=9)payload.shot_index=context.shot_index;
   api('/api/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).catch(()=>{});
 }
-window.WardrobeTryOn = {track,setContext(value) {
-  if(!byId.has(value?.look_id) || !['v1','v2'].includes(value.edition) || !Number.isInteger(value.shot_index) || value.shot_index < 0 || value.shot_index > 9)return;
+window.WardrobeTryOn = {track,setCatalog(catalog) {
+  byId.clear();for(const look of catalog.looks||[])byId.set(look.id,look);
+},setContext(value) {
+  if(!byId.has(value?.look_id) || value.edition!=='v2' || !Number.isInteger(value.shot_index) || value.shot_index < 0 || value.shot_index > 9)return;
   currentContext = {look_id:value.look_id, edition:value.edition, shot_index:value.shot_index};
 }};
 function renderContext() {
   $('tryon-selection').hidden = !frozen;
   if(!frozen)return;
-  const look=byId.get(frozen.look_id), version=look.versions[frozen.edition], panel=frozen.shot_index;
+  const look=frozenLook, version=look.versions.v2, panel=frozen.shot_index;
   $('tryon-context').textContent = 'LOOK '+String(look.id).padStart(3,'0')+' · '+(frozen.edition==='v1'?'造型':'生动')+' · '+look.title+' · '+(panel?'参考 '+String(panel).padStart(2,'0')+' / '+version.shots[panel-1].title:'请选择参考写真');
   $('tryon-reference').hidden = !panel;
   if(panel){
-    $('tryon-reference-image').src=version.image;
+    if(window.WardrobeImages)window.WardrobeImages.set($('tryon-reference-image'),version);
+    else $('tryon-reference-image').src=version.source_url||version.image;
     $('tryon-reference-image').style.left=-((panel-1)%3)*100+'%';
     $('tryon-reference-image').style.top=-Math.floor((panel-1)/3)*100+'%';
   }
 }
 function prepareContext() {
-  frozen=currentContext?{...currentContext}:null;
+  frozen=currentContext&&byId.has(currentContext.look_id)?{...currentContext}:null;
+  frozenLook=frozen?byId.get(frozen.look_id):null;
   const select=$('tryon-panel');select.replaceChildren();
   if(frozen){
-    const shots=byId.get(frozen.look_id).versions[frozen.edition].shots;
+    const shots=frozenLook.versions.v2.shots;
     ['请选择一张参考写真',...shots.map((shot,i)=>String(i+1).padStart(2,'0')+' · '+shot.title)].forEach((label,i)=>{
       const option=document.createElement('option');option.value=String(i);option.textContent=label;select.append(option);
     });

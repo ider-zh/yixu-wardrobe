@@ -13,10 +13,11 @@ try {
  const data=JSON.parse(fs.readFileSync(output,'utf8'));
  assert.equal(data.looks.length,100);
  assert.equal(data.looks[0].id,1);
- assert.equal(data.looks[0].versions.v1.image,'images/look-001.webp');
+ assert.equal(data.looks[0].versions.v1,undefined);
  assert.equal(data.looks[0].versions.v2.image,'images-v2/look-001.webp');
  assert.equal(data.looks[0].versions.v2.shots.length,9);
  assert.equal(data.target,100);
  assert.ok(!fs.readFileSync(output,'utf8').includes('window.WARDROBE'));
- console.log('PASS backend catalog is evaluated public JSON with all 100 outfits and correct editions');
+ assert.ok(data.models.some(model=>model.model_id==='female-01'));
+ console.log('PASS exported content is expressive-only JSON with historical IDs and model registry');
 } finally {fs.rmSync(dir,{recursive:true,force:true});}

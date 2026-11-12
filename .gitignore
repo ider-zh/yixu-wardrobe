@@ -20,6 +20,16 @@
 !/assets/
 !/assets/model-bases/
 !/assets/model-bases/female-01.webp
+!/assets/looks/
+!/assets/looks/**/
+!/assets/looks/**/*.webp
+!/content/
+!/content/catalog.json
+!/content/models.json
+!/content/batch.schema.json
+!/content/batches/
+!/content/batches/*.json
+!/content/batches/.gitkeep
 !/scripts/
 !/scripts/*.mjs
 !/.github/
@@ -62,6 +72,7 @@
 !/qa/regression-deploy.mjs
 !/qa/regression-ci.mjs
 !/qa/regression-integration.mjs
+!/qa/regression-content.mjs
 !/deploy/
 !/deploy/*.py
 !/deploy/*.service

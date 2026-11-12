@@ -91,10 +91,16 @@ def create_app(
         return bool(
             provider_ready()
             and detector_ready()
-            and settings.catalog_path
-            and settings.catalog_path.is_file()
-            and settings.catalog_image_root
-            and settings.catalog_image_root.is_dir()
+            and (
+                content.ready
+                if content.enabled
+                else bool(
+                    settings.catalog_path
+                    and settings.catalog_path.is_file()
+                    and settings.catalog_image_root
+                    and settings.catalog_image_root.is_dir()
+                )
+            )
         )
 
     from contextlib import asynccontextmanager
@@ -110,9 +116,12 @@ def create_app(
 
         async with anyio.create_task_group() as tasks:
             tasks.start_soon(cleanup)
+            if app.state.content.ready:
+                app.state.cdn_worker.start()
             try:
                 yield
             finally:
+                app.state.cdn_worker.stop()
                 tasks.cancel_scope.cancel()
 
     app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan)
@@ -120,6 +129,18 @@ def create_app(
     app.state.settings = settings
     app.state.provider = provider
     app.state.store = store = Store(settings.data_dir)
+    from .content import ContentService
+
+    app.state.content = content = ContentService(settings)
+    app.include_router(content.router())
+    from .cdn import CdnService
+    from .cdn_worker import CdnWorker
+
+    app.state.cdn = cdn = CdnService(settings.data_dir)
+    app.state.cdn_worker = CdnWorker(cdn)
+    if content.ready:
+        cdn.enqueue(content.asset_records(), content.catalog()["revision"])
+        content.set_delivery_resolver(cdn.resolve)
 
     @app.middleware("http")
     async def boundary(request: Request, call_next):
@@ -234,15 +255,18 @@ def create_app(
 
     from .jobs import Jobs
 
-    jobs = Jobs(store, settings, available, detector, clock or time.time)
+    jobs = Jobs(store, settings, available, detector, clock or time.time, content=content)
     app.state.jobs = jobs
     app.include_router(jobs.router(require_visitor, DISCLOSURE_VERSION))
     from .analytics import router as analytics_router
 
-    app.include_router(analytics_router(store, require_visitor, jobs.clock))
+    app.include_router(analytics_router(store, require_visitor, jobs.clock, content=content))
     from .admin import Admin
 
     admin = Admin(store, settings, check_csrf)
     app.include_router(admin.router())
     app.state.admin = admin
+    from .content_admin import create_content_admin_router
+
+    app.include_router(create_content_admin_router(cdn, content, admin))
     return app

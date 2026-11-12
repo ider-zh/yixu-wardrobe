@@ -9,6 +9,7 @@ class Settings:
     admin_host: str = "admin.localhost"
     secure_cookies: bool = True
     cookie_max_age: int | None = None
+    content_root: Path | None = None
     catalog_path: Path | None = None
     catalog_image_root: Path | None = None
     face_model: Path | None = None
@@ -34,6 +35,8 @@ class Settings:
             admin_host=os.environ.get("YIXU_ADMIN_HOST", "admin.localhost"),
             secure_cookies=os.environ.get("YIXU_SECURE_COOKIES", "true").lower()
             not in ("false", "0"),
+            content_root=path("YIXU_CONTENT_ROOT")
+            or ((path("YIXU_IMAGE_ROOT") or Path(__file__).resolve().parent.parent) / "content"),
             catalog_path=path("YIXU_CATALOG_PATH"),
             catalog_image_root=path("YIXU_IMAGE_ROOT"),
             face_model=path("YIXU_FACE_MODEL"),

@@ -27,7 +27,7 @@
     </section>
     <div id="workspace" hidden>
       <div class="session-bar"><span id="provider-summary">尚未读取配置，不能确认生成可用。</span><button id="logout" class="outline" type="button">退出登录</button></div>
-      <nav class="section-nav" aria-label="管理导航"><a href="#overview">使用概览</a><a href="#results">生成结果</a><a href="#settings">服务设置</a><a href="#account">账户安全</a></nav>
+      <nav class="section-nav" aria-label="管理导航"><a href="#overview">使用概览</a><a href="#results">生成结果</a><a href="#content">资源与 CDN</a><a href="#models">系统模特</a><a href="#settings">服务设置</a><a href="#account">账户安全</a></nav>
       <section id="overview" class="panel" aria-labelledby="overview-title">
         <div class="section-heading"><div><p class="eyebrow">THE REAL PICTURE</p><h2 id="overview-title">使用概览</h2></div><button id="refresh-overview" class="outline" type="button">刷新概览 ↻</button></div>
         <p class="muted">来自服务端记录，非独立访客估算。任务状态与存储数量分别统计；无记录时显示 0。</p>
@@ -51,6 +51,19 @@
         <p id="results-empty" class="empty" hidden>暂无生成结果。真实完成的试穿将在这里出现。</p>
         <div id="results-grid" class="results-grid"></div>
         <button id="load-more-results" class="outline load-more" type="button" hidden>继续加载结果 ↓</button>
+      </section>
+      <section id="content" class="panel" aria-labelledby="content-title">
+        <div class="section-heading"><div><p class="eyebrow">PUBLIC CONTENT DELIVERY</p><h2 id="content-title">资源与 CDN 同步</h2></div><button id="refresh-content" class="outline" type="button">刷新同步状态 ↻</button></div>
+        <p class="muted">穿搭由外部 agent 更新项目清单交付；本页面只观察内容版本及公开资源同步。未配置或尚未验证 CDN 时，网站继续使用项目图片。</p>
+        <p id="content-status" role="status">尚未读取资源状态。</p><p id="cdn-status" class="provider-status" role="status">尚未读取 CDN 配置。</p><p id="cdn-progress" class="muted">尚无同步进度。</p>
+        <dl id="cdn-metrics" class="metrics">
+          <div><dt>待同步</dt><dd data-cdn-metric="queued">—</dd></div><div><dt>上传中</dt><dd data-cdn-metric="uploading">—</dd></div><div><dt>已验证</dt><dd data-cdn-metric="verified">—</dd></div><div><dt>失败</dt><dd data-cdn-metric="failed">—</dd></div><div><dt>待人工核对</dt><dd data-cdn-metric="unknown">—</dd></div><div><dt>未配置</dt><dd data-cdn-metric="unconfigured">—</dd></div>
+        </dl>
+        <p class="field-hint">仅明确失败的当前图床任务可重试；交付结果未知时不会自动重传。图床密钥与用户照片不会显示或进入公共同步。</p><ul id="cdn-jobs" class="job-list"></ul>
+      </section>
+      <section id="models" class="panel" aria-labelledby="models-title">
+        <div class="section-heading"><div><p class="eyebrow">SYSTEM MODELS</p><h2 id="models-title">系统模特预览</h2></div><button id="refresh-models" class="outline" type="button">刷新模特 ↻</button></div>
+        <p id="models-status" class="muted">尚未读取模特。基础体和视角来自项目登记资料，历史穿搭不会自动归属新模特。</p><div id="models-grid" class="models-grid"></div>
       </section>
       <section id="settings" class="panel" aria-labelledby="settings-title">
         <div class="section-heading"><div><p class="eyebrow">PROVIDER RUNTIME</p><h2 id="settings-title">生成服务设置</h2></div><button id="refresh-settings" class="outline" type="button">重新读取设置 ↻</button></div>

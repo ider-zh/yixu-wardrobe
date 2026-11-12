@@ -11,6 +11,7 @@ import { createInterface } from 'node:readline';
 import { randomUUID } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { createAdminApp } from '../admin/app.mjs';
+import {loadContent} from '../scripts/content-lib.mjs';
 
 // Actual frontend event handlers -> real create_app routes. Disposable SQLite,
 // default unconfigured provider, no worker, network, photos or fake generations.
@@ -24,9 +25,9 @@ const wait = async predicate => {
   }
   assert.fail('Frontend did not reach expected state');
 };
-async function bridge(t, admin = false) {
+async function bridge(t, admin = false, content = false) {
   const dir = fs.mkdtempSync(path.join(process.env.TMPDIR || os.tmpdir(), 'yixu-ui-'));
-  const child = spawn(process.env.UI_BRIDGE_PYTHON || path.join(root, '.venv/bin/python'), ['tests/ui_bridge.py', dir], {
+  const child = spawn(process.env.UI_BRIDGE_PYTHON || path.join(root, '.venv/bin/python'), ['tests/ui_bridge.py', dir, ...(content ? [root] : [])], {
     cwd: root, env: { ...process.env, PYTHONPATH: [root, process.env.PYTHONPATH].filter(Boolean).join(path.delimiter), PYTHONDONTWRITEBYTECODE: '1' }, stdio: ['pipe', 'pipe', 'pipe'],
   });
   const pending = [];
@@ -196,4 +197,45 @@ test('revoked admin session on password operation clears private dashboard and r
   assert.equal(h.calls.find(c => c.path === '/api/admin/password').status, 401);
   assert.equal(h.calls.filter(c => c.path === '/api/admin/password').length, 1);
   assert.equal(h.$('login-form').querySelector('button').disabled, false);
+});
+
+test('real content API hydrates the actual gallery with source URLs, v2-only data and preserved favorites', async t => {
+  const b = await bridge(t, false, true);
+  const ready = await b.rpc({path:'https://localhost/api/content/catalog'});
+  assert.equal(ready.status,200,'Public content import must succeed before UI hydration');
+  assert.equal(ready.body.revision,loadContent(root).catalog.revision,'Backend and offline export identify the same source revision');
+  const {document, window} = parseHTML(fs.readFileSync(path.join(root, 'index.html'), 'utf8'));
+  // linkedom's select.value is getter-only; browsers support this writable property.
+  for (const select of document.querySelectorAll('select')) {
+    let value='';Object.defineProperty(select,'value',{get:()=>value,set:next=>{value=String(next);}});
+  }
+  for (const dialog of document.querySelectorAll('dialog')) {
+    dialog.showModal=()=>{dialog.open=true;dialog.setAttribute('open','');};
+    dialog.close=()=>{dialog.open=false;dialog.removeAttribute('open');};
+  }
+  const storage = new Map([['wardrobe99:favorites:v1','[9999,1]']]);
+  let accepted;
+  window.WARDROBE={looks:[],categoryOrder:[]};
+  window.WardrobeTryOn={setCatalog:data=>{accepted=data;},setContext(){},track(){}};
+  const source = fs.readFileSync(path.join(root,'app.js'),'utf8').replace("}catch{$('catalog-status')", "}catch(error){window.__hydrationError=String(error);$('catalog-status')");
+  vm.runInNewContext(source,{
+    document,window,fetch:b.fetch,location:{protocol:'https:',href:'https://localhost/',hash:''},URL,
+    localStorage:{getItem:key=>storage.get(key),setItem:(key,value)=>storage.set(key,value)},setTimeout,clearTimeout,
+  });
+  await wait(()=>document.getElementById('catalog-status').textContent==='内容已更新' || window.__hydrationError);
+  assert.equal(window.__hydrationError,undefined);
+  assert.equal(accepted.looks.length,100);
+  assert.equal(accepted.models[0].model_id,'female-01');
+  assert.ok(accepted.looks.every(look=>Object.keys(look.versions).join(',')==='v2'));
+  assert.ok(accepted.looks.every(look=>look.versions.v2.image===look.versions.v2.source_url && look.versions.v2.source_url.startsWith('/api/content/assets/')));
+  assert.ok(document.querySelectorAll('[data-look-card]').length>0);
+  document.querySelector('[data-open="1"]').click();
+  assert.equal(document.getElementById('detail-title').textContent,accepted.looks.find(look=>look.id===1).title);
+  assert.ok(document.getElementById('detail-image').getAttribute('src').startsWith('/api/content/assets/'));
+  document.getElementById('detail-favorite').click();
+  assert.deepEqual(JSON.parse(storage.get('wardrobe99:favorites:v1')),[9999]);
+  assert.equal(document.querySelector('[data-edition]'),null);
+  assert.ok(b.calls.some(call=>call.path==='/api/content/catalog'&&call.status===200));
+  assert.equal((await b.rpc({path:'https://localhost/api/admin/content/overview'})).status,404);
+  assert.equal((await b.rpc({path:'https://admin.localhost/api/admin/content/overview'})).status,401);
 });

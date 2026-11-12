@@ -1,5 +1,24 @@
 # Yixu private API and single worker
 
+## Git content and public resources
+
+The API also imports versioned `content/` manifests at creation. Set
+`YIXU_CONTENT_ROOT` and `YIXU_IMAGE_ROOT` explicitly for a deployed release.
+Verified public WebP files are durably archived beneath `YIXU_DATA_DIR/public-content`,
+and `/api/content/catalog` returns expressive-only content with controlled same-origin
+`source_url` values. Invalid releases preserve the last good content revision.
+Legacy styling remains in source archives but not the public build or active catalog.
+
+Public CDN work uses its own durable queue and API-lifespan background thread,
+separate from private photo generation. No provider is configured by default;
+source URLs work before CDN readiness. A generic HTTPS PUT adapter is available,
+but must be matched to the selected host's actual protocol. Credentials live only
+in private `cdn-config.json`; observation and retry/verification/migration routes
+are authenticated under `/api/admin/content`. Model previews use the authenticated
+admin-origin reference route rather than a main-site API URL on the wrong Host.
+See [development notes](../DEVELOPMENT.md) for the exact resource contract and
+configuration semantics. No user input or private result enters this public queue.
+
 ## Run
 
 From the repository root, install the exact locked official dependencies:
@@ -8,8 +27,9 @@ From the repository root, install the exact locked official dependencies:
 uv sync --locked
 # Set these to operator-owned private/runtime locations, outside the public tree:
 export YIXU_DATA_DIR=/path/to/private/yixu
-export YIXU_CATALOG_PATH=/path/to/runtime/catalog.json
-export YIXU_IMAGE_ROOT=/path/to/site
+export YIXU_CONTENT_ROOT=/path/to/project-release/content
+export YIXU_IMAGE_ROOT=/path/to/project-release
+# Legacy fixture/catalog mode additionally accepts YIXU_CATALOG_PATH.
 export YIXU_FACE_MODEL=/path/to/models/yunet.onnx
 export YIXU_PUBLIC_HOST=www.8882088.xyz
 export YIXU_ADMIN_HOST=admin.8882088.xyz
