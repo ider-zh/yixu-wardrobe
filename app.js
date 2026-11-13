@@ -14,7 +14,7 @@ let productSaved=[];
 try{const value=JSON.parse(localStorage.getItem(productStorageKey)||'[]');if(Array.isArray(value))productSaved=value.filter(id=>typeof id==='string'&&/^[A-Za-z0-9_-]+$/.test(id));}catch{}
 const productFavorites=new Set(productSaved);
 const state = {category:'', season:'', query:'', model:'', region:'', latestOnly:false, favoritesOnly:false, sort:'latest', page:'home', limit:24, active:null, view:0, version:'v2'};
-let filtered = [], toastTimer, detailReturnRoute = '#/home', routing = false, detailNavigation = null, focusArchive = false;
+let filtered = [], toastTimer, detailReturnRoute = '#/home', routing = false, detailNavigation = null, focusArchive = false, routeDetailCloses = 0;
 const snapshotRevision = window.WARDROBE?.revision;
 function latestLooks() {
   const rank = new Map((data.latestOrder || []).map((id,index)=>[id,index]));
@@ -365,7 +365,9 @@ function routeFromURL(scroll=true){
  const route=/^#\/(home|looks|models|favorites|products)(?:\?(.*))?$/.exec(location.hash),page=productRoute?'product':route?.[1]||'home';
  routing=true;
  state.page=page;
- if($('detail-dialog').open)$('detail-dialog').close();state.active=null;
+ // Native dialog close events are queued. A route-driven close must not later
+ // overwrite a detail URL restored by Back before that close event arrives.
+ if($('detail-dialog').open){routeDetailCloses++;$('detail-dialog').close();}state.active=null;detailNavigation=null;
  $('home-page').hidden=page!=='home';$('models-page').hidden=page!=='models';$('collection').hidden=!['looks','favorites'].includes(page);$('closing-note').hidden=page!=='home';
  $('products-page').hidden=page!=='products';$('product-page').hidden=page!=='product';
  if(page==='products')renderProducts();if(page==='product')renderProduct(productRoute[1]);
@@ -382,6 +384,7 @@ function routeFromURL(scroll=true){
  if(focusArchive&&page==='looks'){focusArchive=false;$('collection-title').tabIndex=-1;$('collection-title').focus({preventScroll:true});}
 }
 $('detail-dialog').addEventListener('close',()=>{
+ if(routeDetailCloses){routeDetailCloses--;return;}
  if($('detail-dialog').open)return;
  state.active=null;detailNavigation=null;
  if(/^#look-/.test(location.hash)){history.replaceState(null,'',detailReturnRoute);routeFromURL(false);}

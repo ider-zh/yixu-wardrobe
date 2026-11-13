@@ -61,6 +61,17 @@ check('public UI has no archived edition controls or fixed capacity labels',()=>
   for(const look of context.window.WARDROBE.looks){assert.deepEqual(Object.keys(look.versions),['v2']);assert.equal(look.versions.v2.shots.length,9);}
   assert.doesNotMatch(node('gallery').innerHTML,/images\/look-/);
 });
+check('a queued route close cannot overwrite a detail URL restored by browser Back',()=>{
+  a.openDetail(100);
+  context.location.hash='#/looks?q=100';windowEvents.hashchange();
+  assert.equal(node('detail-dialog').open,false);
+  // The URL traversal can complete before the old native close event runs.
+  context.location.hash='#look-100';node('detail-dialog').events.close[0]();
+  assert.equal(context.location.hash,'#look-100');
+  windowEvents.hashchange();assert.equal(node('detail-dialog').open,true);assert.equal(a.state.active,100);
+  context.location.hash='#/looks';windowEvents.hashchange();node('detail-dialog').events.close[0]();
+  a.resetFilters();
+});
 check('offline snapshot preserves curated category exploration without fixed category sizes',()=>{
   for(const category of baseline.categoryOrder){a.state.category=category;a.refreshFilters();assert.ok(a.getFiltered().every(l=>l.category===category));}
   a.resetFilters();assert.equal(a.state.sort,'latest');assert.deepEqual(Array.from(a.getFiltered(),l=>l.id),baseline.looks.map(l=>l.id).sort((a,b)=>b-a));
