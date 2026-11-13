@@ -12,7 +12,8 @@ Yixu is a wardrobe to wander through at your own pace. Starting with 100 complet
 - **Browse your way.** In 全部穿搭 (All looks), filter by style, season, model or region. Newest publications appear first, with curated exploration available as an alternative.
 - **Follow a model.** The 模特 (Models) page shows each model's published outfits. Historical photographs are not assigned to a newly registered model without checking their identity.
 - **Find a favorite.** Search names, numbers, garments, materials or moods. The gallery labels are Chinese: try 丝绒 for velvet, 百褶裙 for pleated skirts or 惊喜 for surprise.
-- **Look closer.** Open an outfit's expressive nine-photo grid. Select 01–09 to explore one moment, then read the garment list and styling notes.
+- **Look closer.** Select 01–09 by shot number and name to explore the expression, movement and framing, then read the garment list and styling notes.
+- **Follow an idea.** Linked tags in outfit details search the wardrobe for related outfits. Your browser's Back button returns to the outfit you were viewing.
 - **Keep a look.** Save favorites with the heart, compare two or three outfits, or choose 保存图片 to download. Existing numbers and favorites stay associated with their outfits.
 
 Keyboard shortcuts: `/` for search, `←` and `→` for adjacent looks in details, and `Esc` to close a dialog.
@@ -33,7 +34,7 @@ The 200 historical photographs are same-dimension WebP totaling 48,176,224 bytes
 
 Favorites remain in the current browser; favorite selections are not uploaded. Switching browsers or addresses, or clearing browser data, may remove or separate them.
 
-Online photo try-on requires an available backend and generation service. A photo is uploaded only after selecting a reference and explicitly accepting its disclosed use. Results are available to their owner through the existing browser credential; administrators may assess generated results during development. User photos, private try-on results and credentials never enter public image hosting or project source. Offline browsing does not provide online try-on.
+Online photo try-on requires an available backend and generation service. Reference choices show each shot's name and framing; select one to read its full description and see a preview before deciding which frame to use. A photo is uploaded only after explicitly accepting its disclosed use. Results are available to their owner through the existing browser credential; administrators may assess generated results during development. User photos, private try-on results and credentials never enter public image hosting or project source. Offline browsing does not provide online try-on.
 
 Character and outfit images are generative artwork for styling inspiration and visual enjoyment. Details may vary; images do not establish actual size or fit.
 

@@ -117,13 +117,22 @@ try {
   await evaluate('document.getElementById("detail-tryon").click()');
   assert.equal(await evaluate('document.getElementById("tryon-panel")?.value'),'0','Montage 0 requires explicit panel selection, never silently use panel 1');
   assert.equal(await evaluate('document.getElementById("tryon-panel").options.length'),10,'All nine panels plus explicit unselected montage state');
+  const legacyShots=await evaluate('window.WARDROBE.looks.find(look=>look.id===100).versions.v2.shots');
+  assert.deepEqual(await evaluate('[...document.getElementById("tryon-panel").options].slice(1).map(option=>({value:option.value,label:option.textContent}))'),
+    legacyShots.map((shot,i)=>({value:String(i+1),label:String(i+1).padStart(2,'0')+' · '+shot.title+' · '+shot.framing})),
+    'Historical 100 keeps all nine actual titles, framing descriptions and panel indices');
+  assert.equal(await evaluate('document.getElementById("tryon-panel").getAttribute("aria-describedby")'),'tryon-reference-framing');
+  assert.match(await evaluate('document.getElementById("tryon-reference-framing").textContent'),/请选择.*确认覆盖的衣装/);
+  assert.doesNotMatch(await evaluate('document.getElementById("tryon-reference-framing").textContent'),/完整全身|默认.*全身/);
   assert.match(await evaluate('document.getElementById("tryon-context").textContent'), /100.*生动/);
   await evaluate('document.getElementById("tryon-panel").value="9";document.getElementById("tryon-panel").dispatchEvent(new Event("change",{bubbles:true}))');
   assert.match(await evaluate('document.getElementById("tryon-context").textContent'), /100.*生动.*09/);
   await evaluate('document.querySelector("[data-view=\\"4\\"]").click()');
   assert.match(await evaluate('document.getElementById("tryon-context").textContent'), /100.*生动.*09/,'Open request stays frozen when the underlying panel changes');
+  assert.equal(await evaluate('document.getElementById("tryon-reference-framing").textContent'),'画面景别 / '+legacyShots[8].framing,'Framing stays frozen with the selected reference');
   await evaluate('document.getElementById("tryon-close").click();document.getElementById("detail-tryon").click()');
   assert.equal(await evaluate('document.getElementById("tryon-panel").value'),'4');
+  assert.equal(await evaluate('document.getElementById("tryon-reference-framing").textContent'),'画面景别 / '+legacyShots[3].framing);
   assert.match(await evaluate('document.getElementById("tryon-context").textContent'), /100.*生动.*04/);
   const before=await evaluate('document.getElementById("detail-title").textContent');
   await evaluate('document.dispatchEvent(new KeyboardEvent("keydown",{key:"ArrowRight",bubbles:true}))');
@@ -150,6 +159,21 @@ try {
     await client('Emulation.setDeviceMetricsOverride',{...viewport,deviceScaleFactor:1,mobile:viewport.width<600});
     await evaluate('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');
   };
+  const assertReferenceBounds=async label=>{
+    const bounds=await evaluate(`(()=>{
+      const select=document.getElementById('tryon-panel'),description=document.getElementById('tryon-reference-framing');
+      const parent=select.parentElement.getBoundingClientRect(),choice=select.getBoundingClientRect(),text=description.getBoundingClientRect();
+      return {parent:{left:parent.left,right:parent.right},choice:{left:choice.left,right:choice.right},text:{left:text.left,right:text.right,height:text.height},
+        scrollWidth:description.scrollWidth,clientWidth:description.clientWidth,lineHeight:parseFloat(getComputedStyle(description).lineHeight),viewport:innerWidth};
+    })()`);
+    for(const area of [bounds.choice,bounds.text]){
+      assert.ok(area.left>=bounds.parent.left-1&&area.right<=bounds.parent.right+1,label+' stays inside selection content');
+      assert.ok(area.left>=-1&&area.right<=bounds.viewport+1,label+' stays inside viewport');
+    }
+    assert.ok(bounds.scrollWidth<=bounds.clientWidth+1,label+' wraps without horizontal overflow');
+    return bounds;
+  };
+  for(const viewport of viewports){await setViewport(viewport);await assertReferenceBounds('Historical framing '+viewport.width);}
   const assertImageGeometry=async (selector,shape,viewport,source,maxHeight)=>{
     await wait(`document.querySelector(${JSON.stringify(selector)})?.naturalWidth === ${shape.width} && document.querySelector(${JSON.stringify(selector)}).naturalHeight === ${shape.height} && !document.querySelector(${JSON.stringify(selector)}).hidden`);
     const geometry=await evaluate(`(()=>{
@@ -385,6 +409,50 @@ try {
   await client('Emulation.clearDeviceMetricsOverride');
   assert.ok(!requests.some(r=>/^\/images\/look-/.test(r.url)),'Archived v1 photography is never requested by the public page');
   console.log('PASS real Chromium API hydration above 100, second model, preserved unknown favorites, latest filters, public download and one-shot CDN fallback at mobile/desktop widths');
+  // Use the actual published 102 shot script, without changing repository content
+  // or invoking an image provider. All HTTP endpoints remain the local fixture.
+  const publishedShots=JSON.parse(fs.readFileSync(path.join(root,'content/batches/2026-11-12-01.json'),'utf8')).looks.find(look=>look.id===102).shots;
+  const dynamicLook=catalogFixture.looks.find(look=>look.id===102);
+  dynamicLook.versions.v2.shots=structuredClone(publishedShots);
+  const uploadsBeforeFraming=requests.filter(r=>r.method==='POST'&&r.url==='/api/tryons').length;
+  await load();await wait('window.WARDROBE.looks.some(look=>look.id===102)');
+  await evaluate('location.hash="#look-102"');await wait('document.getElementById("detail-dialog").open');
+  await evaluate('document.getElementById("detail-tryon").click()');
+  assert.equal(await evaluate('document.getElementById("tryon-panel").value'),'0','Actual 102 still requires an explicit choice');
+  assert.deepEqual(await evaluate('[...document.getElementById("tryon-panel").options].slice(1).map(option=>({value:option.value,label:option.textContent}))'),
+    publishedShots.map((shot,i)=>({value:String(i+1),label:String(i+1).padStart(2,'0')+' · '+shot.title+' · '+shot.framing})));
+  for(const [index,shot] of publishedShots.entries()){
+    const panel=index+1;
+    await evaluate(`document.getElementById('tryon-panel').value='${panel}';document.getElementById('tryon-panel').dispatchEvent(new Event('change',{bubbles:true}))`);
+    assert.equal(await evaluate('document.getElementById("tryon-reference-framing").textContent'),'画面景别 / '+shot.framing);
+    assert.deepEqual(await evaluate('[document.getElementById("tryon-reference-image").style.left,document.getElementById("tryon-reference-image").style.top]'),
+      [-(index%3)*100+'%',-Math.floor(index/3)*100+'%'],'Actual 102 reference crop preserves row-major panel '+panel);
+  }
+  for(const panel of [1,3,7])assert.match(publishedShots[panel-1].framing,/全身.*双靴/,'Actual shoe-visible references stay explicit');
+  assert.match(publishedShots[1].framing,/坐姿腰上/);
+  const longFraming='胸上近景，完整头部与发顶；请查看画面中实际呈现的衣装层次。'.repeat(12)+'<仅为测试文本>&';
+  for(const framing of [undefined,'','   ',longFraming]){
+    await evaluate('document.getElementById("tryon-close").click()');
+    const variant=structuredClone(dynamicLook);
+    if(framing===undefined)delete variant.versions.v2.shots[0].framing;
+    else variant.versions.v2.shots[0].framing=framing;
+    await evaluate(`window.WardrobeTryOn.setCatalog({looks:[${JSON.stringify(variant)}]});window.WardrobeTryOn.setContext({look_id:102,edition:'v2',shot_index:0});document.getElementById('detail-tryon').click()`);
+    assert.equal(await evaluate('document.getElementById("tryon-panel").value'),'0','Framing metadata never selects a panel');
+    assert.equal(await evaluate('document.getElementById("tryon-panel").options.length'),10);
+    const expected=framing?.trim()||'';
+    assert.equal(await evaluate('document.getElementById("tryon-panel").options[1].textContent'),'01 · '+publishedShots[0].title+(expected?' · '+expected:''));
+    await evaluate('document.getElementById("tryon-panel").value="1";document.getElementById("tryon-panel").dispatchEvent(new Event("change",{bubbles:true}))');
+    assert.equal(await evaluate('document.getElementById("tryon-reference-framing").textContent'),expected?'画面景别 / '+expected:'该画面未提供景别说明，请查看参考图确认覆盖的衣装。');
+    assert.equal(await evaluate('document.getElementById("tryon-reference-framing").children.length'),0,'Framing is plain text');
+    for(const viewport of viewports){
+      await setViewport(viewport);
+      const bounds=await assertReferenceBounds('Published/missing/long framing '+viewport.width);
+      if(expected)assert.ok(bounds.text.height>bounds.lineHeight*2,'Long framing is readable over multiple lines');
+    }
+  }
+  assert.equal(requests.filter(r=>r.method==='POST'&&r.url==='/api/tryons').length,uploadsBeforeFraming,'Reference inspection never uploads a photo or submits generation');
+  await client('Emulation.clearDeviceMetricsOverride');
+  console.log('PASS published 102 and historical 100 actual framing, nine index/crop mappings, frozen context, missing/empty fallback, accessible readable long descriptions at 320/390/1280px; no generation submission');
 } finally {
   if(client&&socket?.readyState===1)await Promise.race([client('Browser.close').catch(()=>{}),new Promise(resolve=>setTimeout(resolve,1000))]);
   if(processChrome.exitCode===null&&processChrome.signalCode===null){const exit=once(processChrome,'exit');try{process.kill(-processChrome.pid,'SIGTERM');}catch(error){if(error.code!=='ESRCH')throw error;}await exit;}

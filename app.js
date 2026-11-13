@@ -10,7 +10,7 @@ let saved = [];
 try { const value = JSON.parse(localStorage.getItem(storageKey) || '[]'); if (Array.isArray(value)) saved = value.filter(id => Number.isSafeInteger(id) && id > 0); } catch {}
 const favorites = new Set(saved), compare = new Set();
 const state = {category:'', season:'', query:'', model:'', region:'', latestOnly:false, favoritesOnly:false, sort:'latest', page:'home', limit:24, active:null, view:0, version:'v2'};
-let filtered = [], toastTimer, detailReturnRoute = '#/home', routing = false, detailNavigation = null;
+let filtered = [], toastTimer, detailReturnRoute = '#/home', routing = false, detailNavigation = null, focusArchive = false;
 const snapshotRevision = window.WARDROBE?.revision;
 function latestLooks() {
   const rank = new Map((data.latestOrder || []).map((id,index)=>[id,index]));
@@ -181,8 +181,14 @@ function buildCategories() {
   $('category-list').innerHTML = entries.map(c=>'<button class="category-button'+(!c.name?' active':'')+'" data-category="'+esc(c.name)+'" aria-pressed="'+!c.name+'"><span>'+esc(c.label)+'</span><span class="cat-count">'+String(c.count).padStart(2,'0')+'</span></button>').join('');
 
 }
+function matchesSearch(look,query) {
+  const words=String(query).trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
+  if(!words.length)return true;
+  const terms=[number(look.id),String(look.id),look.title,look.category,look.season,look.description,look.region,modelName(look.model_id),...(look.tags||[]),...(look.pieces||[]).map(piece=>piece.name),...(look.details||[]),versionOf(look).story,versionOf(look).summary,...(versionOf(look).moods||[]),...(versionOf(look).shots||[]).flatMap(shot=>[shot.title,shot.emotion,shot.pose])].join(' ').toLocaleLowerCase();
+  return words.every(word=>terms.includes(word));
+}
 function matchLooks() {
-  const q = state.query.trim().toLocaleLowerCase(),latest=state.latestOnly?latestBatch():'',latestRank=new Map(latestLooks().map((look,index)=>[look.id,index]));
+  const latest=state.latestOnly?latestBatch():'',latestRank=new Map(latestLooks().map((look,index)=>[look.id,index]));
   filtered = looks.filter(l => {
     if (state.category && l.category !== state.category) return false;
     if (state.season && l.season !== state.season) return false;
@@ -190,11 +196,7 @@ function matchLooks() {
     if (state.region && l.region !== state.region) return false;
     if (state.latestOnly && l.batch_id !== latest) return false;
     if ((state.page==='favorites'||state.favoritesOnly) && !favorites.has(l.id)) return false;
-    if (q) {
-      const terms = [number(l.id),String(l.id),l.title,l.category,l.season,l.description,l.region,modelName(l.model_id),...(l.tags||[]),...(l.pieces||[]).map(p=>p.name),...(l.details||[]),versionOf(l).story,versionOf(l).summary,...(versionOf(l).moods||[]),...(versionOf(l).shots||[]).flatMap(s=>[s.title,s.emotion,s.pose])].join(' ').toLocaleLowerCase();
-      return q.split(/\s+/).every(word=>terms.includes(word));
-    }
-    return true;
+    return matchesSearch(l,state.query);
   }).sort((a,b) => state.version==='v2'&&versionOf(a).ready!==versionOf(b).ready ? Number(versionOf(b).ready)-Number(versionOf(a).ready) : state.sort==='latest' ? latestRank.get(a.id)-latestRank.get(b.id) : state.sort==='curated' ? (a.editorialOrder??a.id)-(b.editorialOrder??b.id) : state.sort==='pieces' ? b.pieces.length-a.pieces.length || a.id-b.id : state.sort==='favorites' ? Number(favorites.has(b.id))-Number(favorites.has(a.id)) || a.id-b.id : a.id-b.id);
 }
 function refreshFilters() {
@@ -269,15 +271,24 @@ function updateDetailActions() {
 }
 function openDetail(id,preserveNavigation=false) {
   const l=byId.get(id);if(!l)return;
-  if(!preserveNavigation||!detailNavigation)detailNavigation=((state.page==='looks'||state.page==='favorites')&&filtered.some(look=>look.id===id)?filtered:latestLooks()).map(look=>look.id);
-  if(!$('detail-dialog').open&&!/^#look-/.test(location.hash))detailReturnRoute=location.hash||'#/home';
-  if(location.hash!=='#look-'+id)history.pushState(null,'','#look-'+id);
+  const detailRoute=/^#look-/.test(location.hash),restored=!$('detail-dialog').open&&detailRoute?history.state?.wardrobeDetail:null;
+  if(restored&&typeof restored.returnRoute==='string'&&/^#\/(home|looks|models|favorites)(?:\?|$)/.test(restored.returnRoute))detailReturnRoute=restored.returnRoute;
+  else if(!$('detail-dialog').open)detailReturnRoute=detailRoute?'#/home':location.hash||'#/home';
+  if(restored&&Array.isArray(restored.navigation)&&restored.navigation.includes(id))detailNavigation=restored.navigation.filter(key=>byId.has(key));
+  else if(!preserveNavigation||!detailNavigation)detailNavigation=((state.page==='looks'||state.page==='favorites')&&filtered.some(look=>look.id===id)?filtered:latestLooks()).map(look=>look.id);
+  const entry={...history.state,wardrobeDetail:{returnRoute:detailReturnRoute,navigation:detailNavigation}};
+  if(location.hash!=='#look-'+id)history.pushState(entry,'','#look-'+id);
+  else history.replaceState(entry,'',location.hash);
   state.active=id;
   $('detail-number').textContent='LOOK '+number(id)+' / '+l.category+' / '+l.season;
   $('detail-title').textContent=l.title;$('detail-story').hidden=state.version!=='v2';$('detail-story-title').textContent=versionOf(l).story;$('detail-story-summary').textContent=versionOf(l).summary;
   $('detail-palette').innerHTML=palette(l);
   $('detail-description').textContent=l.description;
-  $('detail-tags').innerHTML=[...(l.tags||[]),...(state.version==='v2'?(versionOf(l).moods||[]):[])].map(t=>'<span>'+esc(t)+'</span>').join('');
+  $('detail-tags').innerHTML=(l.tags||[]).map(tag=>{
+    if(typeof tag!=='string'||!tag.trim()||!looks.some(other=>other.id!==id&&matchesSearch(other,tag)))return '<span>'+esc(tag)+'</span>';
+    const href='#/looks?'+new URLSearchParams({q:tag});
+    return '<a href="'+esc(href)+'" data-explore-tag aria-label="搜索标签 '+esc(tag)+'">'+esc(tag)+' <span aria-hidden="true">↗</span></a>';
+  }).join('')+(versionOf(l).moods||[]).map(mood=>'<span>'+esc(mood)+'</span>').join('');
   $('detail-pieces').innerHTML=l.pieces.map((p,i)=>'<li><span class="piece-number">'+String(i+1).padStart(2,'0')+'</span><span class="piece-role">'+esc(p.role)+'</span><span>'+esc(p.name)+'</span></li>').join('');
   $('detail-design').innerHTML=l.details.map(d=>'<li>'+esc(d)+'</li>').join('');
   $('detail-scene').textContent='写真场景 / '+l.scene;
@@ -285,7 +296,7 @@ function openDetail(id,preserveNavigation=false) {
   if(versionOf(l).ready)setImage($('detail-image'),versionOf(l));else $('detail-image').removeAttribute('src');
   $('original-link').href=imageURL(versionOf(l));$('download-link').href=publicSource(versionOf(l).download_url,true)||publicSource(versionOf(l).source_url||versionOf(l).image);$('download-link').download='LOOK-'+number(id)+'-'+state.version+'-'+l.title+'.webp';
   $('original-link').hidden=!versionOf(l).ready;$('download-link').hidden=!versionOf(l).ready;
-  $('view-selector').innerHTML=[0,1,2,3,4,5,6,7,8,9].map(v=>'<button data-view="'+v+'" aria-label="'+esc(v?(versionOf(l).shots[v-1]?.title||'写真'+v):'完整九宫格')+'" aria-pressed="'+!v+'">'+(v?String(v).padStart(2,'0'):'九宫格')+'</button>').join('');
+  $('view-selector').innerHTML=[0,1,2,3,4,5,6,7,8,9].map(v=>'<button data-view="'+v+'" aria-label="'+esc(v?String(v).padStart(2,'0')+' · '+(versionOf(l).shots[v-1]?.title||'写真'+v):'完整九宫格')+'" aria-pressed="'+!v+'">'+(v?'<span class="shot-number">'+String(v).padStart(2,'0')+'</span><span class="shot-title">'+esc(versionOf(l).shots[v-1]?.title||'写真'+v)+'</span>':'九宫格')+'</button>').join('');
   $('view-selector').hidden=!versionOf(l).ready;setView(0);updateDetailActions();
   window.WardrobeTryOn?.track?.('look_open',{look_id:id,edition:state.version});
   const list=detailList(),position=list.findIndex(x=>x.id===id);
@@ -295,6 +306,7 @@ function openDetail(id,preserveNavigation=false) {
   $('detail-dialog').scrollTop=0;
 }
 $('view-selector').addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(b)setView(Number(b.dataset.view));});
+$('detail-tags').addEventListener('click',event=>{if(event.target.closest('[data-explore-tag]')&&event.button===0&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey)focusArchive=true;});
 $('close-detail').addEventListener('click',()=>$('detail-dialog').close());
 $('detail-favorite').addEventListener('click',()=>toggleFavorite(state.active));
 $('detail-compare').addEventListener('click',()=>toggleCompare(state.active));
@@ -326,7 +338,7 @@ document.querySelectorAll('dialog').forEach(dialog=>dialog.addEventListener('cli
 document.addEventListener('keydown',e=>{
   const editable=e.target.matches('input,textarea,select,[contenteditable]');
   if(e.key==='/'&&!editable&&!document.querySelector('dialog[open]')){e.preventDefault();if(!['looks','favorites'].includes(state.page)){history.pushState(null,'','#/looks');routeFromURL(false);}$('search').focus();$('search').scrollIntoView({block:'center',behavior:'smooth'});}
-  if($('detail-dialog').open&&!$('tryon-dialog')?.open&&!$('compare-dialog').open&&!editable){if(e.key==='ArrowRight'){e.preventDefault();navigateLook(1);}if(e.key==='ArrowLeft'){e.preventDefault();navigateLook(-1);}}
+  if($('detail-dialog').open&&!$('tryon-dialog')?.open&&!$('compare-dialog').open&&!editable&&!e.target.closest('#view-selector, #detail-tags a')){if(e.key==='ArrowRight'){e.preventDefault();navigateLook(1);}if(e.key==='ArrowLeft'){e.preventDefault();navigateLook(-1);}}
 });
 window.addEventListener('storage',e=>{if(e.key!==storageKey)return;try{const values=JSON.parse(e.newValue||'[]');if(!Array.isArray(values))return;favorites.clear();values.filter(id=>Number.isSafeInteger(id)&&id>0).forEach(id=>favorites.add(id));updateCounts();renderGallery();updateEditionUI();if(state.active)updateDetailActions();}catch{}});
 function archiveRoute(){
@@ -353,6 +365,7 @@ function routeFromURL(scroll=true){
  if($('filter-dialog').open)$('filter-dialog').close();
  routing=false;
  if(scroll)window.scrollTo({top:0,behavior:'instant'});
+ if(focusArchive&&page==='looks'){focusArchive=false;$('collection-title').tabIndex=-1;$('collection-title').focus({preventScroll:true});}
 }
 $('detail-dialog').addEventListener('close',()=>{
  if($('detail-dialog').open)return;

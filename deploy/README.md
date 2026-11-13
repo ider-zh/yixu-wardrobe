@@ -1,5 +1,20 @@
 # Deployment source and verified preparation
 
+## Deployed baseline and current development
+
+Commit `2582a98` was deployed on 2026-11-12. That release serves 102 public
+expressive looks with look 102 featured on the homepage. Trusted HTTPS, the
+resource API, the static snapshot, and the new images for looks 101 and 102 were
+verified. The public site is [www.8882088.xyz](https://www.8882088.xyz/); the
+independently authenticated admin site is
+[admin.8882088.xyz](https://admin.8882088.xyz/). CDN is unconfigured, so images use
+project source URLs. These are recorded release checks, not an uptime guarantee.
+
+Experience improvements started on 2026-11-13 require their own regression and
+release checks. Their scope and acceptance criteria are tracked in the
+[content publishing plan](../docs/content-publishing-plan.md). A commit, passing
+CI, or these deployment instructions do not activate a new production release.
+
 ## Dynamic content release settings
 
 The source now supports expressive-only content manifests and a public CDN queue.
@@ -39,7 +54,7 @@ python3 deploy/render.py \
 node scripts/export-catalog.mjs --output "$BACKEND_RELEASE/catalog.json"
 ```
 
-Provide absolute paths for these operator-selected locations. The renderer writes only its named files into the explicit output directory; review before installing. The catalog evaluates the existing trusted JavaScript catalog with Node and exports all 100 looks; the backend must not parse JavaScript itself.
+Provide absolute paths for these operator-selected locations. The renderer writes only its named files into the explicit output directory; review before installing. The catalog exporter reads the current validated content manifests through `loadContent` and exports all active public looks, including appended batches. Its count is dynamic; the deployed baseline above contains 102 looks. The backend reads JSON and must not parse JavaScript itself.
 
 The real regression commands already exercised for this preparation are:
 
@@ -88,9 +103,9 @@ Before replacing live application configuration:
 2. Stage an explicit immutable release and its own environment. Check ownership/modes and record existing public-build and unrelated service fingerprints. Do not include input photos in backups.
 3. Verify rendered Nginx files with the real host's `nginx -t` and units with `systemd-analyze verify`. Preserve a rollback for only the changed application paths. Stop the owned worker at a controlled boundary before changing shared application code; do not restart unrelated services.
 4. Confirm API/transport listeners are loopback only, supervisor restart/boot enablement, host-role isolation, admin/visitor login separation, safe Cookie attributes, non-cacheable private data, ownership checks and absence of any administrator original-photo API.
-5. Verify trusted HTTPS with normal DNS for both domains, certificate SANs and the existing renewal timer/reload hook. The admin certificate was prepared successfully while its app route deliberately returned maintenance 503 and the unchanged main site returned 200. This is TLS readiness, not finished admin deployment. Recheck the final application's body and status after cutover.
+5. Verify trusted HTTPS with normal DNS for both domains, certificate SANs and the existing renewal timer/reload hook. The 2026-11-12 deployment verified both application origins; a certificate or HTTP status alone does not establish that a later candidate is active. Recheck the final application's body and status after each cutover.
 6. Verify all 200 original gallery image hashes and the original public interactions. Exercise phone and desktop layouts with actual browser input.
-7. Configure an explicitly authorized project key through the private admin settings, then perform any paid photo-quality pilot only with explicit permission and consented inputs. Until then, expose an honest unavailable state, not fake images or an apparently successful end-to-end claim.
+7. Preserve an existing authorized provider configuration. If provider setup is needed, configure an explicitly authorized project key through the private admin settings. Perform any paid photo-quality pilot only with explicit permission and consented inputs; health/configuration checks do not establish generation quality. An unavailable provider must produce an honest unavailable state.
 
 ## Application CI and local verification
 
@@ -140,6 +155,13 @@ is a mode-0600 `publication.json` receipt written outside the repository. The ad
 panel displays that proof separately from CDN synchronization counts. Its proof
 matches the active revision and featured image; replacing content invalidates old
 proof automatically.
+
+The current command verifies `index.html`, `app.js`, the catalog snapshot and the
+featured source image. It does not yet verify every core static file, every image
+in the latest batch, or the admin deployment. The next delivery improvement is to
+cover those files explicitly and test stale/missing files and failed-cutover
+recovery; see the staged acceptance criteria in the development plan. Do not
+infer that broader coverage from an existing publication receipt.
 
 Failed preparation leaves the current static site and previous proof unchanged.
 If restart or origin verification fails after activation, the previous static

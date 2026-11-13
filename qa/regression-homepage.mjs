@@ -138,10 +138,98 @@ try{
  await route('#/favorites');assert.deepEqual(await evaluate('[...document.querySelectorAll("#gallery [data-look-card]")].map(card=>Number(card.dataset.lookCard))'),[featured.id]);
  await navigate(origin+'/#look-'+featured.id);await wait('document.getElementById("detail-dialog").open');assert.equal(await evaluate('document.getElementById("detail-title").textContent'),featured.title);await evaluate('document.getElementById("close-detail").click()');await wait('!document.getElementById("home-page").hidden');
  console.log('PASS published-model links, local/unknown favorite preservation and reloadable direct detail links');
+ // Tag exploration is a real link into the full archive, not a recommendation
+ // API. Each detail entry keeps its origin even after navigating away and Back.
+ const tag='衣序共享标签回归';
+ apiCatalog=structuredClone(catalog);
+ apiCatalog.looks.find(look=>look.id===featured.id).tags.push(tag);
+ apiCatalog.looks.find(look=>look.id!==featured.id).tags.push(tag);
+ await navigate();await wait(`window.WARDROBE.looks.find(look=>look.id===${featured.id}).tags.includes(${JSON.stringify(tag)})`);
+ const region=typeof featured.region==='string'?featured.region:featured.region?.city||'';
+ const filteredOrigin='#/looks?'+new URLSearchParams({category:featured.category,season:featured.season,model:featured.model_id||'',region,latest:'1',saved:'1',sort:'id'});
+ for(const source of ['#/home',filteredOrigin,'#/favorites']){
+  await route(source);
+  await evaluate(source==='#/home'?'document.getElementById("hero-detail").click()':`document.querySelector('#gallery [data-open="${featured.id}"]').click()`);
+  await wait('document.getElementById("detail-dialog").open');
+  const position=await evaluate('document.getElementById("detail-position").textContent');
+  const tags=await evaluate('[...document.querySelectorAll("#detail-tags > a")].map(link=>({href:link.getAttribute("href"),label:link.getAttribute("aria-label")}))');
+  assert.ok(tags.some(link=>new URLSearchParams(link.href.split('?')[1]).get('q')===tag));
+  assert.ok(tags.every(link=>link.label.startsWith('搜索标签 ')),'Link purpose is explicit to assistive technology');
+  assert.equal(await evaluate('document.querySelector("#detail-tags > a").getAttribute("href").startsWith("#/looks?q=")'),true);
+  const expectedMoods=featured.versions.v2.moods||[];
+  for(const mood of expectedMoods)assert.equal(await evaluate(`[...document.querySelectorAll('#detail-tags > span')].some(node=>node.textContent===${JSON.stringify(mood)})`),true,'Mood remains plain text');
+  await evaluate(`document.querySelector('#detail-tags a[href="${'#/looks?'+new URLSearchParams({q:tag})}"]').focus()`);
+  await client('Input.dispatchKeyEvent',{type:'keyDown',key:'Enter',code:'Enter',windowsVirtualKeyCode:13,text:'\r',unmodifiedText:'\r'});
+  await client('Input.dispatchKeyEvent',{type:'keyUp',key:'Enter',code:'Enter',windowsVirtualKeyCode:13});
+  await wait('!document.getElementById("detail-dialog").open && !document.getElementById("collection").hidden');
+  assert.equal(await evaluate('new URLSearchParams(location.hash.split("?")[1]).get("q")'),tag);
+  assert.match(await evaluate('location.hash'),/%[0-9A-F]{2}/,'Chinese query is URL encoded');
+  assert.equal(await evaluate('document.activeElement.id'),'collection-title','Search destination receives focus');
+  assert.equal(await evaluate('document.getElementById("search").value'),tag);
+  assert.equal(await evaluate('document.getElementById("sort").value'),'latest');
+  assert.equal(await evaluate('document.getElementById("latest-only").checked || document.getElementById("favorites-only").checked'),false,'Exploration clears old latest/favorite filters');
+  assert.deepEqual(await evaluate('["model-filter","region-filter"].map(id=>document.getElementById(id).value)'),['','']);
+  const found=await evaluate('[...document.querySelectorAll("#gallery [data-look-card]")].map(card=>Number(card.dataset.lookCard))');
+  assert.ok(found.includes(featured.id)&&found.some(id=>id!==featured.id),'Tag search actually finds another outfit');
+  assert.equal(await evaluate('document.querySelectorAll("#active-filters .filter-pill").length'),1,'Only the clicked tag remains active');
+  await evaluate('history.back()');await wait(`document.getElementById("detail-dialog").open && location.hash==="#look-${featured.id}"`);
+  assert.equal(await evaluate('document.getElementById("detail-position").textContent'),position,'Back restores the original detail navigation context');
+  await evaluate('document.getElementById("close-detail").click()');
+  await wait(`!document.getElementById("detail-dialog").open && location.hash===${JSON.stringify(source)}`);
+ }
+ await navigate(origin+'/#/looks?'+new URLSearchParams({q:tag}));
+ assert.equal(await evaluate('document.getElementById("search").value'),tag,'Reload preserves an encoded search route');
+ // Synthetic long titles and a punctuation-heavy shared tag exercise the same
+ // browser UI without changing any production content or invoking a provider.
+ apiCatalog=structuredClone(catalog);
+ const longTitle='沿着窗边慢慢走来并邀请你一起看看新发现的那本书';
+ const specialTag='针织 蓝+棕 & 雨/日';
+ const synthetic=apiCatalog.looks.find(look=>look.id===featured.id);
+ synthetic.versions.v2.shots.forEach((shot,index)=>{shot.title=longTitle+String(index+1);});
+ synthetic.tags.push(specialTag,'仅本套独有的测试标签',17);
+ apiCatalog.looks.find(look=>look.id!==featured.id).tags.push(specialTag);
+ for(const width of [320,390]){
+  await client('Emulation.setDeviceMetricsOverride',{width,height:844,deviceScaleFactor:1,mobile:true});
+  await navigate();await wait(`window.WARDROBE.looks.find(look=>look.id===${featured.id}).tags.includes(${JSON.stringify(specialTag)})`);
+  await evaluate('document.getElementById("hero-detail").click()');await wait('document.getElementById("detail-dialog").open');
+  assert.equal(await evaluate(`document.querySelector('[data-view="0"]').getAttribute("aria-pressed")`),'true','Grid remains the default');
+  assert.deepEqual(await evaluate('[...document.querySelectorAll("#view-selector .shot-number")].map(node=>node.textContent)'),['01','02','03','04','05','06','07','08','09']);
+  assert.equal(await evaluate(`document.querySelector('[data-view="1"] .shot-title').textContent`),longTitle+'1');
+  assert.equal(await evaluate('document.querySelector("#detail-dialog").scrollWidth<=document.querySelector("#detail-dialog").clientWidth+1'),true,'Long titles fit the '+width+'px dialog');
+  assert.equal(await evaluate('[...document.querySelectorAll("#view-selector button")].every(node=>node.scrollWidth<=node.clientWidth+1)'),true,'Every named button wraps rather than overflowing');
+  await noOverflow('Named shot details '+width);
+  await evaluate(`document.querySelector('[data-view="3"]').focus()`);
+  await client('Input.dispatchKeyEvent',{type:'keyDown',key:'Enter',code:'Enter',windowsVirtualKeyCode:13,text:'\r',unmodifiedText:'\r'});
+  await client('Input.dispatchKeyEvent',{type:'keyUp',key:'Enter',code:'Enter',windowsVirtualKeyCode:13});
+  assert.equal(await evaluate(`document.querySelector('[data-view="3"]').getAttribute("aria-pressed")`),'true');
+  assert.equal(await evaluate('document.querySelector("#view-moment").textContent.includes(window.WARDROBE.looks.find(look=>look.id===Number(document.getElementById("hero-detail").dataset.open)).versions.v2.shots[2].framing)'),true,'Selected shot retains full real framing');
+  for(const key of ['ArrowRight','ArrowLeft']){
+   await client('Input.dispatchKeyEvent',{type:'keyDown',key,code:key,windowsVirtualKeyCode:key==='ArrowRight'?39:37});
+   await client('Input.dispatchKeyEvent',{type:'keyUp',key,code:key,windowsVirtualKeyCode:key==='ArrowRight'?39:37});
+  }
+  assert.equal(await evaluate('location.hash'),'#look-'+featured.id,'Global arrows do not switch outfits while a shot control has focus');
+  assert.equal(await evaluate('document.activeElement.dataset.view'),'3','Arrow keys do not steal shot-control focus');
+  const links=await evaluate('[...document.querySelectorAll("#detail-tags>a")].map(link=>link.getAttribute("href"))');
+  assert.ok(links.some(href=>new URLSearchParams(href.split('?')[1]).get('q')===specialTag));
+  assert.ok(!links.some(href=>new URLSearchParams(href.split('?')[1]).get('q')==='仅本套独有的测试标签'),'Unique tag stays plain text');
+  await evaluate(`document.querySelector('#detail-tags a[href="${'#/looks?'+new URLSearchParams({q:specialTag})}"]').click()`);
+  await wait('!document.getElementById("detail-dialog").open');
+  assert.equal(await evaluate('document.getElementById("search").value'),specialTag,'Punctuation is preserved, not parsed as URL fields');
+  assert.ok(await evaluate('document.querySelectorAll("#gallery [data-look-card]").length>1'));
+ }
+ apiCatalog=structuredClone(catalog);
+ console.log('PASS named shots at 320/390px, keyboard focus, shared-only encoded tag search and source-aware detail Back from home/archive/favorites');
  apiCatalog=structuredClone(catalog);apiCatalog.revision='stale-test-revision';apiCatalog.looks=apiCatalog.looks.filter(look=>look.id!==featured.id);apiCatalog.home={featured_look_id:apiCatalog.looks[0].id,recent_look_ids:[],latest_batch_id:null};
  await navigate();await wait('document.getElementById("catalog-status").textContent.includes("同步中")');assert.equal(await evaluate('document.getElementById("hero-title").textContent'),featured.title);assert.equal(await evaluate('window.WARDROBE.revision'),catalog.revision);
  apiCatalog=structuredClone(catalog);await navigate();await wait('document.getElementById("hero-image-0").naturalWidth>0');assert.equal(await evaluate('document.getElementById("catalog-status").textContent'),'');
  await navigate(pathToFileURL(path.join(output,'index.html')).href);await wait('document.getElementById("hero-image-0").naturalWidth>0');assert.equal(await evaluate('document.getElementById("hero-title").textContent'),featured.title);await route('#/looks');assert.equal(await evaluate('document.querySelector("#gallery [data-look-card]").dataset.lookCard'),String(catalog.latestOrder[0]));await noOverflow('Offline archive');
+ const offlineSource='#/looks?q=1',offlineTag='针织'; // Frozen historical fixture survives future daily hero changes.
+ await route(offlineSource);await evaluate(`document.querySelector('#gallery [data-open="1"]').click()`);await wait('document.getElementById("detail-dialog").open');
+ const offlineLink=await evaluate(`document.querySelector('#detail-tags a[href="${'#/looks?'+new URLSearchParams({q:offlineTag})}"]').getAttribute('href')`);
+ await evaluate(`document.querySelector('#detail-tags a[href="${offlineLink}"]').click()`);await wait('!document.getElementById("detail-dialog").open');
+ assert.equal(await evaluate('location.protocol'),'file:');assert.equal(await evaluate('document.getElementById("search").value'),offlineTag);
+ assert.ok(await evaluate('document.querySelectorAll("#gallery [data-look-card]").length>1'),'Offline exploration uses its snapshot, without the API');
+ await evaluate('history.back()');await wait('document.getElementById("detail-dialog").open');await evaluate('document.getElementById("close-detail").click()');await wait(`location.hash===${JSON.stringify(offlineSource)}`);
  assert.ok(!requested.some(url=>/^\/images\/look-/.test(url)),'Archived v1 pictures never enter the public site');
  assert.deepEqual(exceptions,[],'Browser must not report uncaught JavaScript exceptions');
  console.log('PASS stale API retains newest built version, matching API hydration, real file:// offline snapshot and expressive-only resources');

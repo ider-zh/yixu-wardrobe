@@ -70,11 +70,16 @@ window.WardrobeTryOn = {track,setCatalog(catalog) {
   if(!byId.has(value?.look_id) || value.edition!=='v2' || !Number.isInteger(value.shot_index) || value.shot_index < 0 || value.shot_index > 9)return;
   currentContext = {look_id:value.look_id, edition:value.edition, shot_index:value.shot_index};
 }};
+function shotFraming(shot) {
+  return typeof shot?.framing==='string'?shot.framing.trim():'';
+}
 function renderContext() {
   $('tryon-selection').hidden = !frozen;
   if(!frozen)return;
   const look=frozenLook, version=look.versions.v2, panel=frozen.shot_index;
   $('tryon-context').textContent = 'LOOK '+String(look.id).padStart(3,'0')+' · '+(frozen.edition==='v1'?'造型':'生动')+' · '+look.title+' · '+(panel?'参考 '+String(panel).padStart(2,'0')+' / '+version.shots[panel-1].title:'请选择参考写真');
+  const framing=panel?shotFraming(version.shots[panel-1]):'';
+  $('tryon-reference-framing').textContent=panel?(framing?'画面景别 / '+framing:'该画面未提供景别说明，请查看参考图确认覆盖的衣装。'):'请选择一张参考写真，并查看画面确认覆盖的衣装。';
   $('tryon-reference').hidden = !panel;
   if(panel){
     if(window.WardrobeImages)window.WardrobeImages.set($('tryon-reference-image'),version);
@@ -89,7 +94,7 @@ function prepareContext() {
   const select=$('tryon-panel');select.replaceChildren();
   if(frozen){
     const shots=frozenLook.versions.v2.shots;
-    ['请选择一张参考写真',...shots.map((shot,i)=>String(i+1).padStart(2,'0')+' · '+shot.title)].forEach((label,i)=>{
+    ['请选择一张参考写真',...shots.map((shot,i)=>[String(i+1).padStart(2,'0'),shot.title,shotFraming(shot)].filter(Boolean).join(' · '))].forEach((label,i)=>{
       const option=document.createElement('option');option.value=String(i);option.textContent=label;select.append(option);
     });
     select.value=String(frozen.shot_index);
