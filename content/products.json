@@ -1353,6 +1353,295 @@
         "details_title": "光泽靠近时",
         "worn_title": "肖像里的安静亮点"
       }
+    },
+    {
+      "product_id": "oat-funnel-coat-103",
+      "name": "浅燕麦米漏斗领中长外套",
+      "category": "外层",
+      "subtitle": "一截浅燕麦色，把雨天收得温柔利落。",
+      "description": "短漏斗领、单排同色圆扣与直身微 A 的膝上轮廓，呼应第 103 套的燕麦米外层。独立陈列状态、领内细部与放大的表面微观纹理含 AI 设计补充，原写真不证明这些部位的真实结构或工艺。",
+      "color_name": "浅燕麦米",
+      "color_hex": "#c5b59e",
+      "design_material": "柔软细密的毛感与哑光表面，仅为视觉设计描述，不代表真实纤维成分或加工工艺。",
+      "notes": [
+        "短漏斗领与三颗同色圆扣保持简洁的纵向线条",
+        "长袖、斜插袋与微 A 衣摆延续原写真可见轮廓",
+        "主图采用前面平铺陈列；领内细部及放大微纹理为 AI 设计补充",
+        "省略参考不足的内里与完整背面，不提供未经确认的品牌、成分、尺寸或货源"
+      ],
+      "presentation": {
+        "theme": "editorial",
+        "preset": "warm-paper"
+      },
+      "asset": {
+        "asset_id": "product-oat-funnel-coat-103-hero-r1",
+        "file": "assets/products/look-103/oat-funnel-coat-103-hero-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 108124,
+        "sha256": "8edfcd2588cbb99c3482ad04e9ac783155d638524d6c8ca90647678c28e69ba2",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "领口与扣位，收住竖向线条。",
+          "caption": "独立斜向近景核对短漏斗领与上两颗同色圆扣。领内细缝及放大的表面纹理缺少原写真结构参考，属于 AI 设计推演，不作为真实缝制工艺证明。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-oat-funnel-coat-103-collar-buttons-r1",
+            "file": "assets/products/look-103/oat-funnel-coat-103-collar-buttons-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 182490,
+            "sha256": "ef637b3dbc9aff01f85bb013d26e2a827c2906d48c0977bd0f923c0fe9ee9f75",
+            "visibility": "public"
+          }
+        },
+        {
+          "title": "袖口轻叠，看柔光经过。",
+          "caption": "无装饰袖口轻搭同一外套身片，侧光展示柔软表面的起伏。原写真不足以验证放大后的微观纹理与袖口内缘，此处为 AI 设计推演，不证明实际材质或工艺。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-oat-funnel-coat-103-cuff-texture-r1",
+            "file": "assets/products/look-103/oat-funnel-coat-103-cuff-texture-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 159940,
+            "sha256": "6fe040ea525e97646e9db33e3ba88aae3892dc6dbcfe7ad2c6c18c54c9748b59",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 103,
+          "piece_index": 1,
+          "reference_asset_id": "look-103-female-01-v2-r1",
+          "shot_index": 1
+        }
+      ],
+      "copy": {
+        "hero_title": "燕麦米漏斗领外套"
+      }
+    },
+    {
+      "product_id": "burgundy-knit-dress-103",
+      "name": "酒红纵纹针织连衣裙",
+      "category": "衣裙",
+      "subtitle": "低圆领与细纵纹，勾勒轻收腰的中长轮廓",
+      "description": "以第103套写真中露出的酒红低圆领、纵向纹理与小腿中部裙长为设计依据，独立呈现轻收腰、微A字裙摆的针织连衣裙。写真中的肩袖被外套遮挡，完整肩线、长袖和袖口为克制的AI设计补充；独立图与细部纹理为设计展示，不证明真实材料或工艺。",
+      "color_name": "深酒红",
+      "color_hex": "#611F2C",
+      "design_material": "细纵向罗纹针织观感；柔和哑光与自然垂坠，仅表达设计效果。",
+      "notes": [
+        "完整主图中的肩线、长袖与袖口受原写真外套遮挡，属于AI设计补充。",
+        "领口图涉及未见肩部，已标记设计推演；裙摆纹理近景亦属AI设计演绎，不作真实工艺或成分证明。",
+        "以精确写真修订关联原穿着上下文；未制作未知背面、内标或内里。",
+        "为自有AI设计展示，不提供未经证实的品牌、成分、尺码、价格或货源。"
+      ],
+      "presentation": {
+        "theme": "editorial",
+        "preset": "warm-paper"
+      },
+      "asset": {
+        "asset_id": "product-burgundy-knit-dress-103-main-r1",
+        "file": "assets/products/look-103/burgundy-knit-dress-103-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 94644,
+        "sha256": "1f4aa8e21e173cc4229a32c56f4708b6bb2e07031cfd5f457787a5ee79a835c8",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "低圆领与纵纹衔接",
+          "caption": "独立取景展示低圆领和细纵纹的连接；肩部在原穿搭中被外套遮挡，本图肩线与局部针织细节为AI设计推演。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-burgundy-knit-dress-103-neckline-r1",
+            "file": "assets/products/look-103/burgundy-knit-dress-103-neckline-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 229612,
+            "sha256": "64aa00437ab9fc01a2370f2b923f8b187acbaf2dacb4286bec0ded0ae91b4a52",
+            "visibility": "public"
+          }
+        },
+        {
+          "title": "裙摆垂坠与细纵纹",
+          "caption": "独立取景展示微A裙摆的折面、细纵纹与简洁下摆；放大纹理属于AI设计演绎，不能用于证明真实面料成分或工艺。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-burgundy-knit-dress-103-hem-r1",
+            "file": "assets/products/look-103/burgundy-knit-dress-103-hem-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 203238,
+            "sha256": "2922391196d5afea88d5dae45beea5fd1c72961986875a9faff2ff494d7901b4",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 103,
+          "piece_index": 2,
+          "reference_asset_id": "look-103-female-01-v2-r1",
+          "shot_index": 4
+        }
+      ]
+    },
+    {
+      "presentation": {
+        "theme": "studio",
+        "preset": "neutral-white"
+      },
+      "product_id": "black-ankle-boots-103",
+      "name": "黑色圆头低粗跟短靴",
+      "category": "鞋履",
+      "subtitle": "圆润鞋头，把步履落稳。",
+      "description": "圆头、低粗跟与简洁短靴筒，衔接酒红裙摆下的深色重心。独立图依照写真可见轮廓作 AI 设计演绎，细密表面、边缘及完整靴筒形态不作为原款工艺证明。",
+      "color_name": "黑色",
+      "color_hex": "#252322",
+      "design_material": "哑光皮面与黑色胶底观感，仅为视觉设计描述",
+      "notes": [
+        "圆头与低粗跟，保留简洁而平稳的侧形",
+        "独立图的细纹、边缘与靴筒形态为 AI 设计演绎，不证明真实材质或工艺",
+        "未展示未知鞋底花纹、内里与闭合结构，不提供未经核实的成分、尺寸或货源"
+      ],
+      "asset": {
+        "asset_id": "product-black-ankle-boots-103-main-r1",
+        "file": "assets/products/look-103/black-ankle-boots-103-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 50752,
+        "sha256": "e61384c089d526bda36ebf1d0b7d08dfbe2b5acf48e6f94f48a1a9631992f5d8",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "低跟与侧形",
+          "caption": "以新取景说明低粗跟、靴身与外底边缘的衔接。写真未提供可核实的工艺近照，局部结构与表面均为 AI 设计演绎；不展示未知鞋底或闭合结构。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-black-ankle-boots-103-heel-r1",
+            "file": "assets/products/look-103/black-ankle-boots-103-heel-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 70030,
+            "sha256": "86c8bc01d4535bdad46f4fec50d63f8f4ca1cb570e6e5e1b4cbe5d18b42845d2",
+            "visibility": "public"
+          }
+        },
+        {
+          "title": "圆头与柔和明暗",
+          "caption": "侧向柔光呈现圆头弧度与鞋面细纹。纹理与边缘为 AI 设计演绎，不是主图裁切或实物材质检测。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-black-ankle-boots-103-vamp-r1",
+            "file": "assets/products/look-103/black-ankle-boots-103-vamp-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 98230,
+            "sha256": "0775750050425b871a18e8c4ec8b762cd8a81a09b9ec1a2b789dbf3a19ec4f33",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 103,
+          "piece_index": 3,
+          "reference_asset_id": "look-103-female-01-v2-r1",
+          "shot_index": 4
+        }
+      ]
+    },
+    {
+      "presentation": {
+        "theme": "studio",
+        "preset": "neutral-white"
+      },
+      "product_id": "burgundy-tophandle-bag-103",
+      "name": "深酒红短提手梯形包",
+      "category": "配饰",
+      "subtitle": "一弧提手，收住酒红的温度。",
+      "description": "小圆角梯形包身与单短弧形提手，呼应同色连衣裙。独立图依据原写真可见色型作 AI 设计演绎，微粒纹、提手接点与包身边缘不作为原款工艺证明。",
+      "color_name": "深酒红",
+      "color_hex": "#5d2534",
+      "design_material": "微粒纹皮面与暖金属观感，仅为视觉设计描述",
+      "notes": [
+        "圆角梯形包身与单短提手，保留原写真中清楚可见的识别轮廓",
+        "微粒纹、连接环与边缘细节为 AI 设计演绎，不代表实物材质或工艺",
+        "不展示未知内里、口部闭合机构与背面，不虚构品牌、容量或尺寸"
+      ],
+      "asset": {
+        "asset_id": "product-burgundy-tophandle-bag-103-main-r1",
+        "file": "assets/products/look-103/burgundy-tophandle-bag-103-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 126770,
+        "sha256": "a2e49bdcc48614c6b766d734762e108e9ec14c8f158548e150b9bda2c4283735",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "提手接点与弧线",
+          "caption": "独立近景呈现短提手与小连接环的关系。原写真没有足够像素核实接点工艺，连接细节与微粒纹均为 AI 设计演绎，不据此推定包口结构。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-burgundy-tophandle-bag-103-handle-r1",
+            "file": "assets/products/look-103/burgundy-tophandle-bag-103-handle-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 191032,
+            "sha256": "3bdc268a5cf40592fa4533175a23c2e750f878e20d7c6222071e5c841ed8f933",
+            "visibility": "public"
+          }
+        },
+        {
+          "title": "圆角包身与微粒纹",
+          "caption": "从下角观察包身转折与柔光中的微粒纹。表面与边缘为 AI 设计演绎，不是主图局部裁切，也不构成真实材质证明。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-burgundy-tophandle-bag-103-surface-r1",
+            "file": "assets/products/look-103/burgundy-tophandle-bag-103-surface-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 234704,
+            "sha256": "eefab7a6ad7334988ed4d72c16fc95b72acb8f5a38298159fdbe9e0d6c18ec3b",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 103,
+          "piece_index": 4,
+          "reference_asset_id": "look-103-female-01-v2-r1",
+          "shot_index": 7
+        }
+      ]
     }
   ]
 }

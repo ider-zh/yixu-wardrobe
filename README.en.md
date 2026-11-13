@@ -14,7 +14,7 @@ Yixu is a wardrobe to wander through at your own pace. Starting with 100 complet
 - **Find a favorite.** Search names, numbers, garments, materials or moods. The gallery labels are Chinese: try 丝绒 for velvet, 百褶裙 for pleated skirts or 惊喜 for surprise.
 - **Look closer.** Select 01–09 by shot number and name to explore the expression, movement and framing, then read the garment list and styling notes.
 - **Follow an idea.** Linked tags in outfit details search the wardrobe for related outfits. Your browser's Back button returns to the outfit you were viewing.
-- **Explore each piece.** In “单品”, explore 17 designs from 翡翠新中式, 黑白街头, 海边白裙 and 西岸蓝调皮裙. Browse independent product images, angles and details, return to the original outfit photograph for wearing context, and save pieces separately. Design additions unsupported by the original photograph are disclosed as extrapolations.
+- **Explore each piece.** In “单品”, explore 21 designs from 翡翠新中式, 黑白街头, 海边白裙, 西岸蓝调皮裙 and 燕麦酒红·雨廊赴约. Browse independent product images, angles and details, return to the original outfit photograph for wearing context, and save pieces separately. Design additions unsupported by the original photograph are disclosed as extrapolations.
 - **Explore at a different pace.** The skirt keeps a spacious editorial layout, while the boots put large images and multiple views first. Wearing references and favorites remain consistent.
 - **Keep a look.** Save favorites with the heart, compare two or three outfits, or choose 保存图片 to download. Existing numbers and favorites stay associated with their outfits.
 
