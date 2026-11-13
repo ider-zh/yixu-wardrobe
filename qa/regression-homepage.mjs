@@ -232,12 +232,25 @@ try{
  await evaluate('history.back()');await wait('document.getElementById("detail-dialog").open');await evaluate('document.getElementById("close-detail").click()');await wait(`location.hash===${JSON.stringify(offlineSource)}`);
  // Product samples work from the actual offline snapshot as well as API hydration.
  const sampleProducts=catalog.products||[];
- assert.equal(sampleProducts.length,3);
+ assert.ok(sampleProducts.length>=3,'Published product samples remain available as the catalog grows');
+ // Look 102 is a complete six-piece sample; later looks/products remain unrestricted.
+ const look102=catalog.looks.find(look=>look.id===102);
+ const pieces102=['navy-jacket-102','blue-knit-102','brown-skirt-102','brown-boots-102','navy-bag-102','silver-studs-102'];
+ assert.equal(look102.pieces.length,pieces102.length);
+ for(const [index,id] of pieces102.entries()){
+  const product=sampleProducts.find(product=>product.product_id===id);
+  assert.ok(product,id+' is published with a stable product link');
+  const appearance=product.appearances.find(appearance=>appearance.look_id===102);
+  assert.equal(appearance?.piece_index,index+1,id+' maps to the original outfit piece');
+  assert.equal(appearance.reference_asset_id,look102.versions.v2.asset.asset_id);
+ }
+ for(const [id,asset] of [['blue-knit-102','product-blue-knit-102-r1'],['brown-skirt-102','product-brown-skirt-102-r2'],['brown-boots-102','product-brown-boots-102-r2']])assert.equal(sampleProducts.find(product=>product.product_id===id).asset.asset_id,asset,'Existing image and collection identities survive catalog expansion');
+
  const originalFavorites=await evaluate('localStorage.getItem("wardrobe99:favorites:v1")');
  for(const viewport of [{width:320,height:844},{width:390,height:844},{width:1440,height:1000}]){
   await client('Emulation.setDeviceMetricsOverride',{...viewport,deviceScaleFactor:1,mobile:viewport.width<600});
   await route('#/products');await wait('!document.getElementById("products-page").hidden');
-  assert.equal(await evaluate('document.querySelectorAll("#product-gallery [data-product-card]").length'),3);
+  assert.equal(await evaluate('document.querySelectorAll("#product-gallery [data-product-card]").length'),sampleProducts.length);
   await noOverflow('Product index '+viewport.width);
   const product=sampleProducts.find(p=>p.gallery?.length),hash='#/product/'+product.product_id;
   await evaluate(`document.querySelector('#product-gallery a[href="${hash}"]').click()`);
@@ -273,7 +286,7 @@ try{
   await evaluate('document.querySelector("#product-worn-section").scrollIntoView({behavior:"instant",block:"start"})');
   assert.ok(await evaluate('(()=>{const nav=document.querySelector(".product-chapters"),r=nav.getBoundingClientRect(),header=document.querySelector(".site-header").getBoundingClientRect();return r.top>=header.bottom-1&&!!document.elementFromPoint(r.left+20,r.top+r.height/2)?.closest(".product-chapters");})()'),'Product chapter navigation stays visible below the sticky site header');
   await evaluate('document.querySelector(".product-worn").click()');await wait('document.getElementById("detail-dialog").open');
-  assert.equal(await evaluate('document.querySelectorAll("#detail-product-gallery [data-product-card]").length'),3);
+  assert.equal(await evaluate('document.querySelectorAll("#detail-product-gallery [data-product-card]").length'),sampleProducts.filter(item=>item.appearances.some(a=>a.look_id===product.appearances[0].look_id)).length);
   await evaluate('document.getElementById("close-detail").click()');await wait(`location.hash===${JSON.stringify(hash)}&&!document.getElementById('product-page').hidden`);
   await noOverflow('Product return '+viewport.width);
   if(process.env.YIXU_SCREENSHOT_DIR){
@@ -285,11 +298,72 @@ try{
    const worn=await client('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(process.env.YIXU_SCREENSHOT_DIR,`product-worn-${viewport.width}.png`),Buffer.from(worn.data,'base64'),{mode:0o600});
   }
  }
- const boots=sampleProducts.find(p=>p.gallery?.some(image=>image.role==='view'));
- assert.ok(boots,'A multi-view product is available');
- for(const viewport of [{width:320,height:844},{width:390,height:844},{width:800,height:1000},{width:1440,height:1000}]){
+ // Each published product is the same public contract, regardless of category or gallery size.
+ const galleryFavoritesBefore=await evaluate('localStorage.getItem("yixu:product-favorites:v1")');
+ for(const viewport of [{width:390,height:844},{width:1440,height:1000}]){
   await client('Emulation.setDeviceMetricsOverride',{...viewport,deviceScaleFactor:1,mobile:viewport.width<600});
-  await route('#/product/'+boots.product_id);
+  for(const product of sampleProducts){
+   const hash='#/product/'+product.product_id;
+   await route(hash);await wait('!document.getElementById("product-page").hidden&&document.querySelector(".product-main-image img").naturalWidth>0');
+   assert.equal(await evaluate('document.querySelector("#product-page h1").textContent'),product.copy?.hero_title||product.name,product.product_id+' uses its published copy');
+   assert.equal(await evaluate('document.querySelectorAll("#product-page [data-product-select]").length'),product.gallery?.length?product.gallery.length+1:0);
+   assert.match(await evaluate('document.querySelector(".product-disclosure").textContent'),/AI 设计展示/);
+   await noOverflow(product.product_id+' hero '+viewport.width);
+   const images=[{title:'完整形态',caption:product.description,asset:product.asset},...(product.gallery||[])];
+   for(let index=0;index<images.length;index++){
+    const image=images[index];
+    if(images.length>1)await evaluate(`document.querySelector('[data-product-index="${index}"]').click()`);
+    await wait('document.querySelector(".product-main-image img").complete&&document.querySelector(".product-main-image img").naturalWidth>0');
+    assert.equal(await evaluate('document.querySelector(".product-main-image img").getAttribute("src")'),image.asset.source_url,product.product_id+' selected image '+index);
+    assert.equal(await evaluate('document.querySelector(".product-main-image .product-design-badge").hidden'),!image.design_study,product.product_id+' labels the current image');
+    assert.equal(await evaluate('document.querySelector(".product-main-image img").alt.includes("设计推演")'),!!image.design_study);
+    await evaluate('document.querySelector(".product-main-image").click()');await wait('document.getElementById("product-image-dialog").open&&document.getElementById("product-zoom-image").naturalWidth>0');
+    assert.equal(await evaluate('document.getElementById("product-zoom-image").getAttribute("src")'),image.asset.source_url);
+    assert.equal(await evaluate('document.getElementById("product-image-position").textContent'),`${index+1} / ${images.length}`);
+    assert.equal(await evaluate('document.getElementById("product-image-caption").textContent'),image.title+(image.design_study?' · 设计推演':''));
+    assert.equal(await evaluate('document.getElementById("product-image-note").textContent'),image.caption,'The full photo explanation survives zoom');
+    assert.equal(await evaluate('document.getElementById("product-image-prev").disabled'),index===0);
+    assert.equal(await evaluate('document.getElementById("product-image-next").disabled'),index===images.length-1);
+    await evaluate('document.getElementById("close-product-image").click()');await wait('!document.getElementById("product-image-dialog").open');
+   }
+   // Delivery failure continues to use the project copy, for each product type.
+   await evaluate('(()=>{const image=document.querySelector(".product-main-image img");image.src="data:image/webp;base64,aW52YWxpZA==";image.dispatchEvent(new Event("error"));})()');
+   await wait('document.querySelector(".product-main-image img").naturalWidth>0');
+   assert.equal(await evaluate('document.querySelector(".product-main-image img").getAttribute("src")'),images.at(-1).asset.source_url);
+   for(let index=0;index<product.appearances.length;index++){
+    const appearance=product.appearances[index],look=catalog.looks.find(look=>look.id===appearance.look_id),version=look.versions.v2;
+    assert.equal(appearance.reference_asset_id,version.asset.asset_id,'Appearance uses the exact published photo revision');
+    const source=await evaluate(`(()=>{const card=document.querySelectorAll('#product-worn-section .product-worn')[${index}],photo=card.querySelector('.photo-window'),image=photo.querySelector('img');return {href:card.getAttribute('href'),look:card.dataset.productLook,caption:card.querySelector('.product-worn-source').textContent,src:image.getAttribute('src'),alt:image.alt,x:photo.style.getPropertyValue('--panel-x'),y:photo.style.getPropertyValue('--panel-y')};})()`);
+    assert.equal(source.href,'#look-'+look.id);assert.equal(source.look,String(look.id));
+    assert.equal(source.src,version.source_url);
+    assert.ok(source.caption.includes('第 '+appearance.shot_index+' 镜头'));
+    assert.ok(source.alt.includes(version.shots[appearance.shot_index-1].title),'Original wearing preview names the declared shot');
+    assert.equal(source.x,-((appearance.shot_index-1)%3)*100+'%');assert.equal(source.y,-Math.floor((appearance.shot_index-1)/3)*100+'%');
+    await evaluate(`document.querySelectorAll('#product-worn-section .product-worn')[${index}].click()`);await wait('document.getElementById("detail-dialog").open');
+    assert.equal(await evaluate('document.getElementById("detail-title").textContent'),look.title);
+    assert.equal(await evaluate('document.getElementById("detail-image").getAttribute("src")'),version.source_url);
+    const piece=await evaluate(`(()=>{const row=document.querySelectorAll('#detail-pieces>li')[${appearance.piece_index-1}];return {number:row.querySelector('.piece-number').textContent,role:row.querySelector('.piece-role').textContent,name:row.lastElementChild.textContent};})()`);
+    assert.deepEqual(piece,{number:String(appearance.piece_index).padStart(2,'0'),...look.pieces[appearance.piece_index-1]},'The source outfit keeps its original piece ordering and identity');
+    await evaluate('document.getElementById("close-detail").click()');await wait(`location.hash===${JSON.stringify(hash)}&&!document.getElementById('product-page').hidden`);
+   }
+   await noOverflow(product.product_id+' full page '+viewport.width);
+   if(process.env.YIXU_SCREENSHOT_DIR){
+    await evaluate('window.scrollTo({top:0,behavior:"instant"});document.querySelector("[data-product-index=\\"0\\"]")?.click()');
+    await wait('document.querySelector(".product-main-image img").complete&&document.querySelector(".product-main-image img").naturalWidth>0');
+    const capture=await client('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(process.env.YIXU_SCREENSHOT_DIR,`${product.product_id}-${viewport.width}.png`),Buffer.from(capture.data,'base64'),{mode:0o600});
+   }
+  }
+ }
+ assert.equal(await evaluate('localStorage.getItem("yixu:product-favorites:v1")'),galleryFavoritesBefore,'Browsing any category leaves product collections intact');
+ assert.equal(await evaluate('localStorage.getItem("wardrobe99:favorites:v1")'),originalFavorites,'Product galleries leave outfit collections intact');
+ console.log('PASS all published products: 390/1440px routes, every image selection/zoom, portrait source fallback, design disclosures, exact outfit photo/shot/piece associations and unchanged collections');
+ const boots=sampleProducts.find(p=>p.product_id==='brown-boots-102');
+ assert.ok(boots,'A multi-view product is available');
+ for(const theme of ['editorial','studio']) for(const viewport of [{width:320,height:844},{width:390,height:844},{width:800,height:1000},{width:1440,height:1000}]){
+  await client('Emulation.setDeviceMetricsOverride',{...viewport,deviceScaleFactor:1,mobile:viewport.width<600});
+  await route('#/product/'+boots.product_id+'?theme='+theme);
+  assert.equal(await evaluate('document.getElementById("product-page").dataset.productTheme'),theme);
+  assert.equal(await evaluate('!!document.querySelector(".product-studio-layout")'),theme==='studio','Themes render distinct page structures');
   await wait('document.querySelector(".product-main-image img").naturalWidth>0');
   assert.equal(await evaluate('document.querySelectorAll("[data-product-select]").length'),8);
   assert.equal(await evaluate('document.querySelectorAll(".product-view-card").length'),3);
@@ -317,27 +391,55 @@ try{
   assert.equal(await evaluate('document.querySelector(".product-main-image .product-design-badge").hidden'),true);
   if(process.env.YIXU_SCREENSHOT_DIR){
    await evaluate('window.scrollTo({top:0,behavior:"instant"})');
-   const capture=await client('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(process.env.YIXU_SCREENSHOT_DIR,`boots-${viewport.width}.png`),Buffer.from(capture.data,'base64'),{mode:0o600});
+   const capture=await client('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(process.env.YIXU_SCREENSHOT_DIR,`boots-${theme}-${viewport.width}.png`),Buffer.from(capture.data,'base64'),{mode:0o600});
   }
   await evaluate('document.querySelector(".product-view-section").scrollIntoView({behavior:"instant",block:"start"})');
   await wait('[...document.querySelectorAll(".product-view-image img")].every(image=>image.complete&&image.naturalWidth>0)');
   await noOverflow('Boots full-view section '+viewport.width);
   const study=await evaluate('(()=>{const e=document.querySelector(".product-view-card[data-design-study=true] .product-design-badge");return {hidden:e.hidden,text:e.textContent};})()');
   assert.equal(study.hidden,false);assert.match(study.text,/设计推演/);
-  if(viewport.width<521){
-   assert.ok(await evaluate('(()=>{const e=document.querySelector(".product-view-grid");return e.scrollWidth>e.clientWidth;})()'),'Mobile full views scroll within their own gallery');
+  if(viewport.width<521&&theme==='editorial'){
+   assert.ok(await evaluate('(()=>{const e=document.querySelector(".product-view-grid");return e.scrollWidth>e.clientWidth;})()'),'Editorial mobile full views scroll within their own gallery');
    await evaluate('document.querySelector(".product-view-grid").scrollLeft=10000');
    assert.ok(await evaluate('document.querySelector(".product-view-grid").scrollLeft>0'));
    await evaluate('document.querySelector(".product-view-grid").scrollLeft=0');
   }
   if(process.env.YIXU_SCREENSHOT_DIR){
-   const capture=await client('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(process.env.YIXU_SCREENSHOT_DIR,`boots-views-${viewport.width}.png`),Buffer.from(capture.data,'base64'),{mode:0o600});
+   const capture=await client('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(process.env.YIXU_SCREENSHOT_DIR,`boots-${theme}-views-${viewport.width}.png`),Buffer.from(capture.data,'base64'),{mode:0o600});
    await evaluate('document.querySelector(".product-detail-stories-grid").scrollIntoView({behavior:"instant",block:"start"})');
    await wait('[...document.querySelectorAll(".product-detail-image img")].every(image=>image.complete&&image.naturalWidth>0)');
-   const detail=await client('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(process.env.YIXU_SCREENSHOT_DIR,`boots-details-${viewport.width}.png`),Buffer.from(detail.data,'base64'),{mode:0o600});
+   const detail=await client('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(process.env.YIXU_SCREENSHOT_DIR,`boots-${theme}-details-${viewport.width}.png`),Buffer.from(detail.data,'base64'),{mode:0o600});
   }
  }
- console.log('PASS boots: eight images, view/detail roles, visible design-study labels in cards/hero/zoom, original wearing reference, responsive thumbnails and mobile angle scrolling at 320/390/800/1440px');
+ console.log('PASS boots: both themes, eight images, view/detail roles, visible design-study labels in cards/hero/zoom, original wearing reference, responsive thumbnails and mobile angle scrolling at 320/390/800/1440px');
+ // A theme changes presentation while image identity, collection, and disclosures survive.
+ const bootsHash='#/product/'+boots.product_id;
+ await route(bootsHash+'?theme=editorial');
+ const favoriteBefore=await evaluate('localStorage.getItem("yixu:product-favorites:v1")');
+ await evaluate('document.querySelector("[data-product-index=\\"3\\"]").click()');
+ const selectedSource=boots.gallery[2].asset.source_url;
+ await route(bootsHash+'?theme=studio');
+ assert.equal(await evaluate('document.querySelector(".product-main-image img").getAttribute("src")'),selectedSource,'Theme switch preserves selected asset');
+ assert.equal(await evaluate('document.querySelector(".product-main-image .product-design-badge").hidden'),false);
+ assert.equal(await evaluate('localStorage.getItem("yixu:product-favorites:v1")'),favoriteBefore);
+ await evaluate('history.back()');await wait('location.hash.endsWith("?theme=editorial")');
+ await wait('document.getElementById("product-page").dataset.productTheme==="editorial"');
+ assert.equal(await evaluate('document.querySelector(".product-main-image img").getAttribute("src")'),selectedSource);
+ await route(bootsHash+'?theme=future-theme');
+ assert.equal(await evaluate('document.getElementById("product-page").dataset.productTheme'),'editorial','Unknown safe theme uses built-in fallback');
+ await navigate(pathToFileURL(path.join(output,'index.html')).href+bootsHash+'?theme=studio');
+ assert.equal(await evaluate('document.getElementById("product-page").dataset.productTheme'),'studio','Theme review route reloads offline');
+ await evaluate('document.querySelector("[data-product-index=\\"0\\"]").click();document.querySelector(".product-main-image").click();document.getElementById("product-image-dialog").close();document.querySelector(".product-main-image").click()');
+ await wait('document.getElementById("product-image-dialog").open');
+ await client('Input.dispatchKeyEvent',{type:'keyDown',key:'ArrowRight',code:'ArrowRight',windowsVirtualKeyCode:39});
+ assert.equal(await evaluate('document.getElementById("product-image-position").textContent'),'2 / 8','A queued close cannot disable keyboard navigation in a reopened gallery');
+ await evaluate('document.getElementById("close-product-image").click()');
+ await wait('!document.getElementById("product-image-dialog").open');
+ await route('#/product/'+sampleProducts.find(product=>!product.gallery?.length).product_id+'?theme=studio');
+ assert.equal(await evaluate('document.querySelectorAll("[data-product-select]").length'),0,'One-image legacy product does not invent gallery photos');
+ assert.equal(await evaluate('document.querySelectorAll(".product-detail-story,.product-view-card").length'),0);
+ await noOverflow('Legacy product in Studio');
+ console.log('PASS product themes: structure, offline direct reload, asset selection and browser Back, unchanged collections, unknown theme fallback, legacy single-image content');
  const savedProduct=sampleProducts[0];
  await evaluate('localStorage.setItem("yixu:product-favorites:v1",JSON.stringify(["future-product"]))');
  await client('Page.navigate',{url:'about:blank'});await wait('location.href==="about:blank"');
@@ -349,11 +451,32 @@ try{
  await evaluate('document.querySelector("#product-gallery [data-product-favorite]").click()');
  assert.equal(await evaluate('document.querySelectorAll("#product-gallery [data-product-card]").length'),0);
  await route('#/products?category='+encodeURIComponent(sampleProducts[1].category));
- assert.equal(await evaluate('document.querySelectorAll("#product-gallery [data-product-card]").length'),1);
+ assert.equal(await evaluate('document.querySelectorAll("#product-gallery [data-product-card]").length'),sampleProducts.filter(product=>product.category===sampleProducts[1].category).length);
  await route('#/product/not-published');assert.match(await evaluate('document.getElementById("product-page").textContent'),/暂未发布/);
- await route('#/home');assert.equal(await evaluate('document.querySelectorAll("#home-product-gallery [data-product-card]").length'),3);
+ await route('#/home');assert.equal(await evaluate('document.querySelectorAll("#home-product-gallery [data-product-card]").length'),Math.min(3,sampleProducts.filter(product=>product.appearances.some(a=>a.look_id===featured.id)).length));
  await navigate(origin+'/#/product/'+savedProduct.product_id);await wait('!document.getElementById("product-page").hidden');
  assert.equal(await evaluate('document.querySelector("#product-page h1").textContent'),savedProduct.name,'Reloadable online product route');
+ const plainHeading='<img src=x onerror="window.productCopyExecuted=true"> & "Editorial"';
+ for(const theme of ['editorial','studio']){
+  apiCatalog=structuredClone(catalog);
+  const product=apiCatalog.products.find(product=>product.product_id===boots.product_id);
+  product.presentation={theme,preset:'future-paper'};
+  product.copy={hero_title:plainHeading,views_title:plainHeading,details_title:plainHeading,worn_title:plainHeading,related_title:plainHeading};
+  await navigate(origin+'/?theme-review='+theme+bootsHash);
+  await wait(`document.querySelector('#product-page h1')?.textContent===${JSON.stringify(plainHeading)}`);
+  assert.equal(await evaluate('document.getElementById("product-page").dataset.productTheme'),theme,'API selects the same built-in themes as the offline snapshot');
+  assert.equal(await evaluate('document.getElementById("product-page").dataset.productPreset'),theme==='studio'?'neutral-white':'warm-paper','Unknown safe preset uses the theme default');
+  assert.equal(await evaluate('!!window.productCopyExecuted'),false);
+  assert.equal(await evaluate('!!document.querySelector("#product-page img[src=x]")'),false,'Editorial copy remains text');
+  await noOverflow('API copy in '+theme);
+ }
+ apiCatalog=structuredClone(catalog);
+ apiCatalog.products.find(product=>product.product_id===boots.product_id).presentation={theme:'../../private'};
+ await navigate(origin+'/?theme-review=malformed'+bootsHash);
+ await wait('document.getElementById("catalog-status").textContent.includes("本地内容快照")');
+ assert.equal(await evaluate('document.querySelector("#product-page h1").textContent'),boots.copy?.hero_title||boots.name,'Malformed API theme retains usable built snapshot');
+ apiCatalog=structuredClone(catalog);
+ console.log('PASS product content boundary: API/offline themes, unknown presets, escaped copy, malformed configuration fallback');
  console.log('PASS products: offline/online routes, original outfit associations, portrait images, keyboard zoom, source return, category/collection filters, isolated preserved favorites, unknown IDs and 320/390/1440px layouts');
  assert.ok(!requested.some(url=>/^\/images\/look-/.test(url)),'Archived v1 pictures never enter the public site');
  assert.deepEqual(exceptions,[],'Browser must not report uncaught JavaScript exceptions');

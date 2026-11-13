@@ -101,7 +101,29 @@ class ProductImage(Strict):
     asset: Asset
 
 
+class ProductPresentation(Strict):
+    theme: str = Field(default="editorial", pattern=r"^[a-z][a-z0-9-]{0,63}$")
+    preset: str | None = Field(default=None, pattern=r"^[a-z][a-z0-9-]{0,63}$")
+
+
+class ProductCopy(Strict):
+    hero_title: str | None = Field(default=None, min_length=1, max_length=200)
+    views_title: str | None = Field(default=None, min_length=1, max_length=200)
+    details_title: str | None = Field(default=None, min_length=1, max_length=200)
+    worn_title: str | None = Field(default=None, min_length=1, max_length=200)
+    related_title: str | None = Field(default=None, min_length=1, max_length=200)
+
+    @field_validator("*")
+    @classmethod
+    def visible_text(cls, value):
+        if value is not None and not value.strip():
+            raise ValueError("Product copy requires visible plain text")
+        return value
+
+
 class Product(Strict):
+    model_config = ConfigDict(extra="forbid", serialize_by_alias=True)
+
     product_id: str = Field(pattern=r"^[A-Za-z0-9_-]{1,128}$")
     name: str = Field(min_length=1, max_length=200)
     category: str = Field(min_length=1, max_length=100)
@@ -111,6 +133,8 @@ class Product(Strict):
     color_hex: str = Field(pattern=r"^#[a-fA-F0-9]{6}$")
     design_material: str = Field(min_length=1, max_length=500)
     notes: list[str] = Field(min_length=1, max_length=10)
+    presentation: ProductPresentation = Field(default_factory=ProductPresentation)
+    copy_: ProductCopy = Field(default_factory=ProductCopy, alias="copy")
     asset: Asset
     gallery: list[ProductImage] = Field(default_factory=list, max_length=8)
     appearances: list[ProductAppearance] = Field(min_length=1, max_length=200)

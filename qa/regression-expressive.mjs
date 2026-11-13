@@ -48,6 +48,7 @@ const context={
 context.history={pushState(_state,_title,hash){context.location.hash=hash;},replaceState(_state,_title,hash){context.location.hash=hash;}};
 vm.createContext(context);vm.runInContext(fs.readFileSync(path.join(root,'catalog.js'),'utf8'),context);
 context.window.WARDROBE.revision='synthetic-static-revision';
+for(const module of ['product-themes.js','product-page.js'])vm.runInContext(fs.readFileSync(path.join(root,module),'utf8'),context);
 const app=fs.readFileSync(path.join(root,'app.js'),'utf8');
 const instrumented=app.replace(/\}\)\(\);\s*$/,`window.__audit={state,byId,favorites,compare,openDetail,setView,toggleFavorite,toggleCompare,openComparison,refreshFilters,renderGallery,navigateLook,resetFilters,adoptCatalog,hydrateCatalog,imageFailed,setImage,publicSource,getFiltered:()=>filtered};})();`);
 vm.runInContext(instrumented,context);
@@ -158,7 +159,7 @@ check('an intentionally empty valid catalog renders gracefully without deleting 
   a.adoptCatalog(baseline);assert.equal(a.byId.size,baseline.looks.length);
 });
 check('page styles and scripts retain local dependencies for direct offline opening',()=>{
-  const styles=['style.css','expressive.css','tryon.css'].map(file=>fs.readFileSync(path.join(root,file),'utf8')).join('\n');assert.doesNotMatch(html,/<(?:script|link)[^>]+(?:src|href)=["'](?:https?:)?\/\//i);assert.doesNotMatch(styles,/@import\s|url\(\s*["']?(?:https?:)?\/\//i);
+  const styles=['style.css','expressive.css','product-themes.css','tryon.css'].map(file=>fs.readFileSync(path.join(root,file),'utf8')).join('\n');assert.doesNotMatch(html,/<(?:script|link)[^>]+(?:src|href)=["'](?:https?:)?\/\//i);assert.doesNotMatch(styles,/@import\s|url\(\s*["']?(?:https?:)?\/\//i);
 });
 for(const name of checks)console.log('PASS '+name);
 console.log('Synthetic DOM regression: '+checks.length+' checks passed.');

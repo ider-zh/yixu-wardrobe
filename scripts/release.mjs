@@ -82,7 +82,7 @@ export async function verifyPublication({origin, expected, publicRoot, fetcher =
   const publicSnapshot = snapshotCatalog(await (await get('/catalog.js')).text());
   assert.equal(publicSnapshot.revision, expected.revision, 'Static snapshot differs from API revision');
   assert.equal(publicSnapshot.home?.featured_look_id, featuredId, 'Static homepage feature differs from API');
-  for (const file of ['index.html', 'app.js']) {
+  for (const file of ['index.html', 'app.js', 'product-themes.js', 'product-page.js', 'style.css', 'expressive.css', 'product-themes.css', 'tryon.js', 'tryon.css', 'favicon.svg']) {
     const data = Buffer.from(await (await get('/' + (file === 'index.html' ? '' : file))).arrayBuffer());
     assert.equal(digest(data), digest(fs.readFileSync(path.join(publicRoot, file))), `Public ${file} is stale`);
   }

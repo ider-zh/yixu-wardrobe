@@ -190,11 +190,17 @@ export function loadContent(root) {
     const ids = new Set(), linked = new Set();
     const limits = {name:200,category:100,subtitle:500,description:2000,color_name:100,design_material:500};
     for (const product of manifest.products) {
-      fail(object(product) && Object.keys(product).every(key => ['product_id',...Object.keys(limits),'color_hex','notes','asset','gallery','appearances'].includes(key)), 'Unknown product field');
+      fail(object(product) && Object.keys(product).every(key => ['product_id',...Object.keys(limits),'color_hex','notes','presentation','copy','asset','gallery','appearances'].includes(key)), 'Unknown product field');
       fail(assetId(product.product_id) && !ids.has(product.product_id), 'Invalid or duplicate product');
       ids.add(product.product_id);
       fail(Object.entries(limits).every(([key,max]) => text(product[key]) && product[key].length <= max) && /^#[a-fA-F0-9]{6}$/.test(product.color_hex), 'Complete product description required');
       fail(Array.isArray(product.notes) && product.notes.length > 0 && product.notes.length <= 10 && product.notes.every(text), 'Product notes required');
+      const presentation = product.presentation === undefined ? {} : product.presentation;
+      const slug = value => typeof value === 'string' && /^[a-z][a-z0-9-]{0,63}$/.test(value) && value.trim() === value;
+      fail(object(presentation) && Object.keys(presentation).every(key => ['theme','preset'].includes(key)) && (presentation.theme === undefined || slug(presentation.theme)) && (presentation.preset == null || slug(presentation.preset)), 'Invalid product presentation');
+      const copy = product.copy === undefined ? {} : product.copy;
+      const copyKeys = ['hero_title','views_title','details_title','worn_title','related_title'];
+      fail(object(copy) && Object.entries(copy).every(([key,value]) => copyKeys.includes(key) && (value === null || (text(value) && [...value].length <= 200))), 'Invalid product copy');
       fail(Array.isArray(product.appearances) && product.appearances.length > 0 && product.appearances.length <= 200, 'Product appearances required');
       for (const appearance of product.appearances) {
         fail(object(appearance) && Object.keys(appearance).every(key=>['look_id','piece_index','reference_asset_id','shot_index'].includes(key)), 'Unknown product appearance field');
@@ -212,7 +218,7 @@ export function loadContent(root) {
         registerAsset(image);
       }
       const publicImage = asset => ({...asset,image_url:asset.file,source_url:asset.file});
-      products.push({...structuredClone(product),asset:publicImage(product.asset),gallery:gallery.map(image => ({...structuredClone(image),role:image.role??'detail',design_study:image.design_study??false,asset:publicImage(image.asset)}))});
+      products.push({...structuredClone(product),presentation:{theme:presentation.theme??'editorial',...(presentation.preset == null ? {} : {preset:presentation.preset})},copy:Object.fromEntries(Object.entries(copy).filter(([,value]) => value !== null)),asset:publicImage(product.asset),gallery:gallery.map(image => ({...structuredClone(image),role:image.role??'detail',design_study:image.design_study??false,asset:publicImage(image.asset)}))});
     }
   }
   const published = [...looks.values()];

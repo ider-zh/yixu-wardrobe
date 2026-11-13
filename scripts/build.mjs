@@ -23,7 +23,7 @@ const content = loadContent(root);
 const parent = path.dirname(output);
 fs.mkdirSync(parent, {recursive: true});
 const staging = fs.mkdtempSync(path.join(parent, '.yixu-build-'));
-const files = ['index.html', 'app.js', 'style.css', 'expressive.css', 'tryon.js', 'tryon.css', 'favicon.svg', ...new Set(content.publicAssets.map(asset => asset.file))];
+const files = ['index.html', 'app.js', 'product-themes.js', 'product-page.js', 'style.css', 'expressive.css', 'product-themes.css', 'tryon.js', 'tryon.css', 'favicon.svg', ...new Set(content.publicAssets.map(asset => asset.file))];
 let bytes = 0;
 let backup;
 try {

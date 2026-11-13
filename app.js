@@ -61,6 +61,14 @@ function latestBatch() {
   return data.home?.latest_batch_id || latestLooks().find(l=>l.batch_id)?.batch_id || '';
 }
 function modelName(id) { return models.find(model=>model.id===id)?.name || id; }
+function validProductPresentation(product){
+ const slug=value=>typeof value==='string'&&value.trim()===value&&/^[a-z][a-z0-9-]{0,63}$/.test(value);
+ const object=value=>value&&typeof value==='object'&&!Array.isArray(value);
+ const presentation=product.presentation,copy=product.copy;
+ if(presentation!==undefined&&(!object(presentation)||Object.keys(presentation).some(key=>!['theme','preset'].includes(key))||(presentation.theme!==undefined&&!slug(presentation.theme))||(presentation.preset!==undefined&&!slug(presentation.preset))))return false;
+ const copyKeys=['hero_title','views_title','details_title','worn_title','related_title'];
+ return copy===undefined||(object(copy)&&Object.entries(copy).every(([key,value])=>copyKeys.includes(key)&&typeof value==='string'&&value.trim().length>0&&[...value].length<=200));
+}
 function adoptCatalog(candidate) {
   if(!candidate || !Array.isArray(candidate.looks)||!Array.isArray(candidate.categoryOrder)||!candidate.categoryOrder.every(c=>typeof c==='string')||(candidate.models!==undefined&&(!Array.isArray(candidate.models)||!candidate.models.every(m=>m&&typeof (m.model_id||m.id)==='string'&&typeof m.name==='string'))))return false;
   const next=[], seen=new Set();
@@ -71,11 +79,11 @@ function adoptCatalog(candidate) {
   }
   const offeredProducts=candidate.products??[];
   if(!Array.isArray(offeredProducts)||!offeredProducts.every(p=>{
-    return p&&/^[A-Za-z0-9_-]+$/.test(p.product_id)&&['name','category','subtitle','description','color_name','design_material'].every(key=>typeof p[key]==='string')&&/^#[a-fA-F0-9]{6}$/.test(p.color_hex)&&Array.isArray(p.notes)&&p.notes.every(n=>typeof n==='string')&&publicSource(p.asset?.source_url||p.asset?.file)&&(p.gallery===undefined||(Array.isArray(p.gallery)&&p.gallery.length<=8&&p.gallery.every(image=>image&&typeof image.title==='string'&&typeof image.caption==='string'&&(image.role===undefined||['view','detail'].includes(image.role))&&(image.design_study===undefined||typeof image.design_study==='boolean')&&publicSource(image.asset?.source_url||image.asset?.file))))&&Array.isArray(p.appearances)&&p.appearances.every(a=>{const look=next.find(l=>l.id===a.look_id);return look&&Number.isSafeInteger(a.piece_index)&&a.piece_index>=1&&a.piece_index<=look.pieces.length&&a.reference_asset_id===look.versions.v2.asset?.asset_id&&Number.isInteger(a.shot_index)&&a.shot_index>=1&&a.shot_index<=9;});
+    return p&&validProductPresentation(p)&&/^[A-Za-z0-9_-]+$/.test(p.product_id)&&['name','category','subtitle','description','color_name','design_material'].every(key=>typeof p[key]==='string')&&/^#[a-fA-F0-9]{6}$/.test(p.color_hex)&&Array.isArray(p.notes)&&p.notes.every(n=>typeof n==='string')&&publicSource(p.asset?.source_url||p.asset?.file)&&(p.gallery===undefined||(Array.isArray(p.gallery)&&p.gallery.length<=8&&p.gallery.every(image=>image&&typeof image.title==='string'&&typeof image.caption==='string'&&(image.role===undefined||['view','detail'].includes(image.role))&&(image.design_study===undefined||typeof image.design_study==='boolean')&&publicSource(image.asset?.source_url||image.asset?.file))))&&Array.isArray(p.appearances)&&p.appearances.every(a=>{const look=next.find(l=>l.id===a.look_id);return look&&Number.isSafeInteger(a.piece_index)&&a.piece_index>=1&&a.piece_index<=look.pieces.length&&a.reference_asset_id===look.versions.v2.asset?.asset_id&&Number.isInteger(a.shot_index)&&a.shot_index>=1&&a.shot_index<=9;});
   }))return false;
   if(new Set(offeredProducts.map(p=>p.product_id)).size!==offeredProducts.length)return false;
   const productAsset=a=>({...a,source_url:a.source_url||a.file,image_url:a.image_url||a.source_url||a.file});
-  data={...candidate,products:offeredProducts.map(p=>({...p,asset:productAsset(p.asset),gallery:(p.gallery||[]).map(image=>({...image,asset:productAsset(image.asset)}))})),looks:next};looks=next;byId.clear();looks.forEach(l=>byId.set(l.id,l));
+  data={...candidate,products:offeredProducts.map(p=>({...p,presentation:{theme:'editorial',...p.presentation},copy:p.copy||{},asset:productAsset(p.asset),gallery:(p.gallery||[]).map(image=>({...image,asset:productAsset(image.asset)}))})),looks:next};looks=next;byId.clear();looks.forEach(l=>byId.set(l.id,l));
   models=Array.isArray(data.models)?data.models.map(model=>({...model,id:model.model_id||model.id})):[];
   categories=[...new Set([...(data.categoryOrder||[]),...looks.map(l=>l.category)])].filter(c=>looks.some(l=>l.category===c));
   window.WARDROBE=data;window.WardrobeTryOn?.setCatalog?.(data);
@@ -352,7 +360,7 @@ document.addEventListener('keydown',e=>{
   if(e.key==='/'&&!editable&&!document.querySelector('dialog[open]')){e.preventDefault();if(!['looks','favorites'].includes(state.page)){history.pushState(null,'','#/looks');routeFromURL(false);}$('search').focus();$('search').scrollIntoView({block:'center',behavior:'smooth'});}
   if($('detail-dialog').open&&!$('tryon-dialog')?.open&&!$('compare-dialog').open&&!editable&&!e.target.closest('#view-selector, #detail-tags a')){if(e.key==='ArrowRight'){e.preventDefault();navigateLook(1);}if(e.key==='ArrowLeft'){e.preventDefault();navigateLook(-1);}}
 });
-window.addEventListener('storage',e=>{if(e.key===productStorageKey){try{const values=JSON.parse(e.newValue||'[]');if(!Array.isArray(values))return;productFavorites.clear();values.filter(id=>typeof id==='string'&&/^[A-Za-z0-9_-]+$/.test(id)).forEach(id=>productFavorites.add(id));renderHomeProducts();if(state.page==='products')renderProducts();if(state.page==='product'){const id=/^#\/product\/([A-Za-z0-9_-]+)$/.exec(location.hash)?.[1];if(id)renderProduct(id);}if(state.active)$('detail-product-gallery').innerHTML=productsForLook(state.active).map(productCard).join('');}catch{}return;}if(e.key!==storageKey)return;try{const values=JSON.parse(e.newValue||'[]');if(!Array.isArray(values))return;favorites.clear();values.filter(id=>Number.isSafeInteger(id)&&id>0).forEach(id=>favorites.add(id));updateCounts();renderGallery();updateEditionUI();if(state.active)updateDetailActions();}catch{}});
+window.addEventListener('storage',e=>{if(e.key===productStorageKey){try{const values=JSON.parse(e.newValue||'[]');if(!Array.isArray(values))return;productFavorites.clear();values.filter(id=>typeof id==='string'&&/^[A-Za-z0-9_-]+$/.test(id)).forEach(id=>productFavorites.add(id));renderHomeProducts();if(state.page==='products')renderProducts();if(state.page==='product'){const id=/^#\/product\/([A-Za-z0-9_-]+)(?:\?(.*))?$/.exec(location.hash)?.[1];if(id)renderProduct(id);}if(state.active)$('detail-product-gallery').innerHTML=productsForLook(state.active).map(productCard).join('');}catch{}return;}if(e.key!==storageKey)return;try{const values=JSON.parse(e.newValue||'[]');if(!Array.isArray(values))return;favorites.clear();values.filter(id=>Number.isSafeInteger(id)&&id>0).forEach(id=>favorites.add(id));updateCounts();renderGallery();updateEditionUI();if(state.active)updateDetailActions();}catch{}});
 function archiveRoute(){
  const params=new URLSearchParams();
  for(const [key,value] of [['category',state.category],['season',state.season],['q',state.query],['model',state.model],['region',state.region],['latest',state.latestOnly?'1':''],['saved',state.favoritesOnly&&state.page!=='favorites'?'1':''],['sort',state.sort==='latest'?'':state.sort]])if(value)params.set(key,value);
@@ -362,7 +370,7 @@ function syncArchiveURL(){if(!routing&&['looks','favorites'].includes(state.page
 function routeFromURL(scroll=true){
  const detail=/^#look-(\d+)$/.exec(location.hash);
  if(detail){const id=Number(detail[1]);if(byId.has(id)){openDetail(id,$('detail-dialog').open);return;}notify('这套穿搭暂未发布');}
- const productRoute=/^#\/product\/([A-Za-z0-9_-]+)$/.exec(location.hash);
+ const productRoute=/^#\/product\/([A-Za-z0-9_-]+)(?:\?(.*))?$/.exec(location.hash);
  const route=/^#\/(home|looks|models|favorites|products)(?:\?(.*))?$/.exec(location.hash),page=productRoute?'product':route?.[1]||'home';
  routing=true;
  state.page=page;
@@ -411,68 +419,23 @@ function renderProducts(){
  const selected=products.filter(p=>(!category||p.category===category)&&(!saved||productFavorites.has(p.product_id)));
  $('product-gallery').innerHTML=selected.map(productCard).join('');$('product-empty').hidden=!!selected.length;
 }
-function productImages(product){
- let detail=0;
- return [{title:'完整形态',label:'主视觉',caption:product.description,role:'hero',asset:product.asset},...(product.gallery||[]).map(image=>({...image,role:image.role||'detail',label:image.design_study?'推演视角':image.role==='view'?image.title:'细节 '+String(++detail).padStart(2,'0')}))].map((image,index)=>({...image,index}));
-}
-function productImageAlt(product,image){
- return product.name+' · '+image.title+(image.design_study?' · 设计推演':'');
-}
-function productImageButton(product,image,index,className){
- return `<button class="${className}" data-product-zoom="${esc(product.product_id)}" data-product-frame-index="${index}" aria-label="放大查看 ${esc(productImageAlt(product,image))}"><img ${imageAttributes(image.asset)} alt="${esc(productImageAlt(product,image))}" width="${image.asset.width}" height="${image.asset.height}" ${index?'loading="lazy"':'fetchpriority="high"'} decoding="async"><span class="product-design-badge" ${image.design_study?'':'hidden'}>设计推演</span><span class="product-image-hint" aria-hidden="true">↗</span></button>`;
-}
-function renderProduct(id){
- const product=(data.products||[]).find(p=>p.product_id===id);
- if(!product){$('product-page').innerHTML='<p class="eyebrow">THE OBJECT EDIT</p><h1>这件单品暂未发布。</h1><a class="outline-button" href="#/products">浏览全部单品 ↗</a>';return;}
- const number=String((data.products||[]).indexOf(product)+1).padStart(3,'0'),liked=productFavorites.has(id);
- const images=productImages(product),views=images.filter(image=>image.role==='view'),details=images.filter(image=>image.role==='detail');
- const appearances=product.appearances.filter(a=>byId.has(a.look_id));
- const related=[...new Map(appearances.flatMap(a=>productsForLook(a.look_id)).filter(p=>p.product_id!==id).map(p=>[p.product_id,p])).values()];
- const worn=appearances.map(a=>{
+const productPage=window.YixuProductPage.create({
+ root:$('product-page'),dialog:$('product-image-dialog'),media:{attributes:imageAttributes,set:setImage},renderCard:productCard,
+ renderWorn(a){
   const look=byId.get(a.look_id),version={...versionOf(look),previewPanel:a.shot_index};
   const shown={...look,versions:{v2:version}};
   return `<a class="product-worn" data-product-look="${look.id}" href="#look-${look.id}">${photo(shown)}<div><p class="eyebrow">LOOK ${String(look.id).padStart(3,'0')} / ${esc(publication(look))}</p><h3>${esc(look.title)}</h3><p>${esc(look.description)}</p><p class="product-worn-source">原写真穿着参考 · 第 ${a.shot_index} 镜头</p><span class="product-worn-link">走进这套穿搭 <span aria-hidden="true">↗</span></span></div></a>`;
- }).join('');
- const thumbnails=images.length>1?`<div class="product-thumbnails ${images.length>4?'product-thumbnails-many':''}" role="group" aria-label="选择单品图片">${images.map((image,i)=>`<button data-product-select="${id}" data-product-index="${i}" aria-pressed="${i===0}" aria-label="${esc(image.title)}${image.design_study?' · 设计推演':''}"><img ${imageAttributes(image.asset)} alt="" loading="lazy"><span>${esc(image.label)}</span></button>`).join('')}</div>`:'';
- const stories=details.map((image,i)=>`<article class="product-detail-story">${productImageButton(product,image,image.index,'product-detail-image')}<div class="product-detail-copy"><p class="eyebrow">DETAIL ${String(i+1).padStart(2,'0')}${image.design_study?' · 设计推演':''}</p><h3>${esc(image.title)}</h3><p>${esc(image.caption)}</p><button class="product-text-link" data-product-zoom="${id}" data-product-frame-index="${image.index}">放大这一处细节 ↗</button></div></article>`).join('');
- const angleSection=views.length?`<section class="product-view-section" aria-labelledby="product-views-title"><div class="section-heading"><div><p class="eyebrow">EVERY ANGLE, ONE DESIGN</p><h2 id="product-views-title">换个角度，认识它。</h2></div><span class="product-section-number">${views.length} 个全貌视角</span></div><p class="product-view-hint">左右滑动，查看各个角度 →</p><div class="product-view-grid" tabindex="0" aria-label="单品全貌视角">${views.map(image=>`<article class="product-view-card" data-design-study="${!!image.design_study}">${productImageButton(product,image,image.index,'product-view-image')}<h3>${esc(image.title)}</h3><p>${esc(image.caption)}</p></article>`).join('')}</div></section>`:'';
- $('product-page').innerHTML=`
-  <div class="product-edition-line"><nav class="product-breadcrumb" aria-label="单品路径"><a href="#/products">全部单品</a><span aria-hidden="true">/</span><span>${esc(product.category)}</span></nav><span>衣序单品特辑 · ${number}</span></div>
-  <div class="product-hero ${images.length>4?'product-hero-many':''}">
-   <div class="product-visual"><figure class="product-hero-figure">${productImageButton(product,images[0],0,'product-main-image')}<figcaption><span class="product-hero-caption">01 / ${String(images.length).padStart(2,'0')} · 完整形态</span><span>点击图片，近一点看 ↗</span></figcaption></figure>${thumbnails}</div>
-   <article class="product-copy"><p class="eyebrow">THE SIGNATURE EDIT <span>— ${number}</span></p><p class="product-category">${esc(product.category)} / ${esc(product.color_name)}</p><h1>${esc(product.name)}</h1><p class="product-subtitle">${esc(product.subtitle)}</p><p class="product-description">${esc(product.description)}</p><dl class="product-facts"><div><dt>色调</dt><dd><span class="product-color"><i style="background:${product.color_hex}"></i>${esc(product.color_name)}</span></dd></div><div><dt>视觉肌理</dt><dd>${esc(product.design_material.replace(/，视觉设计描述$/,''))}</dd></div></dl><div class="product-actions"><button class="solid-button" data-product-favorite="${id}" aria-pressed="${liked}" aria-label="${liked?'取消收藏':'收藏单品'} ${esc(product.name)}">${liked?'♥ 已收藏':'♡ 收藏单品'}</button><button class="product-text-link" data-product-worn>看模特怎么穿 <span aria-hidden="true">↓</span></button></div><p class="product-hero-footnote">AI 设计单品 · 穿搭灵感档案</p></article>
-  </div>
-  <nav class="product-chapters" aria-label="单品特辑章节"><button data-product-section="product-hero"><span>01</span>完整形态</button>${views.length?'<button data-product-section="product-view-section"><span>02</span>多角度</button>':''}<button data-product-section="product-observation"><span>${views.length?'03':'02'}</span>设计细节</button><button data-product-worn><span>${views.length?'04':'03'}</span>穿在身上</button><span class="product-chapter-end">THE OBJECT, IN FOCUS</span></nav>
-  ${angleSection}
-  <section class="product-observation" aria-labelledby="product-observation-title"><div class="product-story-intro"><p class="eyebrow">A CLOSER LOOK</p><h2 id="product-observation-title">值得靠近的，<br>不止第一眼。</h2><p>${esc(product.subtitle)}</p></div>${stories?`<div class="product-detail-stories ${details.length>2?'product-detail-stories-grid':''}">${stories}</div>`:''}<ol class="product-design-notes">${product.notes.map((note,i)=>`<li><span>${String(i+1).padStart(2,'0')}</span><p>${esc(note)}</p></li>`).join('')}</ol></section>
-  <section id="product-worn-section" class="product-worn-section"><div class="section-heading"><div><p class="eyebrow">FROM OBJECT TO OUTFIT</p><h2>穿上它，故事才开始。</h2></div><span class="product-section-number">${views.length?'04':'03'} / ON THE MODEL</span></div><div class="product-worn-grid">${worn}</div></section>
-  ${related.length?`<section class="product-related"><div class="section-heading"><div><p class="eyebrow">BETTER TOGETHER</p><h2>让这一件，成为一套。</h2></div><a href="#/products">探索更多单品 ↗</a></div><div class="product-grid">${related.map(productCard).join('')}</div></section>`:''}
-  <p class="product-disclosure">AI 设计展示，供穿搭灵感参考。独立产品图与近景依据写真演绎，细节属于设计补充；请结合原写真查看穿着效果。</p>`;
-}
-let productZoom=null;
-function showProductImage(id,index){
- const product=(data.products||[]).find(p=>p.product_id===id),image=product&&productImages(product)[index];
- if(!image)return;
- productZoom={id,index};setImage($('product-zoom-image'),image.asset);$('product-zoom-image').alt=productImageAlt(product,image);
- $('product-image-caption').textContent=image.title+(image.design_study?' · 设计推演':'');$('product-image-position').textContent=`${index+1} / ${productImages(product).length}`;
- $('product-image-note').textContent=image.caption;
- $('product-image-prev').disabled=index===0;$('product-image-next').disabled=index===productImages(product).length-1;
- if(!$('product-image-dialog').open)$('product-image-dialog').showModal();
+ }
+});
+function renderProduct(id){
+ const product=(data.products||[]).find(p=>p.product_id===id);
+ const appearances=(product?.appearances||[]).filter(a=>byId.has(a.look_id));
+ const related=[...new Map(appearances.flatMap(a=>productsForLook(a.look_id)).filter(p=>p.product_id!==id).map(p=>[p.product_id,p])).values()];
+ productPage.render({product,number:String((data.products||[]).indexOf(product)+1).padStart(3,'0'),liked:productFavorites.has(id),appearances,related,themeOverride:new URLSearchParams(location.hash.split('?')[1]).get('theme')});
 }
 document.addEventListener('click',event=>{
  const worn=event.target.closest('[data-product-look]');
  if(worn&&event.button===0&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey){event.preventDefault();openDetail(Number(worn.dataset.productLook));return;}
- if(event.target.closest('[data-product-worn]')){document.querySelector('#product-worn-section')?.scrollIntoView({behavior:'smooth',block:'start'});return;}
- const chapter=event.target.closest('[data-product-section]');
- if(chapter){document.querySelector('#product-page .'+chapter.dataset.productSection)?.scrollIntoView({behavior:'smooth',block:'start'});return;}
- const selected=event.target.closest('[data-product-select]');
- if(selected){
-  const product=(data.products||[]).find(p=>p.product_id===selected.dataset.productSelect),index=Number(selected.dataset.productIndex),image=product&&productImages(product)[index];if(!image)return;
-  const main=document.querySelector('#product-page .product-main-image');if(!main)return;
-  setImage(main.querySelector('img'),image.asset);main.querySelector('img').alt=productImageAlt(product,image);main.dataset.productFrameIndex=String(index);main.setAttribute('aria-label','放大查看 '+productImageAlt(product,image));main.querySelector('.product-design-badge').hidden=!image.design_study;
-  document.querySelector('.product-hero-caption').textContent=`${String(index+1).padStart(2,'0')} / ${String(productImages(product).length).padStart(2,'0')} · ${image.title}${image.design_study?' · 设计推演':''}`;
-  document.querySelectorAll('[data-product-select]').forEach(b=>b.setAttribute('aria-pressed',String(b===selected)));return;
- }
  const button=event.target.closest('[data-product-favorite]');
  if(button){
   const id=button.dataset.productFavorite,product=(data.products||[]).find(p=>p.product_id===id);if(!product)return;
@@ -481,14 +444,7 @@ document.addEventListener('click',event=>{
   document.querySelectorAll('[data-product-favorite]').forEach(b=>{if(b.dataset.productFavorite!==id)return;const liked=productFavorites.has(id);b.textContent=liked?'♥ 已收藏':'♡ 收藏单品';b.setAttribute('aria-pressed',String(liked));b.setAttribute('aria-label',(liked?'取消收藏':'收藏单品')+' '+product.name);});
   if(state.page==='products'&&new URLSearchParams(location.hash.split('?')[1]).get('saved')==='1')renderProducts();return;
  }
- const zoom=event.target.closest('[data-product-zoom]');
- if(zoom)showProductImage(zoom.dataset.productZoom,Number(zoom.dataset.productFrameIndex)||0);
 });
-$('close-product-image').addEventListener('click',()=>$('product-image-dialog').close());
-$('product-image-prev').addEventListener('click',()=>{if(productZoom)showProductImage(productZoom.id,productZoom.index-1);});
-$('product-image-next').addEventListener('click',()=>{if(productZoom)showProductImage(productZoom.id,productZoom.index+1);});
-$('product-image-dialog').addEventListener('keydown',event=>{if(!productZoom||!['ArrowLeft','ArrowRight'].includes(event.key))return;event.preventDefault();showProductImage(productZoom.id,productZoom.index+(event.key==='ArrowLeft'?-1:1));});
-
 window.matchMedia('(min-width: 801px)').addEventListener('change',event=>{if(event.matches&&$('filter-dialog').open)$('filter-dialog').close();});
 adoptCatalog(window.WARDROBE || {looks:[],categoryOrder:[]});updateCounts();
 hydrateCatalog();

@@ -222,10 +222,12 @@ test('real content API hydrates the actual gallery with source URLs, v2-only dat
   const location={protocol:'https:',href:'https://localhost/#/looks',hash:'#/looks'};
   const history={pushState(_state,_title,hash){location.hash=hash;},replaceState(_state,_title,hash){location.hash=hash;}};
   const source = fs.readFileSync(path.join(root,'app.js'),'utf8').replace("}catch{$('catalog-status')", "}catch(error){window.__hydrationError=String(error);$('catalog-status')");
-  vm.runInNewContext(source,{
+  const context=vm.createContext({
     document,window,fetch:b.fetch,location,history,URL,URLSearchParams,
     localStorage:{getItem:key=>storage.get(key),setItem:(key,value)=>storage.set(key,value)},setTimeout,clearTimeout,
   });
+  for(const module of ['product-themes.js','product-page.js'])vm.runInContext(fs.readFileSync(path.join(root,module),'utf8'),context);
+  vm.runInContext(source,context);
   await wait(()=>accepted?.revision===ready.body.revision || window.__hydrationError);
   assert.equal(window.__hydrationError,undefined);
   assert.deepEqual(Array.from(accepted.looks,look=>look.id),ready.body.looks.map(look=>look.id));

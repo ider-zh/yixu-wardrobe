@@ -95,7 +95,11 @@
             "visibility": "public"
           }
         }
-      ]
+      ],
+      "presentation": {
+        "theme": "editorial",
+        "preset": "warm-paper"
+      }
     },
     {
       "product_id": "brown-boots-102",
@@ -242,7 +246,308 @@
             "visibility": "public"
           }
         }
-      ]
+      ],
+      "presentation": {
+        "theme": "studio",
+        "preset": "neutral-white"
+      },
+      "copy": {
+        "hero_title": "从容，始于足下。",
+        "views_title": "从不同角度，认识它。",
+        "details_title": "近一点，看见分寸。"
+      }
+    },
+    {
+      "product_id": "navy-jacket-102",
+      "name": "海军蓝短款西装外套",
+      "category": "外层",
+      "subtitle": "让肩线利落，让日常从容。",
+      "description": "短款轮廓与深海军蓝，把雾蓝针织和巧克力棕裙装收进清晰的线条。缺口翻领与克制的深色纽扣，保留轻盈的敞穿比例。",
+      "color_name": "海军蓝",
+      "color_hex": "#1b1d2c",
+      "design_material": "细密微绒毛感织物，视觉设计描述，不代表已核实成分",
+      "notes": [
+        "短至腰胯之间，与高腰裙装衔接",
+        "缺口翻领、两颗深色前扣与三扣袖口",
+        "参考写真未展示完整背部及内里，本图库不提供背面或内里结构图"
+      ],
+      "asset": {
+        "asset_id": "product-navy-jacket-102-hero-r1",
+        "file": "assets/products/look-102/navy-jacket-hero-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 76616,
+        "sha256": "2014c697655e56455e9fb5bfc69fca9d7ee342fefdab23ac66e56f78bd87f18e",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "正面全貌",
+          "caption": "从正面查看短款衣身、翻领与两颗深色前扣的比例。",
+          "role": "view",
+          "design_study": false,
+          "asset": {
+            "asset_id": "product-navy-jacket-102-front-r1",
+            "file": "assets/products/look-102/navy-jacket-front-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 101100,
+            "sha256": "e0cb21c1f55f06ed0343656bcf94a7952fff176aa212593cba8f0309c242b695",
+            "visibility": "public"
+          }
+        },
+        {
+          "title": "翻领的转折",
+          "caption": "缺口翻领沿着胸前展开，在深海军蓝之间留下清晰的转折。",
+          "role": "detail",
+          "design_study": false,
+          "asset": {
+            "asset_id": "product-navy-jacket-102-lapel-r1",
+            "file": "assets/products/look-102/navy-jacket-lapel-r1.webp",
+            "mime": "image/webp",
+            "width": 728,
+            "height": 910,
+            "bytes": 82118,
+            "sha256": "64e42bd2de78fea9c353a2504d260b444637c38cbadcdfbb87810de2c17cd248",
+            "visibility": "public"
+          }
+        },
+        {
+          "title": "两颗深色前扣",
+          "caption": "深色圆扣、扣眼与简洁前摆，让短款轮廓保持克制。",
+          "role": "detail",
+          "design_study": false,
+          "asset": {
+            "asset_id": "product-navy-jacket-102-buttons-r1",
+            "file": "assets/products/look-102/navy-jacket-buttons-r1.webp",
+            "mime": "image/webp",
+            "width": 728,
+            "height": 910,
+            "bytes": 94238,
+            "sha256": "c4b0ca23e8ed173effd9a03176a46ce0ed724deac033e1b9c4053102d5b37e3f",
+            "visibility": "public"
+          }
+        },
+        {
+          "title": "袖口三扣",
+          "caption": "三颗小圆扣顺着袖口排列，与前襟的深色纽扣相互呼应。",
+          "role": "detail",
+          "design_study": false,
+          "asset": {
+            "asset_id": "product-navy-jacket-102-cuff-r1",
+            "file": "assets/products/look-102/navy-jacket-cuff-r1.webp",
+            "mime": "image/webp",
+            "width": 760,
+            "height": 950,
+            "bytes": 49334,
+            "sha256": "9421ee431fecadf94673efc5b7a4317b570df008533dd4960dae67701e5f1cab",
+            "visibility": "public"
+          }
+        },
+        {
+          "title": "肩线与微绒肌理",
+          "caption": "近看肩袖交界与细密的微绒毛感，观察柔和的表面起伏。",
+          "role": "detail",
+          "design_study": false,
+          "asset": {
+            "asset_id": "product-navy-jacket-102-cloth-r1",
+            "file": "assets/products/look-102/navy-jacket-cloth-r1.webp",
+            "mime": "image/webp",
+            "width": 764,
+            "height": 955,
+            "bytes": 103868,
+            "sha256": "e35caf15795722fa5dc66f0965377423a7188a8fc43437fcace7a49e82ff5cfb",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 102,
+          "piece_index": 1,
+          "reference_asset_id": "look-102-female-01-v2-r2",
+          "shot_index": 5
+        }
+      ],
+      "presentation": {
+        "theme": "editorial",
+        "preset": "warm-paper"
+      },
+      "copy": {
+        "hero_title": "深蓝，自有分寸。",
+        "views_title": "短款比例，完整看见。",
+        "details_title": "近看，藏在深蓝里的层次。"
+      }
+    },
+    {
+      "product_id": "navy-bag-102",
+      "name": "海军蓝斜挎包",
+      "category": "包袋",
+      "subtitle": "将一抹深蓝，轻轻收在身侧。",
+      "description": "从《西岸蓝调皮裙》的圆角翻盖与单条窄肩带出发，拆解小号海军蓝包的克制轮廓。图像为 AI 独立设计演绎，不代表已核实的实物商品。",
+      "color_name": "海军蓝",
+      "color_hex": "#202936",
+      "design_material": "细纹平滑皮质感，视觉设计描述",
+      "notes": [
+        "小号圆角包身与完整翻盖，延续原穿搭可见的简洁外形",
+        "单条窄肩带以深蓝线条呼应外套",
+        "原写真未提供针脚、微观纹理及内部结构证据；细节图中的针脚与表面纹理属于 AI 设计推演，未展示背部与内部"
+      ],
+      "asset": {
+        "asset_id": "product-navy-bag-hero-102-r1",
+        "file": "assets/products/look-102/navy-bag-hero-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 53100,
+        "sha256": "d76256637b5c3f875ff93f9d9c7dc39a669f98ac84a187cf1e7890a2ea16e323",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "正面全貌",
+          "caption": "正面观察圆角翻盖、紧凑包身与单条窄肩带的整体比例。",
+          "role": "view",
+          "design_study": false,
+          "asset": {
+            "asset_id": "product-navy-bag-front-102-r1",
+            "file": "assets/products/look-102/navy-bag-front-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 91756,
+            "sha256": "29d28516799b5bc0cfdab9be56d5042658a25eb0cd8acd780e4aa219c72469e5",
+            "visibility": "public"
+          }
+        },
+        {
+          "title": "圆角翻盖，沿线收边。",
+          "caption": "AI 设计推演：原写真无法确认针脚与微观表面纹理；本图补充翻盖圆角与边缘走线的设计表现。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-navy-bag-flap-102-r1",
+            "file": "assets/products/look-102/navy-bag-flap-r1.webp",
+            "mime": "image/webp",
+            "width": 741,
+            "height": 926,
+            "bytes": 132946,
+            "sha256": "21122fc6d77b8117fa0a9c2c596839bebb27ed4e54a6ed0ceac3e092e6067873",
+            "visibility": "public"
+          }
+        },
+        {
+          "title": "一条窄带，延续深蓝。",
+          "caption": "AI 设计推演：窄肩带轮廓依据原穿搭，细密针脚与表面纹理为设计补充，不代表已核实工艺。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-navy-bag-strap-102-r1",
+            "file": "assets/products/look-102/navy-bag-strap-r1.webp",
+            "mime": "image/webp",
+            "width": 738,
+            "height": 922,
+            "bytes": 40286,
+            "sha256": "3f18bfdbba99480eeacf96df0499f0d5a2cb32479fa577093a9cd43aef8a60f8",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 102,
+          "piece_index": 5,
+          "reference_asset_id": "look-102-female-01-v2-r2",
+          "shot_index": 2
+        }
+      ],
+      "presentation": {
+        "theme": "studio",
+        "preset": "neutral-white"
+      },
+      "copy": {
+        "hero_title": "轻轻一笔，收住深蓝。",
+        "views_title": "沿着轮廓，重新认识它。",
+        "details_title": "近看线条与收边。"
+      }
+    },
+    {
+      "product_id": "silver-studs-102",
+      "name": "银色圆耳钉",
+      "category": "配饰",
+      "subtitle": "小小圆面，留下一点柔光。",
+      "description": "以《西岸蓝调皮裙》中可见的小圆耳饰为灵感，按银色圆耳钉方向重新设计。原写真无法确认金属色、精确弧度与表面结构，本组产品图均为 AI 设计推演。",
+      "color_name": "柔银色",
+      "color_hex": "#c6c5c2",
+      "design_material": "柔光银色金属感，视觉设计描述；不声明真实金属成分",
+      "notes": [
+        "成对小圆面与柔和圆缘，呼应穿搭中克制的耳饰点缀",
+        "低弧圆面、窄边与柔光表面均为 AI 设计补充，不代表原耳饰的已核实结构",
+        "只展示正面与边缘，未生成无法确认的耳针、耳堵或背部；不声明尺寸与材质成分"
+      ],
+      "asset": {
+        "asset_id": "product-silver-studs-hero-102-r1",
+        "file": "assets/products/look-102/silver-studs-hero-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 21828,
+        "sha256": "cd4fd9360b530bab8a224373c5ffe00cd6b272f71ec0d2d2ecdb4b99927ed69a",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "成对正面方案",
+          "caption": "AI 设计推演：原写真只显示小圆耳饰轮廓；本图的银色、圆面弧度与细边属于设计补充。",
+          "role": "view",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-silver-studs-front-102-r1",
+            "file": "assets/products/look-102/silver-studs-front-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 41772,
+            "sha256": "90f612bcda9a4c56646ec8d78ffe534707a608fd651996246979bff53ec9278e",
+            "visibility": "public"
+          }
+        },
+        {
+          "title": "圆面与柔光细边",
+          "caption": "AI 设计推演：近看设计中的低弧圆面、细窄亮边与柔光纹理，原写真无法核实这些微观结构。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-silver-studs-face-102-r1",
+            "file": "assets/products/look-102/silver-studs-face-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 105238,
+            "sha256": "642d59ca8d13fa94fbaadcd836fd18e425f7fbf7b6fc9e7dae5c2b9b618c2ac1",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 102,
+          "piece_index": 6,
+          "reference_asset_id": "look-102-female-01-v2-r2",
+          "shot_index": 4
+        }
+      ],
+      "presentation": {
+        "theme": "editorial",
+        "preset": "warm-paper"
+      },
+      "copy": {
+        "hero_title": "一点柔光，恰到好处。",
+        "views_title": "一对圆面，保持简单。",
+        "details_title": "在细边之间，看见光。"
+      }
     }
   ]
 }

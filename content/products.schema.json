@@ -159,6 +159,12 @@
           "title": "Notes",
           "type": "array"
         },
+        "presentation": {
+          "$ref": "#/$defs/ProductPresentation"
+        },
+        "copy": {
+          "$ref": "#/$defs/ProductCopy"
+        },
         "asset": {
           "$ref": "#/$defs/Asset"
         },
@@ -230,6 +236,83 @@
       "title": "ProductAppearance",
       "type": "object"
     },
+    "ProductCopy": {
+      "additionalProperties": false,
+      "properties": {
+        "hero_title": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Hero Title"
+        },
+        "views_title": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Views Title"
+        },
+        "details_title": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Details Title"
+        },
+        "worn_title": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Worn Title"
+        },
+        "related_title": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Related Title"
+        }
+      },
+      "title": "ProductCopy",
+      "type": "object"
+    },
     "ProductImage": {
       "additionalProperties": false,
       "properties": {
@@ -269,6 +352,32 @@
         "asset"
       ],
       "title": "ProductImage",
+      "type": "object"
+    },
+    "ProductPresentation": {
+      "additionalProperties": false,
+      "properties": {
+        "theme": {
+          "default": "editorial",
+          "pattern": "^[a-z][a-z0-9-]{0,63}$",
+          "title": "Theme",
+          "type": "string"
+        },
+        "preset": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9-]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Preset"
+        }
+      },
+      "title": "ProductPresentation",
       "type": "object"
     }
   },

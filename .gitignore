@@ -7,6 +7,9 @@
 !/DEVELOPMENT.md
 !/index.html
 !/app.js
+!/product-page.js
+!/product-themes.js
+!/product-themes.css
 !/catalog.js
 !/style.css
 !/expressive.css
@@ -47,6 +50,7 @@
 !/docs/deployment-feasibility.md
 !/docs/ai-tryon-backend-design.md
 !/docs/external-agent-sop.md
+!/docs/product-agent-sop.md
 !/docs/content-publishing-plan.md
 !/docs/images/
 !/docs/images/wardrobe-preview.webp

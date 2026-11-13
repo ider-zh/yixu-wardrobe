@@ -21,7 +21,7 @@ function fixture() {
   const oldCatalog = {...expected, revision: 'c'.repeat(64)};
   fs.mkdirSync(path.join(root, 'public'));
   fs.writeFileSync(path.join(root, 'public/catalog.js'), json(oldCatalog));
-  const staticFiles = {'index.html': '<html>new homepage</html>', 'app.js': 'window.current=true;'};
+  const staticFiles = {'index.html': '<html><link rel="stylesheet" href="product-themes.css"><script src="product-themes.js"></script><script src="product-page.js"></script><script src="app.js"></script></html>', 'app.js': 'window.current=true;', 'product-themes.js':'window.themes=true;', 'product-page.js':'window.products=true;', 'product-themes.css':'.product-studio-layout{display:grid}', 'style.css':'body{margin:0}', 'expressive.css':'.look{display:block}', 'tryon.js':'window.tryon=true;', 'tryon.css':'.tryon{display:none}', 'favicon.svg':'<svg></svg>'};
   const commands = [];
   function execute(command, args) {
     commands.push([command, args]);
@@ -40,7 +40,7 @@ function fixture() {
     if (pathname === '/api/content/assets/look-101') return new Response(image, {headers: {'content-type': 'image/webp'}});
     if (pathname === '/catalog.js') return new Response(json(expected));
     if (pathname === '/') return new Response(staticFiles['index.html']);
-    if (pathname === '/app.js') return new Response(staticFiles['app.js']);
+    if (Object.hasOwn(staticFiles,pathname.slice(1))) return new Response(staticFiles[pathname.slice(1)]);
     return new Response('', {status: 404});
   };
   const dependencies = {execute, loadContent: () => ({catalog: expected}), cleanHead: () => head, fetcher, attempts: 1};
@@ -87,6 +87,13 @@ test('API/snapshot skew is rejected even when total and newest ID match', async 
   const fetcher = async (url, options) => new URL(url).pathname === '/catalog.js' ? new Response(json(f.oldCatalog)) : f.fetcher(url, options);
   await assert.rejects(runRelease(f.options, {...f.dependencies, fetcher}), /Static snapshot differs/);
 }));
+
+test('stale deployed theme code or styles reject publication', async () => {
+  for (const name of ['product-themes.js','product-page.js','product-themes.css']) await useFixture(async f => {
+    const fetcher=async (url, options) => new URL(url).pathname==='/'+name ? new Response('previous version') : f.fetcher(url,options);
+    await assert.rejects(runRelease(f.options,{...f.dependencies,fetcher}),/SHA-256|hash|differs|stale/i);
+  });
+});
 
 test('dry run and dirty source never activate; lock serializes explicit deliveries', async () => useFixture(async f => {
   const result = await runRelease({...f.options, activate: false}, f.dependencies);

@@ -10,7 +10,7 @@ const root = fileURLToPath(new URL('../',import.meta.url));
 const fixture = fs.mkdtempSync(path.join(os.tmpdir(),'yixu-content-'));
 const write = (relative,value) => fs.writeFileSync(path.join(fixture,relative),JSON.stringify(value));
 try {
-  for(const name of ['content','images-v2','assets','scripts','index.html','app.js','style.css','expressive.css','tryon.js','tryon.css','favicon.svg']) {
+  for(const name of ['content','images-v2','assets','scripts','index.html','app.js','style.css','expressive.css','product-themes.js','product-page.js','product-themes.css','tryon.js','tryon.css','favicon.svg']) {
     fs.cpSync(path.join(root,name),path.join(fixture,name),{recursive:true});
   }
   const validProducts=fs.readFileSync(path.join(fixture,'content/products.json'),'utf8');
@@ -27,6 +27,11 @@ try {
     value=>{value.products[0].gallery=null;},
     value=>value.products.find(p=>p.gallery?.length).gallery[0].role='unknown',
     value=>value.products.find(p=>p.gallery?.length).gallery[0].design_study='false',
+    value=>{value.products[0].presentation={theme:'../../private'};},
+    value=>{value.products[0].presentation={theme:'studio',style:'external.css'};},
+    value=>{value.products[0].copy={hero_title:42};},
+    value=>{value.products[0].copy={details_title:'   '};},
+    value=>{value.products[0].copy={html:'<script>evil()</script>'};},
   ]){const invalid=JSON.parse(validProducts);mutate(invalid);write('content/products.json',invalid);assert.throws(()=>loadContent(fixture));}
   fs.writeFileSync(path.join(fixture,'content/products.json'),validProducts);
   const before=loadContent(fixture);

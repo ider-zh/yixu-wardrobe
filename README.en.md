@@ -14,7 +14,8 @@ Yixu is a wardrobe to wander through at your own pace. Starting with 100 complet
 - **Find a favorite.** Search names, numbers, garments, materials or moods. The gallery labels are Chinese: try 丝绒 for velvet, 百褶裙 for pleated skirts or 惊喜 for surprise.
 - **Look closer.** Select 01–09 by shot number and name to explore the expression, movement and framing, then read the garment list and styling notes.
 - **Follow an idea.** Linked tags in outfit details search the wardrobe for related outfits. Your browser's Back button returns to the outfit you were viewing.
-- **Explore each piece.** Browse product editorials with complete silhouettes, multiple angles, independent details and model references in “单品”, switch between enlarged images, and save design objects separately. The first samples are look 102’s knit, skirt and boots. The skirt includes waist and hem close-ups; the boots have eight product images, with the rear view explicitly labeled as a design extrapolation.
+- **Explore each piece.** In “单品”, explore all six pieces from look 102: six jacket images, one knit image, three skirt images, eight boot images, four bag images and three stud images, alongside references from the original outfit photograph. Switch between enlarged images and save designs separately. The boots’ rear view and two bag details are labeled as design extrapolations; the complete silver-stud set is an AI redesign inspired by the original photograph’s small round earrings.
+- **Explore at a different pace.** The skirt keeps a spacious editorial layout, while the boots put large images and multiple views first. Wearing references and favorites remain consistent.
 - **Keep a look.** Save favorites with the heart, compare two or three outfits, or choose 保存图片 to download. Existing numbers and favorites stay associated with their outfits.
 
 Keyboard shortcuts: `/` for search, `←` and `→` for adjacent looks in details, and `Esc` to close a dialog.
@@ -41,4 +42,4 @@ Character and outfit images are generative artwork for styling inspiration and v
 
 The main website uses HTTPS and displays ICP filing number [浙ICP备2026098002号](https://beian.miit.gov.cn/).
 
-For maintenance or daily outfit production by an external agent, see [Development notes](DEVELOPMENT.md) and the [content production SOP](docs/external-agent-sop.md).
+For maintenance or content production by an external agent, see [Development notes](DEVELOPMENT.md), the [outfit production SOP](docs/external-agent-sop.md) and the [product image SOP](docs/product-agent-sop.md).
