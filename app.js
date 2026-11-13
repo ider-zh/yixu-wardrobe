@@ -71,10 +71,11 @@ function adoptCatalog(candidate) {
   }
   const offeredProducts=candidate.products??[];
   if(!Array.isArray(offeredProducts)||!offeredProducts.every(p=>{
-    return p&&/^[A-Za-z0-9_-]+$/.test(p.product_id)&&['name','category','subtitle','description','color_name','design_material'].every(key=>typeof p[key]==='string')&&/^#[a-fA-F0-9]{6}$/.test(p.color_hex)&&Array.isArray(p.notes)&&p.notes.every(n=>typeof n==='string')&&publicSource(p.asset?.source_url||p.asset?.file)&&Array.isArray(p.appearances)&&p.appearances.every(a=>{const look=next.find(l=>l.id===a.look_id);return look&&Number.isSafeInteger(a.piece_index)&&a.piece_index>=1&&a.piece_index<=look.pieces.length&&a.reference_asset_id===look.versions.v2.asset?.asset_id&&Number.isInteger(a.shot_index)&&a.shot_index>=1&&a.shot_index<=9;});
+    return p&&/^[A-Za-z0-9_-]+$/.test(p.product_id)&&['name','category','subtitle','description','color_name','design_material'].every(key=>typeof p[key]==='string')&&/^#[a-fA-F0-9]{6}$/.test(p.color_hex)&&Array.isArray(p.notes)&&p.notes.every(n=>typeof n==='string')&&publicSource(p.asset?.source_url||p.asset?.file)&&(p.gallery===undefined||(Array.isArray(p.gallery)&&p.gallery.length<=8&&p.gallery.every(image=>image&&typeof image.title==='string'&&typeof image.caption==='string'&&publicSource(image.asset?.source_url||image.asset?.file))))&&Array.isArray(p.appearances)&&p.appearances.every(a=>{const look=next.find(l=>l.id===a.look_id);return look&&Number.isSafeInteger(a.piece_index)&&a.piece_index>=1&&a.piece_index<=look.pieces.length&&a.reference_asset_id===look.versions.v2.asset?.asset_id&&Number.isInteger(a.shot_index)&&a.shot_index>=1&&a.shot_index<=9;});
   }))return false;
   if(new Set(offeredProducts.map(p=>p.product_id)).size!==offeredProducts.length)return false;
-  data={...candidate,products:offeredProducts.map(p=>({...p,asset:{...p.asset,source_url:p.asset.source_url||p.asset.file,image_url:p.asset.image_url||p.asset.source_url||p.asset.file}})),looks:next};looks=next;byId.clear();looks.forEach(l=>byId.set(l.id,l));
+  const productAsset=a=>({...a,source_url:a.source_url||a.file,image_url:a.image_url||a.source_url||a.file});
+  data={...candidate,products:offeredProducts.map(p=>({...p,asset:productAsset(p.asset),gallery:(p.gallery||[]).map(image=>({...image,asset:productAsset(image.asset)}))})),looks:next};looks=next;byId.clear();looks.forEach(l=>byId.set(l.id,l));
   models=Array.isArray(data.models)?data.models.map(model=>({...model,id:model.model_id||model.id})):[];
   categories=[...new Set([...(data.categoryOrder||[]),...looks.map(l=>l.category)])].filter(c=>looks.some(l=>l.category===c));
   window.WARDROBE=data;window.WardrobeTryOn?.setCatalog?.(data);
@@ -410,23 +411,61 @@ function renderProducts(){
  const selected=products.filter(p=>(!category||p.category===category)&&(!saved||productFavorites.has(p.product_id)));
  $('product-gallery').innerHTML=selected.map(productCard).join('');$('product-empty').hidden=!!selected.length;
 }
+function productImages(product){
+ return [{title:'完整形态',caption:product.description,asset:product.asset},...(product.gallery||[])];
+}
+function productImageButton(product,image,index,className){
+ return `<button class="${className}" data-product-zoom="${esc(product.product_id)}" data-product-frame-index="${index}" aria-label="放大查看 ${esc(image.title)}"><img ${imageAttributes(image.asset)} alt="${esc(product.name)} · ${esc(image.title)}" width="${image.asset.width}" height="${image.asset.height}" ${index?'loading="lazy"':'fetchpriority="high"'} decoding="async"><span class="product-image-hint" aria-hidden="true">↗</span></button>`;
+}
 function renderProduct(id){
  const product=(data.products||[]).find(p=>p.product_id===id);
  if(!product){$('product-page').innerHTML='<p class="eyebrow">THE OBJECT EDIT</p><h1>这件单品暂未发布。</h1><a class="outline-button" href="#/products">浏览全部单品 ↗</a>';return;}
  const number=String((data.products||[]).indexOf(product)+1).padStart(3,'0'),liked=productFavorites.has(id);
+ const images=productImages(product),gallery=product.gallery||[];
  const appearances=product.appearances.filter(a=>byId.has(a.look_id));
  const related=[...new Map(appearances.flatMap(a=>productsForLook(a.look_id)).filter(p=>p.product_id!==id).map(p=>[p.product_id,p])).values()];
  const worn=appearances.map(a=>{
   const look=byId.get(a.look_id),version={...versionOf(look),previewPanel:a.shot_index};
   const shown={...look,versions:{v2:version}};
-  return `<a class="product-worn" data-product-look="${look.id}" href="#look-${look.id}">${photo(shown)}<div><p class="eyebrow">LOOK ${String(look.id).padStart(3,'0')} / ${esc(publication(look))}</p><h3>${esc(look.title)}</h3><p>${esc(version.shots[a.shot_index-1]?.title||'模特穿着参考')}</p><span>查看整套穿搭 ↗</span></div></a>`;
+  return `<a class="product-worn" data-product-look="${look.id}" href="#look-${look.id}">${photo(shown)}<div><p class="eyebrow">LOOK ${String(look.id).padStart(3,'0')} / ${esc(publication(look))}</p><h3>${esc(look.title)}</h3><p>${esc(look.description)}</p><span class="product-worn-link">走进这套穿搭 <span aria-hidden="true">↗</span></span></div></a>`;
  }).join('');
- $('product-page').innerHTML=`<div class="product-breadcrumb"><a href="#/products">单品</a><span>/</span><span>${esc(product.category)}</span></div><div class="product-hero"><button class="product-main-image" data-product-zoom="${id}" aria-label="放大查看 ${esc(product.name)}"><img ${imageAttributes(product.asset)} alt="${esc(product.name)} · 完整产品图" fetchpriority="high" decoding="async"><span>放大细看 ↗</span></button><article class="product-copy"><p class="eyebrow">THE OBJECT EDIT / ${number}</p><p class="product-category">${esc(product.category)} · AI 设计单品</p><h1>${esc(product.name)}</h1><p class="product-subtitle">${esc(product.subtitle)}</p><p class="product-description">${esc(product.description)}</p><dl class="product-facts"><div><dt>颜色</dt><dd><span class="product-color"><i style="background:${product.color_hex}"></i>${esc(product.color_name)}</span></dd></div><div><dt>肌理</dt><dd>${esc(product.design_material)}</dd></div><div><dt>穿搭</dt><dd>${appearances.length} 套穿着参考</dd></div></dl><div class="product-actions"><button class="solid-button" data-product-favorite="${id}" aria-pressed="${liked}">${liked?'♥ 已收藏':'♡ 收藏单品'}</button><button class="outline-button" data-product-worn>看模特怎么穿 ↓</button></div><p class="product-disclosure">AI 设计展示，供穿搭灵感参考。独立产品图依据写真演绎；未展示部分为设计补充，实际衣装细节请结合穿着参考查看。</p></article></div><section class="product-observation"><div><p class="eyebrow">FORM & TEXTURE</p><h2>细节，让日常不同。</h2><p>从完整轮廓，到值得停留的肌理。</p><ol>${product.notes.map((note,i)=>`<li><span>0${i+1}</span>${esc(note)}</li>`).join('')}</ol></div><button class="product-macro" data-product-zoom="${id}" aria-label="放大单品肌理"><img ${imageAttributes(product.asset)} alt="${esc(product.name)} · 主图局部放大" loading="lazy"><span>主图局部 · 点击查看完整图 ↗</span></button></section><section id="product-worn-section" class="product-worn-section"><div class="section-heading"><div><p class="eyebrow">ON THE MODEL</p><h2>回到穿着的那一刻。</h2></div></div><div class="product-worn-grid">${worn}</div></section>${related.length?`<section class="product-related"><div class="section-heading"><div><p class="eyebrow">THE COMPLETE LOOK</p><h2>一起，刚刚好。</h2></div></div><div class="product-grid">${related.map(productCard).join('')}</div></section>`:''}`;
+ const thumbnails=images.length>1?`<div class="product-thumbnails" role="group" aria-label="选择单品图片">${images.map((image,i)=>`<button data-product-select="${id}" data-product-index="${i}" aria-pressed="${i===0}" aria-label="${esc(image.title)}"><img ${imageAttributes(image.asset)} alt="" loading="lazy"><span>${i===0?'完整形态':`细节 0${i}`}</span></button>`).join('')}</div>`:'';
+ const stories=gallery.map((image,i)=>`<article class="product-detail-story">${productImageButton(product,image,i+1,'product-detail-image')}<div class="product-detail-copy"><p class="eyebrow">DETAIL ${String(i+1).padStart(2,'0')}</p><h3>${esc(image.title)}</h3><p>${esc(image.caption)}</p><button class="product-text-link" data-product-zoom="${id}" data-product-frame-index="${i+1}">放大这一处细节 ↗</button></div></article>`).join('');
+ $('product-page').innerHTML=`
+  <div class="product-edition-line"><nav class="product-breadcrumb" aria-label="单品路径"><a href="#/products">全部单品</a><span aria-hidden="true">/</span><span>${esc(product.category)}</span></nav><span>衣序单品特辑 · ${number}</span></div>
+  <div class="product-hero">
+   <div class="product-visual"><figure class="product-hero-figure">${productImageButton(product,images[0],0,'product-main-image')}<figcaption><span class="product-hero-caption">01 / ${String(images.length).padStart(2,'0')} · 完整形态</span><span>点击图片，近一点看 ↗</span></figcaption></figure>${thumbnails}</div>
+   <article class="product-copy"><p class="eyebrow">THE SIGNATURE EDIT <span>— ${number}</span></p><p class="product-category">${esc(product.category)} / ${esc(product.color_name)}</p><h1>${esc(product.name)}</h1><p class="product-subtitle">${esc(product.subtitle)}</p><p class="product-description">${esc(product.description)}</p><dl class="product-facts"><div><dt>色调</dt><dd><span class="product-color"><i style="background:${product.color_hex}"></i>${esc(product.color_name)}</span></dd></div><div><dt>视觉肌理</dt><dd>${esc(product.design_material.replace(/，视觉设计描述$/,''))}</dd></div></dl><div class="product-actions"><button class="solid-button" data-product-favorite="${id}" aria-pressed="${liked}" aria-label="${liked?'取消收藏':'收藏单品'} ${esc(product.name)}">${liked?'♥ 已收藏':'♡ 收藏单品'}</button><button class="product-text-link" data-product-worn>看模特怎么穿 <span aria-hidden="true">↓</span></button></div><p class="product-hero-footnote">AI 设计单品 · 穿搭灵感档案</p></article>
+  </div>
+  <nav class="product-chapters" aria-label="单品特辑章节"><button data-product-section="product-hero"><span>01</span>完整形态</button><button data-product-section="product-observation"><span>02</span>设计细节</button><button data-product-worn><span>03</span>穿在身上</button><span class="product-chapter-end">THE OBJECT, IN FOCUS</span></nav>
+  <section class="product-observation" aria-labelledby="product-observation-title"><div class="product-story-intro"><p class="eyebrow">A CLOSER LOOK</p><h2 id="product-observation-title">值得靠近的，<br>不止第一眼。</h2><p>${esc(product.subtitle)}</p></div>${stories?`<div class="product-detail-stories">${stories}</div>`:''}<ol class="product-design-notes">${product.notes.map((note,i)=>`<li><span>${String(i+1).padStart(2,'0')}</span><p>${esc(note)}</p></li>`).join('')}</ol></section>
+  <section id="product-worn-section" class="product-worn-section"><div class="section-heading"><div><p class="eyebrow">FROM OBJECT TO OUTFIT</p><h2>穿上它，故事才开始。</h2></div><span class="product-section-number">03 / ON THE MODEL</span></div><div class="product-worn-grid">${worn}</div></section>
+  ${related.length?`<section class="product-related"><div class="section-heading"><div><p class="eyebrow">BETTER TOGETHER</p><h2>让这一件，成为一套。</h2></div><a href="#/products">探索更多单品 ↗</a></div><div class="product-grid">${related.map(productCard).join('')}</div></section>`:''}
+  <p class="product-disclosure">AI 设计展示，供穿搭灵感参考。独立产品图与近景依据写真演绎，细节属于设计补充；请结合原写真查看穿着效果。</p>`;
+}
+let productZoom=null;
+function showProductImage(id,index){
+ const product=(data.products||[]).find(p=>p.product_id===id),image=product&&productImages(product)[index];
+ if(!image)return;
+ productZoom={id,index};setImage($('product-zoom-image'),image.asset);$('product-zoom-image').alt=product.name+' · '+image.title;
+ $('product-image-caption').textContent=image.title;$('product-image-position').textContent=`${index+1} / ${productImages(product).length}`;
+ $('product-image-prev').disabled=index===0;$('product-image-next').disabled=index===productImages(product).length-1;
+ if(!$('product-image-dialog').open)$('product-image-dialog').showModal();
 }
 document.addEventListener('click',event=>{
  const worn=event.target.closest('[data-product-look]');
  if(worn&&event.button===0&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey){event.preventDefault();openDetail(Number(worn.dataset.productLook));return;}
  if(event.target.closest('[data-product-worn]')){document.querySelector('#product-worn-section')?.scrollIntoView({behavior:'smooth',block:'start'});return;}
+ const chapter=event.target.closest('[data-product-section]');
+ if(chapter){document.querySelector('#product-page .'+chapter.dataset.productSection)?.scrollIntoView({behavior:'smooth',block:'start'});return;}
+ const selected=event.target.closest('[data-product-select]');
+ if(selected){
+  const product=(data.products||[]).find(p=>p.product_id===selected.dataset.productSelect),index=Number(selected.dataset.productIndex),image=product&&productImages(product)[index];if(!image)return;
+  const main=document.querySelector('#product-page .product-main-image');if(!main)return;
+  setImage(main.querySelector('img'),image.asset);main.querySelector('img').alt=product.name+' · '+image.title;main.dataset.productFrameIndex=String(index);main.setAttribute('aria-label','放大查看 '+image.title);
+  document.querySelector('.product-hero-caption').textContent=`${String(index+1).padStart(2,'0')} / ${String(productImages(product).length).padStart(2,'0')} · ${index?'细节 0'+index:'完整形态'}`;
+  document.querySelectorAll('[data-product-select]').forEach(b=>b.setAttribute('aria-pressed',String(b===selected)));return;
+ }
  const button=event.target.closest('[data-product-favorite]');
  if(button){
   const id=button.dataset.productFavorite,product=(data.products||[]).find(p=>p.product_id===id);if(!product)return;
@@ -436,9 +475,12 @@ document.addEventListener('click',event=>{
   if(state.page==='products'&&new URLSearchParams(location.hash.split('?')[1]).get('saved')==='1')renderProducts();return;
  }
  const zoom=event.target.closest('[data-product-zoom]');
- if(zoom){const product=(data.products||[]).find(p=>p.product_id===zoom.dataset.productZoom);if(!product)return;setImage($('product-zoom-image'),product.asset);$('product-zoom-image').alt=product.name+' · 完整产品图';$('product-image-dialog').showModal();}
+ if(zoom)showProductImage(zoom.dataset.productZoom,Number(zoom.dataset.productFrameIndex)||0);
 });
 $('close-product-image').addEventListener('click',()=>$('product-image-dialog').close());
+$('product-image-prev').addEventListener('click',()=>{if(productZoom)showProductImage(productZoom.id,productZoom.index-1);});
+$('product-image-next').addEventListener('click',()=>{if(productZoom)showProductImage(productZoom.id,productZoom.index+1);});
+$('product-image-dialog').addEventListener('keydown',event=>{if(!productZoom||!['ArrowLeft','ArrowRight'].includes(event.key))return;event.preventDefault();showProductImage(productZoom.id,productZoom.index+(event.key==='ArrowLeft'?-1:1));});
 
 window.matchMedia('(min-width: 801px)').addEventListener('change',event=>{if(event.matches&&$('filter-dialog').open)$('filter-dialog').close();});
 adoptCatalog(window.WARDROBE || {looks:[],categoryOrder:[]});updateCounts();

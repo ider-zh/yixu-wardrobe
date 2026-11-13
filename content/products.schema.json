@@ -162,6 +162,14 @@
         "asset": {
           "$ref": "#/$defs/Asset"
         },
+        "gallery": {
+          "items": {
+            "$ref": "#/$defs/ProductImage"
+          },
+          "maxItems": 8,
+          "title": "Gallery",
+          "type": "array"
+        },
         "appearances": {
           "items": {
             "$ref": "#/$defs/ProductAppearance"
@@ -220,6 +228,33 @@
         "shot_index"
       ],
       "title": "ProductAppearance",
+      "type": "object"
+    },
+    "ProductImage": {
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "caption": {
+          "maxLength": 1000,
+          "minLength": 1,
+          "title": "Caption",
+          "type": "string"
+        },
+        "asset": {
+          "$ref": "#/$defs/Asset"
+        }
+      },
+      "required": [
+        "title",
+        "caption",
+        "asset"
+      ],
+      "title": "ProductImage",
       "type": "object"
     }
   },

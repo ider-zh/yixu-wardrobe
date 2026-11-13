@@ -190,7 +190,7 @@ export function loadContent(root) {
     const ids = new Set(), linked = new Set();
     const limits = {name:200,category:100,subtitle:500,description:2000,color_name:100,design_material:500};
     for (const product of manifest.products) {
-      fail(object(product) && Object.keys(product).every(key => ['product_id',...Object.keys(limits),'color_hex','notes','asset','appearances'].includes(key)), 'Unknown product field');
+      fail(object(product) && Object.keys(product).every(key => ['product_id',...Object.keys(limits),'color_hex','notes','asset','gallery','appearances'].includes(key)), 'Unknown product field');
       fail(assetId(product.product_id) && !ids.has(product.product_id), 'Invalid or duplicate product');
       ids.add(product.product_id);
       fail(Object.entries(limits).every(([key,max]) => text(product[key]) && product[key].length <= max) && /^#[a-fA-F0-9]{6}$/.test(product.color_hex), 'Complete product description required');
@@ -202,9 +202,17 @@ export function loadContent(root) {
         fail(Number.isSafeInteger(appearance.look_id) && look && Number.isSafeInteger(appearance.piece_index) && appearance.piece_index >= 1 && appearance.piece_index <= look.pieces.length && appearance.reference_asset_id === look.versions.v2.asset.asset_id && Number.isInteger(appearance.shot_index) && appearance.shot_index >= 1 && appearance.shot_index <= 9 && !linked.has(identity), 'Invalid or duplicate product appearance');
         linked.add(identity);
       }
-      fail(product.asset?.visibility === 'public' && product.asset.file?.startsWith('assets/products/') && product.asset.layout == null, 'Independent public product image required');
-      registerAsset(product.asset);
-      products.push({...structuredClone(product),asset:{...product.asset,image_url:product.asset.file,source_url:product.asset.file}});
+      const gallery = product.gallery === undefined ? [] : product.gallery;
+      fail(Array.isArray(gallery) && gallery.length <= 8, 'Invalid product gallery');
+      fail(gallery.every(image => object(image) && Object.keys(image).every(key => ['title','caption','asset'].includes(key)) && text(image.title) && image.title.length <= 200 && text(image.caption) && image.caption.length <= 1000), 'Product image descriptions required');
+      const images = [product.asset, ...gallery.map(image => image.asset)];
+      fail(new Set(images.map(image => image?.asset_id)).size === images.length, 'Duplicate product gallery image');
+      for (const image of images) {
+        fail(image?.visibility === 'public' && image.file?.startsWith('assets/products/') && image.layout == null, 'Independent public product image required');
+        registerAsset(image);
+      }
+      const publicImage = asset => ({...asset,image_url:asset.file,source_url:asset.file});
+      products.push({...structuredClone(product),asset:publicImage(product.asset),gallery:gallery.map(image => ({...structuredClone(image),asset:publicImage(image.asset)}))});
     }
   }
   const published = [...looks.values()];

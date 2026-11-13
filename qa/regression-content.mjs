@@ -20,6 +20,11 @@ try {
     value=>value.products[0].appearances[0].piece_index=999,
     value=>value.products[0].asset.visibility='private',
     value=>value.products[0].asset.sha256='0'.repeat(64),
+    value=>value.products.find(p=>p.gallery?.length).gallery[0].asset.visibility='private',
+    value=>value.products.find(p=>p.gallery?.length).gallery[0].asset.sha256='0'.repeat(64),
+    value=>{const p=value.products.find(p=>p.gallery?.length);p.gallery[0].asset=structuredClone(p.asset);},
+    value=>value.products.find(p=>p.gallery?.length).gallery[0].caption='',
+    value=>{value.products[0].gallery=null;},
   ]){const invalid=JSON.parse(validProducts);mutate(invalid);write('content/products.json',invalid);assert.throws(()=>loadContent(fixture));}
   fs.writeFileSync(path.join(fixture,'content/products.json'),validProducts);
   const before=loadContent(fixture);

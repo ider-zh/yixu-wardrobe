@@ -93,6 +93,12 @@ class ProductAppearance(Strict):
     shot_index: int = Field(strict=True, ge=1, le=9)
 
 
+class ProductImage(Strict):
+    title: str = Field(min_length=1, max_length=200)
+    caption: str = Field(min_length=1, max_length=1000)
+    asset: Asset
+
+
 class Product(Strict):
     product_id: str = Field(pattern=r"^[A-Za-z0-9_-]{1,128}$")
     name: str = Field(min_length=1, max_length=200)
@@ -104,6 +110,7 @@ class Product(Strict):
     design_material: str = Field(min_length=1, max_length=500)
     notes: list[str] = Field(min_length=1, max_length=10)
     asset: Asset
+    gallery: list[ProductImage] = Field(default_factory=list, max_length=8)
     appearances: list[ProductAppearance] = Field(min_length=1, max_length=200)
 
 
@@ -583,9 +590,14 @@ class ContentService:
                     ):
                         raise ValueError("Invalid or duplicate product appearance")
                     linked_pieces.add(identity)
-                record = register(product.asset.model_dump(exclude_none=True))
-                if not record["file"].startswith("assets/products/") or record.get("layout"):
-                    raise ValueError("Product images must be independent public product assets")
+                image_ids = set()
+                for image in [product.asset, *[item.asset for item in product.gallery]]:
+                    if image.asset_id in image_ids:
+                        raise ValueError("Duplicate product gallery image")
+                    image_ids.add(image.asset_id)
+                    record = register(image.model_dump(exclude_none=True))
+                    if not record["file"].startswith("assets/products/") or record.get("layout"):
+                        raise ValueError("Product images must be independent public product assets")
                 products.append(product.model_dump(mode="json", exclude_none=True))
         batches, latest_order, home = publication_projection(
             looks, batches, baseline.get("displayOrder", [])
@@ -641,6 +653,8 @@ class ContentService:
         snapshot = copy.deepcopy(self._snapshot)
         for product in snapshot.get("products", []):
             product["asset"] = self._public_asset(product["asset"])
+            for image in product.get("gallery", []):
+                image["asset"] = self._public_asset(image["asset"])
         for look in snapshot["looks"]:
             version = look["versions"]["v2"]
             version["asset"] = asset = self._public_asset(version["asset"])

@@ -239,7 +239,7 @@ try{
   await route('#/products');await wait('!document.getElementById("products-page").hidden');
   assert.equal(await evaluate('document.querySelectorAll("#product-gallery [data-product-card]").length'),3);
   await noOverflow('Product index '+viewport.width);
-  const product=sampleProducts[0],hash='#/product/'+product.product_id;
+  const product=sampleProducts.find(p=>p.gallery?.length),hash='#/product/'+product.product_id;
   await evaluate(`document.querySelector('#product-gallery a[href="${hash}"]').click()`);
   await wait('!document.getElementById("product-page").hidden');
   assert.equal(await evaluate('document.querySelector("#product-page h1").textContent'),product.name);
@@ -247,19 +247,43 @@ try{
   await noOverflow('Product detail '+viewport.width);
   const box=await evaluate('(()=>{const e=document.querySelector(".product-main-image img"),r=e.getBoundingClientRect();return {width:r.width,height:r.height};})()');
   assert.ok(Math.abs(box.width/box.height-.8)<.01,'Product retains its independent portrait composition');
+  assert.equal(await evaluate('document.querySelectorAll("[data-product-select]").length'),product.gallery.length+1);
+  assert.equal(await evaluate('document.querySelectorAll(".product-detail-story").length'),product.gallery.length,'Independent detail photos replace the enlarged hero');
+  await evaluate('document.querySelector("[data-product-index=\\"1\\"]").click()');
+  await wait('document.querySelector(".product-main-image img").complete&&document.querySelector(".product-main-image img").naturalWidth>0');
+  assert.equal(await evaluate('document.querySelector(".product-main-image img").getAttribute("src")'),product.gallery[0].asset.source_url);
+  assert.equal(await evaluate('document.querySelector("[data-product-index=\\"1\\"]").getAttribute("aria-pressed")'),'true');
+  await evaluate('(()=>{const im=document.querySelector(".product-main-image img");im.src="data:image/webp;base64,aW52YWxpZA==";im.dispatchEvent(new Event("error"));})()');
+  await wait('document.querySelector(".product-main-image img").naturalWidth>0');
+  assert.equal(await evaluate('document.querySelector(".product-main-image img").getAttribute("src")'),product.gallery[0].asset.source_url,'Detail images retain project fallback');
   await evaluate('document.querySelector(".product-main-image").scrollIntoView({block:"center"});document.querySelector(".product-main-image").focus()');
   await client('Input.dispatchKeyEvent',{type:'keyDown',key:'Enter',code:'Enter',windowsVirtualKeyCode:13,text:'\r',unmodifiedText:'\r'});
   await client('Input.dispatchKeyEvent',{type:'keyUp',key:'Enter',code:'Enter',windowsVirtualKeyCode:13});
   await wait('document.getElementById("product-image-dialog").open');
+  assert.equal(await evaluate('document.getElementById("product-zoom-image").getAttribute("src")'),product.gallery[0].asset.source_url,'Zoom opens the selected detail image');
+  await client('Input.dispatchKeyEvent',{type:'keyDown',key:'ArrowRight',code:'ArrowRight',windowsVirtualKeyCode:39});
+  assert.equal(await evaluate('document.getElementById("product-image-position").textContent'),'3 / 3');
+  assert.equal(await evaluate('document.getElementById("product-image-next").disabled'),true);
+  await evaluate('document.getElementById("product-image-prev").click()');
+  assert.equal(await evaluate('document.getElementById("product-image-position").textContent'),'2 / 3');
   await evaluate('document.getElementById("close-product-image").click()');
   await wait('!document.getElementById("product-image-dialog").open');
   await evaluate(`document.querySelector('#product-page [data-product-worn]').click()`);
   assert.equal(await evaluate('location.hash'),hash,'Section navigation stays on the product route');
+  await evaluate('document.querySelector("#product-worn-section").scrollIntoView({behavior:"instant",block:"start"})');
+  assert.ok(await evaluate('(()=>{const nav=document.querySelector(".product-chapters"),r=nav.getBoundingClientRect(),header=document.querySelector(".site-header").getBoundingClientRect();return r.top>=header.bottom-1&&!!document.elementFromPoint(r.left+20,r.top+r.height/2)?.closest(".product-chapters");})()'),'Product chapter navigation stays visible below the sticky site header');
   await evaluate('document.querySelector(".product-worn").click()');await wait('document.getElementById("detail-dialog").open');
   assert.equal(await evaluate('document.querySelectorAll("#detail-product-gallery [data-product-card]").length'),3);
   await evaluate('document.getElementById("close-detail").click()');await wait(`location.hash===${JSON.stringify(hash)}&&!document.getElementById('product-page').hidden`);
   await noOverflow('Product return '+viewport.width);
-  if(process.env.YIXU_SCREENSHOT_DIR){await evaluate('window.scrollTo(0,0)');const capture=await client('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(process.env.YIXU_SCREENSHOT_DIR,`product-${viewport.width}.png`),Buffer.from(capture.data,'base64'),{mode:0o600});}
+  if(process.env.YIXU_SCREENSHOT_DIR){
+   await evaluate('window.scrollTo({top:0,behavior:"instant"});document.querySelector("[data-product-index=\\"0\\"]").click()');
+   const capture=await client('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(process.env.YIXU_SCREENSHOT_DIR,`product-${viewport.width}.png`),Buffer.from(capture.data,'base64'),{mode:0o600});
+   await evaluate('document.querySelector(".product-detail-story").scrollIntoView({behavior:"instant",block:"start"})');
+   const detail=await client('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(process.env.YIXU_SCREENSHOT_DIR,`product-detail-${viewport.width}.png`),Buffer.from(detail.data,'base64'),{mode:0o600});
+   await evaluate('document.querySelector("#product-worn-section").scrollIntoView({behavior:"instant",block:"start"})');
+   const worn=await client('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(process.env.YIXU_SCREENSHOT_DIR,`product-worn-${viewport.width}.png`),Buffer.from(worn.data,'base64'),{mode:0o600});
+  }
  }
  const savedProduct=sampleProducts[0];
  await evaluate('localStorage.setItem("yixu:product-favorites:v1",JSON.stringify(["future-product"]))');

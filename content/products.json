@@ -49,13 +49,13 @@
         "中长裙与长靴衔接，形成完整深棕色调"
       ],
       "asset": {
-        "asset_id": "product-brown-skirt-102-r1",
-        "file": "assets/products/look-102/brown-skirt-r1.webp",
+        "asset_id": "product-brown-skirt-102-r2",
+        "file": "assets/products/look-102/brown-skirt-r2.webp",
         "mime": "image/webp",
         "width": 1122,
         "height": 1402,
-        "bytes": 63080,
-        "sha256": "c09004fd96ae80940cfdd6b46e0e2164896c0c6d5700bf5e06c63d43c7d7a959",
+        "bytes": 107466,
+        "sha256": "3c3c4895d9cc7d9cc15eb106a9c14625b4eaf1064dcf5732fca070fcf32ff3f0",
         "visibility": "public"
       },
       "appearances": [
@@ -64,6 +64,36 @@
           "piece_index": 3,
           "reference_asset_id": "look-102-female-01-v2-r2",
           "shot_index": 1
+        }
+      ],
+      "gallery": [
+        {
+          "title": "干净腰线，纵向延伸。",
+          "caption": "简洁腰头连接前中缝，让视线沿着裙身自然向下。",
+          "asset": {
+            "asset_id": "product-brown-skirt-102-waist-r1",
+            "file": "assets/products/look-102/brown-skirt-waist-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 259616,
+            "sha256": "d6c9e6891aa47ed72222e7ac7ebf70da224e6998020b1b5128294273aab55e18",
+            "visibility": "public"
+          }
+        },
+        {
+          "title": "光泽，在裙摆间流动。",
+          "caption": "宽阔而柔和的褶面，让巧克力棕在明暗之间展开。",
+          "asset": {
+            "asset_id": "product-brown-skirt-102-hem-r1",
+            "file": "assets/products/look-102/brown-skirt-hem-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 197672,
+            "sha256": "5db01b0e70aeebf8eee88072b4a34688042bf68778ed8c313a56160ef835f1ee",
+            "visibility": "public"
+          }
         }
       ]
     },

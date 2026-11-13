@@ -419,6 +419,15 @@ def test_products_are_public_archived_and_linked_to_exact_outfit(content_fixture
     product["asset"] = metadata(
         source, "assets/products/fixture.webp", "product-fixture", (80, 100), False
     )
+    product["gallery"] = [
+        {
+            "title": "细节",
+            "caption": "独立设计近景",
+            "asset": metadata(
+                source, "assets/products/detail.webp", "product-detail", (80, 100), False
+            ),
+        }
+    ]
     product["appearances"] = [
         {
             "look_id": 101,
@@ -442,8 +451,31 @@ def test_products_are_public_archived_and_linked_to_exact_outfit(content_fixture
         response = client.get(item["asset"]["source_url"])
         assert response.headers["content-type"] == "image/webp"
         assert hashlib.sha256(response.content).hexdigest() == product["asset"]["sha256"]
+        detail = item["gallery"][0]["asset"]
+        assert (
+            hashlib.sha256(client.get(detail["source_url"]).content).hexdigest()
+            == product["gallery"][0]["asset"]["sha256"]
+        )
+        service.set_delivery_resolver(lambda key, source: "https://cdn.invalid/" + key + ".webp")
+        delivered = client.get("/api/content/products/" + product["product_id"]).json()
+        assert (
+            delivered["gallery"][0]["asset"]["image_url"]
+            == "https://cdn.invalid/product-detail.webp"
+        )
+        assert delivered["gallery"][0]["asset"]["source_url"] == detail["source_url"]
+        service.set_delivery_resolver(None)
         revision = catalog["revision"]
-        for change in ["stale_reference", "wrong_piece", "duplicate", "private", "bad_hash"]:
+        for change in [
+            "stale_reference",
+            "wrong_piece",
+            "duplicate",
+            "private",
+            "bad_hash",
+            "private_detail",
+            "bad_detail_hash",
+            "duplicate_detail",
+            "empty_caption",
+        ]:
             candidate = copy.deepcopy(manifest)
             entry = candidate["products"][0]
             if change == "stale_reference":
@@ -454,6 +486,14 @@ def test_products_are_public_archived_and_linked_to_exact_outfit(content_fixture
                 candidate["products"].append(copy.deepcopy(entry))
             elif change == "private":
                 entry["asset"]["visibility"] = "private"
+            elif change == "private_detail":
+                entry["gallery"][0]["asset"]["visibility"] = "private"
+            elif change == "bad_detail_hash":
+                entry["gallery"][0]["asset"]["sha256"] = "0" * 64
+            elif change == "duplicate_detail":
+                entry["gallery"][0]["asset"] = copy.deepcopy(entry["asset"])
+            elif change == "empty_caption":
+                entry["gallery"][0]["caption"] = ""
             else:
                 entry["asset"]["sha256"] = "0" * 64
             write_json(settings.content_root / "products.json", candidate)
