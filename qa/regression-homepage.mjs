@@ -233,16 +233,24 @@ try{
  // Product samples work from the actual offline snapshot as well as API hydration.
  const sampleProducts=catalog.products||[];
  assert.ok(sampleProducts.length>=3,'Published product samples remain available as the catalog grows');
- // Look 102 is a complete six-piece sample; later looks/products remain unrestricted.
- const look102=catalog.looks.find(look=>look.id===102);
- const pieces102=['navy-jacket-102','blue-knit-102','brown-skirt-102','brown-boots-102','navy-bag-102','silver-studs-102'];
- assert.equal(look102.pieces.length,pieces102.length);
- for(const [index,id] of pieces102.entries()){
-  const product=sampleProducts.find(product=>product.product_id===id);
-  assert.ok(product,id+' is published with a stable product link');
-  const appearance=product.appearances.find(appearance=>appearance.look_id===102);
-  assert.equal(appearance?.piece_index,index+1,id+' maps to the original outfit piece');
-  assert.equal(appearance.reference_asset_id,look102.versions.v2.asset.asset_id);
+ // Complete outfit samples prove the same product contract across styles;
+ // their piece counts are fixtures, not limits on future catalog growth.
+ const completeSamples=new Map([
+  [3,['jade-qipao-003','black-low-pumps-003','pearl-studs-003']],
+  [5,['black-biker-jacket-005','white-crew-tee-005','charcoal-cargo-trousers-005','black-ankle-boots-005','silver-studs-005']],
+  [7,['ivory-sundress-007','tan-flat-sandals-007','pearl-studs-007']],
+  [102,['navy-jacket-102','blue-knit-102','brown-skirt-102','brown-boots-102','navy-bag-102','silver-studs-102']],
+ ]);
+ for(const [lookId,products] of completeSamples){
+  const look=catalog.looks.find(look=>look.id===lookId);
+  assert.equal(look.pieces.length,products.length);
+  for(const [index,id] of products.entries()){
+   const product=sampleProducts.find(product=>product.product_id===id);
+   assert.ok(product,id+' is published with a stable product link');
+   const appearance=product.appearances.find(appearance=>appearance.look_id===lookId);
+   assert.equal(appearance?.piece_index,index+1,id+' maps to the original outfit piece');
+   assert.equal(appearance.reference_asset_id,look.versions.v2.asset.asset_id);
+  }
  }
  for(const [id,asset] of [['blue-knit-102','product-blue-knit-102-r1'],['brown-skirt-102','product-brown-skirt-102-r2'],['brown-boots-102','product-brown-boots-102-r2']])assert.equal(sampleProducts.find(product=>product.product_id===id).asset.asset_id,asset,'Existing image and collection identities survive catalog expansion');
 

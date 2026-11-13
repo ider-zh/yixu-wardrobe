@@ -548,6 +548,811 @@
         "views_title": "一对圆面，保持简单。",
         "details_title": "在细边之间，看见光。"
       }
+    },
+    {
+      "product_id": "jade-qipao-003",
+      "name": "浅玉绿提花改良旗袍",
+      "category": "裙装",
+      "subtitle": "让玉色与花叶，随步履舒展。",
+      "description": "以《翡翠新中式》写真中的浅玉绿、短袖立领与盘扣为线索，展开一件安静的中长旗袍设计。独立图中的完整花叶纹样、布面微观肌理与局部缝制细节为 AI 设计演绎，不作为真实面料或制作工艺的证明。",
+      "color_name": "浅玉绿",
+      "color_hex": "#a5af98",
+      "design_material": "同色花叶提花感织物，AI 视觉设计描述",
+      "notes": [
+        "短袖与立领，延续写真中的清爽比例",
+        "斜向盘扣与花叶纹样，在浅玉绿中形成层次",
+        "下摆侧衩保持原写真可见的行走轮廓",
+        "细节图为设计推演；没有展示未知背面、内里或拉链"
+      ],
+      "asset": {
+        "asset_id": "product-jade-qipao-hero-003-r1",
+        "file": "assets/products/look-003/jade-qipao-hero-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 143408,
+        "sha256": "ab92d04e1a2f948a12b462d1b78ae4b66c9b43c219f63c3893e8ba2929d14f3f",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 3,
+          "piece_index": 1,
+          "reference_asset_id": "look-003-v2-r1",
+          "shot_index": 4
+        }
+      ],
+      "gallery": [
+        {
+          "title": "立领与盘扣。",
+          "caption": "根据原写真可见的立领和斜向盘扣重新取景；盘结编法、纹样位置与微观织纹为设计推演，不能据此核实实物工艺。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-jade-qipao-collar-003-r1",
+            "file": "assets/products/look-003/jade-qipao-collar-r1.webp",
+            "mime": "image/webp",
+            "width": 774,
+            "height": 968,
+            "bytes": 177950,
+            "sha256": "9e4a753f826e1e9dd6dd44a41387b345b654e49e65d7a20c3747c92c54d194c4",
+            "visibility": "public"
+          }
+        },
+        {
+          "title": "花叶在裙摆间。",
+          "caption": "浅玉绿与花叶提花感随折面变化，保留侧衩线条；边缘缝制与精细纹样为 AI 设计推演，原写真无法验证这些细部。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-jade-qipao-hem-003-r1",
+            "file": "assets/products/look-003/jade-qipao-hem-r1.webp",
+            "mime": "image/webp",
+            "width": 773,
+            "height": 966,
+            "bytes": 150228,
+            "sha256": "8f96e59cd00acd3df9e9ef5e137b9573108f4cd882884cc1f7d3e7c8b66a2842",
+            "visibility": "public"
+          }
+        }
+      ],
+      "presentation": {
+        "theme": "editorial",
+        "preset": "warm-paper"
+      },
+      "copy": {
+        "details_title": "玉色里的细节",
+        "worn_title": "随步履，走入庭院",
+        "related_title": "新中式的轻盈搭配"
+      }
+    },
+    {
+      "product_id": "black-low-pumps-003",
+      "name": "黑色低跟包头鞋",
+      "category": "鞋履",
+      "subtitle": "以一笔干净黑色，收住轻盈步伐。",
+      "description": "沿用原写真里的黑色尖头、浅口与低粗跟，以克制轮廓托起玉绿裙装。独立图库为 AI 设计展示；原写真未展示完整内里与微观表面，图中的浅色内里、细纹和侧面细部为设计补充，不代表真实商品结构或皮革成分。",
+      "color_name": "黑色",
+      "color_hex": "#171615",
+      "design_material": "细纹皮质感表面，AI 视觉设计描述",
+      "notes": [
+        "尖头与浅口，延续写真中的鞋头轮廓",
+        "低粗跟形成安静的落地重心，不以图片推测实际厘米数",
+        "主图的浅色内里与图库精细表面为设计补充",
+        "不展示未知鞋底纹路、内部结构或品牌标记"
+      ],
+      "asset": {
+        "asset_id": "product-black-pumps-hero-003-r1",
+        "file": "assets/products/look-003/black-pumps-hero-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 89832,
+        "sha256": "1e9992340fc1b19380411b8f0e265c1c73dd613ba418689edb7797d2c0bae559",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 3,
+          "piece_index": 2,
+          "reference_asset_id": "look-003-v2-r1",
+          "shot_index": 1
+        }
+      ],
+      "gallery": [
+        {
+          "title": "一条安静的侧线。",
+          "caption": "以已验收母图补充单鞋侧形，保持尖头和低粗跟；完整侧面、内里与局部接合无法由原写真核实，本张为设计推演。",
+          "role": "view",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-black-pumps-side-003-r1",
+            "file": "assets/products/look-003/black-pumps-side-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 51880,
+            "sha256": "9a8d33246927f6833eb4367e5f7eea61e6afb2219d004492e0e10d68136a0e25",
+            "visibility": "public"
+          }
+        },
+        {
+          "title": "光线沿鞋头流动。",
+          "caption": "独立近景突出尖头、浅口与柔和反光；原写真不支持微观皮纹判断，细纹与内里为 AI 设计推演。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-black-pumps-toe-003-r1",
+            "file": "assets/products/look-003/black-pumps-toe-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 99448,
+            "sha256": "d5d70914cf68d34bfa492b919e65d46f888af096ab08d067a7e8906382faf42e",
+            "visibility": "public"
+          }
+        }
+      ],
+      "presentation": {
+        "theme": "editorial",
+        "preset": "warm-paper"
+      },
+      "copy": {
+        "details_title": "黑色里的光与线",
+        "views_title": "从侧面，看清轮廓",
+        "worn_title": "与玉绿裙摆同行"
+      }
+    },
+    {
+      "product_id": "pearl-studs-003",
+      "name": "珍珠耳钉",
+      "category": "配饰",
+      "subtitle": "留一颗柔光，在耳畔。",
+      "description": "从原写真清晰可见的白色圆形耳饰正面出发，将克制的球面轮廓单独呈现。图库为珍珠感外观的 AI 设计演绎，原写真无法核实真实材质、尺寸或微观表面；不声称天然珍珠，也不补画耳针与耳堵。",
+      "color_name": "柔白",
+      "color_hex": "#e7e0d1",
+      "design_material": "柔白珍珠感球面，AI 视觉设计描述",
+      "notes": [
+        "成对白色球面，延续原写真耳畔的简洁轮廓",
+        "高光只表达柔和的光泽设计，不代表材质鉴定",
+        "没有展示未知耳针、耳堵与镶座，也不给出未经测量的尺寸"
+      ],
+      "asset": {
+        "asset_id": "product-pearl-studs-hero-003-r1",
+        "file": "assets/products/look-003/pearl-studs-hero-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 25462,
+        "sha256": "17274ea075398e765838d363fec73086091b891b02ef6d5c60796283bfdefeae",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 3,
+          "piece_index": 3,
+          "reference_asset_id": "look-003-v2-r1",
+          "shot_index": 8
+        }
+      ],
+      "gallery": [
+        {
+          "title": "柔光，慢慢转过。",
+          "caption": "单颗球面以侧向柔光重新取景；原写真无法验证这种精细光泽与表面，本张为 AI 设计推演，未展示耳针或耳堵。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-pearl-studs-lustre-003-r1",
+            "file": "assets/products/look-003/pearl-studs-lustre-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 26680,
+            "sha256": "b5c081d919a2bffe4fa5c6349aa53af193d056f55ccbddd232bc622700b87ae0",
+            "visibility": "public"
+          }
+        }
+      ],
+      "presentation": {
+        "theme": "editorial",
+        "preset": "warm-paper"
+      },
+      "copy": {
+        "details_title": "一颗柔光的层次",
+        "worn_title": "回到原写真耳畔"
+      }
+    },
+    {
+      "product_id": "black-biker-jacket-005",
+      "name": "黑色短款机车皮夹克",
+      "category": "外层",
+      "subtitle": "斜一道银光，收住街头的锋芒。",
+      "description": "短款黑色轮廓与不对称翻领，让白色圆领内搭留出轻松的呼吸感；银色拉链与柔和褶面构成克制的机车表情。图库只表现原写真可见的前侧结构，不补造完整背部与内里。",
+      "color_name": "黑色",
+      "color_hex": "#171717",
+      "design_material": "黑色皮革感表面与银色金属光泽，视觉设计描述，不代表已核实成分",
+      "notes": [
+        "短款、不对称翻领与前中斜拉链，延续原写真比例",
+        "翻领圆扣、侧袋与袖口拉链形成小面积银色亮点",
+        "未展示的背部、内里及内部口袋不作工艺推断；生成纹理仅供设计参考"
+      ],
+      "asset": {
+        "asset_id": "product-black-biker-jacket-005-hero-r1",
+        "file": "assets/products/look-005/black-biker-jacket-005-hero-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 126836,
+        "sha256": "5acb4cc258dad96e85c8413c8a29236afaf6b1ae231eaff469db9b7563d6a474",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "不对称翻领",
+          "caption": "翻领边缘、圆扣与斜拉链在柔光下形成清楚的前侧层次，保持黑色与银色的克制对比。",
+          "role": "detail",
+          "design_study": false,
+          "asset": {
+            "asset_id": "product-black-biker-jacket-005-lapel-r1",
+            "file": "assets/products/look-005/black-biker-jacket-005-lapel-r1.webp",
+            "mime": "image/webp",
+            "width": 773,
+            "height": 966,
+            "bytes": 90426,
+            "sha256": "6e8bd1f486b59a58f0c40c0b4725e5a6c435ff676791af7243a963c5cace07e5",
+            "visibility": "public"
+          }
+        },
+        {
+          "title": "袖口收束",
+          "caption": "独立近景呈现袖口拉链与自然折面；皮革感纹理是 AI 视觉演绎，不作为实物工艺证明。",
+          "role": "detail",
+          "design_study": false,
+          "asset": {
+            "asset_id": "product-black-biker-jacket-005-cuff-r1",
+            "file": "assets/products/look-005/black-biker-jacket-005-cuff-r1.webp",
+            "mime": "image/webp",
+            "width": 771,
+            "height": 964,
+            "bytes": 70478,
+            "sha256": "e0442bcc6921a600774a4f2371505e9eacada0bec6ade85a29c49c07157ee3dd",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 5,
+          "piece_index": 1,
+          "reference_asset_id": "look-005-v2-r1",
+          "shot_index": 3
+        }
+      ],
+      "presentation": {
+        "theme": "studio",
+        "preset": "neutral-white"
+      },
+      "copy": {
+        "hero_title": "线条，自有锋芒。",
+        "details_title": "近看，线条自有分寸。",
+        "worn_title": "回到黑白街头。"
+      }
+    },
+    {
+      "product_id": "white-crew-tee-005",
+      "name": "白色圆领T恤",
+      "category": "上装",
+      "subtitle": "干净的一层，让黑色更有余地。",
+      "description": "白色圆领与平整的针织感表面，为皮夹克和工装裤留下一块轻盈底色。原写真遮挡袖长及完整下摆，主图中的短袖长度、衣长与直下摆属于 AI 设计补充，不能视为原图已验证的原款结构。",
+      "color_name": "白色",
+      "color_hex": "#f5f5f4",
+      "design_material": "细密棉质感针织，视觉设计描述，不代表已核实成分",
+      "notes": [
+        "保持原写真可见的白色、圆领和无图案设计",
+        "AI 设计补充：袖长、完整衣长及下摆在原写真中受遮挡，本图库采用简洁短袖直下摆方案",
+        "不提供背面、标签或成分证据；纹理近景仅表达设计效果"
+      ],
+      "asset": {
+        "asset_id": "product-white-crew-tee-005-hero-r1",
+        "file": "assets/products/look-005/white-crew-tee-005-hero-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 54512,
+        "sha256": "e8aba27d11deece736aca4ffa6ca89bd2eca97889c2f9d1a56cca25173191650",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "圆领的弧线",
+          "caption": "近看圆领罗纹与肩部衔接；生成的细密针织肌理用于说明视觉设计。",
+          "role": "detail",
+          "design_study": false,
+          "asset": {
+            "asset_id": "product-white-crew-tee-005-collar-r1",
+            "file": "assets/products/look-005/white-crew-tee-005-collar-r1.webp",
+            "mime": "image/webp",
+            "width": 758,
+            "height": 948,
+            "bytes": 44148,
+            "sha256": "f894121f6cdd9d117a61b480183744b0fba5464b9fd3fd743bf0700845e63df4",
+            "visibility": "public"
+          }
+        },
+        {
+          "title": "短袖边缘方案",
+          "caption": "AI 设计推演：原写真中的袖长与袖边被夹克遮挡，本图为已批准主图的简洁短袖折边设计补充。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-white-crew-tee-005-sleeve-study-r1",
+            "file": "assets/products/look-005/white-crew-tee-005-sleeve-study-r1.webp",
+            "mime": "image/webp",
+            "width": 757,
+            "height": 946,
+            "bytes": 39824,
+            "sha256": "b3455f3f60c47b2ccc37f37d7c6998ca7702213bddb5d32950c30ad61dce9640",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 5,
+          "piece_index": 2,
+          "reference_asset_id": "look-005-v2-r1",
+          "shot_index": 3
+        }
+      ],
+      "presentation": {
+        "theme": "studio",
+        "preset": "neutral-white"
+      },
+      "copy": {
+        "hero_title": "留白，自在日常。",
+        "details_title": "近看，线条自有分寸。",
+        "worn_title": "回到黑白街头。"
+      }
+    },
+    {
+      "product_id": "charcoal-cargo-trousers-005",
+      "name": "炭灰高腰直筒工装裤",
+      "category": "下装",
+      "subtitle": "把松弛，装进清晰的轮廓。",
+      "description": "炭灰色直筒裤腿与两侧翻盖工装袋，在宽松比例中保留利落线条。干燥的斜纹感表面与黑色皮夹克形成明暗和肌理的对照，图库聚焦已见前侧，不补造隐藏的后袋或内里。",
+      "color_name": "炭灰",
+      "color_hex": "#454548",
+      "design_material": "哑光斜纹织物感，视觉设计描述，不代表已核实成分",
+      "notes": [
+        "高腰与宽松直筒长裤轮廓，衔接短夹克",
+        "两侧大翻盖袋、简洁腰头与前门襟，不额外添加腰带或织带",
+        "原写真没有充分展示后袋、内里及具体扣件，本图库不作实物工艺证明"
+      ],
+      "asset": {
+        "asset_id": "product-charcoal-cargo-trousers-005-hero-r1",
+        "file": "assets/products/look-005/charcoal-cargo-trousers-005-hero-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 153036,
+        "sha256": "a60c90d8d93e2c464362f10c6778b02efb877aa31fe194cc67bddb3eba640925",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "翻盖工装袋",
+          "caption": "侧袋与裤腿形成有层次的矩形结构；近景保持主图的袋型、炭灰色和同色缝线。",
+          "role": "detail",
+          "design_study": false,
+          "asset": {
+            "asset_id": "product-charcoal-cargo-trousers-005-pocket-r1",
+            "file": "assets/products/look-005/charcoal-cargo-trousers-005-pocket-r1.webp",
+            "mime": "image/webp",
+            "width": 767,
+            "height": 959,
+            "bytes": 172900,
+            "sha256": "f5f2f62fb68fffb55e5ddeca30f9bf4f0989a237a4ba2da1bf04c45e10c8ffd9",
+            "visibility": "public"
+          }
+        },
+        {
+          "title": "简洁高腰线",
+          "caption": "腰头、裤耳与前侧门襟构成干净的上部线条，不增加未见腰带或装饰五金。",
+          "role": "detail",
+          "design_study": false,
+          "asset": {
+            "asset_id": "product-charcoal-cargo-trousers-005-waist-r1",
+            "file": "assets/products/look-005/charcoal-cargo-trousers-005-waist-r1.webp",
+            "mime": "image/webp",
+            "width": 763,
+            "height": 954,
+            "bytes": 129606,
+            "sha256": "8573a7fc73dc9d5ed42dc6cbe7087981015acaa22d8e6681ced1a2da19621a80",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 5,
+          "piece_index": 3,
+          "reference_asset_id": "look-005-v2-r1",
+          "shot_index": 3
+        }
+      ],
+      "presentation": {
+        "theme": "studio",
+        "preset": "neutral-white"
+      },
+      "copy": {
+        "hero_title": "松弛有形，自在成行。",
+        "details_title": "近看，线条自有分寸。",
+        "worn_title": "回到黑白街头。"
+      }
+    },
+    {
+      "product_id": "black-ankle-boots-005",
+      "name": "黑色圆头粗跟短靴",
+      "category": "鞋履",
+      "subtitle": "稳稳落下，步调自有力量。",
+      "description": "圆头、黑色鞋面和粗跟延续原写真中清楚可见的鞋履重心。原写真中的筒口被裤脚遮挡，主图及侧面全貌的简洁筒口与露出筒高属于 AI 设计补充；不推断拉链、弹力片或鞋底纹路。",
+      "color_name": "黑色",
+      "color_hex": "#151515",
+      "design_material": "柔和皮革感表面，视觉设计描述，不代表已核实成分",
+      "notes": [
+        "圆头与稳定粗跟，保持原写真黑色短靴的重心",
+        "AI 设计补充：裤脚遮挡了完整筒口，图库以简洁无额外五金的踝部轮廓呈现",
+        "不提供鞋底、内里、尺码、实测跟高或隐藏闭合结构；鞋面纹理为设计演绎"
+      ],
+      "asset": {
+        "asset_id": "product-black-ankle-boots-005-hero-r1",
+        "file": "assets/products/look-005/black-ankle-boots-005-hero-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 120242,
+        "sha256": "4c03d723fb7367a692b2ede9d9ea8dfa1b9b1858bd33784bfb2641b9f9b81916",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "简洁侧形方案",
+          "caption": "AI 设计推演：鞋头与粗跟沿用原写真可见轮廓；原图被裤脚遮挡的筒口、露出筒高与简洁接缝为设计补充。",
+          "role": "view",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-black-ankle-boots-005-side-r1",
+            "file": "assets/products/look-005/black-ankle-boots-005-side-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 105292,
+            "sha256": "6ca8365e23434665f946f64276eaf422bb23d3c93b6c60fa1494a096cc61ff2d",
+            "visibility": "public"
+          }
+        },
+        {
+          "title": "圆头与鞋面",
+          "caption": "独立近景观察圆润鞋头、柔和高光与薄外底边缘，不展示未知鞋底纹路。",
+          "role": "detail",
+          "design_study": false,
+          "asset": {
+            "asset_id": "product-black-ankle-boots-005-toe-r1",
+            "file": "assets/products/look-005/black-ankle-boots-005-toe-r1.webp",
+            "mime": "image/webp",
+            "width": 762,
+            "height": 952,
+            "bytes": 103060,
+            "sha256": "6089b2170e40e54c8e936a5cb3fa4a6bcf41ffc8e8fbdbbaf540751637c5af17",
+            "visibility": "public"
+          }
+        },
+        {
+          "title": "粗跟与足弓",
+          "caption": "从侧面近看粗跟的稳定比例与足弓衔接；不提供未经测量的高度或实物工艺结论。",
+          "role": "detail",
+          "design_study": false,
+          "asset": {
+            "asset_id": "product-black-ankle-boots-005-heel-r1",
+            "file": "assets/products/look-005/black-ankle-boots-005-heel-r1.webp",
+            "mime": "image/webp",
+            "width": 762,
+            "height": 952,
+            "bytes": 85750,
+            "sha256": "a513b8a071f7aa62b02c65ddf23f4d2ac3280810ab219b0a4bb799ceedd15ef2",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 5,
+          "piece_index": 4,
+          "reference_asset_id": "look-005-v2-r1",
+          "shot_index": 2
+        }
+      ],
+      "presentation": {
+        "theme": "studio",
+        "preset": "neutral-white"
+      },
+      "copy": {
+        "hero_title": "步调从容，自有力量。",
+        "details_title": "近看，线条自有分寸。",
+        "worn_title": "回到黑白街头。"
+      }
+    },
+    {
+      "product_id": "silver-studs-005",
+      "name": "小号银色圆耳钉",
+      "category": "配饰",
+      "subtitle": "一点银光，为黑白留个轻声注脚。",
+      "description": "整组图片为 AI 设计推演：原写真只提供低像素的小耳钉亮点，不能核实精确几何与表面结构。本设计以小号银色圆面表达克制光泽，主图与附图均不作为原款细节的实物证明。",
+      "color_name": "银色",
+      "color_hex": "#c6c7c9",
+      "design_material": "银色金属感，AI 视觉设计描述，不代表已核实金属成分",
+      "notes": [
+        "整组 AI 设计推演：小圆面、弧度和表面光泽来自设计补充，原写真分辨率不足以验证",
+        "仅展示简洁圆形正面，不补画未知耳针、耳堵或镶嵌结构",
+        "不提供尺寸、成分或货源；与其他套装中的耳饰使用独立设计编号"
+      ],
+      "asset": {
+        "asset_id": "product-silver-studs-005-hero-r1",
+        "file": "assets/products/look-005/silver-studs-005-hero-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 44352,
+        "sha256": "9af2b6565e685b5681053155cbc51f8d3fc4cfc15a28bc6c645eb69ea9a8a6dc",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "圆面光泽方案",
+          "caption": "AI 设计推演：放近观察主图已采用的银色圆面与柔和反射；原写真无法验证这一表面结构，不展示耳针或耳堵。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-silver-studs-005-surface-study-r1",
+            "file": "assets/products/look-005/silver-studs-005-surface-study-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 59502,
+            "sha256": "60927c6dd2a9daa084b2e1de159260a03cc3722ae7415db08e83a4fd20a58840",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 5,
+          "piece_index": 5,
+          "reference_asset_id": "look-005-v2-r1",
+          "shot_index": 4
+        }
+      ],
+      "presentation": {
+        "theme": "studio",
+        "preset": "neutral-white"
+      },
+      "copy": {
+        "hero_title": "一点银光，刚好。",
+        "details_title": "近看，线条自有分寸。",
+        "worn_title": "回到黑白街头。"
+      }
+    },
+    {
+      "product_id": "ivory-sundress-007",
+      "name": "象牙白方领中长连衣裙",
+      "category": "裙装",
+      "subtitle": "把海风，留在轻盈的褶间。",
+      "description": "宽肩带与方领勾勒清爽的上身，前中小圆扣向收腰线轻轻落下，细密抽褶展开中长裙摆。依据《海边白裙》的可见设计制作，细部织纹与缝制表现为 AI 设计推演，不代表真实面料或商品工艺。",
+      "color_name": "象牙白",
+      "color_hex": "#eee7dc",
+      "design_material": "细腻棉麻感织纹与柔和垂坠，视觉设计描述",
+      "notes": [
+        "宽肩带、方领与前中六颗小圆扣，保留原穿搭的清爽线条",
+        "腰线抽褶展开自然 A 字裙摆，完整前身独立展示",
+        "未展示背面与内里；织纹、细小接缝属于 AI 设计推演"
+      ],
+      "asset": {
+        "asset_id": "product-ivory-sundress-007-r1",
+        "file": "assets/products/look-007/ivory-sundress-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 41520,
+        "sha256": "a6c9c9b6fb5220f1a0cd8b4326725540262067a6d8021f599ca6ee12e6a22878",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 7,
+          "piece_index": 1,
+          "reference_asset_id": "look-007-v2-r1",
+          "shot_index": 3
+        }
+      ],
+      "gallery": [
+        {
+          "title": "方领与圆扣",
+          "caption": "独立近景保留方领、宽肩带和前中圆扣，观察腰线抽褶的衔接；放大的织纹与细缝为 AI 设计推演。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-ivory-sundress-bodice-007-r1",
+            "file": "assets/products/look-007/ivory-sundress-bodice-r1.webp",
+            "mime": "image/webp",
+            "width": 742,
+            "height": 928,
+            "bytes": 51314,
+            "sha256": "bc7d71a432b1fa0819ae0cbe48d739b1d33d03ae9d614a77a5ba2efc37390d6b",
+            "visibility": "public"
+          }
+        },
+        {
+          "title": "裙摆接住柔光",
+          "caption": "独立细节画面呈现下摆的自然折面与柔和接触影；微观织纹和窄边缝制为 AI 设计推演。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-ivory-sundress-hem-007-r1",
+            "file": "assets/products/look-007/ivory-sundress-hem-r1.webp",
+            "mime": "image/webp",
+            "width": 742,
+            "height": 928,
+            "bytes": 66200,
+            "sha256": "fae0aedde74233a59d99252ec56716a6e1875c3ef3455bee1f4b29857aea54b2",
+            "visibility": "public"
+          }
+        }
+      ],
+      "presentation": {
+        "theme": "editorial",
+        "preset": "warm-paper"
+      },
+      "copy": {
+        "hero_title": "海风的形状",
+        "details_title": "光，沿着褶间散开",
+        "worn_title": "回到海边白裙"
+      }
+    },
+    {
+      "product_id": "tan-flat-sandals-007",
+      "name": "棕色双带平底凉鞋",
+      "category": "鞋履",
+      "subtitle": "两道简洁弧线，陪脚步慢下来。",
+      "description": "棕色双带连接开放鞋头与后跟，薄平底为白裙留下轻松的度假重心。依据原穿搭可见的开放后跟双带轮廓展开独立设计；细小缝线、鞋床纹理与鞋底层次为 AI 设计推演，不作为真实商品工艺说明。",
+      "color_name": "暖棕",
+      "color_hex": "#956244",
+      "design_material": "暖棕皮质感鞋面与浅棕鞋床，视觉设计描述",
+      "notes": [
+        "两道简洁鞋面带，开放鞋头与后跟，不增加脚踝背带",
+        "成对主图与独立侧前方取景，分别观察整体与平底比例",
+        "鞋面细纹、缝线和鞋床属于设计推演；不展示未知鞋底纹路"
+      ],
+      "asset": {
+        "asset_id": "product-tan-sandals-007-r1",
+        "file": "assets/products/look-007/tan-sandals-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 117320,
+        "sha256": "8893ed513552eb65157283319b2281a8493ed8ef30936e0ac5a2014fff4d01b3",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 7,
+          "piece_index": 2,
+          "reference_asset_id": "look-007-v2-r1",
+          "shot_index": 3
+        }
+      ],
+      "gallery": [
+        {
+          "title": "平底与双带侧形",
+          "caption": "独立侧前方全貌保留双带与开放后跟；细小缝线和鞋底层次沿用已验收主图的 AI 设计推演，不作为原写真已验证工艺。",
+          "role": "view",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-tan-sandals-side-007-r1",
+            "file": "assets/products/look-007/tan-sandals-side-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 87724,
+            "sha256": "275848c3a7cf62323ea70637c3839cf479f3718b0620a672bb66298ec2474495",
+            "visibility": "public"
+          }
+        },
+        {
+          "title": "圆弧鞋头与柔光",
+          "caption": "独立近景观察鞋头边缘、第一道鞋面带与柔和反射；微观皮纹、缝线和鞋床肌理为 AI 设计推演。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-tan-sandals-toe-007-r1",
+            "file": "assets/products/look-007/tan-sandals-toe-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 135290,
+            "sha256": "62d9fd60dae5865549ee50822eb7e8b8a152c89c8578127d8e83da337c0c70b0",
+            "visibility": "public"
+          }
+        }
+      ],
+      "presentation": {
+        "theme": "studio",
+        "preset": "warm-paper"
+      },
+      "copy": {
+        "views_title": "从双带到平底",
+        "details_title": "把脚步交给柔和弧线",
+        "worn_title": "白裙之下的轻盈"
+      }
+    },
+    {
+      "product_id": "pearl-studs-007",
+      "name": "珍珠感圆耳钉",
+      "category": "配饰",
+      "subtitle": "一点柔光，安静地靠近脸庞。",
+      "description": "以《海边白裙》肖像中可见的小号白色圆面耳饰为依据，展开成对的珍珠感圆面设计。整组独立产品图中的弧度与光泽为 AI 设计推演，不证明天然珍珠、真实成分或实际尺寸；不补造未知耳针与耳堵。",
+      "color_name": "奶油白",
+      "color_hex": "#e9ddca",
+      "design_material": "柔和珍珠感圆面，视觉设计描述，不指代天然材质",
+      "notes": [
+        "成对简洁白色圆面，与白裙的象牙色调轻轻呼应",
+        "正面与柔光近景呈现不同信息，不添加未知背面结构",
+        "整组为 AI 设计推演，不作天然珍珠、材质等级或尺寸声明"
+      ],
+      "asset": {
+        "asset_id": "product-pearl-studs-007-r1",
+        "file": "assets/products/look-007/pearl-studs-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 15928,
+        "sha256": "bc56c685c85906532187fee3bba483103c0a8adfa0f0ef6d47438cc19c0f2a87",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 7,
+          "piece_index": 3,
+          "reference_asset_id": "look-007-v2-r1",
+          "shot_index": 5
+        }
+      ],
+      "gallery": [
+        {
+          "title": "一弧奶油色柔光",
+          "caption": "独立近景表现圆面弧度与克制反射；表面质感为 AI 设计推演，不是天然珍珠、真实成分或品质证明。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-pearl-studs-luster-007-r1",
+            "file": "assets/products/look-007/pearl-studs-luster-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 27366,
+            "sha256": "ab23383030dcb0a10612f6a3e4447070716c1a2ace389e9af0eca2604a5d4d75",
+            "visibility": "public"
+          }
+        }
+      ],
+      "presentation": {
+        "theme": "editorial",
+        "preset": "warm-paper"
+      },
+      "copy": {
+        "hero_title": "轻声发光",
+        "details_title": "光泽靠近时",
+        "worn_title": "肖像里的安静亮点"
+      }
     }
   ]
 }
