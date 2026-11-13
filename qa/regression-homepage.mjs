@@ -230,6 +230,54 @@ try{
  assert.equal(await evaluate('location.protocol'),'file:');assert.equal(await evaluate('document.getElementById("search").value'),offlineTag);
  assert.ok(await evaluate('document.querySelectorAll("#gallery [data-look-card]").length>1'),'Offline exploration uses its snapshot, without the API');
  await evaluate('history.back()');await wait('document.getElementById("detail-dialog").open');await evaluate('document.getElementById("close-detail").click()');await wait(`location.hash===${JSON.stringify(offlineSource)}`);
+ // Product samples work from the actual offline snapshot as well as API hydration.
+ const sampleProducts=catalog.products||[];
+ assert.equal(sampleProducts.length,3);
+ const originalFavorites=await evaluate('localStorage.getItem("wardrobe99:favorites:v1")');
+ for(const viewport of [{width:320,height:844},{width:390,height:844},{width:1440,height:1000}]){
+  await client('Emulation.setDeviceMetricsOverride',{...viewport,deviceScaleFactor:1,mobile:viewport.width<600});
+  await route('#/products');await wait('!document.getElementById("products-page").hidden');
+  assert.equal(await evaluate('document.querySelectorAll("#product-gallery [data-product-card]").length'),3);
+  await noOverflow('Product index '+viewport.width);
+  const product=sampleProducts[0],hash='#/product/'+product.product_id;
+  await evaluate(`document.querySelector('#product-gallery a[href="${hash}"]').click()`);
+  await wait('!document.getElementById("product-page").hidden');
+  assert.equal(await evaluate('document.querySelector("#product-page h1").textContent'),product.name);
+  await wait('document.querySelector(".product-main-image img").naturalWidth>0');
+  await noOverflow('Product detail '+viewport.width);
+  const box=await evaluate('(()=>{const e=document.querySelector(".product-main-image img"),r=e.getBoundingClientRect();return {width:r.width,height:r.height};})()');
+  assert.ok(Math.abs(box.width/box.height-.8)<.01,'Product retains its independent portrait composition');
+  await evaluate('document.querySelector(".product-main-image").scrollIntoView({block:"center"});document.querySelector(".product-main-image").focus()');
+  await client('Input.dispatchKeyEvent',{type:'keyDown',key:'Enter',code:'Enter',windowsVirtualKeyCode:13,text:'\r',unmodifiedText:'\r'});
+  await client('Input.dispatchKeyEvent',{type:'keyUp',key:'Enter',code:'Enter',windowsVirtualKeyCode:13});
+  await wait('document.getElementById("product-image-dialog").open');
+  await evaluate('document.getElementById("close-product-image").click()');
+  await wait('!document.getElementById("product-image-dialog").open');
+  await evaluate(`document.querySelector('#product-page [data-product-worn]').click()`);
+  assert.equal(await evaluate('location.hash'),hash,'Section navigation stays on the product route');
+  await evaluate('document.querySelector(".product-worn").click()');await wait('document.getElementById("detail-dialog").open');
+  assert.equal(await evaluate('document.querySelectorAll("#detail-product-gallery [data-product-card]").length'),3);
+  await evaluate('document.getElementById("close-detail").click()');await wait(`location.hash===${JSON.stringify(hash)}&&!document.getElementById('product-page').hidden`);
+  await noOverflow('Product return '+viewport.width);
+  if(process.env.YIXU_SCREENSHOT_DIR){await evaluate('window.scrollTo(0,0)');const capture=await client('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(process.env.YIXU_SCREENSHOT_DIR,`product-${viewport.width}.png`),Buffer.from(capture.data,'base64'),{mode:0o600});}
+ }
+ const savedProduct=sampleProducts[0];
+ await evaluate('localStorage.setItem("yixu:product-favorites:v1",JSON.stringify(["future-product"]))');
+ await client('Page.navigate',{url:'about:blank'});await wait('location.href==="about:blank"');
+ await navigate(pathToFileURL(path.join(output,'index.html')).href+'#/product/'+savedProduct.product_id);
+ await evaluate('document.querySelector("#product-page [data-product-favorite]").click()');
+ assert.deepEqual(await evaluate('JSON.parse(localStorage.getItem("yixu:product-favorites:v1"))'),['future-product',savedProduct.product_id]);
+ assert.equal(await evaluate('localStorage.getItem("wardrobe99:favorites:v1")'),originalFavorites,'Product collection never overwrites outfit collection');
+ await route('#/products?saved=1');assert.equal(await evaluate('document.querySelectorAll("#product-gallery [data-product-card]").length'),1);
+ await evaluate('document.querySelector("#product-gallery [data-product-favorite]").click()');
+ assert.equal(await evaluate('document.querySelectorAll("#product-gallery [data-product-card]").length'),0);
+ await route('#/products?category='+encodeURIComponent(sampleProducts[1].category));
+ assert.equal(await evaluate('document.querySelectorAll("#product-gallery [data-product-card]").length'),1);
+ await route('#/product/not-published');assert.match(await evaluate('document.getElementById("product-page").textContent'),/暂未发布/);
+ await route('#/home');assert.equal(await evaluate('document.querySelectorAll("#home-product-gallery [data-product-card]").length'),3);
+ await navigate(origin+'/#/product/'+savedProduct.product_id);await wait('!document.getElementById("product-page").hidden');
+ assert.equal(await evaluate('document.querySelector("#product-page h1").textContent'),savedProduct.name,'Reloadable online product route');
+ console.log('PASS products: offline/online routes, original outfit associations, portrait images, keyboard zoom, source return, category/collection filters, isolated preserved favorites, unknown IDs and 320/390/1440px layouts');
  assert.ok(!requested.some(url=>/^\/images\/look-/.test(url)),'Archived v1 pictures never enter the public site');
  assert.deepEqual(exceptions,[],'Browser must not report uncaught JavaScript exceptions');
  console.log('PASS stale API retains newest built version, matching API hydration, real file:// offline snapshot and expressive-only resources');

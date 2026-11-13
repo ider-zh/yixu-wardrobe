@@ -1,0 +1,248 @@
+{
+  "$defs": {
+    "Asset": {
+      "additionalProperties": false,
+      "properties": {
+        "asset_id": {
+          "pattern": "^[A-Za-z0-9_-]{1,128}$",
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "file": {
+          "title": "File",
+          "type": "string"
+        },
+        "mime": {
+          "const": "image/webp",
+          "title": "Mime",
+          "type": "string"
+        },
+        "width": {
+          "maximum": 8000,
+          "minimum": 32,
+          "title": "Width",
+          "type": "integer"
+        },
+        "height": {
+          "maximum": 8000,
+          "minimum": 32,
+          "title": "Height",
+          "type": "integer"
+        },
+        "bytes": {
+          "maximum": 52428800,
+          "minimum": 1,
+          "title": "Bytes",
+          "type": "integer"
+        },
+        "sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "visibility": {
+          "enum": [
+            "public",
+            "private"
+          ],
+          "title": "Visibility",
+          "type": "string"
+        },
+        "layout": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Layout"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "asset_id",
+        "file",
+        "mime",
+        "width",
+        "height",
+        "bytes",
+        "sha256",
+        "visibility"
+      ],
+      "title": "Asset",
+      "type": "object"
+    },
+    "Layout": {
+      "additionalProperties": false,
+      "properties": {
+        "rows": {
+          "const": 3,
+          "title": "Rows",
+          "type": "integer"
+        },
+        "columns": {
+          "const": 3,
+          "title": "Columns",
+          "type": "integer"
+        },
+        "preview_panel": {
+          "maximum": 9,
+          "minimum": 1,
+          "title": "Preview Panel",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "rows",
+        "columns",
+        "preview_panel"
+      ],
+      "title": "Layout",
+      "type": "object"
+    },
+    "Product": {
+      "additionalProperties": false,
+      "properties": {
+        "product_id": {
+          "pattern": "^[A-Za-z0-9_-]{1,128}$",
+          "title": "Product Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "category": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Category",
+          "type": "string"
+        },
+        "subtitle": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Subtitle",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "color_name": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Color Name",
+          "type": "string"
+        },
+        "color_hex": {
+          "pattern": "^#[a-fA-F0-9]{6}$",
+          "title": "Color Hex",
+          "type": "string"
+        },
+        "design_material": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Design Material",
+          "type": "string"
+        },
+        "notes": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 10,
+          "minItems": 1,
+          "title": "Notes",
+          "type": "array"
+        },
+        "asset": {
+          "$ref": "#/$defs/Asset"
+        },
+        "appearances": {
+          "items": {
+            "$ref": "#/$defs/ProductAppearance"
+          },
+          "maxItems": 200,
+          "minItems": 1,
+          "title": "Appearances",
+          "type": "array"
+        }
+      },
+      "required": [
+        "product_id",
+        "name",
+        "category",
+        "subtitle",
+        "description",
+        "color_name",
+        "color_hex",
+        "design_material",
+        "notes",
+        "asset",
+        "appearances"
+      ],
+      "title": "Product",
+      "type": "object"
+    },
+    "ProductAppearance": {
+      "additionalProperties": false,
+      "properties": {
+        "look_id": {
+          "minimum": 1,
+          "title": "Look Id",
+          "type": "integer"
+        },
+        "piece_index": {
+          "minimum": 1,
+          "title": "Piece Index",
+          "type": "integer"
+        },
+        "reference_asset_id": {
+          "pattern": "^[A-Za-z0-9_-]{1,128}$",
+          "title": "Reference Asset Id",
+          "type": "string"
+        },
+        "shot_index": {
+          "maximum": 9,
+          "minimum": 1,
+          "title": "Shot Index",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "look_id",
+        "piece_index",
+        "reference_asset_id",
+        "shot_index"
+      ],
+      "title": "ProductAppearance",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "products": {
+      "items": {
+        "$ref": "#/$defs/Product"
+      },
+      "maxItems": 5000,
+      "title": "Products",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "products"
+  ],
+  "title": "Products",
+  "type": "object"
+}

@@ -14,6 +14,7 @@ Yixu is a wardrobe to wander through at your own pace. Starting with 100 complet
 - **Find a favorite.** Search names, numbers, garments, materials or moods. The gallery labels are Chinese: try 丝绒 for velvet, 百褶裙 for pleated skirts or 惊喜 for surprise.
 - **Look closer.** Select 01–09 by shot number and name to explore the expression, movement and framing, then read the garment list and styling notes.
 - **Follow an idea.** Linked tags in outfit details search the wardrobe for related outfits. Your browser's Back button returns to the outfit you were viewing.
+- **Explore each piece.** Browse independent product imagery, enlarged details and model references in “单品”, and save design objects separately. The first samples are look 102’s knit, skirt and boots.
 - **Keep a look.** Save favorites with the heart, compare two or three outfits, or choose 保存图片 to download. Existing numbers and favorites stay associated with their outfits.
 
 Keyboard shortcuts: `/` for search, `←` and `→` for adjacent looks in details, and `Esc` to close a dialog.
@@ -32,7 +33,7 @@ The 200 historical photographs are same-dimension WebP totaling 48,176,224 bytes
 
 ## Favorites and photos
 
-Favorites remain in the current browser; favorite selections are not uploaded. Switching browsers or addresses, or clearing browser data, may remove or separate them.
+Outfit and product favorites are stored separately in the current browser; favorite selections are not uploaded. Switching browsers or addresses, or clearing browser data, may remove or separate them.
 
 Online photo try-on requires an available backend and generation service. Reference choices show each shot's name and framing; select one to read its full description and see a preview before deciding which frame to use. A photo is uploaded only after explicitly accepting its disclosed use. Results are available to their owner through the existing browser credential; administrators may assess generated results during development. User photos, private try-on results and credentials never enter public image hosting or project source. Offline browsing does not provide online try-on.
 

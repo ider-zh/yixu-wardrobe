@@ -182,6 +182,31 @@ export function loadContent(root) {
       batches.push({batch_id: batch.batch_id, publish_date: batch.publish_date, published_at: publishedAt, cover_look_id: batch.cover_look_id ?? batch.looks[0].id, title: batch.title, region: structuredClone(batch.region), look_ids: batch.looks.map(look => look.id)});
     }
   }
+  const products = [];
+  const productPath = path.join(root, 'content/products.json');
+  if (fs.readdirSync(path.dirname(productPath)).includes('products.json')) {
+    const manifest = json('content/products.json');
+    fail(object(manifest) && Object.keys(manifest).every(key => ['schema_version','products'].includes(key)) && manifest.schema_version === 1 && Array.isArray(manifest.products) && manifest.products.length <= 5000, 'Invalid product manifest');
+    const ids = new Set(), linked = new Set();
+    const limits = {name:200,category:100,subtitle:500,description:2000,color_name:100,design_material:500};
+    for (const product of manifest.products) {
+      fail(object(product) && Object.keys(product).every(key => ['product_id',...Object.keys(limits),'color_hex','notes','asset','appearances'].includes(key)), 'Unknown product field');
+      fail(assetId(product.product_id) && !ids.has(product.product_id), 'Invalid or duplicate product');
+      ids.add(product.product_id);
+      fail(Object.entries(limits).every(([key,max]) => text(product[key]) && product[key].length <= max) && /^#[a-fA-F0-9]{6}$/.test(product.color_hex), 'Complete product description required');
+      fail(Array.isArray(product.notes) && product.notes.length > 0 && product.notes.length <= 10 && product.notes.every(text), 'Product notes required');
+      fail(Array.isArray(product.appearances) && product.appearances.length > 0 && product.appearances.length <= 200, 'Product appearances required');
+      for (const appearance of product.appearances) {
+        fail(object(appearance) && Object.keys(appearance).every(key=>['look_id','piece_index','reference_asset_id','shot_index'].includes(key)), 'Unknown product appearance field');
+        const look = looks.get(appearance.look_id), identity = appearance.look_id + ':' + appearance.piece_index;
+        fail(Number.isSafeInteger(appearance.look_id) && look && Number.isSafeInteger(appearance.piece_index) && appearance.piece_index >= 1 && appearance.piece_index <= look.pieces.length && appearance.reference_asset_id === look.versions.v2.asset.asset_id && Number.isInteger(appearance.shot_index) && appearance.shot_index >= 1 && appearance.shot_index <= 9 && !linked.has(identity), 'Invalid or duplicate product appearance');
+        linked.add(identity);
+      }
+      fail(product.asset?.visibility === 'public' && product.asset.file?.startsWith('assets/products/') && product.asset.layout == null, 'Independent public product image required');
+      registerAsset(product.asset);
+      products.push({...structuredClone(product),asset:{...product.asset,image_url:product.asset.file,source_url:product.asset.file}});
+    }
+  }
   const published = [...looks.values()];
   const legacyOrder = base.displayOrder || base.looks.map(look => look.id);
   fail(Array.isArray(legacyOrder) && legacyOrder.length === base.looks.length && new Set(legacyOrder).size === legacyOrder.length && legacyOrder.every(id => base.looks.some(look => look.id === id)), 'Invalid curated baseline order');
@@ -197,7 +222,7 @@ export function loadContent(root) {
   return {
     catalog: {schema_version: 1, revision, target: published.length, generated: published.length, expressiveGenerated: published.length,
       planned: published.length, categoryOrder: [...base.categoryOrder], displayOrder, latestOrder, home, looks: published,
-      models: publicModels, batches: orderedBatches},
+      models: publicModels, batches: orderedBatches, products},
     assets: [...assets.values()],
     publicAssets: [...assets.values()].filter(asset => asset.visibility === 'public'),
   };

@@ -23,9 +23,14 @@
 !/assets/looks/
 !/assets/looks/**/
 !/assets/looks/**/*.webp
+!/assets/products/
+!/assets/products/**/
+!/assets/products/**/*.webp
 !/content/
 !/content/catalog.json
 !/content/models.json
+!/content/products.json
+!/content/products.schema.json
 !/content/batch.schema.json
 !/content/batches/
 !/content/batches/*.json

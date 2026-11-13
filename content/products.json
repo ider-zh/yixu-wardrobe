@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "products": [
+    {
+      "product_id": "blue-knit-102",
+      "name": "雾蓝圆领针织衫",
+      "category": "上装",
+      "subtitle": "一抹雾蓝，接住日常的柔软。",
+      "description": "细密的针织肌理与干净圆领，在深色外套之间留下轻盈的色彩。",
+      "color_name": "雾蓝",
+      "color_hex": "#aabdd0",
+      "design_material": "细羊毛感针织，视觉设计描述",
+      "notes": [
+        "圆领与细罗纹，收出利落领口",
+        "纯色细针织，与光面裙装形成肌理对照",
+        "衣摆收入裙腰，衔接高腰比例"
+      ],
+      "asset": {
+        "asset_id": "product-blue-knit-102-r1",
+        "file": "assets/products/look-102/blue-knit-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 175954,
+        "sha256": "c1c316320d2a71d9c6c8f3113a55f48c345854fac8e6a7908d680aadbbf0a9ab",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 102,
+          "piece_index": 2,
+          "reference_asset_id": "look-102-female-01-v2-r2",
+          "shot_index": 5
+        }
+      ]
+    },
+    {
+      "product_id": "brown-skirt-102",
+      "name": "巧克力棕 A 字中长裙",
+      "category": "下装",
+      "subtitle": "让光泽沿着裙摆，慢慢流动。",
+      "description": "以克制的A字轮廓和纵向分片，连接针织的柔软与长靴的线条。",
+      "color_name": "巧克力棕",
+      "color_hex": "#594034",
+      "design_material": "光面皮质感，视觉设计描述",
+      "notes": [
+        "简洁腰头，突出高腰线条",
+        "中缝分片与A字裙摆，保持纵向延伸感",
+        "中长裙与长靴衔接，形成完整深棕色调"
+      ],
+      "asset": {
+        "asset_id": "product-brown-skirt-102-r1",
+        "file": "assets/products/look-102/brown-skirt-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 63080,
+        "sha256": "c09004fd96ae80940cfdd6b46e0e2164896c0c6d5700bf5e06c63d43c7d7a959",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 102,
+          "piece_index": 3,
+          "reference_asset_id": "look-102-female-01-v2-r2",
+          "shot_index": 1
+        }
+      ]
+    },
+    {
+      "product_id": "brown-boots-102",
+      "name": "深棕圆头及膝长靴",
+      "category": "鞋履",
+      "subtitle": "稳稳落下，也从容向前。",
+      "description": "圆头、低粗跟与简洁靴筒，为整套蓝棕搭配收住重心。",
+      "color_name": "深巧克力棕",
+      "color_hex": "#382b25",
+      "design_material": "平滑皮质感，视觉设计描述",
+      "notes": [
+        "圆头与低粗跟，延续克制轮廓",
+        "及膝靴筒与裙摆自然衔接",
+        "深棕鞋面与暗色鞋底，呼应裙装与包袋"
+      ],
+      "asset": {
+        "asset_id": "product-brown-boots-102-r1",
+        "file": "assets/products/look-102/brown-boots-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 50068,
+        "sha256": "0ceb9726f78b38c541ae6208a4678e661387759dbb9b8b7a98a0c124c8fc6822",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 102,
+          "piece_index": 4,
+          "reference_asset_id": "look-102-female-01-v2-r2",
+          "shot_index": 3
+        }
+      ]
+    }
+  ]
+}

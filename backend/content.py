@@ -86,6 +86,32 @@ class Piece(Strict):
     name: str = Field(min_length=1, max_length=500)
 
 
+class ProductAppearance(Strict):
+    look_id: int = Field(strict=True, ge=1)
+    piece_index: int = Field(strict=True, ge=1)
+    reference_asset_id: str = Field(pattern=r"^[A-Za-z0-9_-]{1,128}$")
+    shot_index: int = Field(strict=True, ge=1, le=9)
+
+
+class Product(Strict):
+    product_id: str = Field(pattern=r"^[A-Za-z0-9_-]{1,128}$")
+    name: str = Field(min_length=1, max_length=200)
+    category: str = Field(min_length=1, max_length=100)
+    subtitle: str = Field(min_length=1, max_length=500)
+    description: str = Field(min_length=1, max_length=2000)
+    color_name: str = Field(min_length=1, max_length=100)
+    color_hex: str = Field(pattern=r"^#[a-fA-F0-9]{6}$")
+    design_material: str = Field(min_length=1, max_length=500)
+    notes: list[str] = Field(min_length=1, max_length=10)
+    asset: Asset
+    appearances: list[ProductAppearance] = Field(min_length=1, max_length=200)
+
+
+class Products(Strict):
+    schema_version: Literal[1]
+    products: list[Product] = Field(max_length=5000)
+
+
 class BatchLook(Strict):
     id: int = Field(strict=True, ge=1, le=2_147_483_647)
     model_id: str
@@ -535,6 +561,32 @@ class ContentService:
             )
             batch_ids.add(batch.batch_id)
             dates.add(batch.publish_date)
+        products = []
+        product_path = self.source_root / "products.json"
+        if product_path.exists() or product_path.is_symlink():
+            manifest = Products.model_validate(self._read_json(product_path))
+            product_ids, linked_pieces = set(), set()
+            by_id = {look["id"]: look for look in looks}
+            for product in manifest.products:
+                if product.product_id in product_ids:
+                    raise ValueError("Duplicate product identity")
+                product_ids.add(product.product_id)
+                for appearance in product.appearances:
+                    look = by_id.get(appearance.look_id)
+                    identity = (appearance.look_id, appearance.piece_index)
+                    if (
+                        not look
+                        or appearance.piece_index > len(look.get("pieces", []))
+                        or appearance.reference_asset_id
+                        != look["versions"]["v2"]["asset"]["asset_id"]
+                        or identity in linked_pieces
+                    ):
+                        raise ValueError("Invalid or duplicate product appearance")
+                    linked_pieces.add(identity)
+                record = register(product.asset.model_dump(exclude_none=True))
+                if not record["file"].startswith("assets/products/") or record.get("layout"):
+                    raise ValueError("Product images must be independent public product assets")
+                products.append(product.model_dump(mode="json", exclude_none=True))
         batches, latest_order, home = publication_projection(
             looks, batches, baseline.get("displayOrder", [])
         )
@@ -551,6 +603,7 @@ class ContentService:
             "latestOrder": latest_order,
             "home": home,
             "looks": looks,
+            "products": products,
             "models": list(model_map.values()),
             "batches": batches,
             "target": len(looks),
@@ -586,6 +639,8 @@ class ContentService:
         if not self.ready:
             raise HTTPException(503, "content_unavailable:Public content is unavailable")
         snapshot = copy.deepcopy(self._snapshot)
+        for product in snapshot.get("products", []):
+            product["asset"] = self._public_asset(product["asset"])
         for look in snapshot["looks"]:
             version = look["versions"]["v2"]
             version["asset"] = asset = self._public_asset(version["asset"])
@@ -745,6 +800,29 @@ class ContentService:
         @router.get("/models")
         def models():
             return {"items": self.catalog()["models"]}
+
+        @router.get("/products")
+        def products(category: str | None = None, look_id: int | None = None):
+            snapshot = self.catalog()
+            items = [
+                product
+                for product in snapshot.get("products", [])
+                if (not category or product["category"] == category)
+                and (
+                    look_id is None or any(a["look_id"] == look_id for a in product["appearances"])
+                )
+            ]
+            return {"items": items, "total": len(items), "revision": snapshot["revision"]}
+
+        @router.get("/products/{product_id}")
+        def product(product_id: str):
+            item = next(
+                (p for p in self.catalog().get("products", []) if p["product_id"] == product_id),
+                None,
+            )
+            if item is None:
+                raise HTTPException(404, "not_found:Product not found")
+            return item
 
         @router.get("/batches")
         def batches():

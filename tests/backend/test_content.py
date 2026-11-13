@@ -407,3 +407,56 @@ def test_previous_public_asset_url_survives_new_revision(content_fixture):
     assert service.asset(old_id)[0] == old_data
     restarted = ContentService(settings)
     assert restarted.asset(old_id)[0] == old_data
+
+
+def test_products_are_public_archived_and_linked_to_exact_outfit(content_fixture):
+    from pathlib import Path
+
+    settings, batch, _ = content_fixture
+    source = settings.catalog_image_root
+    manifest = json.loads(Path("content/products.json").read_text())
+    product = manifest["products"][0]
+    product["asset"] = metadata(
+        source, "assets/products/fixture.webp", "product-fixture", (80, 100), False
+    )
+    product["appearances"] = [
+        {
+            "look_id": 101,
+            "piece_index": 1,
+            "reference_asset_id": batch["looks"][0]["asset"]["asset_id"],
+            "shot_index": 1,
+        }
+    ]
+    manifest["products"] = [product]
+    write_json(settings.content_root / "products.json", manifest)
+    app = create_app(settings, provider=Provider(), detector=Detector(), clock=Clock())
+    service = app.state.content
+    with TestClient(app, base_url="https://localhost") as client:
+        catalog = client.get("/api/content/catalog").json()
+        item = client.get("/api/content/products/" + product["product_id"]).json()
+        assert catalog["products"] == [item]
+        assert client.get("/api/content/products?look_id=101").json()["total"] == 1
+        assert client.get("/api/content/products?look_id=100").json()["total"] == 0
+        assert client.get("/api/content/products?category=unmatched").json()["total"] == 0
+        assert client.get("/api/content/products/unknown").status_code == 404
+        response = client.get(item["asset"]["source_url"])
+        assert response.headers["content-type"] == "image/webp"
+        assert hashlib.sha256(response.content).hexdigest() == product["asset"]["sha256"]
+        revision = catalog["revision"]
+        for change in ["stale_reference", "wrong_piece", "duplicate", "private", "bad_hash"]:
+            candidate = copy.deepcopy(manifest)
+            entry = candidate["products"][0]
+            if change == "stale_reference":
+                entry["appearances"][0]["reference_asset_id"] = "old-r1"
+            elif change == "wrong_piece":
+                entry["appearances"][0]["piece_index"] = 2
+            elif change == "duplicate":
+                candidate["products"].append(copy.deepcopy(entry))
+            elif change == "private":
+                entry["asset"]["visibility"] = "private"
+            else:
+                entry["asset"]["sha256"] = "0" * 64
+            write_json(settings.content_root / "products.json", candidate)
+            assert not service.import_content()
+            assert service.catalog()["revision"] == revision
+            assert client.get(item["asset"]["source_url"]).status_code == 200

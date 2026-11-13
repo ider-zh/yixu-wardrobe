@@ -130,3 +130,11 @@ node qa/regression-ci.mjs
 生产模板及验证步骤见 [deploy/README.md](deploy/README.md)，私人照片处理规则见[试穿实施说明](docs/ai-tryon-backend-design.md)。[Cloudflare 可行性调查](docs/deployment-feasibility.md)是历史参考，不代表当前部署方案。
 
 GitHub Actions 只有读权限，只校验和构建。源码推送、CI、服务端接收、CDN 同步和网站上线分别报告。部署和外部服务配置按项目授权单独执行，本次开发不改变既有主站或私人服务配置。
+
+## 单品样板
+
+`content/products.json` 是可选的独立单品清单，结构见 `content/products.schema.json`。首批为第 102 套的三件设计单品。每个单品拥有稳定 `product_id`、描述、颜色、设计材质文字、细节说明、一张公开 WebP 及 `appearances`。关联使用 `look_id`、从 1 开始的 `piece_index`、精确写真 `reference_asset_id` 和 `shot_index`，校验器拒绝过期写真、未知穿搭、重复关联和私人资源。更新写真修订时需同步核对单品关联。
+
+最终图位于 `assets/products/`，为约 4:5 的独立陈列图，不采用穿搭写真九宫格布局。主图局部展示是同一张图片的界面放大，不代表新增实拍细节或经过验证的材质成分。生成母本和当次提示词仍保存在私有工作区。缺少单品清单的历史内容继续显示原文字单品，不创建虚构商品。
+
+Node 构建和 Python 导入均将该清单纳入内容版本与公开资产白名单。`GET /api/content/products?category=上装&look_id=102` 提供列表，`GET /api/content/products/{product_id}` 提供独立详情，图片走现有归档、CDN 校验和加载失败回源流程。前端使用 `#/products`、`#/product/{product_id}`，支持完整离线包；新本地收藏键为 `yixu:product-favorites:v1`，沿用的穿搭收藏键和编号不变。此功能不增加访问采集或购买流程。

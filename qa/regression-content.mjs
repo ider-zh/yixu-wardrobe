@@ -13,6 +13,15 @@ try {
   for(const name of ['content','images-v2','assets','scripts','index.html','app.js','style.css','expressive.css','tryon.js','tryon.css','favicon.svg']) {
     fs.cpSync(path.join(root,name),path.join(fixture,name),{recursive:true});
   }
+  const validProducts=fs.readFileSync(path.join(fixture,'content/products.json'),'utf8');
+  for(const mutate of [
+    value=>value.products.push(structuredClone(value.products[0])),
+    value=>value.products[0].appearances[0].reference_asset_id='stale-reference',
+    value=>value.products[0].appearances[0].piece_index=999,
+    value=>value.products[0].asset.visibility='private',
+    value=>value.products[0].asset.sha256='0'.repeat(64),
+  ]){const invalid=JSON.parse(validProducts);mutate(invalid);write('content/products.json',invalid);assert.throws(()=>loadContent(fixture));}
+  fs.writeFileSync(path.join(fixture,'content/products.json'),validProducts);
   const before=loadContent(fixture);
   const nextId=Math.max(...before.catalog.looks.map(look=>look.id))+1;
   const latestDate=before.catalog.batches.map(batch=>batch.publish_date).sort().at(-1)||'2026-11-11';
