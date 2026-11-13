@@ -245,6 +245,20 @@
           "title": "Caption",
           "type": "string"
         },
+        "role": {
+          "default": "detail",
+          "enum": [
+            "view",
+            "detail"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "design_study": {
+          "default": false,
+          "title": "Design Study",
+          "type": "boolean"
+        },
         "asset": {
           "$ref": "#/$defs/Asset"
         }

@@ -112,13 +112,13 @@
         "深棕鞋面与暗色鞋底，呼应裙装与包袋"
       ],
       "asset": {
-        "asset_id": "product-brown-boots-102-r1",
-        "file": "assets/products/look-102/brown-boots-r1.webp",
+        "asset_id": "product-brown-boots-102-r2",
+        "file": "assets/products/look-102/brown-boots-r2.webp",
         "mime": "image/webp",
         "width": 1122,
         "height": 1402,
-        "bytes": 50068,
-        "sha256": "0ceb9726f78b38c541ae6208a4678e661387759dbb9b8b7a98a0c124c8fc6822",
+        "bytes": 60444,
+        "sha256": "660111aca7310650e4784f4f45fa3fb1774910ccbae7955e9c7fced8d38730f4",
         "visibility": "public"
       },
       "appearances": [
@@ -127,6 +127,120 @@
           "piece_index": 4,
           "reference_asset_id": "look-102-female-01-v2-r2",
           "shot_index": 3
+        }
+      ],
+      "gallery": [
+        {
+          "title": "正面全貌",
+          "caption": "正面呈现靴筒、脚背与圆头的衔接，观察简洁轮廓。",
+          "role": "view",
+          "design_study": false,
+          "asset": {
+            "asset_id": "product-brown-boots-102-front-r1",
+            "file": "assets/products/look-102/brown-boots-front-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 45982,
+            "sha256": "26f49f4921f49bc88ced97b616e0698debc52fc83ff071fa35421860e9685745",
+            "visibility": "public"
+          }
+        },
+        {
+          "title": "侧面全貌",
+          "caption": "从筒高、足弓到低粗跟，查看这款设计的侧形比例。",
+          "role": "view",
+          "design_study": false,
+          "asset": {
+            "asset_id": "product-brown-boots-102-side-r1",
+            "file": "assets/products/look-102/brown-boots-side-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 59630,
+            "sha256": "56eb5f28ee82a6d913393f2749ba25f4dd4e00daf8791231fad79239d8d3a1ac",
+            "visibility": "public"
+          }
+        },
+        {
+          "title": "背面方案",
+          "caption": "AI 设计推演：原参考未展示完整背部，本图的背部轮廓与结构属于设计补充，供灵感参考。",
+          "role": "view",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-brown-boots-102-rear-study-r1",
+            "file": "assets/products/look-102/brown-boots-rear-study-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 45440,
+            "sha256": "2705f3253a2682f14fdff005b0717a24f6d4d18a554836ca5265eecf2f4af13f",
+            "visibility": "public"
+          }
+        },
+        {
+          "title": "鞋头与鞋面",
+          "caption": "圆润鞋头与柔和的鞋面光泽，延续深棕色的克制质感。",
+          "role": "detail",
+          "design_study": false,
+          "asset": {
+            "asset_id": "product-brown-boots-102-toe-r1",
+            "file": "assets/products/look-102/brown-boots-toe-r1.webp",
+            "mime": "image/webp",
+            "width": 752,
+            "height": 940,
+            "bytes": 63010,
+            "sha256": "fff5d5186dff00e5f5b29d24c1987e16733857fbdec0329c374b5e1ab17a70d3",
+            "visibility": "public"
+          }
+        },
+        {
+          "title": "低粗跟与外底边缘",
+          "caption": "近看宽阔低跟、足弓与深色外底边缘的连接。",
+          "role": "detail",
+          "design_study": false,
+          "asset": {
+            "asset_id": "product-brown-boots-102-heel-r1",
+            "file": "assets/products/look-102/brown-boots-heel-r1.webp",
+            "mime": "image/webp",
+            "width": 752,
+            "height": 940,
+            "bytes": 65498,
+            "sha256": "adc2c301022b68b89927ecd8e56d1f0a6ab4b6608f5ae4153957c5b6efb4e75c",
+            "visibility": "public"
+          }
+        },
+        {
+          "title": "靴筒与筒口",
+          "caption": "沿着简洁筒口，观察靴筒的弧度与平滑皮质感。",
+          "role": "detail",
+          "design_study": false,
+          "asset": {
+            "asset_id": "product-brown-boots-102-cuff-r1",
+            "file": "assets/products/look-102/brown-boots-cuff-r1.webp",
+            "mime": "image/webp",
+            "width": 748,
+            "height": 935,
+            "bytes": 73926,
+            "sha256": "10f54f68cdc7b65f5e0dc965dc2f6abd73acdcc5b185ab3e4271254e02f58412",
+            "visibility": "public"
+          }
+        },
+        {
+          "title": "踝部褶面与形态",
+          "caption": "柔和褶面在踝部聚拢，用明暗变化表达这款设计的形态。",
+          "role": "detail",
+          "design_study": false,
+          "asset": {
+            "asset_id": "product-brown-boots-102-ankle-r1",
+            "file": "assets/products/look-102/brown-boots-ankle-r1.webp",
+            "mime": "image/webp",
+            "width": 748,
+            "height": 935,
+            "bytes": 81500,
+            "sha256": "2d07c42bef2b7e63bb11970bd4db6c9e5e3085a56adb529d28ce9b73423c240e",
+            "visibility": "public"
+          }
         }
       ]
     }

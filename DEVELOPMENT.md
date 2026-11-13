@@ -133,8 +133,8 @@ GitHub Actions 只有读权限，只校验和构建。源码推送、CI、服务
 
 ## 单品样板
 
-`content/products.json` 是可选的独立单品清单，结构见 `content/products.schema.json`。首批为第 102 套的三件设计单品。每个单品拥有稳定 `product_id`、描述、颜色、设计材质文字、细节说明、一张公开 WebP 主图及 `appearances`；可选 `gallery` 最多登记八张独立细节图，每项包含 `title`、`caption`、`asset`。关联使用 `look_id`、从 1 开始的 `piece_index`、精确写真 `reference_asset_id` 和 `shot_index`，校验器拒绝过期写真、未知穿搭、重复关联和私人资源。更新写真修订时需同步核对单品关联。
+`content/products.json` 是可选的独立单品清单，结构见 `content/products.schema.json`。首批为第 102 套的三件设计单品。每个单品拥有稳定 `product_id`、描述、颜色、设计材质文字、细节说明、一张公开 WebP 主图及 `appearances`；可选 `gallery` 最多登记八张附图，每项包含 `title`、`caption`、`asset`。可选 `role` 区分全貌 `view` 与细节 `detail`，默认 `detail`；`design_study` 默认为 false，设计推演使用严格布尔值 true 并在说明中披露参考边界。关联使用 `look_id`、从 1 开始的 `piece_index`、精确写真 `reference_asset_id` 和 `shot_index`，校验器拒绝过期写真、未知穿搭、重复关联和私人资源。更新写真修订时需同步核对单品关联。
 
-最终图位于 `assets/products/`，为约 4:5 的独立陈列图，不采用穿搭写真九宫格布局。详情页按完整形态、设计细节、穿着上下文组织；有画廊时使用独立近景、缩略图切换和键盘可操作的大图浏览，没有画廊时展示设计说明。棕裙使用新主图 r2 和腰头、裙摆近景，保留原 r1 文件。所有近景均为 AI 设计演绎，不代表实物工艺或材质成分验证。生成母本和当次提示词仍保存在私有工作区。缺少单品清单的历史内容继续显示原文字单品，不创建虚构商品。
+最终图位于 `assets/products/`，为约 4:5 的独立陈列图，不采用穿搭写真九宫格布局。详情页按完整形态、可选多角度、设计细节、穿着上下文组织；画廊支持缩略图切换和键盘大图浏览，多角度在手机端可横向滑动，设计推演在卡片、主图、替代文本与放大说明中保持标识。棕裙包含主图 r2 和腰头、裙摆近景；长靴包含主图 r2、正面/侧面/背面三张全貌与四张独立细节，背面标为设计推演，穿着参考复用原写真第 3 镜头。原 r1 文件保留。细节通过双联合图切分，不放大原生像素；合图母本与实际提示词仅私有保存。全部图片均为 AI 设计演绎，不代表实物工艺或材质成分验证。缺少单品清单的历史内容继续显示原文字单品，不创建虚构商品。
 
 Node 构建和 Python 导入均将该清单纳入内容版本与公开资产白名单。`GET /api/content/products?category=上装&look_id=102` 提供列表，`GET /api/content/products/{product_id}` 提供独立详情，图片走现有归档、CDN 校验和加载失败回源流程。前端使用 `#/products`、`#/product/{product_id}`，支持完整离线包；新本地收藏键为 `yixu:product-favorites:v1`，沿用的穿搭收藏键和编号不变。此功能不增加访问采集或购买流程。

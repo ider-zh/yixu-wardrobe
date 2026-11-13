@@ -285,6 +285,59 @@ try{
    const worn=await client('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(process.env.YIXU_SCREENSHOT_DIR,`product-worn-${viewport.width}.png`),Buffer.from(worn.data,'base64'),{mode:0o600});
   }
  }
+ const boots=sampleProducts.find(p=>p.gallery?.some(image=>image.role==='view'));
+ assert.ok(boots,'A multi-view product is available');
+ for(const viewport of [{width:320,height:844},{width:390,height:844},{width:800,height:1000},{width:1440,height:1000}]){
+  await client('Emulation.setDeviceMetricsOverride',{...viewport,deviceScaleFactor:1,mobile:viewport.width<600});
+  await route('#/product/'+boots.product_id);
+  await wait('document.querySelector(".product-main-image img").naturalWidth>0');
+  assert.equal(await evaluate('document.querySelectorAll("[data-product-select]").length'),8);
+  assert.equal(await evaluate('document.querySelectorAll(".product-view-card").length'),3);
+  assert.equal(await evaluate('document.querySelectorAll(".product-detail-story").length'),4);
+  assert.equal(await evaluate('document.querySelectorAll(".product-chapters button").length'),4);
+  assert.match(await evaluate('document.querySelector(".product-worn-source").textContent'),/原写真穿着参考.*3/);
+  await noOverflow('Boots multi-view hero '+viewport.width);
+  const images=[boots.asset,...boots.gallery.map(image=>image.asset)];
+  for(let index=0;index<images.length;index++){
+   await evaluate(`document.querySelector('[data-product-index="${index}"]').click()`);
+   await wait('document.querySelector(".product-main-image img").complete&&document.querySelector(".product-main-image img").naturalWidth>0');
+   assert.equal(await evaluate('document.querySelector(".product-main-image img").getAttribute("src")'),images[index].source_url);
+   assert.equal(await evaluate('document.querySelectorAll("[data-product-select][aria-pressed=true]").length'),1);
+  }
+  await evaluate('document.querySelector("[data-product-index=\\"3\\"]").click()');
+  assert.equal(await evaluate('document.querySelector(".product-main-image .product-design-badge").hidden'),false);
+  assert.match(await evaluate('document.querySelector(".product-hero-caption").textContent'),/背面方案.*设计推演/);
+  await evaluate('document.querySelector(".product-main-image").click()');await wait('document.getElementById("product-image-dialog").open');
+  assert.match(await evaluate('document.getElementById("product-image-caption").textContent'),/设计推演/);
+  assert.match(await evaluate('document.getElementById("product-image-note").textContent'),/原参考未展示完整背部/);
+  await evaluate('document.getElementById("product-image-next").click()');
+  assert.equal(await evaluate('document.getElementById("product-image-position").textContent'),'5 / 8');
+  assert.doesNotMatch(await evaluate('document.getElementById("product-image-caption").textContent'),/设计推演/);
+  await evaluate('document.getElementById("close-product-image").click();document.querySelector("[data-product-index=\\"0\\"]").click()');
+  assert.equal(await evaluate('document.querySelector(".product-main-image .product-design-badge").hidden'),true);
+  if(process.env.YIXU_SCREENSHOT_DIR){
+   await evaluate('window.scrollTo({top:0,behavior:"instant"})');
+   const capture=await client('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(process.env.YIXU_SCREENSHOT_DIR,`boots-${viewport.width}.png`),Buffer.from(capture.data,'base64'),{mode:0o600});
+  }
+  await evaluate('document.querySelector(".product-view-section").scrollIntoView({behavior:"instant",block:"start"})');
+  await wait('[...document.querySelectorAll(".product-view-image img")].every(image=>image.complete&&image.naturalWidth>0)');
+  await noOverflow('Boots full-view section '+viewport.width);
+  const study=await evaluate('(()=>{const e=document.querySelector(".product-view-card[data-design-study=true] .product-design-badge");return {hidden:e.hidden,text:e.textContent};})()');
+  assert.equal(study.hidden,false);assert.match(study.text,/设计推演/);
+  if(viewport.width<521){
+   assert.ok(await evaluate('(()=>{const e=document.querySelector(".product-view-grid");return e.scrollWidth>e.clientWidth;})()'),'Mobile full views scroll within their own gallery');
+   await evaluate('document.querySelector(".product-view-grid").scrollLeft=10000');
+   assert.ok(await evaluate('document.querySelector(".product-view-grid").scrollLeft>0'));
+   await evaluate('document.querySelector(".product-view-grid").scrollLeft=0');
+  }
+  if(process.env.YIXU_SCREENSHOT_DIR){
+   const capture=await client('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(process.env.YIXU_SCREENSHOT_DIR,`boots-views-${viewport.width}.png`),Buffer.from(capture.data,'base64'),{mode:0o600});
+   await evaluate('document.querySelector(".product-detail-stories-grid").scrollIntoView({behavior:"instant",block:"start"})');
+   await wait('[...document.querySelectorAll(".product-detail-image img")].every(image=>image.complete&&image.naturalWidth>0)');
+   const detail=await client('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(process.env.YIXU_SCREENSHOT_DIR,`boots-details-${viewport.width}.png`),Buffer.from(detail.data,'base64'),{mode:0o600});
+  }
+ }
+ console.log('PASS boots: eight images, view/detail roles, visible design-study labels in cards/hero/zoom, original wearing reference, responsive thumbnails and mobile angle scrolling at 320/390/800/1440px');
  const savedProduct=sampleProducts[0];
  await evaluate('localStorage.setItem("yixu:product-favorites:v1",JSON.stringify(["future-product"]))');
  await client('Page.navigate',{url:'about:blank'});await wait('location.href==="about:blank"');

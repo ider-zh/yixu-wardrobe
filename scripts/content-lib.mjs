@@ -204,7 +204,7 @@ export function loadContent(root) {
       }
       const gallery = product.gallery === undefined ? [] : product.gallery;
       fail(Array.isArray(gallery) && gallery.length <= 8, 'Invalid product gallery');
-      fail(gallery.every(image => object(image) && Object.keys(image).every(key => ['title','caption','asset'].includes(key)) && text(image.title) && image.title.length <= 200 && text(image.caption) && image.caption.length <= 1000), 'Product image descriptions required');
+      fail(gallery.every(image => object(image) && Object.keys(image).every(key => ['title','caption','role','design_study','asset'].includes(key)) && text(image.title) && image.title.length <= 200 && text(image.caption) && image.caption.length <= 1000 && (image.role === undefined || ['view','detail'].includes(image.role)) && (image.design_study === undefined || typeof image.design_study === 'boolean')), 'Valid product image descriptions and roles required');
       const images = [product.asset, ...gallery.map(image => image.asset)];
       fail(new Set(images.map(image => image?.asset_id)).size === images.length, 'Duplicate product gallery image');
       for (const image of images) {
@@ -212,7 +212,7 @@ export function loadContent(root) {
         registerAsset(image);
       }
       const publicImage = asset => ({...asset,image_url:asset.file,source_url:asset.file});
-      products.push({...structuredClone(product),asset:publicImage(product.asset),gallery:gallery.map(image => ({...structuredClone(image),asset:publicImage(image.asset)}))});
+      products.push({...structuredClone(product),asset:publicImage(product.asset),gallery:gallery.map(image => ({...structuredClone(image),role:image.role??'detail',design_study:image.design_study??false,asset:publicImage(image.asset)}))});
     }
   }
   const published = [...looks.values()];

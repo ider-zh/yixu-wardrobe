@@ -423,6 +423,8 @@ def test_products_are_public_archived_and_linked_to_exact_outfit(content_fixture
         {
             "title": "细节",
             "caption": "独立设计近景",
+            "role": "view",
+            "design_study": True,
             "asset": metadata(
                 source, "assets/products/detail.webp", "product-detail", (80, 100), False
             ),
@@ -444,6 +446,8 @@ def test_products_are_public_archived_and_linked_to_exact_outfit(content_fixture
         catalog = client.get("/api/content/catalog").json()
         item = client.get("/api/content/products/" + product["product_id"]).json()
         assert catalog["products"] == [item]
+        assert item["gallery"][0]["role"] == "view"
+        assert item["gallery"][0]["design_study"] is True
         assert client.get("/api/content/products?look_id=101").json()["total"] == 1
         assert client.get("/api/content/products?look_id=100").json()["total"] == 0
         assert client.get("/api/content/products?category=unmatched").json()["total"] == 0
@@ -475,6 +479,8 @@ def test_products_are_public_archived_and_linked_to_exact_outfit(content_fixture
             "bad_detail_hash",
             "duplicate_detail",
             "empty_caption",
+            "bad_role",
+            "bad_study_flag",
         ]:
             candidate = copy.deepcopy(manifest)
             entry = candidate["products"][0]
@@ -494,6 +500,10 @@ def test_products_are_public_archived_and_linked_to_exact_outfit(content_fixture
                 entry["gallery"][0]["asset"] = copy.deepcopy(entry["asset"])
             elif change == "empty_caption":
                 entry["gallery"][0]["caption"] = ""
+            elif change == "bad_role":
+                entry["gallery"][0]["role"] = "unknown"
+            elif change == "bad_study_flag":
+                entry["gallery"][0]["design_study"] = "false"
             else:
                 entry["asset"]["sha256"] = "0" * 64
             write_json(settings.content_root / "products.json", candidate)

@@ -96,6 +96,8 @@ class ProductAppearance(Strict):
 class ProductImage(Strict):
     title: str = Field(min_length=1, max_length=200)
     caption: str = Field(min_length=1, max_length=1000)
+    role: Literal["view", "detail"] = "detail"
+    design_study: bool = Field(default=False, strict=True)
     asset: Asset
 
 
