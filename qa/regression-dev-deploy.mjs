@@ -23,6 +23,7 @@ const python=String.raw`
 import importlib.util,json,os,pathlib,pwd,subprocess,sys,tempfile,urllib.error
 spec=importlib.util.spec_from_file_location('deployment',sys.argv[1]);m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
 real_verify=m.verify
+real_recheck=m.recheck_candidate
 sha='a'*40;old='b'*40
 with tempfile.TemporaryDirectory() as temporary:
  root=pathlib.Path(temporary)/'dev';state=pathlib.Path(temporary)/'private';root.mkdir();state.mkdir();(root/'releases').mkdir();(root/'repository.git').mkdir();(root/'repository.git'/'HEAD').write_text('ref: refs/heads/dev')
@@ -44,7 +45,7 @@ with tempfile.TemporaryDirectory() as temporary:
  assert sentinel.read_bytes()==b'private visitor state must survive rollback'
  m.build=lambda _:(_ for _ in ()).throw(AssertionError('unchanged failed SHA must not loop'))
  m.deliver('http://127.0.0.1')
- m.build=build;m.verify=lambda *_:{'revision':'catalog-version','featured_look_id':103,'source_sha256':'c'*64,'source_bytes':99,'source_verified':True,'static_verified':True}
+ m.build=build;m.recheck_candidate=build;m.verify=lambda *_:{'revision':'catalog-version','featured_look_id':103,'source_sha256':'c'*64,'source_bytes':99,'source_verified':True,'static_verified':True}
  m.deliver('http://127.0.0.1',retry=True)
  assert (root/'current').resolve()==root/'releases'/sha
  receipt=json.loads((state/'deployment.json').read_text());assert receipt['status']=='verified';assert receipt['git_head']==sha
@@ -72,12 +73,14 @@ with tempfile.TemporaryDirectory() as temporary:
  except RuntimeError as error:assert 'stale' in str(error)
  else:raise AssertionError('stale administrator code must fail delivery')
  # Real filesystem check: fix private build staging modes only below web roots.
+ release.chmod(0o700)
  m.run=lambda args,**kw:subprocess.check_output(list(map(str,args)),text=True).strip()
  protected=state/'private-record';protected.write_bytes(b'private');protected.chmod(0o600)
  for name in ('public','admin'):
   (release/name).chmod(0o700)
   for file in (release/name).iterdir():file.chmod(0o600)
  m.make_web_readable(release)
+ assert release.stat().st_mode&0o777==0o755
  for name in ('public','admin'):
   assert (release/name).stat().st_mode&0o777==0o755
   assert all(file.stat().st_mode&0o777==0o644 for file in (release/name).iterdir())
@@ -87,6 +90,20 @@ with tempfile.TemporaryDirectory() as temporary:
  except RuntimeError:pass
  else:raise AssertionError('web-root links must not broaden private permissions')
  assert protected.stat().st_mode&0o777==0o600
+ (release/'public'/'unsafe-link').unlink()
+ tracked=release/'tracked.txt';tracked.write_bytes(b'approved git bytes')
+ blob=m.hashlib.sha1(b'blob 18\0approved git bytes',usedforsecurity=False).hexdigest()
+ def commands(args,**kw):
+  if 'ls-tree' in args:return '100644 blob '+blob+'\ttracked.txt'
+  if '-e' in args:return 'catalog-version'
+  return ''
+ m.run=commands
+ assert real_recheck(sha)==release
+ tracked.write_bytes(b'altered candidate source')
+ try:real_recheck(sha)
+ except RuntimeError as error:assert 'differs' in str(error)
+ else:raise AssertionError('reviewed retry must reject altered source without deleting current release')
+ assert (root/'current').resolve()==release
 print('PASS dev deployment CI gate, isolated activation, auth/static integrity, rollback, persistent data, web-root-only modes and failed-SHA no-retry')
 `;
 const result=spawnSync('python3',['-c',python,root+'deploy/dev-release.py'],{encoding:'utf8',timeout:10000});

@@ -102,6 +102,34 @@ def run(args, *, cwd=None):
 
 
 def get(url, host=None):
+    parsed = urllib.parse.urlsplit(url)
+    if parsed.scheme == "https" and parsed.hostname == DOMAIN:
+        # Like curl --resolve: connect to the owned listener, but verify the
+        # real domain and CA chain. No proxy hairpin or disabled TLS checks.
+        response = subprocess.run(
+            [
+                "/usr/bin/curl",
+                "--fail",
+                "--silent",
+                "--show-error",
+                "--noproxy",
+                "*",
+                "--resolve",
+                DOMAIN + ":443:127.0.0.1",
+                "--max-time",
+                "20",
+                "--header",
+                "Cache-Control: no-cache",
+                url,
+            ],
+            capture_output=True,
+            env={"PATH": "/usr/bin:/bin"},
+            timeout=25,
+            check=False,
+        )
+        if response.returncode:
+            raise OSError("Owned development HTTPS validation failed")
+        return response.stdout
     headers = {"User-Agent": "yixu-dev-deployment", "Cache-Control": "no-cache"}
     if host:
         headers["Host"] = host
@@ -230,6 +258,9 @@ def restart():
 def make_web_readable(release):
     # Build staging directories are private by default. Only the explicit web
     # roots become readable by Nginx; private app data and backend stay private.
+    if release.is_symlink():
+        raise RuntimeError("Development candidate must not be a symlink")
+    run(["/usr/bin/chmod", "0755", release])
     for name in ("public", "admin"):
         directory = release / name
         if directory.is_symlink() or run(["/usr/bin/find", directory, "-type", "l"]):
@@ -286,6 +317,59 @@ def build(sha):
     return release
 
 
+def recheck_candidate(sha):
+    """Reviewed retry: retain the old live release and revalidate this candidate."""
+    release = ROOT / "releases" / sha
+    if release.is_symlink() or not release.is_dir():
+        raise RuntimeError("Reviewed candidate is not an isolated release directory")
+    entries = run(
+        [
+            "/usr/bin/git",
+            "--git-dir=" + str(ROOT / "repository.git"),
+            "ls-tree",
+            "-r",
+            "--full-tree",
+            sha,
+        ]
+    )
+    for entry in entries.splitlines():
+        metadata, filename = entry.split("\t", 1)
+        mode, kind, expected = metadata.split()
+        path = release / filename
+        if (
+            mode not in ("100644", "100755")
+            or kind != "blob"
+            or path.is_symlink()
+            or not path.resolve().is_relative_to(release.resolve())
+        ):
+            raise RuntimeError("Candidate source contains unsupported links or paths")
+        data = path.read_bytes()
+        actual = hashlib.sha1(
+            b"blob " + str(len(data)).encode() + b"\0" + data, usedforsecurity=False
+        ).hexdigest()
+        if actual != expected:
+            raise RuntimeError("Reviewed candidate source differs from its Git commit")
+    make_web_readable(release)
+    run([NODE, "scripts/check.mjs"], cwd=release)
+    run([NODE, "qa/regression-expressive.mjs"], cwd=release)
+    run([release / ".venv/bin/python", "-m", "pytest", "tests/backend", "-q"], cwd=release)
+    expected_revision = run(
+        [
+            NODE,
+            "--input-type=module",
+            "-e",
+            (
+                "import {loadContent} from './scripts/content-lib.mjs';"
+                "process.stdout.write(loadContent(process.cwd()).catalog.revision)"
+            ),
+        ],
+        cwd=release,
+    )
+    if snapshot(release)["revision"] != expected_revision:
+        raise RuntimeError("Reviewed candidate snapshot differs from its source manifests")
+    return release
+
+
 def deliver(origin, retry=False):
     repo = ROOT / "repository.git"
     if not (repo / "HEAD").exists():
@@ -322,7 +406,8 @@ def deliver(origin, retry=False):
     old = (ROOT / "current").resolve() if (ROOT / "current").exists() else None
     switched = False
     try:
-        release = build(sha)
+        candidate = ROOT / "releases" / sha
+        release = recheck_candidate(sha) if retry and candidate.exists() else build(sha)
         switch_current(release)
         switched = True
         restart()
@@ -388,7 +473,7 @@ def main():
     parser.add_argument(
         "--retry",
         action="store_true",
-        help="Retry a reviewed failure after removing its failed candidate",
+        help="Revalidate and retry a reviewed failed candidate without deleting the live version",
     )
     options = parser.parse_args()
     configure_transport()
