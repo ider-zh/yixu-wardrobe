@@ -2195,6 +2195,2558 @@
           "shot_index": 2
         }
       ]
+    },
+    {
+      "product_id": "breton-knit-002",
+      "name": "海军蓝象牙白条纹针织衫",
+      "category": "上装",
+      "subtitle": "船领与密排海军条纹",
+      "description": "平直船领衔接密排海军蓝与象牙白横纹，贴身长袖适合收入高腰裤。 独立图为 AI 设计演绎。",
+      "color_name": "海军蓝与象牙白",
+      "color_hex": "#293847",
+      "design_material": "细密针织感，视觉设计描述",
+      "notes": [
+        "原写真中被收入牛仔裤的完整下摆为设计补充。"
+      ],
+      "asset": {
+        "asset_id": "product-breton-knit-002-r1",
+        "file": "assets/products/look-002/breton-knit-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 152054,
+        "sha256": "a994807c325d00ac527fc03f24a25d1f97170a9e783004116d6148c4a9dedd79",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 2,
+          "piece_index": 1,
+          "reference_asset_id": "look-002-female-01-v2-r2",
+          "shot_index": 5
+        }
+      ],
+      "gallery": [
+        {
+          "title": "船领与细条纹",
+          "caption": "AI 设计推演。浅船领和细横纹取自写真，放大的针织纹理与包边为设计补充。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-breton-neck-002-r1",
+            "file": "assets/products/look-002/breton-neck-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 408936,
+            "sha256": "f65c554f053e328a8f07cf90b1abffe40ac4560e87b10a908ecdfa4ce44d9b99",
+            "visibility": "public"
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "straight-jeans-002",
+      "name": "蓝色高腰直筒牛仔裤",
+      "category": "下装",
+      "subtitle": "踝上裤长与平直裤筒",
+      "description": "高腰五袋设计搭配平直裤筒，裤脚停在鞋面上方，突出玛丽珍鞋的横带。 独立图为 AI 设计演绎。",
+      "color_name": "中蓝",
+      "color_hex": "#59728b",
+      "design_material": "水洗牛仔感，视觉设计描述",
+      "notes": [
+        "单独陈列中可见的纽扣、门襟细针脚为设计补充。"
+      ],
+      "asset": {
+        "asset_id": "product-straight-jeans-002-r1",
+        "file": "assets/products/look-002/straight-jeans-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 212114,
+        "sha256": "85d80ab3f0b494a993e1864198fc0474a19bfa205236b8c4ce3466ed6ab4da09",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 2,
+          "piece_index": 2,
+          "reference_asset_id": "look-002-female-01-v2-r2",
+          "shot_index": 4
+        }
+      ],
+      "gallery": [
+        {
+          "title": "腰头与前袋",
+          "caption": "AI 设计推演。原写真可见高腰与斜向前袋轮廓，近景中纽扣、口袋和走线为设计补充。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-jeans-waist-002-r1",
+            "file": "assets/products/look-002/jeans-waist-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 463768,
+            "sha256": "d7cc2e6672d25778270b749a04e4f16f5959af53db0f20292f7463eaa71ef14a",
+            "visibility": "public"
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "cognac-belt-002",
+      "name": "干邑色窄皮带",
+      "category": "配饰",
+      "subtitle": "高腰处的一线暖棕",
+      "description": "窄棕带与小方扣在高腰牛仔裤上形成轻微的暖色断点。 独立图为 AI 设计演绎。",
+      "color_name": "干邑棕",
+      "color_hex": "#9c603e",
+      "design_material": "暖色平滑皮质感，视觉设计描述",
+      "notes": [
+        "完整带身和扣针结构为独立陈列所需的设计补充。"
+      ],
+      "asset": {
+        "asset_id": "product-cognac-belt-002-r1",
+        "file": "assets/products/look-002/cognac-belt-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 35546,
+        "sha256": "da20495486fc074159e229b3224c29b794d1fd561e04d6cc333815da29978478",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 2,
+          "piece_index": 3,
+          "reference_asset_id": "look-002-female-01-v2-r2",
+          "shot_index": 5
+        }
+      ]
+    },
+    {
+      "product_id": "mary-jane-002",
+      "name": "酒红玛丽珍平底鞋",
+      "category": "鞋履",
+      "subtitle": "酒红色的横带低跟鞋",
+      "description": "单带横跨脚背，圆润鞋头和低跟保留平底玛丽珍鞋的轻巧。 独立图为 AI 设计演绎。",
+      "color_name": "酒红",
+      "color_hex": "#632f39",
+      "design_material": "微光平滑皮质感，视觉设计描述",
+      "notes": [
+        "原写真能确认鞋型与横带。放大的扣件、走线和鞋面纹理为设计补充。"
+      ],
+      "asset": {
+        "asset_id": "product-mary-jane-002-r1",
+        "file": "assets/products/look-002/mary-jane-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 90232,
+        "sha256": "4cd033872f54356ce1d35d0fb755df5c3d2a441cee56845d030f2ec23f9429c1",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 2,
+          "piece_index": 4,
+          "reference_asset_id": "look-002-female-01-v2-r2",
+          "shot_index": 7
+        }
+      ],
+      "gallery": [
+        {
+          "title": "单带与鞋头",
+          "caption": "AI 设计推演。近看酒红鞋面、单带和鞋头比例，微观纹理与侧扣细节为设计补充。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-mary-jane-strap-002-r1",
+            "file": "assets/products/look-002/mary-jane-strap-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 112398,
+            "sha256": "94e65661c7238f78683ae687644c52df5fd6b19e87d08dbfd4128756ba590b51",
+            "visibility": "public"
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "gold-hoop-002",
+      "name": "小号金色圈耳环",
+      "category": "配饰",
+      "subtitle": "成对的细暖金圆圈",
+      "description": "轻细小圈在面颊两侧形成一点暖金色。 独立图为 AI 设计演绎。",
+      "color_name": "暖金",
+      "color_hex": "#c8a46a",
+      "design_material": "暖金色金属感，视觉设计描述",
+      "notes": [
+        "原写真仅支持金色小圈轮廓，实物尺度与闭合结构无法核实。本图为 AI 设计推演。"
+      ],
+      "asset": {
+        "asset_id": "product-gold-hoop-002-r1",
+        "file": "assets/products/look-002/gold-hoop-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 24540,
+        "sha256": "4489ff17293ff0e3fc02e06a4bd78426c03088b28ada065b2376f33ae490c3b7",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 2,
+          "piece_index": 5,
+          "reference_asset_id": "look-002-female-01-v2-r2",
+          "shot_index": 3
+        }
+      ]
+    },
+    {
+      "product_id": "herringbone-blazer-004",
+      "name": "棕色人字纹呢西装",
+      "category": "外套",
+      "subtitle": "秋日的棕呢层次。",
+      "description": "短身剪裁、窄缺口翻领和棕色人字纹，为奶油色针织留出清晰边界。",
+      "color_name": "棕色",
+      "color_hex": "#75553f",
+      "design_material": "温暖毛呢质感",
+      "asset": {
+        "asset_id": "product-herringbone-blazer-004-r1",
+        "file": "assets/products/look-004/herringbone-blazer-r1.webp",
+        "mime": "image/webp",
+        "width": 1121,
+        "height": 1402,
+        "bytes": 166080,
+        "sha256": "0926efc012ddb0dc66042a845dddb7def879c0c09841a2bdb5713d8e6cc0b531",
+        "visibility": "public"
+      },
+      "notes": [
+        "棕色窄缺口翻领",
+        "前幅低调人字纹",
+        "袖长及盖袋比例与写真一致"
+      ],
+      "appearances": [
+        {
+          "look_id": 4,
+          "piece_index": 1,
+          "reference_asset_id": "look-004-female-01-v2-r2",
+          "shot_index": 5
+        }
+      ],
+      "gallery": [
+        {
+          "title": "翻领与人字纹",
+          "caption": "用独立近景看翻领折线和同色人字纹。",
+          "role": "detail",
+          "design_study": false,
+          "asset": {
+            "asset_id": "product-herringbone-blazer-004-lapel-r1",
+            "file": "assets/products/look-004/herringbone-blazer-lapel-r1.webp",
+            "mime": "image/webp",
+            "width": 1121,
+            "height": 1402,
+            "bytes": 329866,
+            "sha256": "1b9151755415a5bad02d656f507f3f851e50a24c105aa36cdc24788d50ae30f7",
+            "visibility": "public"
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "cream-cable-knit-004",
+      "name": "奶油色绞花圆领毛衣",
+      "category": "上装",
+      "subtitle": "浅色绞花。",
+      "description": "奶油色圆领配纵向绞花，增加棕色西装和裙身之间的纹理层次。罩在西装下的衣袖与下摆为设计推演。",
+      "color_name": "奶油色",
+      "color_hex": "#e2d4b6",
+      "design_material": "绞花针织质感",
+      "asset": {
+        "asset_id": "product-cream-cable-knit-004-r1",
+        "file": "assets/products/look-004/cream-cable-knit-r1.webp",
+        "mime": "image/webp",
+        "width": 1121,
+        "height": 1402,
+        "bytes": 146988,
+        "sha256": "89a7a2d2b870f9c36fa58d1442344ea5e258c06f87bb5cec862feddc4e2537a9",
+        "visibility": "public"
+      },
+      "notes": [
+        "圆领由细罗纹收边",
+        "前幅绞花在西装开口处可见",
+        "袖口和下摆为设计推演"
+      ],
+      "appearances": [
+        {
+          "look_id": 4,
+          "piece_index": 2,
+          "reference_asset_id": "look-004-female-01-v2-r2",
+          "shot_index": 5
+        }
+      ],
+      "gallery": [
+        {
+          "title": "圆领与绞花",
+          "caption": "观察圆领的弧线与前幅交错的绞花针路。",
+          "role": "detail",
+          "design_study": false,
+          "asset": {
+            "asset_id": "product-cream-cable-knit-004-cable-r1",
+            "file": "assets/products/look-004/cream-cable-knit-cable-r1.webp",
+            "mime": "image/webp",
+            "width": 1121,
+            "height": 1402,
+            "bytes": 222530,
+            "sha256": "c3a2ba2a3168086b5d9c02c44b20980d9818fb2886609ff32ea8ff3836dfb19a",
+            "visibility": "public"
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "chocolate-pleated-midi-004",
+      "name": "深巧克力百褶中裙",
+      "category": "下装",
+      "subtitle": "裙摆里的深巧克力色。",
+      "description": "顺直的百褶从腰部向下展开，中长裙摆与棕色袜靴连成一线。西装遮住的腰头为设计推演。",
+      "color_name": "深巧克力棕",
+      "color_hex": "#4b3022",
+      "design_material": "有垂度的棕色衣料质感",
+      "asset": {
+        "asset_id": "product-chocolate-pleated-midi-004-r1",
+        "file": "assets/products/look-004/chocolate-pleated-midi-r1.webp",
+        "mime": "image/webp",
+        "width": 1121,
+        "height": 1402,
+        "bytes": 45310,
+        "sha256": "a3a685cfe6572ff54297ae557118cf7a65be17412f4601c974116ba98ad3cbee",
+        "visibility": "public"
+      },
+      "notes": [
+        "过膝中长轮廓",
+        "细褶从腰部向下展开",
+        "腰头属于设计推演"
+      ],
+      "appearances": [
+        {
+          "look_id": 4,
+          "piece_index": 3,
+          "reference_asset_id": "look-004-female-01-v2-r2",
+          "shot_index": 1
+        }
+      ],
+      "gallery": [
+        {
+          "title": "裙褶",
+          "caption": "近看百褶从褶谷到折线的变化。",
+          "role": "detail",
+          "design_study": false,
+          "asset": {
+            "asset_id": "product-chocolate-pleated-midi-004-pleat-r1",
+            "file": "assets/products/look-004/chocolate-pleated-midi-pleat-r1.webp",
+            "mime": "image/webp",
+            "width": 1121,
+            "height": 1402,
+            "bytes": 120122,
+            "sha256": "e8792db8c963f31f64bcdd65e400a846deeba84e89e5c56d2f75066f3a106d09",
+            "visibility": "public"
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "brown-opaque-tights-004",
+      "name": "深棕不透连裤袜",
+      "category": "袜饰",
+      "subtitle": "深棕哑光。",
+      "description": "低反光的不透袜身衔接中裙和短靴。裙内腰部与鞋内脚部的外形为设计推演。",
+      "color_name": "深棕色",
+      "color_hex": "#32251f",
+      "design_material": "均匀哑光袜面",
+      "asset": {
+        "asset_id": "product-brown-opaque-tights-004-r1",
+        "file": "assets/products/look-004/brown-opaque-tights-r1.webp",
+        "mime": "image/webp",
+        "width": 1121,
+        "height": 1402,
+        "bytes": 25810,
+        "sha256": "c68db1f714b209cbe739c0a89114720f882ada652790bcfd538e328e0ae9bf74",
+        "visibility": "public"
+      },
+      "notes": [
+        "深棕色哑光袜面",
+        "袜身在中裙与短靴之间保持不透",
+        "腰部与脚部的外观属设计推演"
+      ],
+      "appearances": [
+        {
+          "look_id": 4,
+          "piece_index": 4,
+          "reference_asset_id": "look-004-female-01-v2-r2",
+          "shot_index": 3
+        }
+      ]
+    },
+    {
+      "product_id": "cognac-lace-boots-004",
+      "name": "干邑色系带短靴",
+      "category": "鞋履",
+      "subtitle": "干邑色的系带线条。",
+      "description": "干邑棕的及踝靴，细鞋带把鞋面向脚背收拢，低跟与暗色鞋底相接。",
+      "color_name": "干邑色",
+      "color_hex": "#9b5831",
+      "design_material": "温润皮面质感",
+      "asset": {
+        "asset_id": "product-cognac-lace-boots-004-r1",
+        "file": "assets/products/look-004/cognac-lace-boots-r1.webp",
+        "mime": "image/webp",
+        "width": 1121,
+        "height": 1402,
+        "bytes": 69858,
+        "sha256": "c15b365106302821a5c4f9bb0b9477bec4f04d7bf30e7dc6e3474c39ec0fa89c",
+        "visibility": "public"
+      },
+      "notes": [
+        "及踝轮廓和低粗跟",
+        "干邑色鞋面到暗色鞋底有明暗过渡",
+        "正面细带交叠"
+      ],
+      "appearances": [
+        {
+          "look_id": 4,
+          "piece_index": 5,
+          "reference_asset_id": "look-004-female-01-v2-r2",
+          "shot_index": 7
+        }
+      ],
+      "gallery": [
+        {
+          "title": "系带与鞋面",
+          "caption": "侧光下看鞋带交叠以及鞋面弧度。",
+          "role": "detail",
+          "design_study": false,
+          "asset": {
+            "asset_id": "product-cognac-lace-boots-004-eyelets-r1",
+            "file": "assets/products/look-004/cognac-lace-boots-eyelets-r1.webp",
+            "mime": "image/webp",
+            "width": 1121,
+            "height": 1402,
+            "bytes": 136350,
+            "sha256": "23086d3bfccf56f8683d2058a929fdff090a535fee58976f3cbb17df41a8be38",
+            "visibility": "public"
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "brown-strap-watch-004",
+      "name": "细棕表带腕表",
+      "category": "饰品",
+      "subtitle": "细带，小表盘。",
+      "description": "细棕表带配浅色圆形小表盘。写真可辨认轮廓，刻度、扣具与细部按设计推演处理。",
+      "color_name": "深棕色",
+      "color_hex": "#674632",
+      "design_material": "棕色皮面与浅色表盘质感",
+      "asset": {
+        "asset_id": "product-brown-strap-watch-004-r1",
+        "file": "assets/products/look-004/brown-strap-watch-r1.webp",
+        "mime": "image/webp",
+        "width": 1121,
+        "height": 1402,
+        "bytes": 51962,
+        "sha256": "85aea3615bab156b75f6031f63da49eb5a06a3a727b58dc538f74bfadb7aff81",
+        "visibility": "public"
+      },
+      "notes": [
+        "细深棕表带",
+        "暖色金属圆形小表盘",
+        "表盘、刻度与带扣的近看形态为设计推演"
+      ],
+      "appearances": [
+        {
+          "look_id": 4,
+          "piece_index": 6,
+          "reference_asset_id": "look-004-female-01-v2-r2",
+          "shot_index": 4
+        }
+      ]
+    },
+    {
+      "product_id": "sage-windbreaker-006",
+      "name": "鼠尾草绿轻量连帽防风衣",
+      "category": "外套",
+      "subtitle": "一层轻薄的鼠尾草绿",
+      "description": "低饱和灰绿色连帽外层，以开襟与收束袖口勾出轻户外轮廓。 陈列图中的口袋拉链和内侧织面为依据写真可见部分完成的设计补充。",
+      "color_name": "鼠尾草绿",
+      "color_hex": "#787b64",
+      "design_material": "薄织面料感，视觉设计描述",
+      "notes": [
+        "轻薄连帽轮廓",
+        "前中拉链开襟与收束袖口"
+      ],
+      "asset": {
+        "asset_id": "product-sage-windbreaker-006-r1",
+        "file": "assets/products/look-006/sage-windbreaker-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 71132,
+        "sha256": "1138915666d4df4dbb32f1b87041a67ba7720b6cab6564b53513df0b24a95450",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 6,
+          "piece_index": 1,
+          "reference_asset_id": "look-006-female-01-v2-r2",
+          "shot_index": 4
+        }
+      ],
+      "gallery": [
+        {
+          "title": "收束在腕边的袖口",
+          "caption": "斜侧柔光照出袖口的弹性褶量与薄织表面的细皱。面料纹理为设计推演。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-sage-windbreaker-006-cuff-r1",
+            "file": "assets/products/look-006/sage-windbreaker-cuff-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 74362,
+            "sha256": "04c6af148c724e4edb3a166ea0b5b7b1711d5c1f5d97942ca2c90e49d044421e",
+            "visibility": "public"
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "cream-crew-tee-006",
+      "name": "奶油色圆领速干T",
+      "category": "上装",
+      "subtitle": "风衣敞开时的一圈奶油白",
+      "description": "圆领和素净奶油色承接风衣与砂色裤。写真中完整袖型和下摆受叠穿遮挡，独立图为设计补充。",
+      "color_name": "奶油白",
+      "color_hex": "#ded3bf",
+      "design_material": "细密针织感，视觉设计描述",
+      "notes": [
+        "贴近颈侧的浅圆领",
+        "内搭袖型与衣摆为设计推演，未验证速干性能"
+      ],
+      "asset": {
+        "asset_id": "product-cream-crew-tee-006-r1",
+        "file": "assets/products/look-006/cream-crew-tee-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 21210,
+        "sha256": "5b3b6de3ce0d7d21b33788f32c403fddb7eeeaa73d658d2a5e27785e5eed3cfa",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 6,
+          "piece_index": 2,
+          "reference_asset_id": "look-006-female-01-v2-r2",
+          "shot_index": 8
+        }
+      ]
+    },
+    {
+      "product_id": "sand-hiking-trousers-006",
+      "name": "砂色直筒徒步裤",
+      "category": "下装",
+      "subtitle": "砂色腿线，落在鞋口上方",
+      "description": "砂色腿线从腰部向下延伸，腿侧口袋收在干净的直筒轮廓内。",
+      "color_name": "砂色",
+      "color_hex": "#ac987d",
+      "design_material": "哑光梭织感，视觉设计描述",
+      "notes": [
+        "略留活动量的直筒裤型",
+        "沿大腿外侧竖向收起的口袋拉链"
+      ],
+      "asset": {
+        "asset_id": "product-sand-hiking-trousers-006-r1",
+        "file": "assets/products/look-006/sand-hiking-trousers-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 33798,
+        "sha256": "f9e9b04b335325e78c0d08b213af767e44a07e2f6d8e787b5edb6195c94e7dc6",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 6,
+          "piece_index": 3,
+          "reference_asset_id": "look-006-female-01-v2-r2",
+          "shot_index": 5
+        }
+      ]
+    },
+    {
+      "product_id": "taupe-hiking-shoes-006",
+      "name": "灰褐色徒步鞋",
+      "category": "鞋履",
+      "subtitle": "把灰褐落在湖边栈道",
+      "description": "灰褐织面感鞋身配浅色厚底，系带与鞋身分层延续了风衣的轻户外语汇。 鞋面分片与底外缘的精确纹理为设计推演。",
+      "color_name": "灰褐",
+      "color_hex": "#827566",
+      "design_material": "织面与浅色橡胶底感，视觉设计描述",
+      "notes": [
+        "低帮圆头与同色系鞋带",
+        "浅底和灰褐鞋面分出层次"
+      ],
+      "asset": {
+        "asset_id": "product-taupe-hiking-shoes-006-r1",
+        "file": "assets/products/look-006/taupe-hiking-shoes-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 102714,
+        "sha256": "15c860cc6808c629f424c33eae9f7958c73c66ed8ff12e521a64a6bb3d804a0c",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 6,
+          "piece_index": 4,
+          "reference_asset_id": "look-006-female-01-v2-r2",
+          "shot_index": 9
+        }
+      ],
+      "gallery": [
+        {
+          "title": "织面和浅色鞋底的交界",
+          "caption": "低角度把圆鞋头、灰褐织面和浅底边缘放在同一光线下。分片走线与底边纹理为设计推演。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-taupe-hiking-shoes-006-toe-edge-r1",
+            "file": "assets/products/look-006/taupe-hiking-shoes-toe-edge-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 137566,
+            "sha256": "45a943925b1d8627f873384f13e140fc3e5bdf41e07688a20df66d8c086a0fc2",
+            "visibility": "public"
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "cream-ankle-socks-006",
+      "name": "奶油色踝袜",
+      "category": "配饰",
+      "subtitle": "从裤脚下露出的一点奶油白",
+      "description": "奶油色短袜呼应内搭。写真可见短袜口，后跟、足底和袜尖为独立陈列图中的设计推演。",
+      "color_name": "奶油白",
+      "color_hex": "#ded2b9",
+      "design_material": "细罗纹针织感，视觉设计描述",
+      "notes": [
+        "鞋口上方保留一段柔和浅色",
+        "独立袜身为依据露出部分补足的设计"
+      ],
+      "asset": {
+        "asset_id": "product-cream-ankle-socks-006-r1",
+        "file": "assets/products/look-006/cream-ankle-socks-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 94012,
+        "sha256": "dc6627fdb1eaa4f0a23563ed9ef8051a9f5be713a05b194a230dc4654f6f4068",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 6,
+          "piece_index": 5,
+          "reference_asset_id": "look-006-female-01-v2-r2",
+          "shot_index": 5
+        }
+      ]
+    },
+    {
+      "product_id": "burgundy-velvet-gown-008",
+      "name": "深酒红丝绒A字长礼服",
+      "category": "礼服",
+      "subtitle": "酒红丝绒沿着裙身铺开。",
+      "description": "浅船领、及肘袖和收束的腰线连成一体，及踝裙摆形成平缓的A字外轮廓。",
+      "color_name": "深酒红",
+      "color_hex": "#541b27",
+      "design_material": "带方向性柔光的丝绒质感",
+      "asset": {
+        "asset_id": "product-burgundy-velvet-gown-008-r1",
+        "file": "assets/products/look-008/burgundy-velvet-gown-r1.webp",
+        "mime": "image/webp",
+        "width": 1121,
+        "height": 1402,
+        "bytes": 38100,
+        "sha256": "1b59a9211da4d7c1dd176217e8401752ad3b23a2a2f57d4cfa3b249e147b8ee6",
+        "visibility": "public"
+      },
+      "notes": [
+        "浅船领与及肘袖",
+        "裙摆留有垂坠空间",
+        "暖光下保留深酒红丝绒的明暗"
+      ],
+      "appearances": [
+        {
+          "look_id": 8,
+          "piece_index": 1,
+          "reference_asset_id": "look-008-female-01-v2-r2",
+          "shot_index": 6
+        }
+      ],
+      "gallery": [
+        {
+          "title": "浅船领与丝绒光泽",
+          "caption": "看横向领口和侧光扫过时的深浅变化。",
+          "role": "detail",
+          "design_study": false,
+          "asset": {
+            "asset_id": "product-burgundy-velvet-gown-008-neckline-r1",
+            "file": "assets/products/look-008/burgundy-velvet-gown-neckline-r1.webp",
+            "mime": "image/webp",
+            "width": 1121,
+            "height": 1402,
+            "bytes": 104370,
+            "sha256": "bee83db0411459e2ec06b13f136d4e34fe6bde0a7daec2843fc5f020dd56ee55",
+            "visibility": "public"
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "burgundy-low-pumps-008",
+      "name": "酒红低跟包头鞋",
+      "category": "鞋履",
+      "subtitle": "与裙摆相接的酒红。",
+      "description": "同色包头鞋以低粗跟承托，鞋口和鞋头保持简洁。",
+      "color_name": "酒红色",
+      "color_hex": "#64292f",
+      "design_material": "低反光皮面质感",
+      "asset": {
+        "asset_id": "product-burgundy-low-pumps-008-r1",
+        "file": "assets/products/look-008/burgundy-low-pumps-r1.webp",
+        "mime": "image/webp",
+        "width": 1121,
+        "height": 1402,
+        "bytes": 42884,
+        "sha256": "0e584fffea747f1b70ed3e0a509e6f62fa4a85c7083e7773d76c75b469212557",
+        "visibility": "public"
+      },
+      "notes": [
+        "包头与低粗跟",
+        "鞋口斜面与裙摆留有间距",
+        "低反光酒红鞋面"
+      ],
+      "appearances": [
+        {
+          "look_id": 8,
+          "piece_index": 2,
+          "reference_asset_id": "look-008-female-01-v2-r2",
+          "shot_index": 3
+        }
+      ],
+      "gallery": [
+        {
+          "title": "鞋口与低跟",
+          "caption": "从侧前方看鞋口弧线、包头和低跟之间的比例。",
+          "role": "view",
+          "design_study": false,
+          "asset": {
+            "asset_id": "product-burgundy-low-pumps-008-profile-r1",
+            "file": "assets/products/look-008/burgundy-low-pumps-profile-r1.webp",
+            "mime": "image/webp",
+            "width": 1121,
+            "height": 1402,
+            "bytes": 49804,
+            "sha256": "ea200ef8ac1d614aedfbdb1cd172dc524f4bae77891166d5e6df498b7181fce2",
+            "visibility": "public"
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "small-gold-drop-earrings-008",
+      "name": "小号金色垂坠耳环",
+      "category": "饰品",
+      "subtitle": "耳边的一点金色。",
+      "description": "小号金色耳坠有短促的垂落线条。写真仅能辨认颜色和轮廓，耳坠连接细节属于设计推演。",
+      "color_name": "暖金色",
+      "color_hex": "#c09a58",
+      "design_material": "暖金属质感",
+      "asset": {
+        "asset_id": "product-small-gold-drop-earrings-008-r1",
+        "file": "assets/products/look-008/small-gold-drop-earrings-r1.webp",
+        "mime": "image/webp",
+        "width": 1121,
+        "height": 1402,
+        "bytes": 144424,
+        "sha256": "ea4646d107256634afbb5457c1159b794d756caa598c1eb3413b6f6988c08779",
+        "visibility": "public"
+      },
+      "notes": [
+        "成对的暖金色小垂坠",
+        "水滴轮廓在侧脸近景可见",
+        "连接结构为设计推演"
+      ],
+      "appearances": [
+        {
+          "look_id": 8,
+          "piece_index": 3,
+          "reference_asset_id": "look-008-female-01-v2-r2",
+          "shot_index": 5
+        }
+      ]
+    },
+    {
+      "product_id": "camel-belted-coat-009",
+      "name": "驼色系带羊毛大衣",
+      "category": "外套",
+      "subtitle": "宽翻领下扎一结驼色",
+      "description": "中长驼色大衣用宽翻领和同色系带收住腰线。局部纽扣及未在写真中展开的内侧为设计补充。",
+      "color_name": "驼色",
+      "color_hex": "#ae825e",
+      "design_material": "柔和短绒羊毛感，视觉设计描述",
+      "notes": [
+        "宽缺口翻领衔接针织高领",
+        "同色软系带在腰间形成简洁结扣"
+      ],
+      "asset": {
+        "asset_id": "product-camel-belted-coat-009-r1",
+        "file": "assets/products/look-009/camel-belted-coat-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 68146,
+        "sha256": "ea150d7a640345d54436115095b87eb714d946d67defad13a084f6691da3deb8",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 9,
+          "piece_index": 1,
+          "reference_asset_id": "look-009-female-01-v2-r2",
+          "shot_index": 4
+        }
+      ],
+      "gallery": [
+        {
+          "title": "系带和重叠前襟",
+          "caption": "斜侧近景呈现同色系带绕过前襟形成的结。短绒肌理和具体缝线为设计推演。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-camel-belted-coat-009-tie-r1",
+            "file": "assets/products/look-009/camel-belted-coat-tie-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 180164,
+            "sha256": "76dbc5c99c2baade439e7889c63de8ed75149ed73f93c1504e3e43dda0f5447d",
+            "visibility": "public"
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "cream-rib-turtleneck-009",
+      "name": "奶油色罗纹高领毛衣",
+      "category": "上装",
+      "subtitle": "大衣领口的一圈奶油白",
+      "description": "奶油白折叠高领保留细竖罗纹，衬托驼色大衣的宽翻领。完整袖型和下摆在写真中多被大衣遮挡，独立图为设计推演。",
+      "color_name": "奶油白",
+      "color_hex": "#e1d1b6",
+      "design_material": "细罗纹针织感，视觉设计描述",
+      "notes": [
+        "折叠高领和细密竖向罗纹",
+        "独立陈列图补全外套遮挡的袖型与衣摆"
+      ],
+      "asset": {
+        "asset_id": "product-cream-rib-turtleneck-009-r1",
+        "file": "assets/products/look-009/cream-rib-turtleneck-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 50214,
+        "sha256": "479a0b1dcc9b763db7d811ddda514e8884321be7c70368b85c8a414a70faf9cb",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 9,
+          "piece_index": 2,
+          "reference_asset_id": "look-009-female-01-v2-r2",
+          "shot_index": 2
+        }
+      ],
+      "gallery": [
+        {
+          "title": "折叠领口与细罗纹",
+          "caption": "观察竖向罗纹从高领折边延伸到肩线。领口接缝和细部针法为设计推演。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-cream-rib-turtleneck-009-collar-r1",
+            "file": "assets/products/look-009/cream-rib-turtleneck-collar-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 141144,
+            "sha256": "453cde9137c3cea66537f98cdde9c473e214b146a0c05a140522046c3a1b58a2",
+            "visibility": "public"
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "cream-straight-trousers-009",
+      "name": "奶油色直筒毛料长裤",
+      "category": "下装",
+      "subtitle": "留给短靴的奶油色直线",
+      "description": "直筒裤在大衣下方延续浅色，裤线顺着脚踝落向短靴。大衣遮住的腰头和门襟为独立陈列图中的设计补充。",
+      "color_name": "奶油白",
+      "color_hex": "#e5d7c0",
+      "design_material": "轻哑光毛料感，视觉设计描述",
+      "notes": [
+        "自然垂下的直筒裤腿",
+        "淡淡的前片裤线延伸到裤脚"
+      ],
+      "asset": {
+        "asset_id": "product-cream-straight-trousers-009-r1",
+        "file": "assets/products/look-009/cream-straight-trousers-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 19926,
+        "sha256": "918e82dbf46c89862f3eee659586087f7b4676cbc11e43469dc71dcdaf6e3595",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 9,
+          "piece_index": 3,
+          "reference_asset_id": "look-009-female-01-v2-r2",
+          "shot_index": 5
+        }
+      ]
+    },
+    {
+      "product_id": "tan-suede-ankle-boots-009",
+      "name": "浅棕麂皮低跟短靴",
+      "category": "鞋履",
+      "subtitle": "给奶油色裤脚一个暖色收尾",
+      "description": "浅棕短靴以圆润鞋头和低方跟承接长裤。陈列图中的精细绒面与缝合线为视觉设计推演。",
+      "color_name": "浅棕",
+      "color_hex": "#b08a67",
+      "design_material": "短绒麂皮感，视觉设计描述",
+      "notes": [
+        "轻收圆头与低方跟",
+        "简明的短筒轮廓衔接奶油色裤脚"
+      ],
+      "asset": {
+        "asset_id": "product-tan-suede-ankle-boots-009-r1",
+        "file": "assets/products/look-009/tan-suede-ankle-boots-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 61900,
+        "sha256": "d60cd1d90eeb84cb3a4761809bbc46261676061df638f557dff76c8a37580084",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 9,
+          "piece_index": 4,
+          "reference_asset_id": "look-009-female-01-v2-r2",
+          "shot_index": 9
+        }
+      ],
+      "gallery": [
+        {
+          "title": "从侧面看靴筒到鞋跟",
+          "caption": "完整侧面展示短靴的圆头、低方跟和薄底。近看的绒面与精确分片为设计推演。",
+          "role": "view",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-tan-suede-ankle-boots-009-profile-r1",
+            "file": "assets/products/look-009/tan-suede-ankle-boots-profile-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 84302,
+            "sha256": "522eda9e854b55ae3d7041ea2a21a1877e127c04edd12dee67aefb127bcc83ea",
+            "visibility": "public"
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "gold-round-studs-009",
+      "name": "小号金色耳钉",
+      "category": "配饰",
+      "subtitle": "冬日里一对小金点",
+      "description": "从写真里的小圆反光提取金色耳钉的设计。球面弧度、表面与比例为 AI 设计推演，独立图展示正面。",
+      "color_name": "暖金色",
+      "color_hex": "#c99b56",
+      "design_material": "暖金色金属感，视觉设计描述",
+      "notes": [
+        "克制的小圆金色高光",
+        "近正视呈现圆面设计，省略未经确认的耳针结构"
+      ],
+      "asset": {
+        "asset_id": "product-gold-round-studs-009-r1",
+        "file": "assets/products/look-009/gold-round-studs-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 13052,
+        "sha256": "0337ac835fbb517bd4be7f8a8cd5a36d5a8749e3641e3528c2c0661670ceb925",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 9,
+          "piece_index": 5,
+          "reference_asset_id": "look-009-female-01-v2-r2",
+          "shot_index": 2
+        }
+      ]
+    },
+    {
+      "product_id": "collarless-coat-010",
+      "name": "沙色无领长风衣",
+      "category": "外套",
+      "subtitle": "浅沙色无领长层",
+      "description": "平直无领开襟从肩前延伸至小腿，形成围住深色内搭的长线条。 独立图为 AI 设计演绎。",
+      "color_name": "浅沙",
+      "color_hex": "#b49c83",
+      "design_material": "中等厚度干爽梭织感，视觉设计描述",
+      "notes": [
+        "单品照的部分表面纹理和内侧边缘为设计补充。"
+      ],
+      "asset": {
+        "asset_id": "product-collarless-coat-010-r1",
+        "file": "assets/products/look-010/collarless-coat-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 125370,
+        "sha256": "90c0e88e85536daaeef7a802854696a28a09dac9386e3ade22338d4aaf2872d3",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 10,
+          "piece_index": 1,
+          "reference_asset_id": "look-010-female-01-v2-r2",
+          "shot_index": 2
+        }
+      ],
+      "gallery": [
+        {
+          "title": "无领开襟",
+          "caption": "AI 设计推演。原写真支持无领长线条，放大的边缘处理和织纹属于设计补充。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-coat-opening-010-r1",
+            "file": "assets/products/look-010/coat-opening-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 255832,
+            "sha256": "26f1fd284fceae417f05601f0a41cd935927e5059631a780801b7e69dc7823d7",
+            "visibility": "public"
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "double-breasted-vest-010",
+      "name": "藏蓝短款双排扣马甲",
+      "category": "上装",
+      "subtitle": "短款 V 领与双排四扣",
+      "description": "短款 V 领马甲用双排四粒小扣收住上身，让象牙白长衬衫从下缘露出。 独立图为 AI 设计演绎。",
+      "color_name": "藏蓝",
+      "color_hex": "#232734",
+      "design_material": "精细斜纹西装面感，视觉设计描述",
+      "notes": [
+        "扣面微观纹理与布料表面为设计补充。"
+      ],
+      "asset": {
+        "asset_id": "product-double-breasted-vest-010-r1",
+        "file": "assets/products/look-010/double-breasted-vest-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 81790,
+        "sha256": "f3eb6f8a25b4c81130a3b69126ec4a416cc13e6b0b722651d3910eae005d0575",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 10,
+          "piece_index": 2,
+          "reference_asset_id": "look-010-female-01-v2-r2",
+          "shot_index": 8
+        }
+      ],
+      "gallery": [
+        {
+          "title": "V 领与双排扣",
+          "caption": "AI 设计推演。双排四扣排布取自原写真，扣面纹理与走线为设计补充。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-vest-front-010-r1",
+            "file": "assets/products/look-010/vest-front-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 164252,
+            "sha256": "5decc29f518a27f58ecaafc08c2ce075b630dd513fd672a4e57cb741a9f19c3b",
+            "visibility": "public"
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "long-shirt-010",
+      "name": "象牙白长摆衬衫",
+      "category": "上装",
+      "subtitle": "从马甲下方露出的象牙白",
+      "description": "尖领和窄袖口留出浅色线条，圆弧长下摆从短马甲下面露出。 独立图为 AI 设计演绎。",
+      "color_name": "象牙白",
+      "color_hex": "#eee8da",
+      "design_material": "细密挺括衬衫面感，视觉设计描述",
+      "notes": [
+        "马甲遮挡的前身与完整门襟为 AI 设计补充。"
+      ],
+      "asset": {
+        "asset_id": "product-long-shirt-010-r1",
+        "file": "assets/products/look-010/long-shirt-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 31852,
+        "sha256": "70d441cf70f3daec8af3d2430dc360ea1c26a8dd614b8bfefcee2f204d3c2207",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 10,
+          "piece_index": 3,
+          "reference_asset_id": "look-010-female-01-v2-r2",
+          "shot_index": 5
+        }
+      ]
+    },
+    {
+      "product_id": "straight-trouser-010",
+      "name": "炭灰直筒西裤",
+      "category": "下装",
+      "subtitle": "终点在脚踝上方的直线",
+      "description": "炭灰裤腿自腰下保持利落直线，踝上裤长露出深棕方头鞋。 独立图为 AI 设计演绎。",
+      "color_name": "炭灰",
+      "color_hex": "#484849",
+      "design_material": "哑光精纺西装面感，视觉设计描述",
+      "notes": [
+        "被衣装遮挡的腰头与门襟为 AI 设计补充。"
+      ],
+      "asset": {
+        "asset_id": "product-straight-trouser-010-r1",
+        "file": "assets/products/look-010/straight-trouser-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 232576,
+        "sha256": "3062f8e975ac459a18c95e49127446eedc2864f1b6ff90459e8906b14845e94f",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 10,
+          "piece_index": 4,
+          "reference_asset_id": "look-010-female-01-v2-r2",
+          "shot_index": 2
+        }
+      ]
+    },
+    {
+      "product_id": "chocolate-belt-010",
+      "name": "巧克力细皮带",
+      "category": "配饰",
+      "subtitle": "夹在深浅两层间的细腰带",
+      "description": "细棕带和低调小方扣在浅衬衫与深马甲之间标记腰线。 独立图为 AI 设计演绎。",
+      "color_name": "巧克力棕",
+      "color_hex": "#624739",
+      "design_material": "平滑皮质感，视觉设计描述",
+      "notes": [
+        "整条带身与扣针表面是陈列所需的设计补充。"
+      ],
+      "asset": {
+        "asset_id": "product-chocolate-belt-010-r1",
+        "file": "assets/products/look-010/chocolate-belt-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 25860,
+        "sha256": "5140db15de4f4e0fba5b034d6c55d0d33c320fef2885c775eb6450e69e0350a3",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 10,
+          "piece_index": 5,
+          "reference_asset_id": "look-010-female-01-v2-r2",
+          "shot_index": 8
+        }
+      ]
+    },
+    {
+      "product_id": "square-toe-loafer-010",
+      "name": "深棕方头乐福鞋",
+      "category": "鞋履",
+      "subtitle": "带轻微方角的低跟鞋",
+      "description": "窄方头和浅鞋面横带与直筒裤硬朗的线条相接，低跟保留轻便日常比例。 独立图为 AI 设计演绎。",
+      "color_name": "深棕",
+      "color_hex": "#382925",
+      "design_material": "平滑哑光皮质感，视觉设计描述",
+      "notes": [
+        "鞋面放大的缝线和横带开口为设计补充，未展示鞋底。"
+      ],
+      "asset": {
+        "asset_id": "product-square-toe-loafer-010-r1",
+        "file": "assets/products/look-010/square-toe-loafer-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 56024,
+        "sha256": "8ae9dd0582ff8343b114acadc31e2789085be21b71f29165e798b6e90a812d1a",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 10,
+          "piece_index": 6,
+          "reference_asset_id": "look-010-female-01-v2-r2",
+          "shot_index": 7
+        }
+      ]
+    },
+    {
+      "product_id": "gold-studs-010",
+      "name": "金色小耳钉",
+      "category": "配饰",
+      "subtitle": "贴近耳垂的小圆金面",
+      "description": "微微隆起的小圆面在长发与浅色衬衫之间留下细点亮光。 独立图为 AI 设计演绎。",
+      "color_name": "暖金",
+      "color_hex": "#c8a262",
+      "design_material": "暖金色金属感，视觉设计描述",
+      "notes": [
+        "写真只支持金色小圆面。圆面弧度和光泽为 AI 设计推演，未展示耳针或背部。"
+      ],
+      "asset": {
+        "asset_id": "product-gold-studs-010-r1",
+        "file": "assets/products/look-010/gold-studs-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 32098,
+        "sha256": "a7b12708f71f653c3801b2f685bc8fe087ae29ef132b5be399fb1073de2171d2",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 10,
+          "piece_index": 7,
+          "reference_asset_id": "look-010-female-01-v2-r2",
+          "shot_index": 6
+        }
+      ]
+    },
+    {
+      "product_id": "trapezoid-bag-010",
+      "name": "深棕梯形手提包",
+      "category": "包袋",
+      "subtitle": "弧形提手与梯形包身",
+      "description": "窄上宽下的深棕包身配短弧提手，把视线收回到肩下的几何轮廓。 独立图为 AI 设计演绎。",
+      "color_name": "深棕",
+      "color_hex": "#40322b",
+      "design_material": "平滑皮质感，视觉设计描述",
+      "notes": [
+        "原写真仅支持包的梯形轮廓与短提手。近景中连接点与表面为 AI 设计推演，未展示包内结构。"
+      ],
+      "asset": {
+        "asset_id": "product-trapezoid-bag-010-r1",
+        "file": "assets/products/look-010/trapezoid-bag-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 79268,
+        "sha256": "37435c883d56d83b14fe518d21513a142987d697a585e9b01712021c7b82c002",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 10,
+          "piece_index": 8,
+          "reference_asset_id": "look-010-female-01-v2-r2",
+          "shot_index": 7
+        }
+      ],
+      "gallery": [
+        {
+          "title": "短弧提手与包口",
+          "caption": "AI 设计推演。近看短弧提手与包口的衔接，连接结构和表面肌理为设计补充。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-bag-handle-010-r1",
+            "file": "assets/products/look-010/bag-handle-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 91180,
+            "sha256": "2f3e655744cb1ec9c86717f47704fe13880e12951d031f9abf147861f71fc339",
+            "visibility": "public"
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "utility-jacket-030",
+      "name": "石墨立领工装夹克",
+      "category": "外套",
+      "subtitle": "敞开的石墨色高立领",
+      "description": "立领、深色拉链和贴近衣身的口袋构成轮廓，敞襟露出细网格马甲。 独立图为 AI 设计演绎。",
+      "color_name": "石墨灰",
+      "color_hex": "#32363a",
+      "design_material": "干爽机能梭织感，视觉设计描述",
+      "notes": [
+        "口袋背面与内里不在参考范围。放大展示的走线和织纹为设计补充。"
+      ],
+      "asset": {
+        "asset_id": "product-utility-jacket-030-r1",
+        "file": "assets/products/look-030/utility-jacket-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 81630,
+        "sha256": "0a105deede8c9042a6010f4529f71e336d8611656de95cd86b59e8fcbf3ab8ba",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 30,
+          "piece_index": 1,
+          "reference_asset_id": "look-030-female-01-v2-r2",
+          "shot_index": 3
+        }
+      ]
+    },
+    {
+      "product_id": "grid-vest-030",
+      "name": "鼠尾草网格织纹马甲",
+      "category": "上装",
+      "subtitle": "灰绿细网格织纹",
+      "description": "浅于外套和打底的灰绿马甲用细格纹与 V 领分开两层深色。 独立图为 AI 设计演绎。",
+      "color_name": "低饱和鼠尾草灰",
+      "color_hex": "#7a837a",
+      "design_material": "细密网格梭织感，视觉设计描述",
+      "notes": [
+        "单独陈列展示的完整肩线和后侧边缘为设计补充。"
+      ],
+      "asset": {
+        "asset_id": "product-grid-vest-030-r1",
+        "file": "assets/products/look-030/grid-vest-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 164638,
+        "sha256": "c7a6248ba73fbbb6bda68ff635e444ed6bf9af2c2648ef9539cb9e2a4e7f5d73",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 30,
+          "piece_index": 2,
+          "reference_asset_id": "look-030-female-01-v2-r2",
+          "shot_index": 8
+        }
+      ]
+    },
+    {
+      "product_id": "mock-neck-030",
+      "name": "黑色高领打底",
+      "category": "上装",
+      "subtitle": "短链之下的黑色半高领",
+      "description": "克制的半高领隔开银色短链与深色外套，维持颈部干净层次。 独立图为 AI 设计演绎。",
+      "color_name": "黑",
+      "color_hex": "#222326",
+      "design_material": "细密哑光针织感，视觉设计描述",
+      "notes": [
+        "外套和马甲下遮挡的主体、袖长与衣摆为 AI 设计推演。"
+      ],
+      "asset": {
+        "asset_id": "product-mock-neck-030-r1",
+        "file": "assets/products/look-030/mock-neck-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 26732,
+        "sha256": "a16ceadbcee6de7c05ffdb7f753a12056ec4cedd784f11a871e4b6ae1c17ee44",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 30,
+          "piece_index": 3,
+          "reference_asset_id": "look-030-female-01-v2-r2",
+          "shot_index": 6
+        }
+      ]
+    },
+    {
+      "product_id": "cargo-trouser-030",
+      "name": "深灰锥形工装裤",
+      "category": "下装",
+      "subtitle": "侧面平贴盖袋与锥形裤腿",
+      "description": "向踝部收窄的裤腿保留活动空间，侧面平贴盖袋避免增加太多体积。 独立图为 AI 设计演绎。",
+      "color_name": "深炭灰",
+      "color_hex": "#414245",
+      "design_material": "细纹哑光梭织感，视觉设计描述",
+      "notes": [
+        "放大的盖袋针脚与被外套遮挡的腰头为设计补充。"
+      ],
+      "asset": {
+        "asset_id": "product-cargo-trouser-030-r1",
+        "file": "assets/products/look-030/cargo-trouser-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 38668,
+        "sha256": "eb343920b09ce2d9746aadb98e9f541599f3fc1582b1fc4ce1757352cdadd1af",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 30,
+          "piece_index": 4,
+          "reference_asset_id": "look-030-female-01-v2-r2",
+          "shot_index": 2
+        }
+      ],
+      "gallery": [
+        {
+          "title": "侧袋与盖片",
+          "caption": "AI 设计推演。斜光说明平贴盖袋的层次，针脚与微观织纹为设计补充。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-cargo-pocket-030-r1",
+            "file": "assets/products/look-030/cargo-pocket-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 307282,
+            "sha256": "b6450780dd6169ea11df60d020072bec8fbc44dfa98c153613d76db296a8e5ce",
+            "visibility": "public"
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "web-belt-030",
+      "name": "黑色织带腰带",
+      "category": "配饰",
+      "subtitle": "黑色织带与扁平矩形扣",
+      "description": "黑编织带与扁平矩形扣在马甲下缘之间形成收束。 独立图为 AI 设计演绎。",
+      "color_name": "黑",
+      "color_hex": "#292a2c",
+      "design_material": "细纹黑色织带感，视觉设计描述",
+      "notes": [
+        "全带末端与扣件内部结构为 AI 设计补充。"
+      ],
+      "asset": {
+        "asset_id": "product-web-belt-030-r1",
+        "file": "assets/products/look-030/web-belt-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 134808,
+        "sha256": "9c9beb9e08c9d63f0de7b96dfe5e9491ad81e5e527a25366d1c8bfea2192a9e2",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 30,
+          "piece_index": 5,
+          "reference_asset_id": "look-030-female-01-v2-r2",
+          "shot_index": 5
+        }
+      ]
+    },
+    {
+      "product_id": "chunky-sneaker-030",
+      "name": "黑灰厚底运动鞋",
+      "category": "鞋履",
+      "subtitle": "黑灰拼片与多层鞋底",
+      "description": "低饱和黑灰拼片延续工装裤的深浅，厚底用多层边缘分梳视觉重心。 独立图为 AI 设计演绎。",
+      "color_name": "黑与冷灰",
+      "color_hex": "#464952",
+      "design_material": "哑光拼片与层叠鞋底质感，视觉设计描述",
+      "notes": [
+        "原写真支持鞋型、配色和拼片关系。精确接缝及质地为设计补充。"
+      ],
+      "asset": {
+        "asset_id": "product-chunky-sneaker-030-r1",
+        "file": "assets/products/look-030/chunky-sneaker-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 66998,
+        "sha256": "38d33bbf5703de9c6b3033e36d285464051e55138a49a4a844a905a187c49fa5",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 30,
+          "piece_index": 6,
+          "reference_asset_id": "look-030-female-01-v2-r2",
+          "shot_index": 2
+        }
+      ],
+      "gallery": [
+        {
+          "title": "灰黑拼片与鞋底侧边",
+          "caption": "AI 设计推演。关注外侧拼片与鞋底侧线的叠层，微观做法为设计补充。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-sneaker-panel-030-r1",
+            "file": "assets/products/look-030/sneaker-panel-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 255744,
+            "sha256": "39048157beae1ec6841a4188ceb48a31a64c65dfb657ca551e3414c9fc046f8b",
+            "visibility": "public"
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "oval-chain-030",
+      "name": "银色短链项链",
+      "category": "配饰",
+      "subtitle": "沿领口落下的椭圆短链",
+      "description": "均匀细椭圆环在黑色领口前形成一段短亮线，保留原穿搭的轻薄比例。 独立图为 AI 设计演绎。",
+      "color_name": "银",
+      "color_hex": "#b9bfc4",
+      "design_material": "柔亮银色金属感，视觉设计描述",
+      "notes": [
+        "写真无法核实闭合方式与真实尺寸。完整环形陈列属于 AI 设计推演。"
+      ],
+      "asset": {
+        "asset_id": "product-oval-chain-030-r1",
+        "file": "assets/products/look-030/oval-chain-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 29404,
+        "sha256": "8ad450e7a72bea1bce73febdfed1ec2703b0cd1e7255afb4aea1d5adb0f8d518",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 30,
+          "piece_index": 7,
+          "reference_asset_id": "look-030-female-01-v2-r2",
+          "shot_index": 6
+        }
+      ]
+    },
+    {
+      "product_id": "utility-bag-030",
+      "name": "黑色斜挎功能包",
+      "category": "包袋",
+      "subtitle": "带拉链前袋的紧凑斜挎包",
+      "description": "小型圆角包身、外部拉链前袋和可调黑织带保留紧凑的日常比例。 独立图为 AI 设计演绎。",
+      "color_name": "黑",
+      "color_hex": "#2d2e30",
+      "design_material": "哑光细纹机能布感，视觉设计描述",
+      "notes": [
+        "包盖边缘与前链纹理为设计补充。仅呈现外观。"
+      ],
+      "asset": {
+        "asset_id": "product-utility-bag-030-r1",
+        "file": "assets/products/look-030/utility-bag-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 111654,
+        "sha256": "abe3cbb013c81e3507a3876b71f1d051c799a9f92ac7f5f449aec1cdd674597d",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 30,
+          "piece_index": 8,
+          "reference_asset_id": "look-030-female-01-v2-r2",
+          "shot_index": 5
+        }
+      ]
+    },
+    {
+      "product_id": "ink-bamboo-long-coat-040",
+      "name": "墨绿竹影提花及膝长衫",
+      "category": "外套",
+      "subtitle": "墨绿长衫，竹影随光变化。",
+      "description": "衣身接近膝长，墨绿色同色竹纹顺着垂直轮廓展开，门襟保留低调暗色盘扣。",
+      "color_name": "墨绿色",
+      "color_hex": "#283a2e",
+      "design_material": "暗纹提花与垂感衣料质感",
+      "asset": {
+        "asset_id": "product-ink-bamboo-long-coat-040-r1",
+        "file": "assets/products/look-040/ink-bamboo-long-coat-r1.webp",
+        "mime": "image/webp",
+        "width": 1121,
+        "height": 1402,
+        "bytes": 88176,
+        "sha256": "5d176180aa56dc9681d13ae11bdee993af62f6aa4e10dd26e6cf73ef4e1cd149",
+        "visibility": "public"
+      },
+      "notes": [
+        "近膝长度与直身外形",
+        "低对比墨绿竹叶暗纹",
+        "门襟深色盘扣"
+      ],
+      "appearances": [
+        {
+          "look_id": 40,
+          "piece_index": 1,
+          "reference_asset_id": "look-040-female-01-v2-r2",
+          "shot_index": 5
+        }
+      ],
+      "gallery": [
+        {
+          "title": "竹叶暗纹与门襟",
+          "caption": "近看同色竹叶纹与门襟处的明暗交界。",
+          "role": "detail",
+          "design_study": false,
+          "asset": {
+            "asset_id": "product-ink-bamboo-long-coat-040-bamboo-r1",
+            "file": "assets/products/look-040/ink-bamboo-long-coat-bamboo-r1.webp",
+            "mime": "image/webp",
+            "width": 1121,
+            "height": 1402,
+            "bytes": 363896,
+            "sha256": "ec5fcb23b1b9bff8219b423c7fe440d7f763995993ecb14981c6216024198548",
+            "visibility": "public"
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "ivory-stand-collar-shirt-040",
+      "name": "米白立领棉绸衫",
+      "category": "上装",
+      "subtitle": "一线米白立领。",
+      "description": "米白立领顺着长衫门襟显露，前幅干净。长衫遮挡的袖口和下摆为设计推演。",
+      "color_name": "米白色",
+      "color_hex": "#e8deca",
+      "design_material": "平滑棉绸质感",
+      "asset": {
+        "asset_id": "product-ivory-stand-collar-shirt-040-r1",
+        "file": "assets/products/look-040/ivory-stand-collar-shirt-r1.webp",
+        "mime": "image/webp",
+        "width": 1121,
+        "height": 1402,
+        "bytes": 36180,
+        "sha256": "8cccaf67c96ccdc631b63eb2c9d2c75ed1e9d303c78958f6e3411ae43e340d8c",
+        "visibility": "public"
+      },
+      "notes": [
+        "米白立领与清晰前襟",
+        "面料呈柔和低反光",
+        "袖口和下摆为设计推演"
+      ],
+      "appearances": [
+        {
+          "look_id": 40,
+          "piece_index": 2,
+          "reference_asset_id": "look-040-female-01-v2-r2",
+          "shot_index": 4
+        }
+      ],
+      "gallery": [
+        {
+          "title": "立领与前襟",
+          "caption": "看立领高度和前襟由领口向下的衔接。",
+          "role": "detail",
+          "design_study": false,
+          "asset": {
+            "asset_id": "product-ivory-stand-collar-shirt-040-collar-r1",
+            "file": "assets/products/look-040/ivory-stand-collar-shirt-collar-r1.webp",
+            "mime": "image/webp",
+            "width": 1121,
+            "height": 1402,
+            "bytes": 73860,
+            "sha256": "f2fc60e5fcd7a5a37ae6bd40f0617616b28aa731fba05f86cf8295fac322fd11",
+            "visibility": "public"
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "sand-draped-wide-trousers-040",
+      "name": "浅沙垂褶阔腿裤",
+      "category": "下装",
+      "subtitle": "浅沙色的长线条。",
+      "description": "裤管留有纵向垂褶，在鞋面上方自然收拢。被衣层遮住的腰头属于设计推演。",
+      "color_name": "浅沙色",
+      "color_hex": "#bfb090",
+      "design_material": "轻柔垂感衣料质感",
+      "asset": {
+        "asset_id": "product-sand-draped-wide-trousers-040-r1",
+        "file": "assets/products/look-040/sand-draped-wide-trousers-r1.webp",
+        "mime": "image/webp",
+        "width": 1121,
+        "height": 1402,
+        "bytes": 62460,
+        "sha256": "b538a8da7306c91b983c3df20f9b0ce6e376a4acc4ac1accfd37ec62b7a4a12f",
+        "visibility": "public"
+      },
+      "notes": [
+        "裤管垂褶纵向清楚",
+        "浅沙色与长衫墨绿色形成明度差",
+        "被遮挡的腰头为设计推演"
+      ],
+      "appearances": [
+        {
+          "look_id": 40,
+          "piece_index": 3,
+          "reference_asset_id": "look-040-female-01-v2-r2",
+          "shot_index": 3
+        }
+      ],
+      "gallery": [
+        {
+          "title": "裤管垂褶",
+          "caption": "近看纵向褶线如何沿裤管向下落。",
+          "role": "detail",
+          "design_study": false,
+          "asset": {
+            "asset_id": "product-sand-draped-wide-trousers-040-drape-r1",
+            "file": "assets/products/look-040/sand-draped-wide-trousers-drape-r1.webp",
+            "mime": "image/webp",
+            "width": 1121,
+            "height": 1402,
+            "bytes": 157894,
+            "sha256": "ffa991c416de5f84d8ae408df7c748fa8005f0916bd9ea0e15550cb9605a038c",
+            "visibility": "public"
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "black-embroidered-square-loafers-040",
+      "name": "黑色方头绣边便鞋",
+      "category": "鞋履",
+      "subtitle": "方头便鞋的浅色细边。",
+      "description": "黑色方头便鞋以浅色绣边勾勒鞋口，鞋底贴近地面。低分辨率写真未显示每一针，图中具体纹样为设计推演。",
+      "color_name": "黑色",
+      "color_hex": "#282523",
+      "design_material": "哑光鞋面与细绣边质感",
+      "asset": {
+        "asset_id": "product-black-embroidered-square-loafers-040-r1",
+        "file": "assets/products/look-040/black-embroidered-square-loafers-r1.webp",
+        "mime": "image/webp",
+        "width": 1121,
+        "height": 1402,
+        "bytes": 69036,
+        "sha256": "2d6f37470e02cffd277407563e234fc4e4c114fb5d53f4ebb51a50b356311a4f",
+        "visibility": "public"
+      },
+      "notes": [
+        "低鞋底与柔和方头",
+        "黑色鞋面以暖浅色绣边勾勒前鞋口",
+        "具体纹样为设计推演"
+      ],
+      "appearances": [
+        {
+          "look_id": 40,
+          "piece_index": 4,
+          "reference_asset_id": "look-040-female-01-v2-r2",
+          "shot_index": 6
+        }
+      ],
+      "gallery": [
+        {
+          "title": "方头与绣边",
+          "caption": "看方头轮廓和绣边的配色。单针纹理超出写真参考，具体针路为设计推演。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-black-embroidered-square-loafers-040-embroidery-r1",
+            "file": "assets/products/look-040/black-embroidered-square-loafers-embroidery-r1.webp",
+            "mime": "image/webp",
+            "width": 1121,
+            "height": 1402,
+            "bytes": 95548,
+            "sha256": "5d23f9b896aecaa4e7a7e3b0f00cf4e04ae110ed7dd74126e82a3f8616becf3d",
+            "visibility": "public"
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "dark-brown-slim-belt-040",
+      "name": "深棕窄皮带",
+      "category": "配饰",
+      "subtitle": "细窄皮带。",
+      "description": "深棕色窄带从长衫门襟间露出，腰线保持轻巧。扣具与带尾细节为设计推演。",
+      "color_name": "深棕色",
+      "color_hex": "#503926",
+      "design_material": "深棕皮面质感",
+      "asset": {
+        "asset_id": "product-dark-brown-slim-belt-040-r1",
+        "file": "assets/products/look-040/dark-brown-slim-belt-r1.webp",
+        "mime": "image/webp",
+        "width": 1121,
+        "height": 1402,
+        "bytes": 103230,
+        "sha256": "8b8e8b7970362194aeee19ca91bd14a89e23efb91fe65e95130d21bcfc396c0e",
+        "visibility": "public"
+      },
+      "notes": [
+        "深棕细带勾勒腰线",
+        "小巧矩形环扣",
+        "带孔与带尾外形为设计推演"
+      ],
+      "appearances": [
+        {
+          "look_id": 40,
+          "piece_index": 5,
+          "reference_asset_id": "look-040-female-01-v2-r2",
+          "shot_index": 9
+        }
+      ]
+    },
+    {
+      "product_id": "small-jade-ring-drops-040",
+      "name": "小玉环耳坠",
+      "category": "饰品",
+      "subtitle": "耳边的小玉环。",
+      "description": "浅绿色的小环沿着耳垂下方垂落。图片表达玉色与通透感，连接结构属于设计推演。",
+      "color_name": "浅玉绿色",
+      "color_hex": "#9ea982",
+      "design_material": "淡青绿半透光泽",
+      "asset": {
+        "asset_id": "product-small-jade-ring-drops-040-r1",
+        "file": "assets/products/look-040/small-jade-ring-drops-r1.webp",
+        "mime": "image/webp",
+        "width": 1121,
+        "height": 1402,
+        "bytes": 73324,
+        "sha256": "015176a62b5bf8163ba21858b165d5bf82b667d412c778bd6bd265b18c4179e0",
+        "visibility": "public"
+      },
+      "notes": [
+        "淡玉绿色与半透光泽",
+        "细小环状垂坠",
+        "近看连接部位为设计推演"
+      ],
+      "appearances": [
+        {
+          "look_id": 40,
+          "piece_index": 6,
+          "reference_asset_id": "look-040-female-01-v2-r2",
+          "shot_index": 5
+        }
+      ]
+    },
+    {
+      "product_id": "smoke-brown-bamboo-handle-bag-040",
+      "name": "烟棕竹柄小方包",
+      "category": "包袋",
+      "subtitle": "烟棕方包，弧形竹柄。",
+      "description": "挺括的小方包配单个弧形竹柄，暖色提柄从深棕包身上显出。包内与背面信息省略。",
+      "color_name": "烟棕色",
+      "color_hex": "#604b38",
+      "design_material": "平滑深棕包身与干竹质感",
+      "asset": {
+        "asset_id": "product-smoke-brown-bamboo-handle-bag-040-r1",
+        "file": "assets/products/look-040/smoke-brown-bamboo-handle-bag-r1.webp",
+        "mime": "image/webp",
+        "width": 1121,
+        "height": 1402,
+        "bytes": 104896,
+        "sha256": "a9da29722b35a7bed22e1b427c5955c75d0cd0bb65e47282266df0c94d4189d0",
+        "visibility": "public"
+      },
+      "notes": [
+        "烟棕挺括方包",
+        "提手上可见弧形竹节",
+        "不披露包内结构"
+      ],
+      "appearances": [
+        {
+          "look_id": 40,
+          "piece_index": 7,
+          "reference_asset_id": "look-040-female-01-v2-r2",
+          "shot_index": 8
+        }
+      ],
+      "gallery": [
+        {
+          "title": "弧形竹柄",
+          "caption": "竹节沿提柄的弧面分布。连接包身处的近景为设计推演。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-smoke-brown-bamboo-handle-bag-040-bamboo-handle-r1",
+            "file": "assets/products/look-040/smoke-brown-bamboo-handle-bag-bamboo-handle-r1.webp",
+            "mime": "image/webp",
+            "width": 1121,
+            "height": 1402,
+            "bytes": 112806,
+            "sha256": "e5b3e61ef29047b2bec177f134ca5245cac4073297dab76078281cfdd198919c",
+            "visibility": "public"
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "apricot-cropped-cardigan-050",
+      "name": "杏色短针织开衫",
+      "category": "外套",
+      "subtitle": "杏色短开衫。",
+      "description": "短款针织的前襟用小粒浅色纽扣收边，搭配高腰的藕粉裙。",
+      "color_name": "杏色",
+      "color_hex": "#c89976",
+      "design_material": "细针织绞纹与轻柔罗纹感",
+      "asset": {
+        "asset_id": "product-apricot-cropped-cardigan-050-r1",
+        "file": "assets/products/look-050/apricot-cropped-cardigan-r1.webp",
+        "mime": "image/webp",
+        "width": 1121,
+        "height": 1402,
+        "bytes": 244564,
+        "sha256": "4dae997e7fe4ce7352541a6a4e19ca7136c8ba9c885785410e89807aade4e230",
+        "visibility": "public"
+      },
+      "notes": [
+        "杏色短身剪裁",
+        "浅色扣粒沿前襟排开",
+        "罗纹贴近衣摆与袖口"
+      ],
+      "appearances": [
+        {
+          "look_id": 50,
+          "piece_index": 1,
+          "reference_asset_id": "look-050-female-01-v2-r2",
+          "shot_index": 4
+        }
+      ]
+    },
+    {
+      "product_id": "ivory-opaque-lace-blouse-050",
+      "name": "米白不透蕾丝立领衫",
+      "category": "上装",
+      "subtitle": "柔和花纹沿立领展开。",
+      "description": "米白色花纹铺在不透的衬层上，立领高于开衫领口。开衫遮住的下摆与袖下段为设计推演。",
+      "color_name": "米白色",
+      "color_hex": "#e6dbcb",
+      "design_material": "花纹蕾丝叠不透衬层的视觉效果",
+      "asset": {
+        "asset_id": "product-ivory-opaque-lace-blouse-050-r1",
+        "file": "assets/products/look-050/ivory-opaque-lace-blouse-r1.webp",
+        "mime": "image/webp",
+        "width": 1121,
+        "height": 1402,
+        "bytes": 139736,
+        "sha256": "aaa2d2fc5394f46477588aa20bf3a7715e20cf1dc29cecf2dab9feba35d46ed2",
+        "visibility": "public"
+      },
+      "notes": [
+        "低立领带花纹上缘",
+        "花纹下保留同色不透衬层",
+        "袖口和下摆为设计推演"
+      ],
+      "appearances": [
+        {
+          "look_id": 50,
+          "piece_index": 2,
+          "reference_asset_id": "look-050-female-01-v2-r2",
+          "shot_index": 5
+        }
+      ],
+      "gallery": [
+        {
+          "title": "花纹与立领",
+          "caption": "近看花纹在不透衬层上的层次，观察立领上缘。",
+          "role": "detail",
+          "design_study": false,
+          "asset": {
+            "asset_id": "product-ivory-opaque-lace-blouse-050-lace-r1",
+            "file": "assets/products/look-050/ivory-opaque-lace-blouse-lace-r1.webp",
+            "mime": "image/webp",
+            "width": 1121,
+            "height": 1402,
+            "bytes": 231376,
+            "sha256": "d5d342b58856792c36a37c62ab67a3b935251990ab588f4f5bd851bb74c7a711",
+            "visibility": "public"
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "lotus-pink-tiered-pleated-skirt-050",
+      "name": "藕粉细褶三层中长裙",
+      "category": "下装",
+      "subtitle": "三层裙摆，细褶向下。",
+      "description": "藕粉色细褶构成三层清晰的裙身，长度落在小腿中段。被腰带挡住的裙腰细节为设计推演。",
+      "color_name": "藕粉色",
+      "color_hex": "#cba4a2",
+      "design_material": "柔软、有垂坠感的细褶衣料",
+      "asset": {
+        "asset_id": "product-lotus-pink-tiered-pleated-skirt-050-r1",
+        "file": "assets/products/look-050/lotus-pink-tiered-pleated-skirt-r1.webp",
+        "mime": "image/webp",
+        "width": 1121,
+        "height": 1402,
+        "bytes": 69162,
+        "sha256": "d2e9dc04e13d9462f00a61e02963f946a847a7b702a92834478ccd077a3ec500",
+        "visibility": "public"
+      },
+      "notes": [
+        "三层搭接与竖向细褶",
+        "藕粉层次与杏色针织有柔和色差",
+        "隐藏在腰带后的裙腰为设计推演"
+      ],
+      "appearances": [
+        {
+          "look_id": 50,
+          "piece_index": 3,
+          "reference_asset_id": "look-050-female-01-v2-r2",
+          "shot_index": 6
+        }
+      ],
+      "gallery": [
+        {
+          "title": "接缝下方的细褶",
+          "caption": "观察相邻两层的叠合，以及褶线从层边向下延伸。图中裙腰被穿着时的腰带遮挡，属设计推演。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-lotus-pink-tiered-pleated-skirt-050-tiers-r1",
+            "file": "assets/products/look-050/lotus-pink-tiered-pleated-skirt-tiers-r1.webp",
+            "mime": "image/webp",
+            "width": 1121,
+            "height": 1402,
+            "bytes": 138908,
+            "sha256": "282423bcb273ad10b6b5073300161fb1c54cdd66c6435183ca21c3f1bc34e772",
+            "visibility": "public"
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "caramel-suede-mary-janes-050",
+      "name": "焦糖绒面玛丽珍鞋",
+      "category": "鞋履",
+      "subtitle": "焦糖色与一道细搭带。",
+      "description": "包覆鞋头的圆口鞋配一条细搭带，低粗跟承接裙摆下方的轮廓。",
+      "color_name": "焦糖色",
+      "color_hex": "#a57950",
+      "design_material": "柔软的低反光绒面质感",
+      "asset": {
+        "asset_id": "product-caramel-suede-mary-janes-050-r1",
+        "file": "assets/products/look-050/caramel-suede-mary-janes-r1.webp",
+        "mime": "image/webp",
+        "width": 1121,
+        "height": 1402,
+        "bytes": 61966,
+        "sha256": "f92ecc7288028c7710ed56275ebb447b326c7e4019580fba541420860be7395f",
+        "visibility": "public"
+      },
+      "notes": [
+        "焦糖色圆鞋头和细搭带",
+        "低粗跟与暗色薄鞋底",
+        "鞋面保留绒面低反光效果"
+      ],
+      "appearances": [
+        {
+          "look_id": 50,
+          "piece_index": 4,
+          "reference_asset_id": "look-050-female-01-v2-r2",
+          "shot_index": 3
+        }
+      ],
+      "gallery": [
+        {
+          "title": "低跟与搭带侧面",
+          "caption": "从侧前方看搭带的高度、圆头和低跟比例。",
+          "role": "view",
+          "design_study": false,
+          "asset": {
+            "asset_id": "product-caramel-suede-mary-janes-050-profile-r1",
+            "file": "assets/products/look-050/caramel-suede-mary-janes-profile-r1.webp",
+            "mime": "image/webp",
+            "width": 1121,
+            "height": 1402,
+            "bytes": 67434,
+            "sha256": "9dfd97d068ff3c87c1d1d5fb4423e4006a2ecaaefef980a1f8eade4312ace0a9",
+            "visibility": "public"
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "light-brown-braided-belt-050",
+      "name": "浅棕细编织腰带",
+      "category": "配饰",
+      "subtitle": "浅棕细编带。",
+      "description": "细窄的浅棕色带面以编织呈现，用小巧矩形环扣收束。写真遮住的带尾为设计推演。",
+      "color_name": "浅棕色",
+      "color_hex": "#ac815f",
+      "design_material": "细编织皮带质感",
+      "asset": {
+        "asset_id": "product-light-brown-braided-belt-050-r1",
+        "file": "assets/products/look-050/light-brown-braided-belt-r1.webp",
+        "mime": "image/webp",
+        "width": 1121,
+        "height": 1402,
+        "bytes": 55226,
+        "sha256": "20b70fd877a107f22392658e141a14a9a966e76ee26dbf3c4d4d598dc97d5340",
+        "visibility": "public"
+      },
+      "notes": [
+        "浅棕交错细带",
+        "暖金色矩形环扣",
+        "写真遮挡的带尾处理为设计推演"
+      ],
+      "appearances": [
+        {
+          "look_id": 50,
+          "piece_index": 5,
+          "reference_asset_id": "look-050-female-01-v2-r2",
+          "shot_index": 8
+        }
+      ]
+    },
+    {
+      "product_id": "small-pearl-studs-050",
+      "name": "小珍珠耳钉",
+      "category": "饰品",
+      "subtitle": "一对小圆珍珠耳钉。",
+      "description": "浅色小圆面在耳边提亮。写真仅能确认正面轮廓和色调，图片中的珠面光泽为设计推演。",
+      "color_name": "暖白色",
+      "color_hex": "#e8decd",
+      "design_material": "暖白珠面柔光",
+      "asset": {
+        "asset_id": "product-small-pearl-studs-050-r1",
+        "file": "assets/products/look-050/small-pearl-studs-r1.webp",
+        "mime": "image/webp",
+        "width": 1121,
+        "height": 1402,
+        "bytes": 31036,
+        "sha256": "926701b133cbb53f0f82d281827d2f572e1d915e0163b7753aaac15e7750e1b9",
+        "visibility": "public"
+      },
+      "notes": [
+        "成对的小圆耳钉",
+        "暖白珠面",
+        "珠面的近距离柔光属于设计推演"
+      ],
+      "appearances": [
+        {
+          "look_id": 50,
+          "piece_index": 6,
+          "reference_asset_id": "look-050-female-01-v2-r2",
+          "shot_index": 5
+        }
+      ]
+    },
+    {
+      "product_id": "caramel-soft-square-bag-050",
+      "name": "焦糖软方包",
+      "category": "包袋",
+      "subtitle": "焦糖色小方包。",
+      "description": "单个短手提柄与柔和方形轮廓相接，正面保留低调翻盖。包内结构与遮挡部位省略。",
+      "color_name": "焦糖色",
+      "color_hex": "#a57652",
+      "design_material": "低反光皮面与柔和包身质感",
+      "asset": {
+        "asset_id": "product-caramel-soft-square-bag-050-r1",
+        "file": "assets/products/look-050/caramel-soft-square-bag-r1.webp",
+        "mime": "image/webp",
+        "width": 1121,
+        "height": 1402,
+        "bytes": 57594,
+        "sha256": "472f2cc9df13b4d05026a0aee6373c29fa0c6cd62336a6f1134addb3b701dffd",
+        "visibility": "public"
+      },
+      "notes": [
+        "焦糖色软方形包身",
+        "单条短提柄",
+        "沿原照片的翻盖轮廓，连接和扣具近景为设计推演"
+      ],
+      "appearances": [
+        {
+          "look_id": 50,
+          "piece_index": 7,
+          "reference_asset_id": "look-050-female-01-v2-r2",
+          "shot_index": 1
+        }
+      ],
+      "gallery": [
+        {
+          "title": "翻盖边缘与提柄",
+          "caption": "近看翻盖收边和提柄连接处。连接细节为设计推演。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-caramel-soft-square-bag-050-flap-r1",
+            "file": "assets/products/look-050/caramel-soft-square-bag-flap-r1.webp",
+            "mime": "image/webp",
+            "width": 1121,
+            "height": 1402,
+            "bytes": 118776,
+            "sha256": "aadf1411e13118932425a18761ee218a8b364c2885358012f9f765176d777dae",
+            "visibility": "public"
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "oat-long-vest-080",
+      "name": "燕麦亚麻长马甲",
+      "category": "外套",
+      "subtitle": "浅色长线条，衔接条纹与宽腿裤。",
+      "description": "燕麦色无袖马甲以窄驳领和低位口袋拉长轮廓。原写真以敞穿为主，完整内侧及扣合位置为设计推演。",
+      "color_name": "燕麦色",
+      "color_hex": "#cbb99b",
+      "design_material": "细亚麻质感，视觉设计描述",
+      "notes": [
+        "窄驳领与无袖开口露出蓝白条纹",
+        "低位外袋保持长马甲的纵向比例",
+        "内侧与扣合仅作设计推演"
+      ],
+      "asset": {
+        "asset_id": "product-oat-long-vest-080-r1",
+        "file": "assets/products/look-080/oat-long-vest-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 103698,
+        "sha256": "422180f4478c7a0bc30cfbd5527a2834b194bb095211a8a01ef29aad6b97b227",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 80,
+          "piece_index": 1,
+          "reference_asset_id": "look-080-female-01-v2-r2",
+          "shot_index": 8
+        }
+      ],
+      "gallery": [
+        {
+          "title": "窄驳领与领口",
+          "caption": "近景展示燕麦色马甲的窄驳领、V 形开口和无袖肩线。精细纱线为设计推演。",
+          "asset": {
+            "asset_id": "product-oat-long-vest-080-lapel-r1",
+            "file": "assets/products/look-080/oat-long-vest-lapel-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 256250,
+            "sha256": "08a574e26c4d2d7d6439742d5ca93bbf0bc1be7f82c076fa7eaa1bd8927b6c75",
+            "visibility": "public"
+          },
+          "role": "detail",
+          "design_study": true
+        }
+      ]
+    },
+    {
+      "product_id": "blue-pinstripe-shirt-080",
+      "name": "蓝白细条纹短袖衬衫",
+      "category": "上装",
+      "subtitle": "细蓝白条纹，为浅色叠穿添一点清凉。",
+      "description": "浅蓝细纵条纹、尖领与短袖来自写真中可见的部分。衣摆在写真中收入裤腰，展开形态为设计推演。",
+      "color_name": "粉蓝与白",
+      "color_hex": "#8297bd",
+      "design_material": "轻薄棉布感细条纹，视觉设计描述",
+      "notes": [
+        "短袖保持简洁直口",
+        "近看细纵条纹与浅色纽扣",
+        "自由垂下的衣摆为设计推演"
+      ],
+      "asset": {
+        "asset_id": "product-blue-pinstripe-shirt-080-r1",
+        "file": "assets/products/look-080/blue-pinstripe-shirt-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 152698,
+        "sha256": "ff3451c5e66ad66b16fd583fdf8439034f2b23dedf053827ed2e496af55a0121",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 80,
+          "piece_index": 2,
+          "reference_asset_id": "look-080-female-01-v2-r2",
+          "shot_index": 8
+        }
+      ]
+    },
+    {
+      "product_id": "ivory-wide-trousers-080",
+      "name": "米白亚麻宽腿裤",
+      "category": "下装",
+      "subtitle": "宽直裤腿把浅色一路延伸到鞋面。",
+      "description": "米白宽腿裤保留垂坠的裤线和细纹理。原写真腰头搭配腰带，独立陈列中的腰头细部为设计推演。",
+      "color_name": "米白",
+      "color_hex": "#e6dcc8",
+      "design_material": "干爽亚麻感，视觉设计描述",
+      "notes": [
+        "宽直裤腿保留面料起伏",
+        "米白与燕麦色有细微层次",
+        "腰头局部为设计推演"
+      ],
+      "asset": {
+        "asset_id": "product-ivory-wide-trousers-080-r1",
+        "file": "assets/products/look-080/ivory-wide-trousers-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 46278,
+        "sha256": "3edf72544bdb51c631defc4efdd51cc96e0ef2e70e51123de409882d24edddc5",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 80,
+          "piece_index": 3,
+          "reference_asset_id": "look-080-female-01-v2-r2",
+          "shot_index": 1
+        }
+      ],
+      "gallery": [
+        {
+          "title": "裤脚的垂褶",
+          "caption": "低角度呈现宽裤脚与几道自然垂褶。纤维起伏和细缝为设计推演。",
+          "asset": {
+            "asset_id": "product-ivory-wide-trousers-080-hem-r1",
+            "file": "assets/products/look-080/ivory-wide-trousers-hem-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 103838,
+            "sha256": "842faceb22912d1ac0fd3e38d2ba9a828174094c834ed351ec979495ecf35eb7",
+            "visibility": "public"
+          },
+          "role": "detail",
+          "design_study": true
+        }
+      ]
+    },
+    {
+      "product_id": "brown-braided-belt-080",
+      "name": "棕色编织腰带",
+      "category": "配饰",
+      "subtitle": "在浅色腰线上留一小段焦糖棕。",
+      "description": "窄腰带沿用写真中的棕色和轻巧针扣。编织纹路、整条配件及扣件细部为设计推演。",
+      "color_name": "焦糖棕",
+      "color_hex": "#805138",
+      "design_material": "编织皮质感，视觉设计描述",
+      "notes": [
+        "窄腰带保持穿着参考中的比例",
+        "小扣点出棕色腰线",
+        "带尾和扣件细部为设计推演"
+      ],
+      "asset": {
+        "asset_id": "product-brown-braided-belt-080-r1",
+        "file": "assets/products/look-080/brown-braided-belt-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 73496,
+        "sha256": "8ca44ad7e585aef0f3f1e3fa23038a0a0c5933736a81a2d146b30628bbbfe6a0",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 80,
+          "piece_index": 4,
+          "reference_asset_id": "look-080-female-01-v2-r2",
+          "shot_index": 8
+        }
+      ]
+    },
+    {
+      "product_id": "brown-flat-slide-sandals-080",
+      "name": "棕色平底皮凉鞋",
+      "category": "鞋履",
+      "subtitle": "棕色宽带和薄底，跟随长裤下摆移动。",
+      "description": "本次修订把旧写真中的多根窄带演绎为一条较宽的鞋面带，保留棕色、露趾和平底。独立主图对遮挡处的边缘和鞋垫作设计推演。",
+      "color_name": "棕色",
+      "color_hex": "#825638",
+      "design_material": "柔光皮质感，视觉设计描述",
+      "notes": [
+        "每只鞋保留一字宽前带",
+        "开放后跟与纤薄深棕底",
+        "鞋垫及边缘细节为设计推演"
+      ],
+      "asset": {
+        "asset_id": "product-brown-flat-slide-sandals-080-r1",
+        "file": "assets/products/look-080/brown-flat-slide-sandals-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 75424,
+        "sha256": "eb2bc5a1b3d2a3e044e52a55606eca5626ad80c3b6370807a4be09c0b1b578bc",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 80,
+          "piece_index": 5,
+          "reference_asset_id": "look-080-female-01-v2-r2",
+          "shot_index": 9
+        }
+      ]
+    },
+    {
+      "product_id": "straw-crescent-bag-080",
+      "name": "天然草编半月包",
+      "category": "包袋",
+      "subtitle": "浅金草编绕出圆提把和半月轮廓。",
+      "description": "半月包延续原设计的草编轮廓。本次修订改用编织圆环提把，主图独立展示未系巾的包，柄部被遮挡处的收口为设计推演。",
+      "color_name": "浅草金",
+      "color_hex": "#bf9d65",
+      "design_material": "草编肌理，视觉设计描述",
+      "notes": [
+        "半月弧线与短圆环提把",
+        "编织表面让浅金色自然过渡",
+        "被丝巾遮挡的接合部为设计推演"
+      ],
+      "asset": {
+        "asset_id": "product-straw-crescent-bag-080-r1",
+        "file": "assets/products/look-080/straw-crescent-bag-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 134652,
+        "sha256": "b71a45bc6acb0e1ba7f3415a58ef1d6f0b457a5c9c9a705bc10d348a76f9bae3",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 80,
+          "piece_index": 6,
+          "reference_asset_id": "look-080-female-01-v2-r2",
+          "shot_index": 2
+        }
+      ],
+      "gallery": [
+        {
+          "title": "圆环提把与草编纹路",
+          "caption": "独立近景区分缠绕提把与半月包身的编织方向。柄部遮挡区域的接合为设计推演。",
+          "asset": {
+            "asset_id": "product-straw-crescent-bag-080-handle-r1",
+            "file": "assets/products/look-080/straw-crescent-bag-handle-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 225484,
+            "sha256": "461eab46880caec0b78aca0af1e9d5cb1d79090fc5c1cf6f6c13e62c880da27c",
+            "visibility": "public"
+          },
+          "role": "detail",
+          "design_study": true
+        }
+      ]
+    },
+    {
+      "product_id": "pearl-studs-080",
+      "name": "珍珠小耳钉",
+      "category": "配饰",
+      "subtitle": "耳侧一点轻柔的珍珠白光泽。",
+      "description": "原写真仅能判断耳侧低调的浅色圆点。正面形状和错落反光为设计推演。",
+      "color_name": "珍珠白",
+      "color_hex": "#efe6d5",
+      "design_material": "珍珠光泽感，视觉设计描述",
+      "notes": [
+        "成对呈现小巧圆面",
+        "近景表现柔光，延续穿着参考中的低调比例",
+        "珍珠表面纹理为设计推演"
+      ],
+      "asset": {
+        "asset_id": "product-pearl-studs-080-r1",
+        "file": "assets/products/look-080/pearl-studs-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 16502,
+        "sha256": "e00adf715537f09837e9fcc7d69afada15497a113374178096556085a353d5a7",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 80,
+          "piece_index": 7,
+          "reference_asset_id": "look-080-female-01-v2-r2",
+          "shot_index": 4
+        }
+      ]
+    },
+    {
+      "product_id": "blue-bag-scarf-080",
+      "name": "蓝色窄丝巾",
+      "category": "配饰",
+      "subtitle": "包柄边的一笔海蓝，呼应衬衫条纹。",
+      "description": "海蓝窄巾以两道浅细线勾边。参考图中的丝巾系在包柄，展开长度、端部与内折纹理为设计推演。",
+      "color_name": "海蓝",
+      "color_hex": "#455e83",
+      "design_material": "缎面柔光感，视觉设计描述",
+      "notes": [
+        "蓝色主体与浅色细边",
+        "窄巾独立陈列可看清两端",
+        "完整端部和折痕为设计推演"
+      ],
+      "asset": {
+        "asset_id": "product-blue-bag-scarf-080-r1",
+        "file": "assets/products/look-080/blue-bag-scarf-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 97224,
+        "sha256": "ba8c53dd7884439f0f3acabb1eea90c70973fa81f0bb740aefe9214df25c3674",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 80,
+          "piece_index": 8,
+          "reference_asset_id": "look-080-female-01-v2-r2",
+          "shot_index": 2
+        }
+      ]
     }
   ]
 }
