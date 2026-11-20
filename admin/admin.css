@@ -120,6 +120,8 @@ main { max-width: 1248px; margin: 0 auto; padding: 48px 24px 40px; }
 .check-label { display: flex; gap: 12px; align-items: center; min-height: 46px; font-weight: 400; }
 .field-hint { font-size: 12px; margin: 8px 0 12px; }
 .account-panel form { max-width: 540px; }
+#site-theme-form { max-width: 540px; }
+#site-theme-save { margin-top: 16px; }
 .privacy-note { color: var(--muted); border-left: 2px solid #9ba78a; padding-left: 18px; font-size: 12px; margin: 34px 0; }
 footer { border-top: 1px solid var(--line); padding: 26px max(24px, calc((100% - 1200px) / 2)); display: flex; align-items: center; gap: 28px; color: var(--muted); font-size: 12px; flex-wrap: wrap; }
 footer .brand-name { font-size: 24px; }
@@ -155,7 +157,7 @@ footer > :last-child { margin-left: auto; }
   .session-bar > button { flex-shrink: 0; }
   .connection-bar { align-items: flex-start; }
   .connection-bar > button { flex-shrink: 0; padding: 8px; font-size: 12px; }
-  #settings-fields > button, #password-form > button { width: 100%; }
+  #site-theme-save, #settings-fields > button, #password-form > button { width: 100%; }
   footer { padding: 24px 20px; gap: 12px 20px; }
   footer > :last-child { flex-basis: 100%; margin-left: 0; }
 }

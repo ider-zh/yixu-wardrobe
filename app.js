@@ -3,7 +3,6 @@
 let data = {}, looks = [], categories = [], models = [];
 const byId = new Map();
 const $ = id => document.getElementById(id);
-window.YixuSiteTheme?.mount(document.querySelector('[data-site-theme-control]'));
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const number = id => String(id).padStart(3,'0');
 const storageKey = 'wardrobe99:favorites:v1';
@@ -433,7 +432,7 @@ function renderProduct(id){
  const product=(data.products||[]).find(p=>p.product_id===id);
  const appearances=(product?.appearances||[]).filter(a=>byId.has(a.look_id));
  const related=[...new Map(appearances.flatMap(a=>productsForLook(a.look_id)).filter(p=>p.product_id!==id).map(p=>[p.product_id,p])).values()];
- productPage.render({product,number:String((data.products||[]).indexOf(product)+1).padStart(3,'0'),liked:productFavorites.has(id),appearances,related,themeOverride:new URLSearchParams(location.hash.split('?')[1]).get('theme')});
+ productPage.render({product,number:String((data.products||[]).indexOf(product)+1).padStart(3,'0'),liked:productFavorites.has(id),appearances,related});
 }
 document.addEventListener('click',event=>{
  const worn=event.target.closest('[data-product-look]');

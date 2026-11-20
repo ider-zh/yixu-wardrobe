@@ -18,10 +18,10 @@ function productImageButton(product,image,index,className){
 }
 function render(view){
  current={...view,liked:view.product&&isLiked?isLiked(view.product.product_id):view.liked};
- const {product,number,liked,appearances,related,themeOverride}=current;
+ const {product,number,liked,appearances,related}=current;
  const id=product?.product_id;
  if(!product){selectedProduct=null;selectedAsset=null;delete root.dataset.productTheme;delete root.dataset.productPreset;root.innerHTML='<p class="eyebrow">THE OBJECT EDIT</p><h1>这件单品暂未发布。</h1><a class="outline-button" href="#/products">浏览全部单品 ↗</a>';return;}
- const theme=window.YixuProductThemes.resolve(product.presentation,themeOverride);
+ const theme=window.YixuProductThemes.resolve();
  root.dataset.productTheme=theme.name;root.dataset.productPreset=theme.preset;
  const images=productImages(product),views=images.filter(image=>image.role==='view'),details=images.filter(image=>image.role==='detail');
  const worn=appearances.map(renderWorn).join('');

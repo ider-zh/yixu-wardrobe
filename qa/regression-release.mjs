@@ -162,6 +162,7 @@ test('admin separates imported content, publication proof and CDN availability',
       '/api/admin/overview': {popular_looks: [], recent_jobs: []},
       '/api/admin/results?offset=0&limit=24': {items: [], has_more: false},
       '/api/admin/settings': {},
+      '/api/admin/site-theme': {theme: 'editorial'},
       '/api/admin/content/overview': content,
       '/api/admin/content/models': {models: []},
     };

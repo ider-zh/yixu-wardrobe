@@ -12,7 +12,7 @@
 </head>
 <body>
   <a class="skip-link" href="#main">跳到主要内容</a>
-  <header class="site-header"><a class="brand" href="./" aria-label="衣序管理首页"><span>衣序</span><small>THE WARDROBE / ADMIN</small></a><div data-site-theme-control></div></header>
+  <header class="site-header"><a class="brand" href="./" aria-label="衣序管理首页"><span>衣序</span><small>THE WARDROBE / ADMIN</small></a></header>
   <main id="main">
     <div class="page-heading"><p class="eyebrow">BEHIND THE WARDROBE</p><h1>管理工作台<span>.</span></h1><p class="muted">记录真实使用，照看每一次生成。</p></div>
     <div class="connection-bar"><p id="notice" role="status" aria-live="polite">正在连接管理服务…</p><button id="reconnect" class="text-button" type="button">重新连接</button></div>
@@ -28,7 +28,7 @@
     </section>
     <div id="workspace" hidden>
       <div class="session-bar"><span id="provider-summary">尚未读取配置，不能确认生成可用。</span><button id="logout" class="outline" type="button">退出登录</button></div>
-      <nav class="section-nav" aria-label="管理导航"><a href="#overview">使用概览</a><a href="#results">生成结果</a><a href="#content">资源与 CDN</a><a href="#models">系统模特</a><a href="#settings">服务设置</a><a href="#account">账户安全</a></nav>
+      <nav class="section-nav" aria-label="管理导航"><a href="#overview">使用概览</a><a href="#results">生成结果</a><a href="#content">资源与 CDN</a><a href="#models">系统模特</a><a href="#site-theme">网站主题</a><a href="#settings">服务设置</a><a href="#account">账户安全</a></nav>
       <section id="overview" class="panel" aria-labelledby="overview-title">
         <div class="section-heading"><div><p class="eyebrow">THE REAL PICTURE</p><h2 id="overview-title">使用概览</h2></div><button id="refresh-overview" class="outline" type="button">刷新概览 ↻</button></div>
         <p class="muted">来自服务端事件记录。任务状态与存储数量分别统计；无记录时显示 0。</p>
@@ -80,6 +80,22 @@
       <section id="models" class="panel" aria-labelledby="models-title">
         <div class="section-heading"><div><p class="eyebrow">SYSTEM MODELS</p><h2 id="models-title">系统模特预览</h2></div><button id="refresh-models" class="outline" type="button">刷新模特 ↻</button></div>
         <p id="models-status" class="muted">尚未读取模特。基础体和视角来自项目登记资料，历史穿搭不会自动归属新模特。</p><div id="models-grid" class="models-grid"></div>
+      </section>
+      <section id="site-theme" class="panel" aria-labelledby="site-theme-title">
+        <div class="section-heading"><h2 id="site-theme-title">网站主题</h2><button id="refresh-site-theme" class="outline" type="button">重新读取 ↻</button></div>
+        <p id="site-theme-help" class="muted">保存后，所有访客都使用这个布局。已打开的页面在刷新或回到前台时读取设置。</p>
+        <p id="site-theme-status" class="provider-status" role="status">尚未读取网站主题。</p>
+        <form id="site-theme-form">
+          <fieldset id="site-theme-fields" disabled>
+            <label for="site-theme-select">选择网站主题</label>
+            <select id="site-theme-select" name="theme" required aria-describedby="site-theme-help site-theme-status">
+              <option value="" disabled selected>等待读取主题</option>
+              <option value="editorial">Editorial · 留白叙事</option>
+              <option value="studio">Studio · 大图图库</option>
+            </select>
+            <button id="site-theme-save" type="submit" disabled>保存网站主题 ↗</button>
+          </fieldset>
+        </form>
       </section>
       <section id="settings" class="panel" aria-labelledby="settings-title">
         <div class="section-heading"><div><p class="eyebrow">PROVIDER RUNTIME</p><h2 id="settings-title">生成服务设置</h2></div><button id="refresh-settings" class="outline" type="button">重新读取设置 ↻</button></div>

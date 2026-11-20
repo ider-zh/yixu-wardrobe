@@ -20,9 +20,11 @@ const catalog=loadContent(root).catalog;
 const featured=catalog.looks.find(look=>look.id===catalog.home.featured_look_id);
 assert.ok(featured,'Publication projection supplies a real hero');
 let apiCatalog=structuredClone(catalog);
+let siteTheme='editorial';
 const requested=[];
 const server=http.createServer((req,res)=>{
  requested.push(req.url);
+ if(req.url==='/api/site-theme'){res.setHeader('Content-Type','application/json');res.setHeader('Cache-Control','no-store');res.end(JSON.stringify({theme:siteTheme}));return;}
  if(req.url==='/api/content/catalog'){res.setHeader('Content-Type','application/json');res.setHeader('Cache-Control','no-store');res.end(JSON.stringify(apiCatalog));return;}
  if(req.url==='/api/bootstrap'){
   res.setHeader('Content-Type','application/json');res.end(JSON.stringify({csrf_token:'fixture-csrf',visitor:{id:'fixture'},generation_available:false,disclosure:{accepted:false,version:'fixture-v1',title:'照片用途',items:['照片交由第三方 AI 生成试穿图，结果可供后台评估。']}}));return;
@@ -56,6 +58,11 @@ try{
  const wait=async expression=>{for(let n=0;n<150;n++){if(await evaluate(expression))return;await new Promise(resolve=>setTimeout(resolve,25));}throw Error('DOM condition timed out: '+expression);};
  const navigate=async(url=origin)=>{await client('Page.navigate',{url});await wait('document.readyState==="complete" && !!document.querySelector("#hero-detail")?.dataset.open');};
  const route=async hash=>{await evaluate(`location.hash=${JSON.stringify(hash)}`);await wait(`location.hash===${JSON.stringify(hash)}`);await evaluate('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');};
+ const selectServerTheme=async theme=>{
+  siteTheme=theme;
+  await evaluate("window.dispatchEvent(new PageTransitionEvent('pageshow',{persisted:true}))");
+  await wait(`document.documentElement.dataset.siteTheme===${JSON.stringify(theme)}`);
+ };
  const noOverflow=async label=>assert.ok(await evaluate('document.documentElement.scrollWidth<=innerWidth+1'),label+' has no horizontal overflow');
  const activate=async(selector,touch=false)=>{
   const point=await evaluate(`(()=>{const e=document.querySelector(${JSON.stringify(selector)});const r=e.getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2};})()`);
@@ -367,9 +374,11 @@ try{
  console.log('PASS all published products: 390/1440px routes, every image selection/zoom, portrait source fallback, design disclosures, exact outfit photo/shot/piece associations and unchanged collections');
  const boots=sampleProducts.find(p=>p.product_id==='brown-boots-102');
  assert.ok(boots,'A multi-view product is available');
+ const bootsHash='#/product/'+boots.product_id;
+ await navigate(origin+'/'+bootsHash);
  for(const theme of ['editorial','studio']) for(const viewport of [{width:320,height:844},{width:390,height:844},{width:800,height:1000},{width:1440,height:1000}]){
   await client('Emulation.setDeviceMetricsOverride',{...viewport,deviceScaleFactor:1,mobile:viewport.width<600});
-  await route('#/product/'+boots.product_id+'?theme='+theme);
+  await selectServerTheme(theme);
   assert.equal(await evaluate('document.getElementById("product-page").dataset.productTheme'),theme);
   assert.equal(await evaluate('!!document.querySelector(".product-studio-layout")'),theme==='studio','Themes render distinct page structures');
   await wait('document.querySelector(".product-main-image img").naturalWidth>0');
@@ -421,33 +430,32 @@ try{
  }
  console.log('PASS boots: both themes, eight images, view/detail roles, visible design-study labels in cards/hero/zoom, original wearing reference, responsive thumbnails and mobile angle scrolling at 320/390/800/1440px');
  // A theme changes presentation while image identity, collection, and disclosures survive.
- const bootsHash='#/product/'+boots.product_id;
- await route(bootsHash+'?theme=editorial');
+ await selectServerTheme('editorial');
  const favoriteBefore=await evaluate('localStorage.getItem("yixu:product-favorites:v1")');
  await evaluate('document.querySelector("[data-product-index=\\"3\\"]").click()');
  const selectedSource=boots.gallery[2].asset.source_url;
- await route(bootsHash+'?theme=studio');
+ await selectServerTheme('studio');
  assert.equal(await evaluate('document.querySelector(".product-main-image img").getAttribute("src")'),selectedSource,'Theme switch preserves selected asset');
  assert.equal(await evaluate('document.querySelector(".product-main-image .product-design-badge").hidden'),false);
  assert.equal(await evaluate('localStorage.getItem("yixu:product-favorites:v1")'),favoriteBefore);
- await evaluate('history.back()');await wait('location.hash.endsWith("?theme=editorial")');
- await wait('document.getElementById("product-page").dataset.productTheme==="editorial"');
+ assert.equal(await evaluate('location.hash'),bootsHash);
+ await selectServerTheme('editorial');
  assert.equal(await evaluate('document.querySelector(".product-main-image img").getAttribute("src")'),selectedSource);
- await route(bootsHash+'?theme=future-theme');
- assert.equal(await evaluate('document.getElementById("product-page").dataset.productTheme'),boots.presentation?.theme==='studio'?'studio':'editorial','Invalid URL theme preserves the valid content recommendation');
+ await route(bootsHash+'?theme=studio');
+ assert.equal(await evaluate('document.getElementById("product-page").dataset.productTheme'),'editorial','A legacy query cannot override the server theme');
  await navigate(pathToFileURL(path.join(output,'index.html')).href+bootsHash+'?theme=studio');
- assert.equal(await evaluate('document.getElementById("product-page").dataset.productTheme'),'studio','Theme review route reloads offline');
+ assert.equal(await evaluate('document.getElementById("product-page").dataset.productTheme'),'editorial','Offline pages use the built-in default');
  await evaluate('document.querySelector("[data-product-index=\\"0\\"]").click();document.querySelector(".product-main-image").click();document.getElementById("product-image-dialog").close();document.querySelector(".product-main-image").click()');
  await wait('document.getElementById("product-image-dialog").open');
  await client('Input.dispatchKeyEvent',{type:'keyDown',key:'ArrowRight',code:'ArrowRight',windowsVirtualKeyCode:39});
  assert.equal(await evaluate('document.getElementById("product-image-position").textContent'),'2 / 8','A queued close cannot disable keyboard navigation in a reopened gallery');
  await evaluate('document.getElementById("close-product-image").click()');
  await wait('!document.getElementById("product-image-dialog").open');
- await route('#/product/'+sampleProducts.find(product=>!product.gallery?.length).product_id+'?theme=studio');
+ await route('#/product/'+sampleProducts.find(product=>!product.gallery?.length).product_id);
  assert.equal(await evaluate('document.querySelectorAll("[data-product-select]").length'),0,'One-image legacy product does not invent gallery photos');
  assert.equal(await evaluate('document.querySelectorAll(".product-detail-story,.product-view-card").length'),0);
- await noOverflow('Legacy product in Studio');
- console.log('PASS product themes: structure, offline direct reload, asset selection and browser Back, unchanged collections, unknown theme fallback, legacy single-image content');
+ await noOverflow('Legacy product offline');
+ console.log('PASS product themes: both structures, offline default, unchanged collections and selected assets, legacy single-image content');
  const savedProduct=sampleProducts[0];
  await evaluate('localStorage.setItem("yixu:product-favorites:v1",JSON.stringify(["future-product"]))');
  await client('Page.navigate',{url:'about:blank'});await wait('location.href==="about:blank"');
@@ -466,14 +474,15 @@ try{
  assert.equal(await evaluate('document.querySelector("#product-page h1").textContent'),savedProduct.name,'Reloadable online product route');
  const plainHeading='<img src=x onerror="window.productCopyExecuted=true"> & "Editorial"';
  for(const theme of ['editorial','studio']){
+  siteTheme=theme;
   apiCatalog=structuredClone(catalog);
   const product=apiCatalog.products.find(product=>product.product_id===boots.product_id);
-  product.presentation={theme,preset:'future-paper'};
+  product.presentation={theme:theme==='editorial'?'studio':'editorial',preset:'future-paper'};
   product.copy={hero_title:plainHeading,views_title:plainHeading,details_title:plainHeading,worn_title:plainHeading,related_title:plainHeading};
   await navigate(origin+'/?theme-review='+theme+bootsHash);
   await wait(`document.querySelector('#product-page h1')?.textContent===${JSON.stringify(plainHeading)}`);
-  assert.equal(await evaluate('document.getElementById("product-page").dataset.productTheme'),theme,'API selects the same built-in themes as the offline snapshot');
-  assert.equal(await evaluate('document.getElementById("product-page").dataset.productPreset'),theme==='studio'?'neutral-white':'warm-paper','Unknown safe preset uses the theme default');
+  await wait(`document.getElementById("product-page").dataset.productTheme===${JSON.stringify(theme)}`);
+  assert.equal(await evaluate('document.getElementById("product-page").dataset.productPreset'),theme==='studio'?'neutral-white':'warm-paper','The site theme supplies the product preset');
   assert.equal(await evaluate('!!window.productCopyExecuted'),false);
   assert.equal(await evaluate('!!document.querySelector("#product-page img[src=x]")'),false,'Editorial copy remains text');
   await noOverflow('API copy in '+theme);
@@ -484,7 +493,7 @@ try{
  await wait('document.getElementById("catalog-status").textContent.includes("本地内容快照")');
  assert.equal(await evaluate('document.querySelector("#product-page h1").textContent'),boots.copy?.hero_title||boots.name,'Malformed API theme retains usable built snapshot');
  apiCatalog=structuredClone(catalog);
- console.log('PASS product content boundary: API/offline themes, unknown presets, escaped copy, malformed configuration fallback');
+ console.log('PASS product content boundary: server theme takes priority, escaped copy and malformed configuration fallback');
  console.log('PASS products: offline/online routes, original outfit associations, portrait images, keyboard zoom, source return, category/collection filters, isolated preserved favorites, unknown IDs and 320/390/1440px layouts');
  assert.ok(!requested.some(url=>/^\/images\/look-/.test(url)),'Archived v1 pictures never enter the public site');
  assert.deepEqual(exceptions,[],'Browser must not report uncaught JavaScript exceptions');

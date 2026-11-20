@@ -1,6 +1,7 @@
 import json
 import stat
 
+import pytest
 from fastapi.testclient import TestClient
 
 from backend.app import create_app
@@ -10,11 +11,60 @@ from backend.settings import Settings
 def login(client, root):
     bootstrap = client.get("/api/admin/bootstrap").json()
     creds = json.loads((root / "initial-admin.json").read_text())
-    headers = {"Origin": "https://admin.localhost", "X-CSRF-Token": bootstrap["csrf_token"]}
+    headers = {"Origin": str(client.base_url).rstrip("/"), "X-CSRF-Token": bootstrap["csrf_token"]}
     result = client.post("/api/admin/login", json=creds, headers=headers)
     assert result.status_code == 200
     headers["X-CSRF-Token"] = result.json()["csrf_token"]
     return headers
+
+
+@pytest.mark.parametrize("admin_host", ["admin.localhost", "localhost"])
+def test_site_theme_is_public_to_read_and_admin_only_to_save(tmp_path, admin_host):
+    settings = Settings(data_dir=tmp_path, admin_host=admin_host)
+    public = "/api/site-theme"
+    admin = "/api/admin/site-theme"
+    editorial = {"theme": "editorial"}
+    studio = {"theme": "studio"}
+    app = create_app(settings)
+    with (
+        TestClient(app, base_url="https://localhost") as visitor,
+        TestClient(app, base_url=f"https://{admin_host}") as controller,
+    ):
+        response = visitor.get(public)
+        assert response.json() == editorial
+        assert response.headers["Cache-Control"] == "no-store"
+        assert "set-cookie" not in response.headers
+        assert visitor.put(public, json=studio).status_code == 405
+        assert visitor.put(admin, json=studio).status_code == (
+            401 if admin_host == "localhost" else 404
+        )
+        assert controller.get(admin).status_code == 401
+        assert controller.put(admin, json=studio).status_code == 401
+
+        headers = login(controller, tmp_path)
+        assert controller.get(admin).json() == editorial
+        assert controller.put(admin, json=studio).status_code == 403
+        assert (
+            controller.put(
+                admin, json=studio, headers={**headers, "Origin": "https://elsewhere.test"}
+            ).status_code
+            == 403
+        )
+        for invalid in ({"theme": "auto"}, {"theme": True}, {"theme": "studio", "extra": 1}, {}):
+            assert controller.put(admin, json=invalid, headers=headers).status_code == 422
+        assert visitor.get(public).json() == editorial
+        response = controller.put(admin, json=studio, headers=headers)
+        assert response.json() == studio
+        assert response.headers["Cache-Control"] == "no-store"
+        assert visitor.get(public).json() == studio
+        assert controller.post("/api/admin/logout", headers=headers).status_code == 200
+        assert controller.put(admin, json=editorial, headers=headers).status_code == 401
+
+    with TestClient(create_app(settings), base_url="https://localhost") as restarted:
+        assert restarted.get(public).json() == studio
+    isolated = Settings(data_dir=tmp_path / "isolated", admin_host=admin_host)
+    with TestClient(create_app(isolated), base_url="https://localhost") as separate:
+        assert separate.get(public).json() == editorial
 
 
 def test_admin_first_init_persistent_hash_login_password_logout(tmp_path):

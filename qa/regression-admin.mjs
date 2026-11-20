@@ -23,14 +23,15 @@ async function harness(routes = {}, transport = null) {
     return typeof result === 'function' ? result(record) : json(result);
   };
   const confirmations = [];
-  const app = createAdminApp({ document, fetch, confirm: (text) => { confirmations.push(text); return true; } });
+  const appliedThemes = [];
+  const app = createAdminApp({ document, fetch, applySiteTheme: theme => appliedThemes.push(theme), confirm: (text) => { confirmations.push(text); return true; } });
   const fire = async (selector, type = 'submit') => {
     const element = document.querySelector(selector);
     assert.ok(element, `rendered target exists: ${selector}`);
     element.dispatchEvent(new window.Event(type, { bubbles: true, cancelable: true }));
     await app.idle();
   };
-  return { document, window, app, requests, routes, fire, confirmations };
+  return { document, window, app, requests, routes, fire, confirmations, appliedThemes };
 }
 
 const emptyOverview = () => ({ visits: 0, look_opens: 0, tryons_total: 0, queued: 0, running: 0, succeeded: 0, failed: 0, unknown: 0, result_count: 0, result_bytes: 0, popular_looks: [], recent_jobs: [] });
@@ -41,6 +42,7 @@ const sessionRoutes = () => ({
   'GET /api/admin/overview': emptyOverview(),
   'GET /api/admin/results?offset=0&limit=24': { items: [], has_more: false },
   'GET /api/admin/settings': { model: '', api_base: '', proxy_url: '', api_key_configured: false, enabled: false },
+  'GET /api/admin/site-theme': { theme: 'editorial' },
   'GET /api/admin/bootstrap': { authenticated: false, csrf_token: 'fixture-prelogin' },
   'POST /api/admin/login': { authenticated: true, csrf_token: 'fixture-authenticated' },
   'POST /api/admin/logout': { authenticated: false },
@@ -84,6 +86,71 @@ test('login error remains accessible, never authenticates, and allows a retry', 
   await h.fire('#login-form');
   assert.equal(h.document.querySelector('#workspace').hidden, false);
   assert.equal(h.document.querySelector('#error').hidden, true);
+});
+
+function chooseTheme(h, theme) {
+  const select = h.document.querySelector('#site-theme-select');
+  [...select.options].forEach(option => { option.selected = false; });
+  [...select.options].find(option => option.value === theme).selected = true;
+  select.dispatchEvent(new h.window.Event('change', { bubbles: true }));
+}
+
+test('site theme is loaded after login and published only through an explicit authenticated save', async () => {
+  const routes = sessionRoutes();
+  let theme = 'editorial';
+  routes['GET /api/admin/site-theme'] = () => json({ theme });
+  routes['PUT /api/admin/site-theme'] = request => {
+    theme = request.body.theme;
+    return json({ theme });
+  };
+  const h = await harness(routes);
+  const select = h.document.querySelector('#site-theme-select');
+  const save = h.document.querySelector('#site-theme-save');
+  const status = h.document.querySelector('#site-theme-status');
+  assert.ok(select.closest('#workspace[hidden]'));
+  assert.equal(save.disabled, true);
+  await h.app.start();
+  await h.fire('#site-theme-form');
+  assert.equal(h.requests.some(r => r.url.endsWith('/site-theme')), false);
+  await login(h);
+  assert.equal(select.value, 'editorial');
+  assert.equal(save.disabled, false);
+  chooseTheme(h, 'studio');
+  assert.equal(h.requests.some(r => r.method === 'PUT'), false);
+  assert.equal(h.appliedThemes.at(-1), 'editorial');
+  await h.fire('#site-theme-form');
+  const write = h.requests.find(r => r.method === 'PUT');
+  assert.equal(write.url, '/api/admin/site-theme');
+  assert.deepEqual(write.body, { theme: 'studio' });
+  assert.equal(write.headers['X-CSRF-Token'], 'fixture-authenticated');
+  assert.equal(h.appliedThemes.at(-1), 'studio');
+  assert.match(status.textContent, /已保存.*Studio/);
+  await h.fire('#logout', 'click');
+  assert.ok(select.closest('#workspace[hidden]'));
+  assert.equal(save.disabled, true);
+  assert.equal(h.appliedThemes.at(-1), 'editorial');
+  await login(h);
+  assert.equal(select.value, 'studio', 'the next session reads the saved server choice');
+  assert.equal(h.appliedThemes.at(-1), 'studio');
+});
+
+test('failed theme save keeps the confirmed layout and allows an authoritative refresh', async () => {
+  const routes = sessionRoutes();
+  routes['GET /api/admin/site-theme'] = { theme: 'studio' };
+  routes['PUT /api/admin/site-theme'] = () => json({ error: { code: 'csrf', message: '设置未获授权。' } }, 403);
+  const h = await harness(routes);
+  const select = h.document.querySelector('#site-theme-select');
+  await login(h);
+  chooseTheme(h, 'editorial');
+  await h.fire('#site-theme-form');
+  assert.equal(select.value, 'studio');
+  assert.equal(h.appliedThemes.at(-1), 'studio');
+  assert.match(h.document.querySelector('#site-theme-status').textContent, /未能确认保存结果/);
+  assert.match(h.document.querySelector('#error').textContent, /未获授权/);
+  h.routes['GET /api/admin/site-theme'] = { theme: 'editorial' };
+  await h.fire('#refresh-site-theme', 'click');
+  assert.equal(select.value, 'editorial');
+  assert.equal(h.appliedThemes.at(-1), 'editorial');
 });
 
 test('authenticated bootstrap renders authoritative analytics and queue; refresh preserves honest zero states', async () => {
@@ -290,14 +357,19 @@ test('incorrect current password preserves authenticated workspace and shows fie
 test('expired session purges private photos/settings and obtains fresh prelogin CSRF without replaying mutations', async () => {
   const routes = sessionRoutes();
   routes['GET /api/admin/results?offset=0&limit=24'] = { items: [result('fixture-expiry')], has_more: false };
+  routes['GET /api/admin/site-theme'] = { theme: 'studio' };
   const h = await harness(routes);
   await login(h);
+  assert.equal(h.appliedThemes.at(-1), 'studio');
   h.document.querySelector('#provider-key').value = 'fixture-unsaved-key';
   h.routes['GET /api/admin/overview'] = () => json({ error: { code: 'admin_auth', message: 'Session expired' } }, 401);
   await h.fire('#refresh-overview', 'click');
   assert.equal(h.document.querySelector('#workspace').hidden, true);
   assert.equal(h.document.querySelectorAll('#results-grid img').length, 0);
   assert.equal(h.document.querySelector('#provider-key').value, '');
+  assert.equal(h.document.querySelector('#site-theme-select').value, '');
+  assert.equal(h.document.querySelector('#site-theme-save').disabled, true);
+  assert.equal(h.appliedThemes.at(-1), 'editorial');
   assert.match(h.document.querySelector('#error').textContent, /会话.*重新登录/);
   assert.equal(h.requests.at(-1).url, '/api/admin/bootstrap');
   h.routes['GET /api/admin/overview'] = emptyOverview();
@@ -404,6 +476,7 @@ test('rendered login, analytics and logout work over native HTTP with a fixture 
       if (request.url === '/api/admin/overview') return send({ ...emptyOverview(), visits: 42 });
       if (request.url === '/api/admin/results?offset=0&limit=24') return send({ items: [], has_more: false });
       if (request.url === '/api/admin/settings') return send({ model: '', api_base: '', proxy_url: '', api_key_configured: false, enabled: false });
+      if (request.url === '/api/admin/site-theme') return send({ theme: 'editorial' });
       if (request.url === '/api/admin/logout') { authenticated = false; token = 'fixture-http-next-login'; return send({ authenticated: false }); }
       return send({ error: { code: 'not_found', message: 'Unexpected fixture route' } }, 404);
     } catch { response.statusCode = 500; response.end(JSON.stringify({ error: { code: 'fixture_failure', message: 'Fixture handler failed' } })); }

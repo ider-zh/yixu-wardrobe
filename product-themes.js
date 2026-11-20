@@ -1,4 +1,4 @@
-/* Built-in layout adapters. Content supplies plain text and a theme name only. */
+/* Built-in product layouts follow the active site theme. */
 (() => {
 'use strict';
 const themes = Object.freeze({
@@ -12,14 +12,10 @@ const themes = Object.freeze({
  }
 });
 window.YixuProductThemes=Object.freeze({
- resolve(presentation={},override){
-  const validOverride=Object.hasOwn(themes,override)?override:undefined;
-  const requested=window.YixuSiteTheme?.resolve(presentation.theme,validOverride)??(validOverride||presentation.theme);
-  const name=Object.hasOwn(themes,requested)?requested:'editorial';
+ resolve(){
+  const name=window.YixuSiteTheme?.resolve()==='studio'?'studio':'editorial';
   const adapter=themes[name];
-  const explicit=Object.hasOwn(themes,override)||!!window.YixuSiteTheme?.preference();
-  const preset=!explicit&&['warm-paper','neutral-white'].includes(presentation.preset)?presentation.preset:adapter.preset;
-  return {name,preset,render:adapter.render};
+  return {name,preset:adapter.preset,render:adapter.render};
  }
 });
 })();

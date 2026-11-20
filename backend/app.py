@@ -190,6 +190,10 @@ def create_app(
             "detector_ready": detector_ready(),
         }
 
+    @app.get("/api/site-theme")
+    def get_site_theme():
+        return {"theme": store.site_theme()}
+
     @app.get("/api/bootstrap")
     def bootstrap(request: Request):
         visitor, token = store.visitor(request.cookies.get("yixu_visitor"))

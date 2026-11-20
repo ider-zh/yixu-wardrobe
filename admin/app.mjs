@@ -1,9 +1,9 @@
-export function createAdminApp({ document, fetch, confirm }) {
+export function createAdminApp({ document, fetch, confirm, applySiteTheme = theme => globalThis.YixuSiteTheme?.apply?.(theme) }) {
   const $ = (selector) => document.querySelector(selector);
-  globalThis.YixuSiteTheme?.mount(document.querySelector('[data-site-theme-control]'));
   let csrf = '';
   let pending = Promise.resolve();
   let busy = false;
+  let savedSiteTheme = null;
   let resultOffset = 0;
   const resultIds = new Set();
   const runtimeFields = { model: '#provider-model', api_base: '#provider-api-base', proxy_url: '#provider-proxy', size: '#provider-size', quality: '#provider-quality', provider_timeout_seconds: '#provider-timeout' };
@@ -37,6 +37,7 @@ export function createAdminApp({ document, fetch, confirm }) {
         busy = false;
         controls.forEach(button => { button.disabled = false; });
         $('#login-form button').disabled = !csrf;
+        $('#site-theme-save').disabled = !savedSiteTheme;
         $('#main').setAttribute('aria-busy', 'false');
       }
     })();
@@ -79,6 +80,11 @@ export function createAdminApp({ document, fetch, confirm }) {
   }
   function clearPrivate() {
     clearPasswordInputs();
+    savedSiteTheme = null;
+    setFieldValue($('#site-theme-select'), '');
+    $('#site-theme-fields').disabled = true;
+    $('#site-theme-status').textContent = '尚未读取网站主题。';
+    applySiteTheme('editorial');
     document.querySelectorAll('[data-metric]').forEach(element => { element.textContent = '—'; });
     $('#popular-looks').replaceChildren();
     $('#recent-jobs').replaceChildren();
@@ -113,6 +119,48 @@ export function createAdminApp({ document, fetch, confirm }) {
       if (selected) selected.selected = true;
     } else element.value = value;
   }
+  const validSiteTheme = theme => theme === 'editorial' || theme === 'studio';
+  function renderSiteTheme(data, saved = false) {
+    const theme = data?.theme;
+    if (!validSiteTheme(theme)) throw new Error('主题设置响应异常，请重新读取。');
+    savedSiteTheme = theme;
+    setFieldValue($('#site-theme-select'), theme);
+    applySiteTheme(theme);
+    $('#site-theme-fields').disabled = false;
+    const label = theme === 'studio' ? 'Studio' : 'Editorial';
+    $('#site-theme-status').textContent = saved ? `已保存，全站使用 ${label}。` : `当前网站主题为 ${label}。`;
+  }
+  async function loadSiteTheme() {
+    try {
+      renderSiteTheme(await request('/site-theme'));
+    } catch (error) {
+      $('#site-theme-status').textContent = '网站主题读取失败，请重新读取。';
+      throw error;
+    }
+  }
+  $('#refresh-site-theme').addEventListener('click', () => run(async () => {
+    await loadSiteTheme();
+    $('#notice').textContent = '已读取网站主题。';
+  }));
+  $('#site-theme-form').addEventListener('submit', event => {
+    event.preventDefault();
+    const theme = $('#site-theme-select').value;
+    if (!savedSiteTheme || !validSiteTheme(theme)) return;
+    run(async () => {
+      $('#site-theme-fields').disabled = true;
+      $('#site-theme-status').textContent = '正在保存网站主题…';
+      try {
+        renderSiteTheme(await request('/site-theme', { method: 'PUT', body: { theme } }), true);
+        $('#notice').textContent = '网站主题已保存。';
+      } catch (error) {
+        setFieldValue($('#site-theme-select'), savedSiteTheme);
+        $('#site-theme-status').textContent = '未能确认保存结果。当前显示上次读取的主题，请重新读取设置。';
+        throw error;
+      } finally {
+        $('#site-theme-fields').disabled = !savedSiteTheme;
+      }
+    });
+  });
   async function loadSettings() {
     const data = await request('/settings');
     supportedRuntime = new Set(Object.keys(runtimeFields).filter(key => Object.hasOwn(data, key)));
@@ -389,7 +437,7 @@ export function createAdminApp({ document, fetch, confirm }) {
   $('#refresh-content').addEventListener('click', () => run(loadContent));
   $('#refresh-models').addEventListener('click', () => run(loadModels));
   async function loadDashboard() {
-    const sections = await Promise.allSettled([loadOverview(), loadResults(), loadSettings(), loadContent(), loadModels()]);
+    const sections = await Promise.allSettled([loadOverview(), loadResults(), loadSettings(), loadContent(), loadModels(), loadSiteTheme()]);
     const failures = sections.filter(section => section.status === 'rejected');
     if (failures.length) throw (failures.find(section => section.reason.sessionExpired) || failures[0]).reason;
     $('#notice').textContent = '工作台已更新。数据来自服务端；外部生成尚未在此验证。';

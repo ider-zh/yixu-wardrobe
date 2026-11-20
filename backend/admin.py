@@ -10,7 +10,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
 
 from .files import atomic_write
-from .store import digest
+from .store import ThemeName, digest
 
 
 class Review(BaseModel):
@@ -29,6 +29,11 @@ class PasswordChange(BaseModel):
     model_config = ConfigDict(extra="forbid")
     current_password: str = Field(max_length=1024)
     new_password: str = Field(min_length=16, max_length=1024)
+
+
+class SiteTheme(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    theme: ThemeName
 
 
 class Admin:
@@ -161,6 +166,17 @@ class Admin:
             from .analytics import overview
 
             return overview(self.store, request.app.state.jobs, request.app.state.geolocation)
+
+        @router.get("/site-theme")
+        def get_site_theme(request: Request):
+            self.session(request)
+            return {"theme": self.store.site_theme()}
+
+        @router.put("/site-theme")
+        def put_site_theme(request: Request, data: SiteTheme):
+            self.session(request, mutate=True)
+            self.store.save_site_theme(data.theme)
+            return {"theme": data.theme}
 
         @router.get("/settings")
         def get_settings(request: Request):

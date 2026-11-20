@@ -5,6 +5,9 @@ import secrets
 import sqlite3
 from contextlib import contextmanager
 from pathlib import Path
+from typing import Literal
+
+ThemeName = Literal["editorial", "studio"]
 
 
 def digest(value: str) -> str:
@@ -48,6 +51,9 @@ class Store:
                 CREATE INDEX IF NOT EXISTS page_events ON events(event,owner,created);
                 CREATE TABLE IF NOT EXISTS admin_sessions (
                     token_hash TEXT PRIMARY KEY, csrf TEXT, authenticated INTEGER DEFAULT 0);
+                CREATE TABLE IF NOT EXISTS site_preferences (
+                    id INTEGER PRIMARY KEY CHECK(id=1),
+                    theme TEXT NOT NULL CHECK(theme IN ('editorial', 'studio')));
             """)
         self.db_path.chmod(0o600)
 
@@ -62,6 +68,19 @@ class Store:
                 yield db
         finally:
             db.close()
+
+    def site_theme(self) -> ThemeName:
+        with self.connect() as db:
+            row = db.execute("SELECT theme FROM site_preferences WHERE id=1").fetchone()
+        return "studio" if row and row["theme"] == "studio" else "editorial"
+
+    def save_site_theme(self, theme: ThemeName) -> None:
+        with self.connect() as db:
+            db.execute(
+                "INSERT INTO site_preferences (id,theme) VALUES (1,?) "
+                "ON CONFLICT(id) DO UPDATE SET theme=excluded.theme",
+                (theme,),
+            )
 
     def visitor(self, token: str | None):
         with self.connect() as db:
