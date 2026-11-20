@@ -25,10 +25,12 @@ STATE = Path("/var/lib/yixu-dev-deploy")
 DATA = Path("/var/lib/yixu-wardrobe-dev")
 USER = "yixu-dev"
 UNIT = "yixu-dev-api.service"
+WORKER_UNIT = "yixu-dev-worker.service"
 DOMAIN = "dev-yixu.8882088.xyz"
 REPO = "https://github.com/ider-zh/yixu-wardrobe.git"
 NODE = "/opt/yixu-dev-node/bin/node"
 DOWNLOAD_PROXY = None
+GENERATION_ENABLED = False
 ENV = {
     "PATH": "/opt/yixu-dev-node/bin:/usr/local/bin:/usr/bin:/bin",
     "HOME": "/var/lib/yixu-wardrobe-dev",
@@ -58,11 +60,16 @@ def write_json(path, value, owner=None):
 
 
 def configure_transport():
-    global DOWNLOAD_PROXY
+    global DOWNLOAD_PROXY, GENERATION_ENABLED
     config = Path("/etc/yixu-wardrobe-dev/deploy.json")
     if not config.exists():
         return
-    value = json.loads(config.read_text()).get("download_proxy")
+    values = json.loads(config.read_text())
+    enabled = values.get("generation_enabled", False)
+    if not isinstance(enabled, bool):
+        raise TypeError("Development generation_enabled must be an explicit boolean")
+    GENERATION_ENABLED = enabled
+    value = values.get("download_proxy")
     if not value:
         return
     parsed = urllib.parse.urlsplit(value)
@@ -177,8 +184,18 @@ def snapshot(release):
 def verify(release, origin):
     catalog = snapshot(release)
     health = json.loads(get("http://127.0.0.1:8766/api/health", DOMAIN))
-    if health.get("ok") is not True or health.get("provider_configured") is not False:
-        raise RuntimeError("Development API is unhealthy or unexpected generation is enabled")
+    if health.get("ok") is not True:
+        raise RuntimeError("Development API is unhealthy")
+    if GENERATION_ENABLED:
+        bootstrap = json.loads(get("http://127.0.0.1:8766/api/bootstrap", DOMAIN))
+        if (
+            health.get("provider_configured") is not True
+            or health.get("detector_ready") is not True
+            or bootstrap.get("generation_available") is not True
+        ):
+            raise RuntimeError("Authorized development generation is not fully configured")
+    elif health.get("provider_configured") is not False:
+        raise RuntimeError("Development generation requires explicit operator authorization")
     actual = json.loads(get("http://127.0.0.1:8766/api/content/catalog", DOMAIN))
     if actual.get("revision") != catalog["revision"] or actual.get("home") != catalog["home"]:
         raise RuntimeError("API and development snapshot differ")
@@ -233,6 +250,7 @@ def verify(release, origin):
         "source_bytes": asset["bytes"],
         "static_verified": True,
         "admin_auth_verified": True,
+        "generation_enabled": GENERATION_ENABLED,
     }
 
 
@@ -251,8 +269,19 @@ def switch_current(release):
     os.replace(temporary, ROOT / "current")
 
 
+def stop_worker():
+    if GENERATION_ENABLED or Path("/etc/systemd/system/" + WORKER_UNIT).exists():
+        # Worker SIGTERM stops claiming jobs and lets an in-flight request finish.
+        subprocess.run(["/usr/bin/systemctl", "stop", WORKER_UNIT], check=True, timeout=3750)
+
+
 def restart():
     subprocess.run(["/usr/bin/systemctl", "restart", UNIT], check=True, timeout=60)
+    if GENERATION_ENABLED:
+        subprocess.run(["/usr/bin/systemctl", "restart", WORKER_UNIT], check=True, timeout=60)
+        subprocess.run(
+            ["/usr/bin/systemctl", "is-active", "--quiet", WORKER_UNIT], check=True, timeout=20
+        )
 
 
 def make_web_readable(release):
@@ -310,9 +339,9 @@ def build(sha):
     run([NODE, "scripts/check.mjs"], cwd=release)
     run([NODE, "qa/regression-expressive.mjs"], cwd=release)
     run([NODE, "scripts/build.mjs"], cwd=release)
-    make_web_readable(release)
     run([release / ".venv/bin/python", "-m", "pytest", "tests/backend", "-q"], cwd=release)
-    # Fail on unsafe coarse-geography or same-origin boundaries through the normal suite.
+    # Some regression tests rebuild public/. Apply web modes after every build/test.
+    make_web_readable(release)
     snapshot(release)
     return release
 
@@ -349,7 +378,6 @@ def recheck_candidate(sha):
         ).hexdigest()
         if actual != expected:
             raise RuntimeError("Reviewed candidate source differs from its Git commit")
-    make_web_readable(release)
     run([NODE, "scripts/check.mjs"], cwd=release)
     run([NODE, "qa/regression-expressive.mjs"], cwd=release)
     run([release / ".venv/bin/python", "-m", "pytest", "tests/backend", "-q"], cwd=release)
@@ -367,6 +395,7 @@ def recheck_candidate(sha):
     )
     if snapshot(release)["revision"] != expected_revision:
         raise RuntimeError("Reviewed candidate snapshot differs from its source manifests")
+    make_web_readable(release)
     return release
 
 
@@ -408,6 +437,7 @@ def deliver(origin, retry=False):
     try:
         candidate = ROOT / "releases" / sha
         release = recheck_candidate(sha) if retry and candidate.exists() else build(sha)
+        stop_worker()
         switch_current(release)
         switched = True
         restart()
@@ -448,9 +478,11 @@ def deliver(origin, retry=False):
         print(json.dumps(receipt))
     except Exception:
         if switched and old:
+            stop_worker()
             switch_current(old)
             restart()
         elif switched:
+            stop_worker()
             subprocess.run(["/usr/bin/systemctl", "stop", UNIT], check=False, timeout=60)
         write_json(
             receipt_path,

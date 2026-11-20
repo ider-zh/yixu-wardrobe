@@ -18,6 +18,8 @@ assert.doesNotMatch(site,/admin-dev\.|admin\.8882088|proxy_pass.*:8765/);
 assert.match(read('deploy/dev-api.service'),/User=yixu-dev/);
 assert.match(read('deploy/dev-api.service'),/ReadWritePaths=\/var\/lib\/yixu-wardrobe-dev/);
 assert.match(read('deploy/dev-deploy.timer'),/OnUnitInactiveSec=60s/);
+assert.match(read('deploy/dev-worker.service'),/User=yixu-dev/);
+assert.match(read('deploy/dev-worker.service'),/TimeoutStopSec=3700/);
 
 const python=String.raw`
 import importlib.util,json,os,pathlib,pwd,subprocess,sys,tempfile,urllib.error
@@ -30,7 +32,7 @@ with tempfile.TemporaryDirectory() as temporary:
  m.ROOT=root;m.STATE=state;m.DATA=state/"appdata";m.USER=pwd.getpwuid(os.getuid()).pw_name;m.run=lambda args,**kw:sha if 'rev-parse' in args else '';m.time.sleep=lambda _:None
  old_release=root/'releases'/old;old_release.mkdir();m.switch_current(old_release)
  sentinel=state/'state.sqlite3';sentinel.write_bytes(b'private visitor state must survive rollback')
- calls=[];m.restart=lambda:calls.append('restart');m.ci_succeeded=lambda _:False
+ calls=[];m.stop_worker=lambda:calls.append('stop-worker');m.restart=lambda:calls.append('restart');m.ci_succeeded=lambda _:False
  m.build=lambda _:(_ for _ in ()).throw(AssertionError('CI must gate build'))
  m.deliver('http://127.0.0.1');assert (root/'current').resolve()==old_release;assert not calls
  m.ci_succeeded=lambda _:True
@@ -40,7 +42,7 @@ with tempfile.TemporaryDirectory() as temporary:
  try:m.deliver('http://127.0.0.1')
  except RuntimeError:pass
  else:raise AssertionError('failed verification must fail delivery')
- assert (root/'current').resolve()==old_release;assert calls==['restart','restart']
+ assert (root/'current').resolve()==old_release;assert calls==['stop-worker','restart','stop-worker','restart']
  failure=json.loads((state/'deployment.json').read_text());assert failure['status']=='failed';assert failure['previous_release_restored'];assert failure['private_database_rolled_back'] is False
  assert sentinel.read_bytes()==b'private visitor state must survive rollback'
  m.build=lambda _:(_ for _ in ()).throw(AssertionError('unchanged failed SHA must not loop'))
@@ -68,6 +70,16 @@ with tempfile.TemporaryDirectory() as temporary:
   return routes[path]
  m.get=get;m.verify=real_verify
  assert m.verify(release,'http://127.0.0.1')['static_files_verified']==14
+ m.GENERATION_ENABLED=True
+ routes['/api/health']=json.dumps({'ok':True,'provider_configured':True,'detector_ready':True}).encode()
+ routes['/api/bootstrap']=json.dumps({'generation_available':True}).encode()
+ assert m.verify(release,'http://127.0.0.1')['generation_enabled'] is True
+ routes['/api/bootstrap']=json.dumps({'generation_available':False}).encode()
+ try:m.verify(release,'http://127.0.0.1')
+ except RuntimeError as error:assert 'not fully configured' in str(error)
+ else:raise AssertionError('authorized generation must be functionally available')
+ m.GENERATION_ENABLED=False
+ routes['/api/health']=json.dumps({'ok':True,'provider_configured':False}).encode()
  routes['/admin/app.mjs']=b'stale admin source'
  try:m.verify(release,'http://127.0.0.1')
  except RuntimeError as error:assert 'stale' in str(error)
@@ -96,9 +108,16 @@ with tempfile.TemporaryDirectory() as temporary:
  def commands(args,**kw):
   if 'ls-tree' in args:return '100644 blob '+blob+'\ttracked.txt'
   if '-e' in args:return 'catalog-version'
+  if 'pytest' in args:
+   (release/'public').chmod(0o700)
+   for file in (release/'public').iterdir():file.chmod(0o600)
+  if str(args[0]) in ('/usr/bin/find','/usr/bin/chmod'):
+   return subprocess.check_output(list(map(str,args)),text=True).strip()
   return ''
  m.run=commands
  assert real_recheck(sha)==release
+ assert (release/'public').stat().st_mode&0o777==0o755
+ assert all(file.stat().st_mode&0o777==0o644 for file in (release/'public').iterdir())
  tracked.write_bytes(b'altered candidate source')
  try:real_recheck(sha)
  except RuntimeError as error:assert 'differs' in str(error)

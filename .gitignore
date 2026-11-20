@@ -8,6 +8,8 @@
 !/index.html
 !/app.js
 !/product-page.js
+!/site-theme.js
+!/site-theme.css
 !/product-themes.js
 !/product-themes.css
 !/catalog.js
@@ -52,6 +54,7 @@
 !/docs/external-agent-sop.md
 !/docs/product-agent-sop.md
 !/docs/content-publishing-plan.md
+!/docs/site-theme-architecture.md
 !/docs/images/
 !/docs/images/wardrobe-preview.webp
 # Backend and admin source only; runtime data, credentials, models and venv stay ignored.
@@ -79,6 +82,7 @@
 !/qa/regression-admin.mjs
 !/qa/regression-visitor-geo.mjs
 !/qa/regression-dev-deploy.mjs
+!/qa/regression-site-theme.mjs
 !/qa/regression-catalog-export.mjs
 !/qa/regression-deploy.mjs
 !/qa/regression-ci.mjs

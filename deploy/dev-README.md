@@ -10,6 +10,7 @@
 | 代码与构建 | `/srv/yixu-wardrobe-dev/releases/<完整提交SHA>` |
 | 当前版本 | `/srv/yixu-wardrobe-dev/current` 原子符号链接 |
 | API | `yixu-dev-api.service`，仅 `127.0.0.1:8766` |
+| 独立生成 worker | 显式启用生成时使用 `yixu-dev-worker.service` |
 | 私有数据 | `/var/lib/yixu-wardrobe-dev`，0700 |
 | 服务配置 | `/etc/yixu-wardrobe-dev/runtime.env`，0600 |
 | 部署配置 | `/etc/yixu-wardrobe-dev/deploy.json`，0600 |
@@ -18,13 +19,13 @@
 | Node | `/opt/yixu-dev-node`，不改系统 Node |
 | 定时检查 | `yixu-dev-deploy.timer` / `yixu-dev-deploy.service` |
 
-开发环境使用独立 SQLite、管理员密码、会话、资源归档和结果目录，不复制生产照片、数据库、`runtime.json` 或项目 API Key。AI 生成默认关闭，也不启动生成 worker。首次 API 启动自动创建开发管理员，初始凭据仅保存在开发私有数据目录的 `initial-admin.json`，不得打印到发布日志或提交 Git。
+开发环境使用独立 SQLite、管理员密码、会话、资源归档和结果目录，不复制生产照片、数据库或账号。AI 生成默认关闭；用户明确授权复用正式站模型配置后，才可在服务器内部将模型连接/参数配置独立复制到开发私有 `runtime.json`，保留 0600 与开发用户所有，不输出项目 Key。私有 `deploy.json` 的严格布尔字段 `generation_enabled` 默认 false，授权启用时设 true，并独立安装、启用 `dev-worker.service`。首次 API 启动自动创建开发管理员，初始凭据仅保存在开发私有数据目录的 `initial-admin.json`，不得打印到发布日志或提交 Git。
 
 离线地域库可独立安装到开发数据目录的 `geoip/city.mmdb`；仅复制公开可下载的库，不复制生产访客记录。数据库不进入仓库或静态网站。
 
 ## 首次准备
 
-本目录提供 `dev-api.service`、`dev-deploy.service`、`dev-deploy.timer` 和 `dev-site.conf`。服务安装者须创建上述独立用户与目录、设置所有权，并将发布控制器复制到 root 所有的固定路径；仓库中的控制器更新不会自动替换已安装副本，基础设施改动需要单独审阅安装。
+本目录提供 `dev-api.service`、`dev-worker.service`、`dev-deploy.service`、`dev-deploy.timer` 和 `dev-site.conf`。服务安装者须创建上述独立用户与目录、设置所有权，并将发布控制器复制到 root 所有的固定路径；仓库中的控制器更新不会自动替换已安装副本，基础设施改动需要单独审阅安装。
 
 开发环境变量：
 
@@ -51,10 +52,10 @@ YIXU_GEOIP_DATABASE=/var/lib/yixu-wardrobe-dev/geoip/city.mmdb
 1. 以 `yixu-dev` 拉取公开仓库的 `refs/heads/dev`，取得完整 SHA。
 2. 查询该 SHA、`dev` 分支、push 事件对应的现有 `check.yml` **整个工作流**结论，只有最新一轮 completed/success 才继续。未完成、失败或查询失败不切换站点。
 3. 在独立候选目录导出该提交，以 `yixu-dev` 运行锁定依赖安装、图片与内容检查、原有交互回归、静态构建及全部后端 pytest。仓库命令不以 root 运行，不读取生产环境变量。首次下载依赖可能较慢，原站继续服务。
-4. 成功后原子切换开发 `current`，只重启固定的 `yixu-dev-api.service`。
-5. 核对开发 API 健康、生成服务关闭、管理员接口未登录返回 401、API/静态内容版本和首页主推一致、十四个核心网站/后台文件实际字节，以及首页主推源图字节数和 SHA-256。通过后才写 root 私有的 `deployment.json`，并按后端合同写入开发数据目录的 `publication.json`（0600，开发服务用户所有）；后台据此显示网站已验证。
+4. 成功后先停止固定的开发 worker 认领新任务，等待在途任务正常结束，再原子切换开发 `current`。只重启固定的 `yixu-dev-api.service`，显式授权生成时再启动固定的 `yixu-dev-worker.service`，两者使用同一代码与私有状态。worker 的 SIGTERM 会等待当前请求完成，停止宽限覆盖最长配置请求；异常中止仍遵循“可能发送后不自动重放”的既有恢复规则。
+5. 核对开发 API 健康；默认模式要求生成关闭，显式生成模式要求 provider、detector 与 `generation_available` 均为 true、开发 worker active（不发实际生成测试）。再核对管理员接口未登录返回 401、API/静态内容版本和首页主推一致、十四个核心网站/后台文件实际字节，以及首页主推源图字节数和 SHA-256。通过后才写 root 私有的 `deployment.json`，并按后端合同写入开发数据目录的 `publication.json`（0600，开发服务用户所有）；后台据此显示网站已验证。
 
-互斥锁阻止重叠发布。已验证的相同 SHA 不重复构建；失败 SHA 只尝试一次，等待人工检查，不循环重启。候选构建失败不切换站点；切换后核验失败会恢复上一个开发版本并重启开发 API。开发私有数据库不会回滚，生产服务不会重启。首次发布失败且没有旧开发版本时停止开发 API并保留失败回执。
+互斥锁阻止重叠发布。已验证的相同 SHA 不重复构建；失败 SHA 只尝试一次，等待人工检查，不循环重启。候选构建失败不切换站点；切换后核验失败会先停止新开发 worker，再恢复上一个开发版本并重启开发 API及已授权的开发 worker。开发私有数据库不会回滚，生产服务不会重启。首次发布失败且没有旧开发版本时停止开发 worker与 API并保留失败回执。
 
 确认开发 HTTPS 已准备好、首次完整发布已验收后再启用：
 
