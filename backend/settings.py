@@ -20,6 +20,7 @@ class Settings:
     face_min_fraction: float = 0.025
     detector_score_threshold: float = 0.85
     image_concurrency: int = 1
+    geoip_database: Path | None = None
 
     @classmethod
     def from_env(cls):
@@ -50,6 +51,7 @@ class Settings:
             face_min_fraction=float(os.environ.get("YIXU_FACE_MIN_FRACTION", "0.025")),
             detector_score_threshold=float(os.environ.get("YIXU_DETECTOR_SCORE_THRESHOLD", "0.85")),
             image_concurrency=int(os.environ.get("YIXU_IMAGE_CONCURRENCY", "1")),
+            geoip_database=path("YIXU_GEOIP_DATABASE"),
         )
 
 

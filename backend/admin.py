@@ -68,6 +68,7 @@ class Admin:
             httponly=True,
             secure=self.settings.secure_cookies,
             samesite="strict",
+            path="/api/admin",
             max_age=self.settings.cookie_max_age,
         )
 
@@ -127,7 +128,11 @@ class Admin:
                 )
             response = JSONResponse({"authenticated": False})
             response.delete_cookie(
-                "yixu_admin", secure=self.settings.secure_cookies, httponly=True, samesite="strict"
+                "yixu_admin",
+                path="/api/admin",
+                secure=self.settings.secure_cookies,
+                httponly=True,
+                samesite="strict",
             )
             return response
 
@@ -155,7 +160,7 @@ class Admin:
             self.session(request)
             from .analytics import overview
 
-            return overview(self.store, request.app.state.jobs)
+            return overview(self.store, request.app.state.jobs, request.app.state.geolocation)
 
         @router.get("/settings")
         def get_settings(request: Request):

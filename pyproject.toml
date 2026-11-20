@@ -2,7 +2,17 @@
 name = "yixu-backend"
 version = "0.1.0"
 requires-python = ">=3.12"
-dependencies = ["fastapi", "uvicorn", "httpx2", "openai", "pillow", "python-multipart", "opencv-python-headless", "argon2-cffi"]
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "httpx2",
+    "openai",
+    "pillow",
+    "python-multipart",
+    "opencv-python-headless",
+    "argon2-cffi",
+    "maxminddb>=3.3.0,<4",
+]
 
 [dependency-groups]
 dev = ["pytest", "ruff", "mypy", "types-Pillow"]

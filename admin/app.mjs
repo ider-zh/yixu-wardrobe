@@ -81,6 +81,7 @@ export function createAdminApp({ document, fetch, confirm }) {
     document.querySelectorAll('[data-metric]').forEach(element => { element.textContent = '—'; });
     $('#popular-looks').replaceChildren();
     $('#recent-jobs').replaceChildren();
+    clearVisitorGeo();
     $('#results-grid').replaceChildren();
     $('#models-grid').replaceChildren();
     $('#cdn-jobs').replaceChildren();
@@ -235,8 +236,56 @@ export function createAdminApp({ document, fetch, confirm }) {
   }
   $('#refresh-results').addEventListener('click', () => run(() => loadResults()));
   $('#load-more-results').addEventListener('click', () => run(() => loadResults(false)));
+  const countText = value => Number.isSafeInteger(value) && value >= 0 ? new Intl.NumberFormat('zh-CN').format(value) : '—';
+  function clearVisitorGeo() {
+    $('#visitor-total').textContent = '—';
+    $('#visitor-page-views').textContent = '—';
+    $('#visitor-geo-status').textContent = '尚未读取地域统计。';
+    for (const id of ['visitor-countries', 'visitor-provinces', 'recent-visitors']) $(`#${id}`).replaceChildren();
+  }
+  function renderVisitorGeo(geo) {
+    clearVisitorGeo();
+    if (!geo || typeof geo !== 'object') {
+      $('#visitor-geo-status').textContent = '当前服务尚未提供地域统计，历史访问不会推定归属地。';
+      return;
+    }
+    $('#visitor-total').textContent = countText(geo.total_visitors);
+    $('#visitor-page-views').textContent = countText(geo.total_page_views);
+    const databaseMessages = {
+      ready: '离线 IP 数据库已就绪；未知地域与历史记录按实际结果保留。',
+      unconfigured: '尚未配置离线 IP 数据库；新的公网访问暂无法确定地域，已有统计仍可查看。',
+      unavailable: '离线 IP 数据库暂不可用；访问记录继续保存，无法定位的地域显示未知。',
+    };
+    $('#visitor-geo-status').textContent = databaseMessages[geo.database?.status] || '地域数据库状态未知，无法确认新访问的定位能力。';
+    const distribution = (id, rows, name, empty) => {
+      const list = $(`#${id}`);
+      const entries = Array.isArray(rows) ? rows.slice(0, 30) : [];
+      list.replaceChildren(...entries.map(row => {
+        const item = node('li');
+        item.append(node('span', name(row)), node('span', `${countText(row.visits)} 次访问 · ${countText(row.visitors)} 个访客`, 'geo-count'));
+        return item;
+      }));
+      if (!entries.length) list.append(node('li', empty, 'geo-empty'));
+      if (Array.isArray(rows) && rows.length > 30) list.append(node('li', '按访问数展示前 30 个地域。', 'geo-empty'));
+    };
+    distribution('visitor-countries', geo.countries, row => row.country_name || row.country_code || '未知国家 / 地区', '暂无国家 / 地区访问记录。');
+    distribution('visitor-provinces', geo.china_provinces, row => row.region_name || row.region_code || '中国 · 省级未知', '暂无中国省级访问记录。');
+    const statusMessages = { private: '内网或保留地址，无法定位', unknown: '地域未知', unavailable: '数据库不可用，地域未知', legacy: '历史记录，无地域信息' };
+    const visitors = Array.isArray(geo.recent_visitors) ? geo.recent_visitors.slice(0, 20) : [];
+    $('#recent-visitors').replaceChildren(...visitors.map(visitor => {
+      const item = node('li');
+      const country = visitor.country_name || visitor.country_code;
+      const region = visitor.country_code === 'CN' ? visitor.region_name || visitor.region_code || '省级未知' : '';
+      const location = country ? [country, region].filter(Boolean).join(' · ') : statusMessages[visitor.status] || '地域未知';
+      const stamp = value => typeof value === 'number' && Number.isFinite(value) ? timeText(value * 1000) : '时间未知';
+      item.append(node('strong', `匿名访客 ${visitor.visitor_id || '标识未知'} · ${location}`), node('p', `${countText(visitor.page_views)} 次页面访问 · 最近 ${stamp(visitor.last_seen)}`), node('p', `首次 ${stamp(visitor.first_seen)}`));
+      return item;
+    }));
+    if (!visitors.length) $('#recent-visitors').append(node('li', '暂无页面访问记录。', 'muted'));
+  }
   async function loadOverview() {
     const data = await request('/overview');
+    renderVisitorGeo(data.visitor_geo);
     document.querySelectorAll('[data-metric]').forEach(element => {
       const key = element.dataset.metric;
       const value = data[key];

@@ -36,6 +36,8 @@ The 200 historical photographs are same-dimension WebP totaling 48,176,224 bytes
 
 Outfit and product favorites are stored separately in the current browser; favorite selections are not uploaded. Switching browsers or addresses, or clearing browser data, may remove or separate them.
 
+Online page visits use a local IP database to estimate the country and, for China, province. Only administrators can view these statistics. Raw IP addresses are not stored or sent to a third-party lookup service. Results describe approximate network exits, may reflect proxies or carrier/database errors, and do not establish a person's location. Anonymous browser counts are not people counts; missing historical locations remain unknown.
+
 Online photo try-on requires an available backend and generation service. Reference choices show each shot's name and framing; select one to read its full description and see a preview before deciding which frame to use. A photo is uploaded only after explicitly accepting its disclosed use. Results are available to their owner through the existing browser credential; administrators may assess generated results during development. User photos, private try-on results and credentials never enter public image hosting or project source. Offline browsing does not provide online try-on.
 
 Character and outfit images are generative artwork for styling inspiration and visual enjoyment. Details may vary; images do not establish actual size or fit.

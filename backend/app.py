@@ -122,6 +122,7 @@ def create_app(
                 yield
             finally:
                 app.state.cdn_worker.stop()
+                app.state.geolocation.close()
                 tasks.cancel_scope.cancel()
 
     app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan)
@@ -129,6 +130,11 @@ def create_app(
     app.state.settings = settings
     app.state.provider = provider
     app.state.store = store = Store(settings.data_dir)
+    from .geolocation import GeoLocator
+
+    app.state.geolocation = geolocation = GeoLocator(
+        settings.geoip_database or settings.data_dir / "geoip" / "city.mmdb"
+    )
     from .content import ContentService
 
     app.state.content = content = ContentService(settings)
@@ -160,7 +166,7 @@ def create_app(
         if host not in (settings.public_host, settings.admin_host):
             return error("host", "Unknown host", 421)
         admin = request.url.path.startswith("/api/admin")
-        if admin != (host == settings.admin_host):
+        if settings.admin_host != settings.public_host and admin != (host == settings.admin_host):
             return error("not_found", "Not found", 404)
         try:
             if hasattr(app.state, "jobs"):
@@ -272,7 +278,11 @@ def create_app(
     app.include_router(jobs.router(require_visitor, DISCLOSURE_VERSION))
     from .analytics import router as analytics_router
 
-    app.include_router(analytics_router(store, require_visitor, jobs.clock, content=content))
+    app.include_router(
+        analytics_router(
+            store, require_visitor, jobs.clock, content=content, geolocation=geolocation
+        )
+    )
     from .admin import Admin
 
     admin = Admin(store, settings, check_csrf)

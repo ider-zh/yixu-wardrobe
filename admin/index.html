@@ -11,7 +11,7 @@
 </head>
 <body>
   <a class="skip-link" href="#main">跳到主要内容</a>
-  <header class="site-header"><a class="brand" href="/" aria-label="衣序管理首页"><span>衣序</span><small>THE WARDROBE / ADMIN</small></a></header>
+  <header class="site-header"><a class="brand" href="./" aria-label="衣序管理首页"><span>衣序</span><small>THE WARDROBE / ADMIN</small></a></header>
   <main id="main">
     <div class="page-heading"><p class="eyebrow">BEHIND THE WARDROBE</p><h1>管理工作台<span>.</span></h1><p class="muted">记录真实使用，照看每一次生成。</p></div>
     <div class="connection-bar"><p id="notice" role="status" aria-live="polite">正在连接管理服务…</p><button id="reconnect" class="text-button" type="button">重新连接</button></div>
@@ -30,7 +30,7 @@
       <nav class="section-nav" aria-label="管理导航"><a href="#overview">使用概览</a><a href="#results">生成结果</a><a href="#content">资源与 CDN</a><a href="#models">系统模特</a><a href="#settings">服务设置</a><a href="#account">账户安全</a></nav>
       <section id="overview" class="panel" aria-labelledby="overview-title">
         <div class="section-heading"><div><p class="eyebrow">THE REAL PICTURE</p><h2 id="overview-title">使用概览</h2></div><button id="refresh-overview" class="outline" type="button">刷新概览 ↻</button></div>
-        <p class="muted">来自服务端记录，非独立访客估算。任务状态与存储数量分别统计；无记录时显示 0。</p>
+        <p class="muted">来自服务端事件记录。任务状态与存储数量分别统计；无记录时显示 0。</p>
         <dl id="metrics" class="metrics">
           <div><dt>页面访问事件</dt><dd data-metric="visits">—</dd></div>
           <div><dt>造型打开事件</dt><dd data-metric="look_opens">—</dd></div>
@@ -43,6 +43,21 @@
           <div><dt>当前结果数</dt><dd data-metric="result_count">—</dd></div>
           <div><dt>结果存储大小</dt><dd data-metric="result_bytes">—</dd></div>
         </dl>
+        <section class="visitor-geo" aria-labelledby="visitor-geo-title">
+          <h3 id="visitor-geo-title">访客与地域</h3>
+          <p class="muted">按页面访问事件统计。匿名访客按浏览器标识去重，不等于实际人数；同一访客可能出现在多个地域。IP 归属为近似网络出口位置，并非实际所在地，VPN 与运营商可能影响结果；历史记录无地域信息。</p>
+          <p id="visitor-geo-status" class="provider-status" role="status">尚未读取地域统计。</p>
+          <dl class="metrics visitor-metrics">
+            <div><dt>匿名浏览器访客</dt><dd id="visitor-total">—</dd></div>
+            <div><dt>页面访问事件</dt><dd id="visitor-page-views">—</dd></div>
+          </dl>
+          <div class="geo-distributions">
+            <section aria-labelledby="visitor-countries-title"><h3 id="visitor-countries-title">国家 / 地区分布</h3><ul id="visitor-countries" class="geo-list"></ul></section>
+            <section aria-labelledby="visitor-provinces-title"><h3 id="visitor-provinces-title">中国省级分布</h3><ul id="visitor-provinces" class="geo-list"></ul></section>
+          </div>
+          <section aria-labelledby="recent-visitors-title"><h3 id="recent-visitors-title">最近匿名访客</h3><p class="field-hint">展示最近 20 个浏览器标识及其最近一次访问的地域；不展示或保存原始 IP 地址。</p><ul id="recent-visitors" class="visitor-list"></ul></section>
+          <p class="field-hint">IP 地域数据：<a href="https://db-ip.com" rel="noreferrer noopener">DB-IP.com</a>。使用本地离线数据库，不向第三方提交访客 IP。</p>
+        </section>
         <div class="overview-details"><section aria-labelledby="popular-title"><h3 id="popular-title">热门造型</h3><ol id="popular-looks"></ol></section><section aria-labelledby="jobs-title"><h3 id="jobs-title">最近任务</h3><p class="muted">状态待确认的外部请求不会自动重放；这里不显示原始照片。</p><ul id="recent-jobs" class="job-list"></ul></section></div>
       </section>
       <section id="results" class="panel" aria-labelledby="results-title">
@@ -99,7 +114,7 @@
     </div>
     <aside class="privacy-note">仅管理员可访问生成结果。原始照片和衍生输入不可在此查看，最迟于接收后 1 小时删除。生成结果全局保留最新 1000 张，先入先出，无时间到期规则。</aside>
   </main>
-  <footer><span class="brand-name">衣序</span><span>穿行于日常，停留在喜欢。</span><span>独立管理入口 · admin.8882088.xyz</span></footer>
+  <footer><span class="brand-name">衣序</span><span>穿行于日常，停留在喜欢。</span><span>管理入口 · 需要独立登录</span></footer>
   <noscript><p>管理工作台需要 JavaScript。请启用后刷新；未加载时不会展示私有数据。</p></noscript>
   <script type="module" src="./app.mjs"></script>
 </body>

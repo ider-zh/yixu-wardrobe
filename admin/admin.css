@@ -75,6 +75,19 @@ main { max-width: 1248px; margin: 0 auto; padding: 48px 24px 40px; }
 .metrics dt { font-size: 12px; color: var(--muted); }
 .metrics dd { margin: 10px 0 0; font-family: Georgia, serif; font-variant-numeric: tabular-nums; font-size: clamp(23px, 2.7vw, 34px); line-height: 1.3; overflow-wrap: anywhere; }
 .overview-details { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 32px; }
+.visitor-geo { margin: 32px 0; padding: 26px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.visitor-geo > .muted, #visitor-geo-status { overflow-wrap: anywhere; }
+.visitor-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 560px; }
+.geo-distributions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; margin-bottom: 28px; }
+.geo-distributions > section { min-width: 0; }
+.geo-list, .visitor-list { list-style: none; padding: 0; margin-bottom: 0; }
+.geo-list li { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+.geo-list li > span { min-width: 0; overflow-wrap: anywhere; }
+.geo-list .geo-count { flex-shrink: 0; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.geo-list li.geo-empty { display: block; color: var(--muted); }
+.visitor-list li { padding: 14px 0; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
+.visitor-list strong { display: block; font-size: 14px; font-weight: 550; }
+.visitor-list p { margin: 5px 0 0; font-size: 12px; color: var(--muted); }
 #popular-looks { padding-left: 24px; }
 #popular-looks li { padding: 7px 0; border-bottom: 1px solid var(--line); }
 .job-list { list-style: none; padding: 0; margin-bottom: 0; }
@@ -133,6 +146,7 @@ footer > :last-child { margin-left: auto; }
   .section-heading > button { min-height: 44px; padding: 8px 12px; font-size: 12px; }
   .section-heading h2 { font-size: 25px; }
   .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .geo-distributions { grid-template-columns: minmax(0, 1fr); gap: 24px; }
   .metrics > div { padding: 16px 12px; }
   .metrics dd { font-size: 28px; }
   .results-grid { grid-template-columns: minmax(0, 1fr); }

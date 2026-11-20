@@ -147,6 +147,42 @@ credential fields. Event IDs deduplicate per visitor. Overview generation/queue,
 status, bytes and retained-result counts come from server SQLite state, not
 client claims. Unreviewed results are available normally.
 
+### Visitor geography
+
+New `page_view` events are enriched locally with country and Chinese province
+when available. The separate `event_geo` table stores only coarse geography,
+lookup status, source and database build epoch; it contains no raw IP, city,
+coordinates or user agent. Existing events remain untouched and appear as
+historical unknowns. Event retries do not duplicate visits or trigger another
+lookup. Region visitor counts deduplicate browser owners within each region;
+they are not a count of actual people and should not be added across regions.
+The administrator overview exposes `visitor_geo`; public APIs never expose it.
+
+Install the official [DB-IP City Lite MMDB](https://db-ip.com/db/download/ip-to-city-lite)
+in the private data directory at `geoip/city.mmdb`, or set
+`YIXU_GEOIP_DATABASE` to its absolute path. The runtime dependency is locked in
+`uv.lock`. Database files stay outside Git and static exports, readable only by
+the service user. Download the current monthly HTTPS archive, decompress to a
+temporary file, verify it with `maxminddb.open_database`, then atomically rename
+it over `city.mmdb`; the reader detects replacement without restart. Updating
+the file does not rewrite past event geography. Missing or invalid databases
+degrade to unknown without blocking events. No automatic download or external
+lookup occurs during a visitor request.
+
+DB-IP Lite includes IPv4/IPv6 and uses CC BY 4.0; the results section links to
+[DB-IP.com](https://db-ip.com/) as required by its
+[attribution terms](https://db-ip.com/db/lite.php). Province accuracy is not
+guaranteed: VPNs, carrier exits and database coverage affect estimates. Only the
+database's first-level subdivision is used; cities never stand in for provinces.
+Uvicorn supplies the client address under its trusted-proxy policy; Nginx must
+overwrite forwarded headers and Uvicorn must only trust the configured local
+proxy. Application code ignores client-supplied IP/geography headers and fields.
+
+For a same-origin `/admin/` installation set `YIXU_ADMIN_HOST` equal to
+`YIXU_PUBLIC_HOST` and proxy `/api/admin/` on that origin. Authentication and
+same-origin CSRF remain mandatory; administrator cookies are restricted to
+`/api/admin`. Legacy separate-host deployments retain their existing host split.
+
 ## Technical environment controls
 
 - Required production paths/hosts: `YIXU_DATA_DIR`, `YIXU_CATALOG_PATH`,

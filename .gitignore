@@ -77,6 +77,8 @@
 !/tryon.css
 !/qa/regression-tryon.mjs
 !/qa/regression-admin.mjs
+!/qa/regression-visitor-geo.mjs
+!/qa/regression-dev-deploy.mjs
 !/qa/regression-catalog-export.mjs
 !/qa/regression-deploy.mjs
 !/qa/regression-ci.mjs
