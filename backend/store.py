@@ -5,9 +5,23 @@ import secrets
 import sqlite3
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Literal
+from typing import Literal, get_args
 
-ThemeName = Literal["editorial", "studio"]
+ThemeName = Literal[
+    "editorial",
+    "studio",
+    "contact-sheet",
+    "salon-album",
+    "wardrobe-index",
+    "linen-room",
+    "indigo-studio",
+    "porcelain-case",
+    "night-runway",
+    "city-billboard",
+    "garden-walk",
+    "sunset-notes",
+]
+THEME_CHECK = f"CHECK(theme IN ({', '.join(map(repr, get_args(ThemeName)))}))"
 
 
 def digest(value: str) -> str:
@@ -51,11 +65,28 @@ class Store:
                 CREATE INDEX IF NOT EXISTS page_events ON events(event,owner,created);
                 CREATE TABLE IF NOT EXISTS admin_sessions (
                     token_hash TEXT PRIMARY KEY, csrf TEXT, authenticated INTEGER DEFAULT 0);
-                CREATE TABLE IF NOT EXISTS site_preferences (
-                    id INTEGER PRIMARY KEY CHECK(id=1),
-                    theme TEXT NOT NULL CHECK(theme IN ('editorial', 'studio')));
             """)
+            self._migrate_site_preferences(db)
         self.db_path.chmod(0o600)
+
+    @staticmethod
+    def _migrate_site_preferences(db: sqlite3.Connection) -> None:
+        # Lock before inspecting the schema so concurrent starts see the completed migration.
+        db.execute("BEGIN IMMEDIATE")
+        schema = db.execute(
+            "SELECT sql FROM sqlite_schema WHERE type='table' AND name='site_preferences'"
+        ).fetchone()
+        if schema and THEME_CHECK in schema["sql"]:
+            return
+        table = "site_preferences_next" if schema else "site_preferences"
+        db.execute(
+            f"CREATE TABLE {table} (id INTEGER PRIMARY KEY CHECK(id=1), "
+            f"theme TEXT NOT NULL {THEME_CHECK})"
+        )
+        if schema:
+            db.execute("INSERT INTO site_preferences_next SELECT id, theme FROM site_preferences")
+            db.execute("DROP TABLE site_preferences")
+            db.execute("ALTER TABLE site_preferences_next RENAME TO site_preferences")
 
     @contextmanager
     def connect(self):
@@ -72,7 +103,7 @@ class Store:
     def site_theme(self) -> ThemeName:
         with self.connect() as db:
             row = db.execute("SELECT theme FROM site_preferences WHERE id=1").fetchone()
-        return "studio" if row and row["theme"] == "studio" else "editorial"
+        return row["theme"] if row else "editorial"
 
     def save_site_theme(self, theme: ThemeName) -> None:
         with self.connect() as db:

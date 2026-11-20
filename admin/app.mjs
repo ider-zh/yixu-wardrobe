@@ -125,15 +125,17 @@ export function createAdminApp({ document, fetch, confirm, applySiteTheme = them
       if (selected) selected.selected = true;
     } else element.value = value;
   }
-  const validSiteTheme = theme => theme === 'editorial' || theme === 'studio';
+  const siteThemeLabels = new Map([...$('#site-theme-select').options]
+    .filter(option => option.value)
+    .map(option => [option.value, option.textContent.split(' · ')[0]]));
   function renderSiteTheme(data, saved = false) {
     const theme = data?.theme;
-    if (!validSiteTheme(theme)) throw new Error('主题设置响应异常，请重新读取。');
+    const label = siteThemeLabels.get(theme);
+    if (!label) throw new Error('主题设置响应异常，请重新读取。');
     savedSiteTheme = theme;
     setFieldValue($('#site-theme-select'), theme);
     applySiteTheme(theme);
     $('#site-theme-fields').disabled = false;
-    const label = theme === 'studio' ? 'Studio' : 'Editorial';
     $('#site-theme-status').textContent = saved ? `已保存，全站使用 ${label}。` : `当前网站主题为 ${label}。`;
   }
   async function loadSiteTheme() {
@@ -151,7 +153,7 @@ export function createAdminApp({ document, fetch, confirm, applySiteTheme = them
   $('#site-theme-form').addEventListener('submit', event => {
     event.preventDefault();
     const theme = $('#site-theme-select').value;
-    if (!savedSiteTheme || !validSiteTheme(theme)) return;
+    if (!savedSiteTheme || !siteThemeLabels.has(theme)) return;
     run(async () => {
       $('#site-theme-fields').disabled = true;
       $('#site-theme-status').textContent = '正在保存网站主题…';

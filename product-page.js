@@ -74,7 +74,7 @@ $('product-image-next').addEventListener('click',()=>{if(zoomIndex!==null)showIm
 dialog.addEventListener('close',()=>{if(!dialog.open)zoomIndex=null;});
 dialog.addEventListener('keydown',event=>{if(zoomIndex===null||!['ArrowLeft','ArrowRight'].includes(event.key))return;event.preventDefault();showImage(zoomIndex+(event.key==='ArrowLeft'?-1:1));});
 window.YixuSiteTheme?.subscribe(()=>{
- if(!current?.product||root.hidden)return;
+ if(!current?.product||root.hidden||root.dataset.productTheme===window.YixuProductThemes.resolve().name)return;
  const active=document.activeElement,focusIndex=active?.dataset?.productIndex,mainFocused=active?.matches?.('.product-main-image');
  const top=root.ownerDocument.defaultView?.scrollY||0;
  render(current);

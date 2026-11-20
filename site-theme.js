@@ -4,6 +4,12 @@
 
   const root = document.documentElement;
   const admin = root.dataset.siteContext === 'admin';
+  const themeColor = document.querySelector('meta[name="theme-color"]');
+  const themes = new Set([
+    'editorial', 'studio', 'contact-sheet', 'salon-album', 'wardrobe-index',
+    'linen-room', 'indigo-studio', 'porcelain-case', 'night-runway',
+    'city-billboard', 'garden-walk', 'sunset-notes',
+  ]);
   const listeners = new Set();
   let theme;
   let adminLayout;
@@ -45,16 +51,23 @@
   }
 
   function apply(nextTheme) {
-    if (nextTheme !== 'editorial' && nextTheme !== 'studio') return false;
+    if (!themes.has(nextTheme)) return false;
     if (nextTheme === theme) return true;
+    const studio = nextTheme === 'studio';
+    const layoutChanged = studio !== (theme === 'studio');
     theme = nextTheme;
     root.dataset.siteTheme = theme;
-    const active = document.activeElement;
-    const studio = theme === 'studio';
-    if (admin) arrangeAdmin(studio);
-    else arrangePublic(studio);
-    if (active?.isConnected && document.activeElement !== active) {
-      active.focus?.({preventScroll: true});
+    if (themeColor) {
+      const paper = window.getComputedStyle(root).getPropertyValue('--paper').trim();
+      if (paper) themeColor.content = paper;
+    }
+    if (layoutChanged) {
+      const active = document.activeElement;
+      if (admin) arrangeAdmin(studio);
+      else arrangePublic(studio);
+      if (active?.isConnected && document.activeElement !== active) {
+        active.focus?.({preventScroll: true});
+      }
     }
     for (const listener of listeners) listener({theme});
     return true;

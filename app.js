@@ -125,6 +125,17 @@ function photo(look, alt) {
  const x=-((p-1)%3)*100,y=-Math.floor((p-1)/3)*100,nx=-((next-1)%3)*100,ny=-Math.floor((next-1)/3)*100;
  return '<div class="photo-window" style="--panel-x:'+x+'%;--panel-y:'+y+'%;--next-x:'+nx+'%;--next-y:'+ny+'%"><img '+imageAttributes(v)+' alt="'+esc(alt || look.title+' · '+(v.shots[p-1]?.title||'写真'))+'" loading="lazy" decoding="async"></div>';
 }
+function updateHeroCover(look, theme) {
+ const v=versionOf(look),panel=Math.min(9,Math.max(1,v.previewPanel||1));
+ const image=$('hero-image-0'),frame=image.parentElement,fullSheet=theme==='contact-sheet';
+ const caption=fullSheet?'完整九宫格':(v.shots[panel-1]?.title||'生动写真');
+ if(fullSheet)frame.classList.add('full-sheet');
+ else frame.classList.remove('full-sheet');
+ image.alt=look.title+' · '+caption;
+ frame.style.setProperty('--panel-x',-((panel-1)%3)*100+'%');
+ frame.style.setProperty('--panel-y',-Math.floor((panel-1)/3)*100+'%');
+ $('hero-edition-note').textContent='LOOK '+number(look.id)+' / '+caption;
+}
 function updateEditionUI(){
  renderHomeProducts();
  $('completion-note').textContent=looks.length+' 套生动穿搭';
@@ -132,7 +143,7 @@ function updateEditionUI(){
  const look=featuredLook();
  $('latest-feature').hidden=!look;
  if(!look){$('recent-gallery').innerHTML='';$('recent-gallery').parentElement.hidden=true;return;}
- const v=versionOf(look),p=Math.min(9,Math.max(1,v.previewPanel||1));
+ const v=versionOf(look);
  $('hero-title').textContent=look.title;
  $('hero-publication').textContent=publication(look)+' · LOOK '+number(look.id);
  $('hero-kicker').innerHTML='<span class="small-line"></span>'+((look.published_at||look.publish_date)?'最新一期 / THE LATEST EDIT':'历史精选 / FROM THE ARCHIVE');
@@ -143,9 +154,8 @@ function updateEditionUI(){
  $('hero-photo-button').setAttribute('aria-label','查看 '+look.title+' 的穿搭详情');
  $('hero-favorite').dataset.favorite=look.id;
  const liked=favorites.has(look.id);$('hero-favorite').textContent=liked?'♥ 已收藏':'♡ 收藏这套';$('hero-favorite').setAttribute('aria-pressed',String(liked));
- const image=$('hero-image-0');setImage(image,v);image.alt=look.title+' · '+(v.shots[p-1]?.title||'生动写真');
- image.parentElement.style.setProperty('--panel-x',-((p-1)%3)*100+'%');image.parentElement.style.setProperty('--panel-y',-Math.floor((p-1)/3)*100+'%');
- $('hero-edition-note').textContent='LOOK '+number(look.id)+' / '+(v.shots[p-1]?.title||'生动写真');
+ setImage($('hero-image-0'),v);
+ updateHeroCover(look,window.YixuSiteTheme?.resolve());
  const recentIds=Array.isArray(data.home?.recent_look_ids)?data.home.recent_look_ids:null;
  const recent=(recentIds?recentIds.map(id=>byId.get(id)).filter(Boolean):latestLooks()).filter(l=>l.id!==look.id).slice(0,6);
  $('recent-gallery').innerHTML=recent.map(renderCard).join('');
@@ -447,6 +457,10 @@ document.addEventListener('click',event=>{
  }
 });
 window.matchMedia('(min-width: 801px)').addEventListener('change',event=>{if(event.matches&&$('filter-dialog').open)$('filter-dialog').close();});
+window.YixuSiteTheme?.subscribe(({theme})=>{
+ const look=featuredLook();
+ if(look)updateHeroCover(look,theme);
+});
 adoptCatalog(window.WARDROBE || {looks:[],categoryOrder:[]});updateCounts();
 hydrateCatalog();
 })();

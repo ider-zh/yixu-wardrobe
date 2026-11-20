@@ -15,7 +15,7 @@ Yixu is a wardrobe to wander through at your own pace. Starting with 100 complet
 - **Look closer.** Select 01–09 by shot number and name to explore the expression, movement and framing, then read the garment list and styling notes.
 - **Follow an idea.** Linked tags in outfit details search the wardrobe for related outfits. Your browser's Back button returns to the outfit you were viewing.
 - **Explore each piece.** Browse independent designs across Chinese-inspired, streetwear, resort and daily edits. Explore complete forms, angles and details, return to the original outfit photograph for wearing context, and save pieces separately. Design additions unsupported by the original photograph are disclosed as extrapolations.
-- **Site layout.** An administrator chooses Editorial or Studio in the 网站主题 section of the admin workspace. The storefront retrieves the current theme when visitors open or return to the page, preserving their favorites and browsing context.
+- **Site themes.** The site offers 12 layouts and visual styles, including Editorial, Studio, Contact Sheet, Linen Room, and Night Runway. Administrators set the theme for the site in the 网站主题 section of the workspace. The storefront retrieves the current theme when visitors open or return to the page, preserving their favorites and browsing context.
 - **Keep a look.** Save favorites with the heart, compare two or three outfits, or choose 保存图片 to download. Existing numbers and favorites stay associated with their outfits.
 
 Keyboard shortcuts: `/` for search, `←` and `→` for adjacent looks in details, and `Esc` to close a dialog.

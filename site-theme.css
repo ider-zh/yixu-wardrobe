@@ -40,3 +40,2244 @@ html[data-site-theme="studio"][data-site-context="admin"] .results-grid{grid-tem
 html[data-site-theme="studio"][data-site-context="admin"] .visitor-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
 
 @media(max-width:520px){html[data-site-theme="studio"] .gallery,html[data-site-theme="studio"] .product-grid{grid-template-columns:1fr}html[data-site-theme="studio"] .look-card .photo-window{max-height:none}}
+
+/* 暗房样片 — graphite surrounds a single illuminated frame. */
+html[data-site-theme="contact-sheet"] {
+  color-scheme: dark;
+  --contact-paper: #1b1e20;
+  --contact-mat: #292d30;
+  --contact-ink: #f3eee6;
+  --contact-muted: #bbb8b0;
+  --contact-line: #686a68;
+  --contact-light: #e8c688;
+  --paper: var(--contact-paper);
+  --paper-light: var(--contact-mat);
+  --surface: var(--contact-mat);
+  --ink: var(--contact-ink);
+  --muted: var(--contact-muted);
+  --line: var(--contact-line);
+  --green: var(--contact-light);
+  --accent: var(--contact-light);
+  --danger: #ffb7ac;
+  background: var(--paper);
+}
+
+html[data-site-theme="contact-sheet"] :is(body, .product-detail[data-product-preset]) {
+  --paper: var(--contact-paper);
+  --paper-light: var(--contact-mat);
+  --ink: var(--contact-ink);
+  --muted: var(--contact-muted);
+  --line: var(--contact-line);
+  --green: var(--contact-light);
+  --accent: var(--contact-light);
+}
+
+html[data-site-theme="contact-sheet"] :is(.site-header, footer, .product-chapters) {
+  background: var(--paper);
+  border-color: var(--line);
+}
+
+html[data-site-theme="contact-sheet"] .latest-hero {
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  gap: 20px;
+  min-height: 0;
+  padding: clamp(26px, 4vw, 52px) 6% 28px;
+}
+
+html[data-site-theme="contact-sheet"] .hero-copy {
+  text-align: center;
+  max-width: 44rem;
+  min-width: 0;
+}
+
+html[data-site-theme="contact-sheet"] .latest-hero h1 {
+  font-family: var(--sans);
+  font-size: clamp(28px, 3.1vw, 45px);
+  font-weight: 550;
+  letter-spacing: .04em;
+  line-height: 1.3;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+html[data-site-theme="contact-sheet"] .latest-hero .hero-description {
+  margin-inline: auto;
+}
+
+html[data-site-theme="contact-sheet"] .hero-actions {
+  justify-content: center;
+}
+
+html[data-site-theme="contact-sheet"] .hero-archive-note {
+  margin-top: 14px;
+}
+
+html[data-site-theme="contact-sheet"] .hero-actions > button {
+  min-height: 44px;
+}
+
+html[data-site-theme="contact-sheet"] .latest-hero .hero-cover {
+  width: min(100%, clamp(220px, 39vw, 360px));
+  max-width: none;
+  padding: clamp(7px, 1vw, 14px);
+  background: var(--paper-light);
+  border: 1px solid var(--line);
+}
+
+html[data-site-theme="contact-sheet"] .hero-cover .photo-window {
+  box-shadow: none;
+}
+
+html[data-site-theme="contact-sheet"] .hero-cover .photo-window.full-sheet > img {
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+html[data-site-theme="contact-sheet"] .hero-cover-caption {
+  margin: 8px 0 0;
+  font-size: 11px;
+  line-height: 1.55;
+  font-variant-numeric: tabular-nums;
+}
+
+html[data-site-theme="contact-sheet"] :is(.collection, .recent-section, .product-section, .models-section) {
+  max-width: 1440px;
+}
+
+html[data-site-theme="contact-sheet"] :is(.gallery, .recent-section .gallery) {
+  gap: clamp(14px, 2vw, 28px);
+}
+
+html[data-site-theme="contact-sheet"] :is(.look-card, .product-card, .model-card) {
+  padding: clamp(6px, 1vw, 12px);
+  border: 1px solid var(--line);
+  background: var(--paper-light);
+}
+
+html[data-site-theme="contact-sheet"] :is(.card-meta, .product-card-meta) {
+  overflow-wrap: anywhere;
+}
+
+html[data-site-theme="contact-sheet"] :is(.card-title, .product-card h3, .model-card h2, .section-heading :is(h1, h2)) {
+  font-family: var(--sans);
+  letter-spacing: .025em;
+}
+
+html[data-site-theme="contact-sheet"] :is(.card-number, .hero-publication, .card-publication) {
+  font-variant-numeric: tabular-nums;
+}
+
+html[data-site-theme="contact-sheet"] :is(.card-number, .dialog-close, .product-image-hint) {
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--line);
+}
+
+html[data-site-theme="contact-sheet"] :is(.photo-window, .card-pending, .image-unavailable, .detail-photo-frame,
+  .product-card-photo, .product-main-image, .product-detail-image, .product-view-image, .product-thumbnails img) {
+  background: var(--contact-paper);
+}
+
+html[data-site-theme="contact-sheet"] :is(.card-pending span, .empty-state > span, .gallery-end,
+  .hero-description, .detail-description, .detail-story p, .view-moment,
+  .piece-list .piece-number, .piece-list .piece-role, .design-list li, .comparison-card ul,
+  .about-dialog p:not(.eyebrow), .search-wrap kbd) {
+  color: var(--muted);
+}
+
+html[data-site-theme="contact-sheet"] .search-wrap input::placeholder {
+  color: var(--muted);
+}
+
+html[data-site-theme="contact-sheet"] :is(.solid-button, .category-button.active, .season-options label:has(input:checked),
+  .view-selector button.active, .icon-button.selected.compare, .toast, .open-caption) {
+  color: var(--contact-paper);
+  background: var(--contact-light);
+}
+
+html[data-site-theme="contact-sheet"] :is(.solid-button:hover, .category-button.active:hover,
+  .view-selector button.active:hover, .icon-button.selected.compare:hover) {
+  color: var(--contact-paper);
+  background: #f5dcaf;
+}
+
+html[data-site-theme="contact-sheet"] :is(.category-button.active .cat-count, .season-options label:has(input:checked)) {
+  color: var(--contact-paper);
+}
+
+html[data-site-theme="contact-sheet"] .season-options input:checked {
+  accent-color: var(--contact-paper);
+}
+
+html[data-site-theme="contact-sheet"] :is(.category-button:not(.active):hover, .outline-button:hover,
+  .load-more:hover, .detail-tags > a:hover) {
+  background: var(--paper-light);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+html[data-site-theme="contact-sheet"] :is(.icon-button, .view-selector button:not(.active)) {
+  background: var(--paper);
+  border-color: var(--line);
+}
+
+html[data-site-theme="contact-sheet"] :is(.icon-button:not(.selected):hover, .view-selector button:not(.active):hover) {
+  background: var(--paper-light);
+  border-color: var(--accent);
+}
+
+html[data-site-theme="contact-sheet"] :is(.icon-button.selected.favorite, .product-save[aria-pressed="true"],
+  .product-view-card[data-design-study="true"] > p) {
+  color: var(--accent);
+}
+
+html[data-site-theme="contact-sheet"] .product-filters a[aria-current] {
+  background: var(--accent);
+  color: var(--paper);
+}
+
+html[data-site-theme="contact-sheet"] :is(dialog, .compare-tray) {
+  border: 1px solid var(--line);
+  overscroll-behavior: contain;
+}
+
+html[data-site-theme="contact-sheet"] dialog::backdrop {
+  background: #101314d9;
+  backdrop-filter: none;
+}
+
+html[data-site-theme="contact-sheet"] :is(.detail-photo-area, .detail-story,
+  .product-worn-section, .product-detail[data-product-preset] .product-worn-section) {
+  background: var(--paper);
+}
+
+html[data-site-theme="contact-sheet"] :is(.detail-photo-footer a, .comparison-card li + li) {
+  border-color: var(--line);
+}
+
+html[data-site-theme="contact-sheet"] .product-hero-figure {
+  padding: clamp(7px, 1vw, 14px);
+  background: var(--paper-light);
+  border: 1px solid var(--line);
+}
+
+html[data-site-theme="contact-sheet"] .product-hero-figure figcaption {
+  padding: 9px 0 0;
+  font-size: 11px;
+}
+
+html[data-site-theme="contact-sheet"] :is(.tryon-dialog, .tryon-submit-area) {
+  color: var(--ink);
+  background: var(--paper);
+}
+
+html[data-site-theme="contact-sheet"] :is(.tryon-photo-stage, .tryon-disclosure, .tryon-reference-thumbnail,
+  .tryon-reference-choice, .tryon-waiting, .tryon-photo-skeleton) {
+  background: var(--paper-light);
+  border-color: var(--line);
+}
+
+html[data-site-theme="contact-sheet"] :is(.tryon-entry, .tryon-flow, .tryon-history-area, .tryon-job, .tryon-reference-section,
+  .tryon-photo-placeholder) {
+  border-color: var(--line);
+}
+
+html[data-site-theme="contact-sheet"] :is(.tryon-entry, .tryon-intro, .tryon-flow li, .tryon-section-kicker,
+  .tryon-hint, .tryon-photo-placeholder, .tryon-local-note, .tryon-reference-framing,
+  .tryon-job-status, .tryon-skeleton-caption, .tryon-progress-steps li, .tryon-reference-kind),
+html[data-site-theme="contact-sheet"] :is(#tryon-context, #tryon-status, #tryon-jobs-status),
+html[data-site-theme="contact-sheet"] .tryon-reference-choice[data-image-failed="true"] .tryon-reference-thumbnail::before {
+  color: var(--muted);
+}
+
+html[data-site-theme="contact-sheet"] :is(.tryon-flow li[aria-current], .tryon-progress-steps li[data-state="current"]) {
+  color: var(--ink);
+  border-color: var(--accent);
+}
+
+html[data-site-theme="contact-sheet"] :is(.tryon-progress-steps li[data-state="done"], .tryon-progress-steps li[data-state="current"])::before {
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: none;
+}
+
+html[data-site-theme="contact-sheet"] .tryon-job-error {
+  color: var(--danger);
+}
+
+html[data-site-theme="contact-sheet"] .tryon-reference-choice:has(input:checked) {
+  color: var(--ink);
+  background: var(--paper);
+  border-color: var(--accent);
+}
+
+html[data-site-theme="contact-sheet"] .tryon-reference-choice:has(input:checked) .tryon-reference-thumbnail::after {
+  color: var(--paper);
+  background: var(--accent);
+}
+
+html[data-site-theme="contact-sheet"] .tryon-photo-skeleton::after {
+  opacity: .32;
+}
+
+html[data-site-theme="contact-sheet"] select {
+  color: var(--ink);
+  background: var(--paper);
+  border-color: var(--line);
+}
+
+html[data-site-theme="contact-sheet"] :is(a, button, input, select, textarea):focus-visible,
+html[data-site-theme="contact-sheet"] :is(.tryon-reference-choice, .tryon-photo-inputs label):focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+html[data-site-theme="contact-sheet"][data-site-context="admin"] :is(button:not(.outline, .text-button), .skip-link) {
+  color: var(--paper);
+  background: var(--accent);
+}
+
+html[data-site-theme="contact-sheet"][data-site-context="admin"] button:not(.outline, .text-button):hover {
+  background: #f5dcaf;
+}
+
+html[data-site-theme="contact-sheet"][data-site-context="admin"] :is(button.outline:hover, .result-preview,
+  .model-card img, input:not([type="checkbox"]), textarea, .provider-status, #error) {
+  background: var(--paper);
+  border-color: var(--line);
+}
+
+html[data-site-theme="contact-sheet"][data-site-context="admin"] :is(#error, button.danger) {
+  color: var(--danger);
+}
+
+html[data-site-theme="contact-sheet"][data-site-context="admin"] :is(.status-chip, .privacy-note) {
+  color: var(--muted);
+  border-color: var(--line);
+}
+
+html[data-site-theme="contact-sheet"][data-site-context="admin"] #workspace .panel {
+  padding-inline: clamp(16px, 3.5vw, 42px);
+}
+
+html[data-site-theme="contact-sheet"][data-site-context="admin"] .metrics dd {
+  font-family: inherit;
+}
+
+@media (min-width: 801px) {
+  html[data-site-theme="contact-sheet"] .detail-layout {
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  }
+
+  html[data-site-theme="contact-sheet"] .product-hero {
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, .85fr);
+    align-items: start;
+    gap: 6%;
+  }
+
+  html[data-site-theme="contact-sheet"] .product-hero-many .product-copy {
+    padding-top: 18px;
+  }
+}
+
+@media (max-width: 520px) {
+  html[data-site-theme="contact-sheet"] .hero-copy .eyebrow {
+    margin-bottom: 10px;
+  }
+
+  html[data-site-theme="contact-sheet"] .hero-cover-caption {
+    font-size: 10px;
+  }
+
+  html[data-site-theme="contact-sheet"] .card-topline {
+    flex-wrap: wrap;
+  }
+
+  html[data-site-theme="contact-sheet"] .product-hero-figure figcaption {
+    font-size: 9px;
+  }
+}
+
+/* 沙龙相册 — a wide album opening with the photograph set into a rose mat. */
+html[data-site-theme="salon-album"] {
+  --album-paper: #f9f3f5;
+  --album-mat: #efdde5;
+  --album-surface: #fffafb;
+  --album-ink: #35232e;
+  --album-muted: #664b5a;
+  --album-line: #ac8799;
+  --album-wine: #832951;
+  --paper: var(--album-paper);
+  --paper-light: var(--album-surface);
+  --surface: var(--album-surface);
+  --ink: var(--album-ink);
+  --muted: var(--album-muted);
+  --line: var(--album-line);
+  --green: var(--album-wine);
+  --accent: var(--album-wine);
+  --serif: "Songti SC", "Noto Serif CJK SC", "SimSun", "Palatino Linotype", Georgia, serif;
+  background: var(--paper);
+}
+
+html[data-site-theme="salon-album"] :is(body, .product-detail[data-product-preset]) {
+  --paper: var(--album-paper);
+  --paper-light: var(--album-surface);
+  --ink: var(--album-ink);
+  --muted: var(--album-muted);
+  --line: var(--album-line);
+  --green: var(--album-wine);
+  --accent: var(--album-wine);
+  background: var(--paper);
+}
+
+html[data-site-theme="salon-album"] .latest-hero {
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr);
+  align-items: end;
+  gap: clamp(34px, 6vw, 105px);
+  width: min(100% - 10vw, 1340px);
+  min-height: 0;
+  margin: clamp(18px, 3vw, 45px) auto 0;
+  padding: clamp(25px, 5vw, 72px) clamp(20px, 5vw, 85px);
+  background: var(--album-mat);
+  border: 4px double var(--line);
+}
+
+html[data-site-theme="salon-album"] .hero-copy {
+  min-width: 0;
+  padding-bottom: clamp(0px, 3vw, 42px);
+}
+
+html[data-site-theme="salon-album"] .latest-hero h1 {
+  font-size: clamp(34px, 5.2vw, 79px);
+  line-height: 1.2;
+  letter-spacing: .02em;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+html[data-site-theme="salon-album"] .latest-hero .hero-cover {
+  justify-self: end;
+  width: min(100%, 340px);
+  max-width: none;
+  margin: 0;
+  padding: clamp(8px, 2vw, 22px);
+  background: var(--paper-light);
+  border: 4px double var(--line);
+}
+
+html[data-site-theme="salon-album"] .hero-cover .photo-window {
+  box-shadow: none;
+}
+
+html[data-site-theme="salon-album"] .hero-cover-caption {
+  margin-top: 9px;
+  letter-spacing: .05em;
+  font-size: 11px;
+}
+
+html[data-site-theme="salon-album"] .hero-actions > button {
+  min-height: 44px;
+}
+
+html[data-site-theme="salon-album"] :is(.recent-section, .models-section, .product-section, .collection) {
+  max-width: 1440px;
+}
+
+html[data-site-theme="salon-album"] :is(.section-heading, .collection-heading) :is(h1, h2) {
+  text-wrap: balance;
+  letter-spacing: .025em;
+}
+
+html[data-site-theme="salon-album"] .recent-section .gallery {
+  gap: clamp(16px, 3.5vw, 56px);
+}
+
+html[data-site-theme="salon-album"] .look-photo-button {
+  padding: clamp(5px, 1vw, 12px);
+  border: 4px double var(--line);
+  background: var(--paper-light);
+}
+
+html[data-site-theme="salon-album"] .card-actions {
+  right: calc(clamp(5px, 1vw, 12px) + 10px);
+  bottom: calc(clamp(5px, 1vw, 12px) + 10px);
+}
+
+html[data-site-theme="salon-album"] .card-topline {
+  flex-wrap: wrap;
+}
+
+html[data-site-theme="salon-album"] :is(.card-meta, .product-card-meta) {
+  overflow-wrap: anywhere;
+}
+
+html[data-site-theme="salon-album"] .card-title {
+  font-size: clamp(16px, 1.6vw, 24px);
+  letter-spacing: .015em;
+}
+
+html[data-site-theme="salon-album"] :is(.product-card-photo, .product-hero-figure, .model-card > a:first-child) {
+  padding: clamp(5px, 1.3vw, 16px);
+  border: 4px double var(--line);
+  background: var(--paper-light);
+}
+
+html[data-site-theme="salon-album"] .model-card > a:first-child {
+  display: block;
+  max-width: 410px;
+}
+
+html[data-site-theme="salon-album"] .product-hero-figure figcaption {
+  padding-bottom: 0;
+}
+
+html[data-site-theme="salon-album"] .product-worn-section {
+  background: var(--album-mat);
+}
+
+html[data-site-theme="salon-album"] :is(footer, .closing-note, .detail-photo-area, .tryon-photo-stage,
+  .tryon-disclosure, .tryon-waiting, .tryon-reference-choice, .tryon-photo-skeleton) {
+  background: var(--album-mat);
+  border-color: var(--line);
+}
+
+html[data-site-theme="salon-album"] :is(.detail-story, .tryon-dialog, .tryon-submit-area,
+  .view-selector button:not(.active)) {
+  background: var(--paper-light);
+  border-color: var(--line);
+}
+
+html[data-site-theme="salon-album"] :is(.hero-description, .detail-description, .detail-story p, .view-moment,
+  .about-dialog p:not(.eyebrow), .tryon-intro, .tryon-hint, .tryon-local-note,
+  .tryon-reference-kind, .tryon-reference-framing, .tryon-flow li) {
+  color: var(--muted);
+}
+
+html[data-site-theme="salon-album"] .tryon-flow li[aria-current] {
+  color: var(--ink);
+  border-color: var(--accent);
+}
+
+html[data-site-theme="salon-album"] .tryon-reference-choice:has(input:checked) {
+  background: var(--paper);
+  border-color: var(--accent);
+}
+
+html[data-site-theme="salon-album"] .tryon-reference-choice:has(input:checked) .tryon-reference-thumbnail::after {
+  background: var(--accent);
+}
+
+html[data-site-theme="salon-album"] :is(.solid-button:hover, .category-button.active:hover) {
+  color: #fff;
+  background: #63203f;
+}
+
+html[data-site-theme="salon-album"] :is(.outline-button:hover, .category-button:not(.active):hover,
+  .detail-tags > a:hover, .load-more:hover) {
+  background: #e9cedc;
+}
+
+html[data-site-theme="salon-album"] .product-save[aria-pressed="true"] {
+  color: var(--accent);
+}
+
+html[data-site-theme="salon-album"] :is(a, button, input, select, textarea):focus-visible,
+html[data-site-theme="salon-album"] :is(.tryon-reference-choice, .tryon-photo-inputs label):focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+html[data-site-theme="salon-album"][data-site-context="admin"] #workspace .panel {
+  border-block-start: 4px double var(--line);
+  padding-inline: clamp(16px, 4vw, 46px);
+}
+
+html[data-site-theme="salon-album"][data-site-context="admin"] :is(input:not([type="checkbox"]), select, textarea) {
+  color: var(--ink);
+  background: var(--paper-light);
+  border-color: var(--line);
+}
+
+html[data-site-theme="salon-album"][data-site-context="admin"] :is(.provider-status, button.outline:hover) {
+  background: var(--album-mat);
+  border-color: var(--line);
+}
+
+html[data-site-theme="salon-album"][data-site-context="admin"] button:not(.outline, .text-button):hover {
+  background: #63203f;
+}
+
+@media (min-width: 801px) {
+  html[data-site-theme="salon-album"] .recent-section .look-card:nth-child(3n + 2) {
+    margin-top: clamp(26px, 5vw, 76px);
+  }
+
+  html[data-site-theme="salon-album"] .detail-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr);
+  }
+
+  html[data-site-theme="salon-album"] .product-hero {
+    grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr);
+    gap: 8%;
+    align-items: center;
+  }
+
+  html[data-site-theme="salon-album"] .product-hero-many .product-copy {
+    padding-top: 0;
+  }
+}
+
+@media (max-width: 680px) {
+  html[data-site-theme="salon-album"] .latest-hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+    padding: 20px clamp(12px, 4vw, 28px);
+  }
+
+  html[data-site-theme="salon-album"] .hero-copy {
+    padding-bottom: 0;
+  }
+
+  html[data-site-theme="salon-album"] .latest-hero .hero-cover {
+    width: min(100%, 276px);
+    justify-self: center;
+  }
+
+  html[data-site-theme="salon-album"] .hero-cover-caption {
+    font-size: 10px;
+  }
+}
+
+/* 衣橱索引 — a compact illustrated ledger for scanning the collection. */
+html[data-site-theme="wardrobe-index"] {
+  --index-paper: #f4f5f8;
+  --index-surface: #fff;
+  --index-tint: #e3e7f0;
+  --index-ink: #242a3b;
+  --index-muted: #515a70;
+  --index-rule: #959fb4;
+  --index-link: #3b4e7a;
+  --paper: var(--index-paper);
+  --paper-light: var(--index-surface);
+  --surface: var(--index-surface);
+  --ink: var(--index-ink);
+  --muted: var(--index-muted);
+  --line: var(--index-rule);
+  --green: var(--index-link);
+  --accent: var(--index-link);
+  --serif: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", system-ui, sans-serif;
+  background: var(--paper);
+}
+
+html[data-site-theme="wardrobe-index"] :is(body, .product-detail[data-product-preset]) {
+  --paper: var(--index-paper);
+  --paper-light: var(--index-surface);
+  --ink: var(--index-ink);
+  --muted: var(--index-muted);
+  --line: var(--index-rule);
+  --green: var(--index-link);
+  --accent: var(--index-link);
+  background: var(--paper);
+}
+
+html[data-site-theme="wardrobe-index"] .latest-hero {
+  width: min(100% - 10vw, 1270px);
+  min-height: 0;
+  margin: clamp(16px, 3vw, 36px) auto 0;
+  padding: clamp(18px, 4.5vw, 60px);
+  grid-template-columns: minmax(0, 1fr) minmax(0, clamp(155px, 24vw, 272px));
+  gap: clamp(22px, 7vw, 100px);
+  align-items: start;
+  border: 1px solid var(--line);
+  border-block-start: 5px solid var(--accent);
+  background: var(--paper-light);
+}
+
+html[data-site-theme="wardrobe-index"] .hero-copy {
+  min-width: 0;
+  padding-block: clamp(0px, 1vw, 14px);
+}
+
+html[data-site-theme="wardrobe-index"] .latest-hero h1 {
+  max-width: 14em;
+  font-size: clamp(31px, 4vw, 56px);
+  font-weight: 650;
+  letter-spacing: 0;
+  line-height: 1.2;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+html[data-site-theme="wardrobe-index"] :is(.hero-publication, .card-number, .card-publication, .detail-navigation > span) {
+  font-variant-numeric: tabular-nums;
+}
+
+html[data-site-theme="wardrobe-index"] .hero-publication {
+  border-block: 1px solid var(--line);
+  padding-block: 8px;
+}
+
+html[data-site-theme="wardrobe-index"] .hero-actions > button {
+  min-height: 44px;
+}
+
+html[data-site-theme="wardrobe-index"] .latest-hero .hero-cover {
+  width: 100%;
+  max-width: 272px;
+  padding: 6px;
+  border: 1px solid var(--line);
+  background: var(--index-tint);
+}
+
+html[data-site-theme="wardrobe-index"] .hero-cover .photo-window {
+  box-shadow: none;
+}
+
+html[data-site-theme="wardrobe-index"] .hero-cover-caption {
+  margin-top: 7px;
+  letter-spacing: .02em;
+  font-size: 11px;
+}
+
+html[data-site-theme="wardrobe-index"] :is(.recent-section, .collection, .product-section, .models-section) {
+  max-width: 1440px;
+}
+
+html[data-site-theme="wardrobe-index"] :is(.section-heading, .collection-heading) :is(h1, h2) {
+  font-weight: 650;
+  letter-spacing: 0;
+}
+
+html[data-site-theme="wardrobe-index"] :is(.collection .gallery, .recent-section .gallery) {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: clamp(18px, 4vw, 56px);
+  row-gap: 0;
+}
+
+html[data-site-theme="wardrobe-index"] .look-card {
+  display: grid;
+  grid-template-columns: minmax(0, clamp(92px, 11vw, 148px)) minmax(0, 1fr);
+  align-items: start;
+  gap: clamp(12px, 2vw, 24px);
+  padding-block: clamp(12px, 2.2vw, 30px);
+  border-block-end: 1px solid var(--line);
+  animation: none;
+}
+
+html[data-site-theme="wardrobe-index"] .look-card .look-photo-button {
+  border: 1px solid var(--line);
+}
+
+html[data-site-theme="wardrobe-index"] .look-card .card-actions {
+  position: static;
+  display: flex;
+  margin-top: 5px;
+}
+
+html[data-site-theme="wardrobe-index"] .look-card .icon-button {
+  flex: 1;
+  width: auto;
+  min-width: 24px;
+  min-height: 32px;
+}
+
+html[data-site-theme="wardrobe-index"] .card-meta {
+  padding: 2px 0 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+html[data-site-theme="wardrobe-index"] .card-topline {
+  align-items: flex-start;
+  flex-wrap: wrap;
+  font-size: 10px;
+}
+
+html[data-site-theme="wardrobe-index"] .card-title {
+  min-height: 36px;
+  font-size: clamp(16px, 1.6vw, 23px);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+html[data-site-theme="wardrobe-index"] :is(.card-publication, .card-tags) {
+  font-size: 11px;
+}
+
+html[data-site-theme="wardrobe-index"] .card-tags {
+  white-space: normal;
+}
+
+html[data-site-theme="wardrobe-index"] .card-number {
+  color: var(--ink);
+  background: var(--paper-light);
+}
+
+html[data-site-theme="wardrobe-index"] :is(.product-card, .model-card) {
+  min-width: 0;
+  border-block-end: 1px solid var(--line);
+}
+
+html[data-site-theme="wardrobe-index"] :is(.product-card-meta, .product-worn > div) {
+  overflow-wrap: anywhere;
+}
+
+html[data-site-theme="wardrobe-index"] :is(.product-card-photo, .product-main-image, .product-detail-image, .product-view-image) {
+  background: var(--index-tint);
+}
+
+html[data-site-theme="wardrobe-index"] :is(.product-hero-figure, .product-facts) {
+  border-block-start: 3px solid var(--accent);
+}
+
+html[data-site-theme="wardrobe-index"] .product-hero-figure figcaption {
+  padding-inline: 8px;
+  border-block-end: 1px solid var(--line);
+}
+
+html[data-site-theme="wardrobe-index"] .product-facts > div {
+  grid-template-columns: 5em minmax(0, 1fr);
+  padding-inline: 10px;
+}
+
+html[data-site-theme="wardrobe-index"] :is(footer, .detail-photo-area, .detail-story, .product-worn-section,
+  .tryon-photo-stage, .tryon-disclosure, .tryon-waiting, .tryon-reference-choice, .tryon-photo-skeleton) {
+  background: var(--index-tint);
+  border-color: var(--line);
+}
+
+html[data-site-theme="wardrobe-index"] :is(.tryon-dialog, .tryon-submit-area, .view-selector button:not(.active)) {
+  color: var(--ink);
+  background: var(--paper-light);
+  border-color: var(--line);
+}
+
+html[data-site-theme="wardrobe-index"] :is(.hero-description, .detail-description, .detail-story p, .view-moment,
+  .about-dialog p:not(.eyebrow), .tryon-intro, .tryon-hint, .tryon-local-note, .tryon-reference-kind,
+  .tryon-reference-framing, .tryon-flow li) {
+  color: var(--muted);
+}
+
+html[data-site-theme="wardrobe-index"] .tryon-flow li[aria-current] {
+  color: var(--ink);
+  border-color: var(--accent);
+}
+
+html[data-site-theme="wardrobe-index"] .tryon-reference-choice:has(input:checked) {
+  background: var(--paper-light);
+  border-color: var(--accent);
+}
+
+html[data-site-theme="wardrobe-index"] .tryon-reference-choice:has(input:checked) .tryon-reference-thumbnail::after {
+  background: var(--accent);
+}
+
+html[data-site-theme="wardrobe-index"] :is(.solid-button:hover, .category-button.active:hover) {
+  color: #fff;
+  background: #283a63;
+}
+
+html[data-site-theme="wardrobe-index"] :is(.outline-button:hover, .category-button:not(.active):hover,
+  .detail-tags > a:hover, .load-more:hover) {
+  background: var(--index-tint);
+}
+
+html[data-site-theme="wardrobe-index"] .product-save[aria-pressed="true"] {
+  color: var(--accent);
+}
+
+html[data-site-theme="wardrobe-index"] :is(a, button, input, select, textarea):focus-visible,
+html[data-site-theme="wardrobe-index"] :is(.tryon-reference-choice, .tryon-photo-inputs label):focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+html[data-site-theme="wardrobe-index"][data-site-context="admin"] #workspace .panel {
+  border-block-start: 3px solid var(--accent);
+  padding: clamp(16px, 2.5vw, 27px);
+  margin-bottom: 16px;
+}
+
+html[data-site-theme="wardrobe-index"][data-site-context="admin"] .metrics dd {
+  font-family: inherit;
+}
+
+html[data-site-theme="wardrobe-index"][data-site-context="admin"] :is(.provider-status, button.outline:hover) {
+  background: var(--index-tint);
+  border-color: var(--line);
+}
+
+html[data-site-theme="wardrobe-index"][data-site-context="admin"] button:not(.outline, .text-button):hover {
+  background: #283a63;
+}
+
+html[data-site-theme="wardrobe-index"][data-site-context="admin"] :is(input:not([type="checkbox"]), select, textarea) {
+  color: var(--ink);
+  background: var(--index-surface);
+  border-color: var(--line);
+}
+
+@media (min-width: 801px) {
+  html[data-site-theme="wardrobe-index"] .product-hero {
+    grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr);
+    gap: clamp(30px, 5vw, 72px);
+    align-items: start;
+  }
+
+  html[data-site-theme="wardrobe-index"] .product-hero-many .product-copy {
+    padding-top: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  html[data-site-theme="wardrobe-index"] :is(.collection .gallery, .recent-section .gallery) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 520px) {
+  html[data-site-theme="wardrobe-index"] .latest-hero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-site-theme="wardrobe-index"] .latest-hero .hero-cover {
+    width: min(100%, 204px);
+  }
+
+  html[data-site-theme="wardrobe-index"] .hero-cover-caption {
+    font-size: 10px;
+  }
+}
+
+/* 亚麻展室 uses a textile mount to pair the cover portrait with its story. */
+html[data-site-theme="linen-room"],
+html[data-site-theme="linen-room"] :is(body, .product-detail[data-product-preset]) {
+  --paper: #f3ebdf;
+  --paper-light: #fffaf1;
+  --surface: #fffaf1;
+  --ink: #36271d;
+  --muted: #6c5141;
+  --line: #bc9e84;
+  --green: #623e2b;
+  --accent: #7e422a;
+  --linen-mount: #ead7bf;
+  --serif: "Noto Serif SC", "Songti SC", "SimSun", Georgia, serif;
+}
+
+html[data-site-theme="linen-room"] .latest-hero {
+  max-width: 1440px;
+  width: 92%;
+  min-height: 0;
+  grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr);
+  gap: clamp(24px, 7vw, 100px);
+  padding: clamp(28px, 4vw, 64px);
+  margin: clamp(16px, 3vw, 44px) auto;
+  background:
+    repeating-linear-gradient(0deg, #623e2b0a 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(90deg, #fffaf155 0 1px, transparent 1px 5px),
+    var(--linen-mount);
+  border-block: 1px solid var(--line);
+}
+
+html[data-site-theme="linen-room"] .hero-copy {
+  justify-self: end;
+  width: min(100%, 450px);
+  min-width: 0;
+}
+
+html[data-site-theme="linen-room"] .latest-hero h1 {
+  font-size: clamp(33px, 5.3vw, 74px);
+  letter-spacing: .025em;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+html[data-site-theme="linen-room"] .latest-hero .hero-description {
+  color: var(--muted);
+  font-size: clamp(13px, 1.25vw, 16px);
+  line-height: 1.85;
+  max-width: 34em;
+}
+
+html[data-site-theme="linen-room"] .latest-hero .hero-cover {
+  width: min(100%, 384px);
+  max-width: none;
+  margin: 0;
+  padding: clamp(8px, 1.2vw, 17px);
+  background: var(--paper-light);
+  border-block-end: 3px solid var(--line);
+  box-shadow: 0 9px 18px #36271d20;
+}
+
+html[data-site-theme="linen-room"] .hero-cover .photo-window {
+  box-shadow: none;
+}
+
+html[data-site-theme="linen-room"] .hero-cover-caption {
+  margin: 10px 0 1px;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+html[data-site-theme="linen-room"] :is(.collection, .recent-section, .product-section, .models-section) {
+  max-width: 1330px;
+  margin-inline: auto;
+}
+
+html[data-site-theme="linen-room"] .gallery {
+  gap: clamp(18px, 3vw, 42px);
+}
+
+html[data-site-theme="linen-room"] .look-card {
+  background: var(--paper-light);
+  border-block-end: 1px solid var(--line);
+}
+
+html[data-site-theme="linen-room"] :is(.card-meta, .product-card-meta) {
+  padding: 12px clamp(9px, 1.5vw, 20px) 16px;
+}
+
+html[data-site-theme="linen-room"] :is(.card-tags, .gallery-end),
+html[data-site-theme="linen-room"] .search-wrap input::placeholder {
+  color: var(--muted);
+}
+
+html[data-site-theme="linen-room"] .product-card {
+  border-block-end: 4px solid var(--linen-mount);
+}
+
+html[data-site-theme="linen-room"] :is(.model-card, .product-facts, .detail-photo-area, .tryon-photo-stage, .tryon-disclosure) {
+  background: var(--linen-mount);
+}
+
+html[data-site-theme="linen-room"] .product-facts {
+  padding-inline: 14px;
+  margin-inline: 0;
+}
+
+html[data-site-theme="linen-room"] .product-facts > div + div {
+  border-block-start-style: dashed;
+}
+
+html[data-site-theme="linen-room"] :is(footer, .tryon-submit-area) {
+  background: var(--paper);
+}
+
+html[data-site-theme="linen-room"] :is(.detail-dialog, .about-dialog, .compare-dialog, .tryon-dialog, .product-image-dialog) {
+  background: var(--paper-light);
+  color: var(--ink);
+  border-color: var(--line);
+  overscroll-behavior: contain;
+}
+
+html[data-site-theme="linen-room"] :is(.tryon-intro, .tryon-hint, .tryon-local-note, .tryon-section-kicker, .tryon-reference-kind) {
+  color: var(--muted);
+}
+
+html[data-site-theme="linen-room"] :is(.solid-button:hover, .open-caption) {
+  background: #4d2d1e;
+}
+
+html[data-site-theme="linen-room"] .outline-button:hover {
+  background: var(--linen-mount);
+}
+
+html[data-site-theme="linen-room"] :is(.tryon-dialog, #workspace) :focus-visible {
+  outline-color: var(--accent);
+}
+
+html[data-site-theme="linen-room"][data-site-context="admin"] #workspace .panel {
+  border-block-start: 4px solid var(--line);
+}
+
+html[data-site-theme="linen-room"][data-site-context="admin"] #workspace .section-nav {
+  border-block-end: 3px solid var(--line);
+}
+
+html[data-site-theme="linen-room"][data-site-context="admin"] #workspace button:not(.outline, .text-button):hover {
+  background: #4d2d1e;
+}
+
+@media (max-width: 620px) {
+  html[data-site-theme="linen-room"] .latest-hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 23px;
+    padding: 24px 16px;
+  }
+
+  html[data-site-theme="linen-room"] .hero-copy {
+    justify-self: center;
+  }
+
+  html[data-site-theme="linen-room"] .latest-hero .hero-cover {
+    width: min(100%, 288px);
+    justify-self: center;
+  }
+
+  html[data-site-theme="linen-room"] .recent-section .gallery {
+    gap: 22px 14px;
+  }
+}
+
+/* 靛蓝工坊 frames the photograph and garment specifications as drawings. */
+html[data-site-theme="indigo-studio"],
+html[data-site-theme="indigo-studio"] :is(body, .product-detail[data-product-preset]) {
+  --paper: #e8eff8;
+  --paper-light: #f7fbff;
+  --surface: #f7fbff;
+  --ink: #173b61;
+  --muted: #3e5a78;
+  --line: #9eb6d3;
+  --green: #204a7b;
+  --accent: #224d8c;
+  --indigo-rule: #557ba8;
+  --serif: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+}
+
+html[data-site-theme="indigo-studio"] .latest-hero {
+  width: 91%;
+  max-width: 1320px;
+  min-height: 0;
+  align-items: stretch;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 360px);
+  gap: clamp(16px, 3vw, 42px);
+  margin: clamp(16px, 2.5vw, 36px) auto 0;
+  padding: clamp(18px, 3.2vw, 48px);
+  background-color: #dce8f6;
+  background-image:
+    linear-gradient(0deg, #557ba827 1px, transparent 1px),
+    linear-gradient(90deg, #557ba827 1px, transparent 1px);
+  background-size: 18px 18px;
+  border: 1px solid var(--indigo-rule);
+}
+
+html[data-site-theme="indigo-studio"] .hero-copy {
+  align-self: end;
+  width: min(100%, 515px);
+  min-width: 0;
+  padding: clamp(16px, 3vw, 44px);
+  background: var(--paper-light);
+  border: 1px solid var(--indigo-rule);
+}
+
+html[data-site-theme="indigo-studio"] .latest-hero h1 {
+  font-size: clamp(31px, 4vw, 59px);
+  font-weight: 700;
+  letter-spacing: -.04em;
+  line-height: 1.17;
+  line-break: strict;
+  text-wrap: balance;
+}
+
+html[data-site-theme="indigo-studio"] .latest-hero .hero-description {
+  color: var(--muted);
+  max-width: 36em;
+}
+
+html[data-site-theme="indigo-studio"] .latest-hero .hero-cover {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 8px;
+  background: var(--paper-light);
+  border: 2px solid var(--green);
+}
+
+html[data-site-theme="indigo-studio"] .hero-cover .photo-window {
+  box-shadow: none;
+}
+
+html[data-site-theme="indigo-studio"] .hero-cover-caption {
+  margin-top: 8px;
+  padding: 6px 3px 0;
+  border-block-start: 1px solid var(--line);
+  font-variant-numeric: tabular-nums;
+}
+
+html[data-site-theme="indigo-studio"] :is(.collection, .recent-section, .product-section, .models-section) {
+  max-width: 1450px;
+  margin-inline: auto;
+}
+
+html[data-site-theme="indigo-studio"] :is(.gallery, .product-grid) {
+  gap: clamp(10px, 1.25vw, 20px);
+}
+
+html[data-site-theme="indigo-studio"] :is(.look-card, .product-card, .model-card) {
+  background: var(--paper-light);
+  border: 1px solid var(--indigo-rule);
+}
+
+html[data-site-theme="indigo-studio"] :is(.card-meta, .product-card-meta) {
+  padding: 11px clamp(8px, 1.2vw, 18px) 16px;
+  border-block-start: 1px solid var(--indigo-rule);
+}
+
+html[data-site-theme="indigo-studio"] :is(.card-title, .product-card h3) {
+  font-weight: 620;
+  letter-spacing: 0;
+}
+
+html[data-site-theme="indigo-studio"] :is(.card-tags, .gallery-end),
+html[data-site-theme="indigo-studio"] .search-wrap input::placeholder {
+  color: var(--muted);
+}
+
+html[data-site-theme="indigo-studio"] :is(.product-edition-line, .product-facts, .product-design-notes) {
+  font-variant-numeric: tabular-nums;
+}
+
+html[data-site-theme="indigo-studio"] .product-facts {
+  padding-inline: 13px;
+  border: 1px solid var(--indigo-rule);
+  background: var(--paper-light);
+}
+
+html[data-site-theme="indigo-studio"] .product-facts > div:first-child {
+  border-block-start: 0;
+}
+
+html[data-site-theme="indigo-studio"] :is(.detail-dialog, .about-dialog, .compare-dialog, .tryon-dialog, .product-image-dialog) {
+  background: var(--paper-light);
+  color: var(--ink);
+  border-color: var(--indigo-rule);
+  overscroll-behavior: contain;
+}
+
+html[data-site-theme="indigo-studio"] :is(.detail-photo-area, .tryon-photo-stage, .tryon-disclosure, .tryon-submit-area, footer) {
+  background: var(--paper);
+}
+
+html[data-site-theme="indigo-studio"] :is(.tryon-intro, .tryon-hint, .tryon-local-note, .tryon-section-kicker, .tryon-reference-kind) {
+  color: var(--muted);
+}
+
+html[data-site-theme="indigo-studio"] :is(.solid-button:hover, .open-caption) {
+  background: #153556;
+}
+
+html[data-site-theme="indigo-studio"] .outline-button:hover {
+  background: #dce8f6;
+}
+
+html[data-site-theme="indigo-studio"] :is(.tryon-dialog, #workspace) :focus-visible {
+  outline-color: var(--accent);
+}
+
+html[data-site-theme="indigo-studio"][data-site-context="admin"] #workspace :is(h2, .metrics dd) {
+  font-family: var(--serif);
+  font-weight: 650;
+}
+
+html[data-site-theme="indigo-studio"][data-site-context="admin"] #workspace .panel {
+  border-color: var(--indigo-rule);
+  border-inline-start-width: 4px;
+}
+
+html[data-site-theme="indigo-studio"][data-site-context="admin"] #workspace button:not(.outline, .text-button):hover {
+  background: #153556;
+}
+
+@media (min-width: 740px) {
+  html[data-site-theme="indigo-studio"] .product-hero {
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  }
+
+  html[data-site-theme="indigo-studio"] .product-copy {
+    border-block-start: 4px solid var(--indigo-rule);
+    padding-top: clamp(14px, 2.5vw, 36px);
+  }
+}
+
+@media (max-width: 640px) {
+  html[data-site-theme="indigo-studio"] .latest-hero {
+    grid-template-columns: minmax(0, 1fr);
+    width: 92%;
+    padding: 12px;
+  }
+
+  html[data-site-theme="indigo-studio"] .latest-hero .hero-cover {
+    width: min(100%, 275px);
+    justify-self: center;
+  }
+
+  html[data-site-theme="indigo-studio"] .hero-copy {
+    justify-self: center;
+  }
+}
+
+/* 白瓷展柜 centers each display and places its label on a separate ledge. */
+html[data-site-theme="porcelain-case"],
+html[data-site-theme="porcelain-case"] :is(body, .product-detail[data-product-preset]) {
+  --paper: #f5faf9;
+  --paper-light: #fff;
+  --surface: #fff;
+  --ink: #143c38;
+  --muted: #41605f;
+  --line: #b0cbc6;
+  --green: #235a53;
+  --accent: #205e57;
+  --porcelain-back: #e3f0ed;
+  --serif: "Songti SC", "Noto Serif SC", "SimSun", Baskerville, Georgia, serif;
+}
+
+html[data-site-theme="porcelain-case"] .latest-hero {
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  gap: clamp(18px, 3vw, 36px);
+  width: 92%;
+  max-width: 1040px;
+  min-height: 0;
+  margin: clamp(16px, 2.8vw, 40px) auto 0;
+  padding: clamp(24px, 4vw, 52px) 16px clamp(18px, 2.5vw, 38px);
+  background: linear-gradient(var(--porcelain-back) 0 92%, var(--line) 92% calc(92% + 1px), var(--paper) calc(92% + 1px));
+  border: 1px solid var(--line);
+  border-radius: clamp(18px, 4vw, 56px) clamp(18px, 4vw, 56px) 0 0;
+}
+
+html[data-site-theme="porcelain-case"] .hero-copy {
+  max-width: 590px;
+  min-width: 0;
+  text-align: center;
+}
+
+html[data-site-theme="porcelain-case"] .latest-hero .small-line {
+  display: none;
+}
+
+html[data-site-theme="porcelain-case"] .latest-hero h1 {
+  font-size: clamp(30px, 4.7vw, 58px);
+  letter-spacing: .03em;
+  text-wrap: balance;
+}
+
+html[data-site-theme="porcelain-case"] .latest-hero .hero-description {
+  color: var(--muted);
+  max-width: 36em;
+  margin-inline: auto;
+}
+
+html[data-site-theme="porcelain-case"] .hero-actions {
+  justify-content: center;
+}
+
+html[data-site-theme="porcelain-case"] .latest-hero .hero-cover {
+  width: min(100%, 304px);
+  max-width: none;
+  margin: 0;
+  padding: clamp(10px, 1.4vw, 19px) clamp(10px, 1.4vw, 19px) 0;
+  background: var(--paper-light);
+  border: 1px solid var(--line);
+  box-shadow: 0 6px 20px #143c3818;
+}
+
+html[data-site-theme="porcelain-case"] .hero-cover .photo-window {
+  box-shadow: none;
+}
+
+html[data-site-theme="porcelain-case"] .hero-cover-caption {
+  margin: 0;
+  padding: 12px 4px;
+  font-size: 10px;
+  text-align: center;
+}
+
+html[data-site-theme="porcelain-case"] :is(.collection, .recent-section, .product-section, .models-section) {
+  max-width: 1220px;
+  margin-inline: auto;
+}
+
+html[data-site-theme="porcelain-case"] :is(.gallery, .product-grid, .model-gallery) {
+  gap: clamp(14px, 2.2vw, 34px);
+}
+
+html[data-site-theme="porcelain-case"] :is(.look-card, .product-card, .model-card) {
+  padding: clamp(5px, 1vw, 14px) clamp(5px, 1vw, 14px) 0;
+  background: var(--paper-light);
+  border: 1px solid var(--line);
+}
+
+html[data-site-theme="porcelain-case"] .model-card {
+  padding-bottom: 16px;
+}
+
+html[data-site-theme="porcelain-case"] :is(.card-meta, .product-card-meta) {
+  margin-block-start: 8px;
+  padding: 10px 2px 13px;
+  border-block-start: 1px solid var(--line);
+}
+
+html[data-site-theme="porcelain-case"] :is(.card-tags, .gallery-end),
+html[data-site-theme="porcelain-case"] .search-wrap input::placeholder {
+  color: var(--muted);
+}
+
+html[data-site-theme="porcelain-case"] :is(.product-hero-figure, .product-view-card, .product-detail-story) {
+  background: var(--paper-light);
+  border: 1px solid var(--line);
+  padding: clamp(8px, 1.5vw, 19px);
+}
+
+html[data-site-theme="porcelain-case"] .product-hero-figure figcaption {
+  border-top: 1px solid var(--line);
+  padding-bottom: 0;
+  margin-block-start: 10px;
+}
+
+html[data-site-theme="porcelain-case"] :is(.detail-dialog, .about-dialog, .compare-dialog, .tryon-dialog, .product-image-dialog) {
+  background: var(--paper-light);
+  color: var(--ink);
+  border-color: var(--line);
+  overscroll-behavior: contain;
+}
+
+html[data-site-theme="porcelain-case"] :is(.detail-photo-area, .tryon-photo-stage, .tryon-disclosure, footer) {
+  background: var(--porcelain-back);
+}
+
+html[data-site-theme="porcelain-case"] .tryon-submit-area {
+  background: var(--paper-light);
+}
+
+html[data-site-theme="porcelain-case"] :is(.tryon-intro, .tryon-hint, .tryon-local-note, .tryon-section-kicker, .tryon-reference-kind) {
+  color: var(--muted);
+}
+
+html[data-site-theme="porcelain-case"] :is(.solid-button:hover, .open-caption) {
+  background: #143c38;
+}
+
+html[data-site-theme="porcelain-case"] .outline-button:hover {
+  background: var(--porcelain-back);
+}
+
+html[data-site-theme="porcelain-case"] :is(.tryon-dialog, #workspace) :focus-visible {
+  outline-color: var(--accent);
+}
+
+html[data-site-theme="porcelain-case"][data-site-context="admin"] #workspace .panel {
+  border-block-end: 3px double var(--line);
+  border-radius: 10px 10px 0 0;
+}
+
+html[data-site-theme="porcelain-case"][data-site-context="admin"] #workspace .metrics > div {
+  background: var(--paper);
+}
+
+html[data-site-theme="porcelain-case"][data-site-context="admin"] #workspace button:not(.outline, .text-button):hover {
+  background: #143c38;
+}
+
+@media (min-width: 700px) {
+  html[data-site-theme="porcelain-case"] .latest-hero {
+    gap: 24px;
+    padding-block-start: 36px;
+  }
+
+  html[data-site-theme="porcelain-case"] .latest-hero :is(.eyebrow, .hero-meta) {
+    margin-bottom: 10px;
+  }
+
+  html[data-site-theme="porcelain-case"] .latest-hero h1 {
+    margin-block: 8px 12px;
+  }
+
+  html[data-site-theme="porcelain-case"] .latest-hero .hero-description {
+    -webkit-line-clamp: 2;
+    margin-bottom: 17px;
+  }
+
+  html[data-site-theme="porcelain-case"] .hero-archive-note {
+    margin-top: 10px;
+  }
+
+  html[data-site-theme="porcelain-case"] .latest-hero .hero-cover {
+    width: min(100%, 284px);
+  }
+}
+
+@media (max-width: 520px) {
+  html[data-site-theme="porcelain-case"] .latest-hero .hero-cover {
+    width: min(100%, 242px);
+  }
+
+  html[data-site-theme="porcelain-case"] .hero-cover-caption {
+    padding-block: 8px;
+  }
+
+  html[data-site-theme="porcelain-case"] .product-detail-story {
+    gap: 16px;
+  }
+}
+
+/* Night Runway: a low-lit stage and black mats keep the original photographs luminous. */
+html[data-site-theme="night-runway"],
+html[data-site-theme="night-runway"] body,
+html[data-site-theme="night-runway"] .product-detail[data-product-preset] {
+  --paper: #1a141e;
+  --paper-light: #281e2c;
+  --surface: #281e2c;
+  --ink: #fbecf3;
+  --muted: #cbb7c7;
+  --line: #796178;
+  --accent: #f1c4e1;
+  --green: #78466e;
+  --runway-mat: #100d12;
+  --runway-hover: #5f3656;
+  --danger: #ffc0b8;
+}
+
+html[data-site-theme="night-runway"] {
+  color-scheme: dark;
+}
+
+html[data-site-theme="night-runway"] :is(
+  .hero-description, .hero-meta, .detail-description, .detail-story p, .view-moment,
+  .piece-list .piece-number, .piece-list .piece-role, .design-list li, .comparison-card ul,
+  .about-dialog p:not(.eyebrow), .gallery-end, .product-save[aria-pressed="true"],
+  .product-view-card[data-design-study="true"] > p, .search-wrap kbd
+) {
+  color: var(--muted);
+}
+
+html[data-site-theme="night-runway"] .search-wrap input::placeholder {
+  color: var(--muted);
+}
+
+html[data-site-theme="night-runway"] .site-header {
+  border-color: var(--line);
+}
+
+html[data-site-theme="night-runway"] .site-header nav a[aria-current="page"] {
+  color: var(--accent);
+  box-shadow: inset 0 -2px var(--accent);
+}
+
+html[data-site-theme="night-runway"] .season-options label:has(input:checked),
+html[data-site-theme="night-runway"] .category-button.active {
+  color: #fff;
+}
+
+html[data-site-theme="night-runway"] .latest-hero {
+  max-width: 1480px;
+  min-height: 0;
+  grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr);
+  gap: clamp(20px, 6vw, 94px);
+  padding: clamp(28px, 5.5vw, 80px) 7%;
+  background: radial-gradient(ellipse at 73% 44%, #3b2a40 0%, var(--paper) 66%);
+}
+
+html[data-site-theme="night-runway"] .hero-copy {
+  align-self: center;
+  max-width: 410px;
+}
+
+html[data-site-theme="night-runway"] .latest-hero h1 {
+  font-size: clamp(2.2rem, 4.6vw, 4.35rem);
+  line-height: 1.26;
+  letter-spacing: .03em;
+  text-wrap: balance;
+}
+
+html[data-site-theme="night-runway"] .latest-hero .hero-cover {
+  max-width: none;
+  width: min(100%, 410px);
+  padding: clamp(9px, 1.2vw, 18px);
+  border: 1px solid var(--line);
+  background: var(--runway-mat);
+}
+
+html[data-site-theme="night-runway"] .hero-cover .photo-window {
+  box-shadow: none;
+}
+
+html[data-site-theme="night-runway"] .hero-cover-caption {
+  margin: 12px 0 0;
+  letter-spacing: .08em;
+}
+
+html[data-site-theme="night-runway"] .solid-button:is(:hover, :active) {
+  background: var(--runway-hover);
+}
+
+html[data-site-theme="night-runway"] .outline-button {
+  color: var(--accent);
+  border-color: var(--line);
+}
+
+html[data-site-theme="night-runway"] :is(
+  .outline-button, .load-more, .category-button, .detail-tags > a, .icon-button
+):hover {
+  background: var(--runway-hover);
+}
+
+html[data-site-theme="night-runway"] .product-filters a:hover {
+  border-color: var(--accent);
+}
+
+html[data-site-theme="night-runway"] :is(
+  .card-number, .icon-button, .product-image-hint, .dialog-close,
+  .view-selector button, .sort-label select, .content-filters select
+) {
+  color: var(--ink);
+  background: var(--paper-light);
+  border-color: var(--line);
+}
+
+html[data-site-theme="night-runway"] :is(
+  .icon-button.selected.compare, .view-selector button.active, .open-caption
+) {
+  color: #fff;
+  background: var(--green);
+}
+
+html[data-site-theme="night-runway"] :is(dialog, .product-image-dialog) {
+  overscroll-behavior: contain;
+}
+
+html[data-site-theme="night-runway"] dialog::backdrop {
+  background: #100d12dc;
+}
+
+html[data-site-theme="night-runway"] :is(
+  .image-unavailable, .card-pending, .detail-photo-frame, .product-card-photo,
+  .product-main-image, .product-detail-image, .product-view-image, .product-thumbnails img
+) {
+  background: var(--runway-mat);
+}
+
+html[data-site-theme="night-runway"] :is(.recent-section, .models-section, .product-section) {
+  max-width: 1370px;
+}
+
+html[data-site-theme="night-runway"] :is(.recent-section .gallery, .product-grid) {
+  gap: clamp(16px, 3.6vw, 52px);
+}
+
+html[data-site-theme="night-runway"] :is(.look-card .image-zone, .product-card-photo) {
+  outline: 1px solid var(--line);
+  outline-offset: 3px;
+}
+
+html[data-site-theme="night-runway"] :is(.card-meta, .product-card-meta) {
+  padding-top: 16px;
+}
+
+html[data-site-theme="night-runway"] .product-copy h1 {
+  text-wrap: balance;
+  letter-spacing: .06em;
+}
+
+html[data-site-theme="night-runway"] :is(.detail-story, .product-worn-section, .closing-note, footer) {
+  background: var(--paper-light);
+}
+
+html[data-site-theme="night-runway"] .detail-photo-area {
+  background: var(--runway-mat);
+}
+
+html[data-site-theme="night-runway"] :is(
+  .tryon-dialog, .tryon-submit-area, .tryon-disclosure, .tryon-reference-choice, .tryon-waiting,
+  .tryon-dialog select, .tryon-photo-stage, .tryon-reference-thumbnail, .tryon-photo-skeleton
+) {
+  color: var(--ink);
+  background: var(--paper-light);
+  border-color: var(--line);
+}
+
+html[data-site-theme="night-runway"] :is(.tryon-photo-stage, .tryon-photo-skeleton) {
+  background: var(--runway-mat);
+}
+
+html[data-site-theme="night-runway"] .tryon-reference-choice:has(input:checked) {
+  background: var(--runway-hover);
+}
+
+html[data-site-theme="night-runway"] :is(
+  .tryon-entry, .tryon-intro, .tryon-flow li, .tryon-section-kicker, .tryon-hint,
+  .tryon-local-note, .tryon-reference-framing, .tryon-photo-placeholder, .tryon-progress-steps li,
+  .tryon-skeleton-caption, .tryon-job-status, .tryon-reference-kind, #tryon-context,
+  #tryon-status, #tryon-jobs-status
+) {
+  color: var(--muted);
+}
+
+html[data-site-theme="night-runway"] :is(.tryon-flow li[aria-current], .tryon-progress-steps li[data-state="current"]) {
+  color: var(--ink);
+  border-color: var(--accent);
+}
+
+html[data-site-theme="night-runway"] .tryon-job-error {
+  color: var(--danger);
+}
+
+html[data-site-theme="night-runway"] :is(
+  .tryon-disclosure input, .tryon-dialog, .tryon-flow, .tryon-history-area,
+  .tryon-reference-section, .tryon-job, .tryon-entry, .tryon-photo-placeholder
+) {
+  accent-color: var(--green);
+  border-color: var(--line);
+}
+
+html[data-site-theme="night-runway"] .tryon-reference-choice:has(input:checked) {
+  border-color: var(--accent);
+}
+
+html[data-site-theme="night-runway"] :is(
+  button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible,
+  .tryon-photo-inputs label:focus-within, .tryon-reference-choice:focus-within
+) {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+html[data-site-theme="night-runway"][data-site-context="admin"] :is(input, select, textarea) {
+  color: var(--ink);
+  background: var(--runway-mat);
+  border-color: var(--line);
+}
+
+html[data-site-theme="night-runway"][data-site-context="admin"] button:not(.outline, .text-button, .danger) {
+  background: var(--green);
+}
+
+html[data-site-theme="night-runway"][data-site-context="admin"] button:hover:not(:disabled, .danger) {
+  background: var(--runway-hover);
+}
+
+html[data-site-theme="night-runway"][data-site-context="admin"] :is(
+  .section-nav, .provider-status, .result-preview, .model-card img
+) {
+  color: var(--ink);
+  background: var(--runway-mat);
+}
+
+html[data-site-theme="night-runway"][data-site-context="admin"] .section-nav {
+  gap: clamp(12px, 2vw, 28px);
+  padding-inline: 14px;
+}
+
+html[data-site-theme="night-runway"][data-site-context="admin"] :is(.empty, .status-chip) {
+  color: var(--muted);
+  border-color: var(--line);
+}
+
+html[data-site-theme="night-runway"][data-site-context="admin"] .skip-link {
+  color: var(--runway-mat);
+}
+
+@media (max-width: 620px) {
+  html[data-site-theme="night-runway"] .latest-hero {
+    grid-template-columns: minmax(0, 1fr);
+    background: radial-gradient(ellipse at 60% 72%, #3b2a40 0%, var(--paper) 72%);
+  }
+
+  html[data-site-theme="night-runway"] .latest-hero .hero-cover {
+    max-width: 330px;
+  }
+}
+
+@media (min-width: 1040px) {
+  html[data-site-theme="night-runway"] .collection .gallery {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 48px 36px;
+  }
+}
+
+/* City Billboard: architectural blocks and a headline the size of a street poster. */
+html[data-site-theme="city-billboard"],
+html[data-site-theme="city-billboard"] body,
+html[data-site-theme="city-billboard"] .product-detail[data-product-preset] {
+  --paper: #f6f8fc;
+  --paper-light: #fff;
+  --surface: #fff;
+  --ink: #141a21;
+  --muted: #4d596b;
+  --line: #a9bbcf;
+  --accent: #153dac;
+  --green: #153dac;
+  --billboard-field: #e3ebfb;
+  --billboard-hover: #0b2876;
+}
+
+html[data-site-theme="city-billboard"] .site-header {
+  border-bottom: 4px solid var(--accent);
+}
+
+html[data-site-theme="city-billboard"] .brand-mark,
+html[data-site-theme="city-billboard"] :is(
+  .latest-hero h1, .section-heading h1, .section-heading h2, .collection-heading h2,
+  .card-title, .product-card h3, .product-copy h1, .detail-info h2
+) {
+  font-family: var(--sans);
+  font-weight: 800;
+  letter-spacing: -.025em;
+}
+
+html[data-site-theme="city-billboard"] .latest-hero {
+  max-width: 1640px;
+  min-height: 0;
+  grid-template-columns: minmax(0, 1.36fr) minmax(0, 1fr);
+  gap: clamp(22px, 4vw, 64px);
+  padding: clamp(26px, 4.5vw, 72px) clamp(16px, 6vw, 92px);
+  background: linear-gradient(90deg, var(--billboard-field) 0 58%, var(--paper) 58%);
+}
+
+html[data-site-theme="city-billboard"] .hero-copy {
+  padding: clamp(16px, 2.5vw, 42px) 0;
+  min-width: 0;
+}
+
+html[data-site-theme="city-billboard"] .latest-hero h1 {
+  font-size: clamp(2.45rem, 6.4vw, 6.1rem);
+  line-height: 1.13;
+  line-break: strict;
+  text-wrap: balance;
+}
+
+html[data-site-theme="city-billboard"] .hero-description {
+  color: var(--muted);
+}
+
+html[data-site-theme="city-billboard"] .latest-hero .hero-cover {
+  width: min(100%, 390px);
+  max-width: none;
+  margin: 0 auto;
+  padding: 10px 10px 0;
+  background: var(--ink);
+}
+
+html[data-site-theme="city-billboard"] .hero-cover .photo-window {
+  box-shadow: none;
+}
+
+html[data-site-theme="city-billboard"] .hero-cover-caption {
+  margin: 0;
+  padding: 9px 2px;
+  color: #e3ebfb;
+  font-size: 11px;
+}
+
+html[data-site-theme="city-billboard"] :is(.solid-button, .toast) {
+  background: var(--accent);
+}
+
+html[data-site-theme="city-billboard"] .solid-button:hover {
+  background: var(--billboard-hover);
+}
+
+html[data-site-theme="city-billboard"] :is(
+  .outline-button, .load-more, .category-button, .detail-tags > a
+):hover {
+  background: var(--billboard-field);
+}
+
+html[data-site-theme="city-billboard"] .category-button.active:hover {
+  background: var(--billboard-hover);
+}
+
+html[data-site-theme="city-billboard"] :is(.collection-heading, .section-heading) {
+  padding-bottom: 12px;
+  border-bottom: 3px solid var(--ink);
+}
+
+html[data-site-theme="city-billboard"] :is(.collection .gallery, .recent-section .gallery, .product-grid) {
+  gap: 30px clamp(12px, 1.6vw, 24px);
+}
+
+html[data-site-theme="city-billboard"] :is(.look-card, .product-card) {
+  border-bottom: 2px solid var(--line);
+}
+
+html[data-site-theme="city-billboard"] .card-title {
+  font-size: clamp(1rem, 1.7vw, 1.3rem);
+  text-wrap: balance;
+}
+
+html[data-site-theme="city-billboard"] .card-number {
+  top: 0;
+  left: 0;
+  padding: 3px 8px;
+  background: var(--accent);
+  color: #fff;
+  font: 700 12px/1.5 var(--sans);
+  font-variant-numeric: tabular-nums;
+}
+
+html[data-site-theme="city-billboard"] :is(.product-main-image, .product-view-image, .detail-photo-area) {
+  background-color: var(--billboard-field);
+}
+
+html[data-site-theme="city-billboard"] :is(.product-chapters, .product-worn-section, .detail-story, .tryon-disclosure) {
+  border-top: 2px solid var(--accent);
+  background: var(--billboard-field);
+}
+
+html[data-site-theme="city-billboard"] .product-design-notes li {
+  border-color: var(--accent);
+}
+
+html[data-site-theme="city-billboard"] :is(dialog, .product-image-dialog) {
+  overscroll-behavior: contain;
+}
+
+html[data-site-theme="city-billboard"] footer {
+  border-top: 4px solid var(--accent);
+  background: var(--billboard-field);
+}
+
+html[data-site-theme="city-billboard"] :is(
+  button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible,
+  .tryon-photo-inputs label:focus-within, .tryon-reference-choice:focus-within
+) {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+html[data-site-theme="city-billboard"][data-site-context="admin"] :is(h1, h2, .brand > span) {
+  font-family: inherit;
+  font-weight: 750;
+  letter-spacing: -.015em;
+}
+
+html[data-site-theme="city-billboard"][data-site-context="admin"] .panel {
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--ink);
+}
+
+html[data-site-theme="city-billboard"][data-site-context="admin"] :is(.metrics > div, .provider-status) {
+  background: var(--billboard-field);
+}
+
+html[data-site-theme="city-billboard"][data-site-context="admin"] .section-nav {
+  border-bottom-width: 2px;
+}
+
+html[data-site-theme="city-billboard"][data-site-context="admin"] button:hover:not(:disabled, .outline, .text-button, .danger) {
+  background: var(--billboard-hover);
+}
+
+@media (max-width: 620px) {
+  html[data-site-theme="city-billboard"] .latest-hero {
+    grid-template-columns: minmax(0, 1fr);
+    background: linear-gradient(var(--billboard-field) 0 62%, var(--paper) 62%);
+  }
+
+  html[data-site-theme="city-billboard"] .hero-copy {
+    padding: 0;
+  }
+
+  html[data-site-theme="city-billboard"] .latest-hero .hero-cover {
+    max-width: 280px;
+  }
+}
+
+/* Garden Walk: a continuous pale green ground, rounded photo beds, and an open path through them. */
+html[data-site-theme="garden-walk"],
+html[data-site-theme="garden-walk"] body,
+html[data-site-theme="garden-walk"] .product-detail[data-product-preset] {
+  --paper: #edf4e7;
+  --paper-light: #f8fcf4;
+  --surface: #f8fcf4;
+  --ink: #1d3224;
+  --muted: #4f6350;
+  --line: #a8bba2;
+  --accent: #366434;
+  --green: #285436;
+  --garden-bed: #dce9d3;
+  --garden-hover: #1c4228;
+}
+
+html[data-site-theme="garden-walk"] .latest-hero {
+  max-width: 1370px;
+  min-height: 0;
+  gap: clamp(20px, 5vw, 68px);
+  grid-template-columns: minmax(0, .95fr) minmax(0, 1fr);
+  padding: clamp(26px, 4vw, 60px) 7% clamp(40px, 5vw, 74px);
+}
+
+html[data-site-theme="garden-walk"] .hero-copy {
+  max-width: 425px;
+  min-width: 0;
+}
+
+html[data-site-theme="garden-walk"] .latest-hero h1 {
+  font-size: clamp(2rem, 4.4vw, 4.05rem);
+  line-height: 1.32;
+  text-wrap: balance;
+}
+
+html[data-site-theme="garden-walk"] .hero-description {
+  color: var(--muted);
+}
+
+html[data-site-theme="garden-walk"] .latest-hero .hero-cover {
+  max-width: none;
+  width: min(100%, 365px);
+  padding: clamp(10px, 1.7vw, 23px);
+  padding-top: clamp(24px, 4vw, 50px);
+  border-radius: 45px 45px 22px 22px;
+  background: var(--garden-bed);
+  box-shadow: inset 0 0 0 1px var(--line), 0 12px 28px #203c231c;
+}
+
+html[data-site-theme="garden-walk"] .hero-cover .photo-window {
+  box-shadow: none;
+}
+
+html[data-site-theme="garden-walk"] .hero-cover-caption {
+  margin-top: 12px;
+  text-align: center;
+}
+
+html[data-site-theme="garden-walk"] :is(.hero-actions button, .product-actions .solid-button, .filter-toggle) {
+  border-radius: 999px;
+}
+
+html[data-site-theme="garden-walk"] .solid-button:hover {
+  background: var(--garden-hover);
+}
+
+html[data-site-theme="garden-walk"] :is(.look-card .photo-window, .card-pending, .product-card-photo, .model-card .photo-window) {
+  border-radius: 18px 18px 6px 6px;
+}
+
+html[data-site-theme="garden-walk"] :is(.recent-section, .product-section, .models-section) {
+  max-width: 1330px;
+}
+
+html[data-site-theme="garden-walk"] :is(.collection .gallery, .recent-section .gallery, .product-grid) {
+  gap: clamp(23px, 3.1vw, 44px) clamp(12px, 2vw, 30px);
+}
+
+html[data-site-theme="garden-walk"] :is(.product-card, .look-card) {
+  padding: clamp(5px, .8vw, 12px);
+  border: 1px solid var(--line);
+  border-radius: 22px 22px 9px 9px;
+  background: var(--paper-light);
+}
+
+html[data-site-theme="garden-walk"] :is(.card-meta, .product-card-meta) {
+  padding-inline: 4px;
+}
+
+html[data-site-theme="garden-walk"] .product-main-image {
+  border-radius: 28px 28px 10px 10px;
+  background: var(--garden-bed);
+}
+
+html[data-site-theme="garden-walk"] :is(.product-worn-section, .detail-photo-area, .detail-story, .tryon-disclosure) {
+  background: var(--garden-bed);
+}
+
+html[data-site-theme="garden-walk"] :is(.detail-dialog, .compare-dialog, .about-dialog, .product-image-dialog, .compare-tray) {
+  border-radius: 16px;
+}
+
+html[data-site-theme="garden-walk"] :is(dialog, .product-image-dialog) {
+  overscroll-behavior: contain;
+}
+
+html[data-site-theme="garden-walk"] :is(.view-selector button.active, .tryon-reference-choice:has(input:checked)) {
+  border-color: var(--green);
+}
+
+html[data-site-theme="garden-walk"] :is(button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+html[data-site-theme="garden-walk"] footer {
+  background: var(--garden-bed);
+}
+
+html[data-site-theme="garden-walk"][data-site-context="admin"] .panel {
+  border-radius: 22px 22px 8px 8px;
+}
+
+html[data-site-theme="garden-walk"][data-site-context="admin"] .section-nav {
+  gap: clamp(12px, 2vw, 24px);
+  border-radius: 0 0 15px 15px;
+}
+
+html[data-site-theme="garden-walk"][data-site-context="admin"] :is(.metrics > div, .provider-status) {
+  background: var(--garden-bed);
+}
+
+@media (min-width: 1100px) {
+  html[data-site-theme="garden-walk"] :is(.recent-section .look-card, #home-product-gallery .product-card):nth-child(3n + 2) {
+    margin-block: 22px 0;
+  }
+
+  html[data-site-theme="garden-walk"] :is(.recent-section .look-card, #home-product-gallery .product-card):nth-child(3n + 1) {
+    margin-block: 0 22px;
+  }
+}
+
+@media (max-width: 620px) {
+  html[data-site-theme="garden-walk"] .latest-hero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-site-theme="garden-walk"] .latest-hero .hero-cover {
+    max-width: 300px;
+  }
+}
+
+/* Sunset Notes: one diary column, with the date and margin rules framing each photograph. */
+html[data-site-theme="sunset-notes"],
+html[data-site-theme="sunset-notes"] body,
+html[data-site-theme="sunset-notes"] .product-detail[data-product-preset] {
+  --paper: #fff1e5;
+  --paper-light: #fff8f0;
+  --surface: #fff8f0;
+  --ink: #44251f;
+  --muted: #765347;
+  --line: #d2a28e;
+  --accent: #a13f32;
+  --green: #843630;
+  --notes-sheet: #f9e2d5;
+  --notes-hover: #652b27;
+}
+
+html[data-site-theme="sunset-notes"] .latest-hero {
+  max-width: 860px;
+  min-height: 0;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(26px, 4vw, 44px);
+  padding: clamp(30px, 5vw, 66px) clamp(18px, 6vw, 82px);
+}
+
+html[data-site-theme="sunset-notes"] .hero-copy {
+  max-width: 520px;
+  padding-inline-start: clamp(10px, 2.4vw, 34px);
+  border-inline-start: 2px solid var(--line);
+}
+
+html[data-site-theme="sunset-notes"] .latest-hero h1 {
+  max-width: 13em;
+  font-size: clamp(2rem, 4.2vw, 3.7rem);
+  line-height: 1.34;
+  letter-spacing: .045em;
+  text-wrap: balance;
+}
+
+html[data-site-theme="sunset-notes"] .hero-publication {
+  color: var(--green);
+  font-variant-numeric: tabular-nums;
+}
+
+html[data-site-theme="sunset-notes"] .latest-hero .hero-description {
+  color: var(--muted);
+  font-size: clamp(.75rem, 1.2vw, .875rem);
+  max-width: 32em;
+}
+
+html[data-site-theme="sunset-notes"] .latest-hero .hero-cover {
+  max-width: none;
+  width: min(100%, 480px);
+  margin: 0 auto;
+  padding: clamp(14px, 3vw, 38px) clamp(24px, 6vw, 70px) 14px;
+  background: var(--notes-sheet);
+  border-block: 1px solid var(--line);
+}
+
+html[data-site-theme="sunset-notes"] .hero-cover .photo-window {
+  box-shadow: 0 0 0 1px var(--line);
+}
+
+html[data-site-theme="sunset-notes"] .hero-cover-caption {
+  margin-top: 10px;
+  text-align: center;
+}
+
+html[data-site-theme="sunset-notes"] .solid-button:hover {
+  background: var(--notes-hover);
+}
+
+html[data-site-theme="sunset-notes"] :is(.outline-button, .category-button, .load-more, .detail-tags > a):hover {
+  background: var(--notes-sheet);
+}
+
+html[data-site-theme="sunset-notes"] .category-button.active:hover {
+  background: var(--notes-hover);
+}
+
+html[data-site-theme="sunset-notes"] :is(.recent-section, .models-section, .product-section) {
+  max-width: 1150px;
+}
+
+html[data-site-theme="sunset-notes"] :is(.collection-heading, .section-heading) {
+  border-inline-start: 2px solid var(--line);
+  padding-inline-start: clamp(9px, 1.7vw, 22px);
+}
+
+html[data-site-theme="sunset-notes"] :is(.card-meta, .product-card-meta) {
+  margin-top: 10px;
+  padding: 9px 0 7px 10px;
+  border-inline-start: 1px solid var(--line);
+}
+
+html[data-site-theme="sunset-notes"] :is(.look-card .image-zone, .product-card-photo) {
+  outline: 1px solid var(--line);
+  outline-offset: 2px;
+}
+
+html[data-site-theme="sunset-notes"] :is(.card-publication, .product-edition-line > span) {
+  font-variant-numeric: tabular-nums;
+  color: var(--green);
+}
+
+html[data-site-theme="sunset-notes"] .product-hero-figure {
+  padding: clamp(8px, 2vw, 24px) clamp(12px, 3vw, 36px) 0;
+  border-inline: 1px solid var(--line);
+  background: var(--notes-sheet);
+}
+
+html[data-site-theme="sunset-notes"] .product-story-intro {
+  margin-inline: auto;
+  max-width: 560px;
+}
+
+html[data-site-theme="sunset-notes"] :is(.product-worn-section, .detail-photo-area, .detail-story, .tryon-disclosure, footer) {
+  background: var(--notes-sheet);
+}
+
+html[data-site-theme="sunset-notes"] :is(dialog, .product-image-dialog) {
+  overscroll-behavior: contain;
+}
+
+html[data-site-theme="sunset-notes"] :is(
+  button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible,
+  .tryon-photo-inputs label:focus-within, .tryon-reference-choice:focus-within
+) {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+html[data-site-theme="sunset-notes"][data-site-context="admin"] .panel {
+  border-inline-start: 3px double var(--line);
+}
+
+html[data-site-theme="sunset-notes"][data-site-context="admin"] .section-nav {
+  padding-inline: clamp(10px, 1.5vw, 20px);
+  background: var(--notes-sheet);
+}
+
+html[data-site-theme="sunset-notes"][data-site-context="admin"] :is(.metrics > div, .provider-status) {
+  background: var(--notes-sheet);
+}
+
+html[data-site-theme="sunset-notes"][data-site-context="admin"] button:hover:not(:disabled, .outline, .text-button, .danger) {
+  background: var(--notes-hover);
+}
+
+@media (min-width: 940px) {
+  html[data-site-theme="sunset-notes"] .collection .gallery {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 46px clamp(18px, 3vw, 42px);
+  }
+}

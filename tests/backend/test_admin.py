@@ -1,5 +1,8 @@
 import json
+import sqlite3
 import stat
+from concurrent.futures import ThreadPoolExecutor
+from contextlib import closing
 from dataclasses import replace
 
 import pytest
@@ -7,6 +10,7 @@ from fastapi.testclient import TestClient
 
 from backend.app import create_app
 from backend.settings import Settings
+from backend.store import Store
 
 
 def login(client, root):
@@ -66,6 +70,48 @@ def test_site_theme_is_public_to_read_and_admin_only_to_save(tmp_path, admin_hos
     isolated = Settings(data_dir=tmp_path / "isolated", admin_host=admin_host)
     with TestClient(create_app(isolated), base_url="https://localhost") as separate:
         assert separate.get(public).json() == editorial
+
+
+def test_site_theme_migrates_legacy_sqlite_and_persists_all_new_options(tmp_path):
+    with closing(sqlite3.connect(tmp_path / "state.sqlite3")) as db:
+        db.executescript("""
+            PRAGMA journal_mode=WAL;
+            CREATE TABLE site_preferences (
+                id INTEGER PRIMARY KEY CHECK(id=1),
+                theme TEXT NOT NULL CHECK(theme IN ('editorial', 'studio')));
+            INSERT INTO site_preferences (id, theme) VALUES (1, 'studio');
+        """)
+    with ThreadPoolExecutor(max_workers=4) as workers:
+        futures = [workers.submit(Store, tmp_path) for _ in range(4)]
+        assert [future.result().site_theme() for future in futures] == ["studio"] * 4
+
+    settings = Settings(data_dir=tmp_path)
+    public = "/api/site-theme"
+    admin = "/api/admin/site-theme"
+    with TestClient(create_app(settings), base_url="https://admin.localhost") as controller:
+        headers = login(controller, tmp_path)
+        assert controller.get(admin).json() == {"theme": "studio"}
+        for theme in (
+            "contact-sheet",
+            "salon-album",
+            "wardrobe-index",
+            "linen-room",
+            "indigo-studio",
+            "porcelain-case",
+            "night-runway",
+            "city-billboard",
+            "garden-walk",
+            "sunset-notes",
+        ):
+            setting = {"theme": theme}
+            assert controller.put(admin, json=setting, headers=headers).json() == setting
+            assert controller.get(admin).json() == setting
+            with TestClient(create_app(settings), base_url="https://localhost") as restarted:
+                assert restarted.get(public).json() == setting
+
+    with pytest.raises(sqlite3.IntegrityError), Store(tmp_path).connect() as db:
+        db.execute("UPDATE site_preferences SET theme='unknown' WHERE id=1")
+    assert Store(tmp_path).site_theme() == "sunset-notes"
 
 
 def test_admin_first_init_persistent_hash_login_password_logout(tmp_path):
