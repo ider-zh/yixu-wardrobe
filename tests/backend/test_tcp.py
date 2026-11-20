@@ -14,6 +14,7 @@ def test_real_uvicorn_factory_on_loopback_separates_hosts(tmp_path):
     env = {
         **os.environ,
         "YIXU_DATA_DIR": str(tmp_path / "private"),
+        "YIXU_CONTENT_ROOT": str(tmp_path / "content"),
         "YIXU_PUBLIC_HOST": "localhost",
         "YIXU_ADMIN_HOST": "admin.localhost",
         "YIXU_SECURE_COOKIES": "false",

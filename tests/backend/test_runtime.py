@@ -14,6 +14,8 @@ def test_optional_environment_factory_real_model_and_no_import_initialization(
     root = tmp_path / "private"
     model = os.environ.get("YIXU_TEST_FACE_MODEL")
     monkeypatch.setenv("YIXU_DATA_DIR", str(root))
+    # Catalog import has its own tests. Keep this startup check independent of gallery size.
+    monkeypatch.setenv("YIXU_CONTENT_ROOT", str(tmp_path / "content"))
     monkeypatch.setenv("YIXU_PUBLIC_HOST", "localhost")
     monkeypatch.setenv("YIXU_ADMIN_HOST", "admin.localhost")
     monkeypatch.setenv("YIXU_SECURE_COOKIES", "false")

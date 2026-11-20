@@ -25,13 +25,16 @@ assert.match(read('deploy/dev-worker.service'),/TimeoutStopSec=3700/);
 
 const python=String.raw`
 import importlib.util,json,os,pathlib,pwd,subprocess,sys,tempfile,urllib.error
+from itertools import count
+from types import SimpleNamespace
 spec=importlib.util.spec_from_file_location('deployment',sys.argv[1]);m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
 real_verify=m.verify
 real_recheck=m.recheck_candidate
 sha='a'*40;old='b'*40
 with tempfile.TemporaryDirectory() as temporary:
  root=pathlib.Path(temporary)/'dev';state=pathlib.Path(temporary)/'private';root.mkdir();state.mkdir();(root/'releases').mkdir();(root/'repository.git').mkdir();(root/'repository.git'/'HEAD').write_text('ref: refs/heads/dev')
- m.ROOT=root;m.STATE=state;m.DATA=state/"appdata";m.USER=pwd.getpwuid(os.getuid()).pw_name;m.run=lambda args,**kw:sha if 'rev-parse' in args else '';m.time.sleep=lambda _:None
+ m.ROOT=root;m.STATE=state;m.DATA=state/"appdata";m.USER=pwd.getpwuid(os.getuid()).pw_name;m.run=lambda args,**kw:sha if 'rev-parse' in args else ''
+ m.time=SimpleNamespace(monotonic=count().__next__,sleep=lambda _:None)
  old_release=root/'releases'/old;old_release.mkdir();m.switch_current(old_release)
  sentinel=state/'state.sqlite3';sentinel.write_bytes(b'private visitor state must survive rollback')
  calls=[];m.stop_worker=lambda:calls.append('stop-worker');m.restart=lambda:calls.append('restart');m.ci_succeeded=lambda _:False

@@ -485,12 +485,13 @@ def deliver(origin, retry=False):
         switched = True
         restart()
         result = None
-        for attempt in range(15):
+        deadline = time.monotonic() + 60
+        while True:
             try:
                 result = verify(release, origin)
                 break
             except (OSError, ValueError, RuntimeError):
-                if attempt == 14:
+                if time.monotonic() >= deadline:
                     raise
                 time.sleep(1)
         receipt = {
