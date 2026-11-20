@@ -1,0 +1,11 @@
+[Unit]
+Description=Check the Yixu development HTTPS certificate twice daily
+
+[Timer]
+OnCalendar=*-*-* 04,16:20:00
+RandomizedDelaySec=30min
+Persistent=true
+Unit=yixu-dev-cert-renew.service
+
+[Install]
+WantedBy=timers.target

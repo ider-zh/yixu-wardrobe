@@ -84,3 +84,13 @@ node qa/regression-dev-deploy.mjs
 ```
 
 回归覆盖 CI 门禁、固定服务/目录隔离、同源后台、管理员鉴权及核心文件核验、切换失败恢复、数据库不回滚、同一失败 SHA 不循环尝试。真实服务器还必须执行 `nginx -t`、实际 HTTP/HTTPS与 API/后台检查，并核对正式虚拟主机、服务 PID/启动时间、当前版本与配置哈希保持原样。
+
+## 仅开发证书的续期
+
+`dev-cert-renew.service` 与 `dev-cert-renew.timer` 每日两次检查 `dev-yixu.8882088.xyz` 的独立证书，只使用 `certbot renew --cert-name dev-yixu.8882088.xyz`，不改变正式站或原有 `certbot.timer` 的配置。确需现有 loopback 传输时，仅在私有 `/etc/yixu-wardrobe-dev/cert-renew.env` 设置 HTTP(S) 代理，不携带应用密钥。续期成功才执行 Nginx 语法检查与平滑 reload；正常未到续期时间不会重新签发。
+
+安装为 `yixu-dev-cert-renew.service` / `.timer` 后启用后者。私有环境文件须 0600；首次安装验证 unit、启动一次续期检查并检查 timer。开发站证书、自动发布与正式服务状态分别核验。
+
+## 构建资源保护
+
+开发发布 unit 对构建进程及其子进程设置半核 CPU 配额、较低 CPU/IO 权重、物理内存 25% 软阈值及 35% 上限，并限制任务数。达到内存上限时停止开发构建，让该项失败局限在开发发布 unit，减少对正式应用的影响；这些限制不作用于正式服务。限额需要随 unit 安装后才在服务器生效，源码存在不代表现场已经启用。服务器不可访问时暂停发布，先通过控制台检查内存、负载、磁盘和 OOM，再恢复受控发布；不通过未经核实的重启或删除数据恢复。

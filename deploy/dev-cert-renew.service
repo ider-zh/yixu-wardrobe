@@ -1,0 +1,11 @@
+[Unit]
+Description=Renew only the Yixu development HTTPS certificate
+After=network-online.target nginx.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=-/etc/yixu-wardrobe-dev/cert-renew.env
+ExecStart=/usr/bin/certbot renew --cert-name dev-yixu.8882088.xyz --quiet --deploy-hook "/usr/sbin/nginx -t && /usr/bin/systemctl reload nginx"
+TimeoutStartSec=15min
+UMask=0077
