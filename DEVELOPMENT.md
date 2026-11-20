@@ -125,6 +125,10 @@ node qa/regression-ci.mjs
 
 ## 历史图片与部署
 
+开发迭代使用 `dev` 分支，目标为 `https://dev-yixu.8882088.xyz/` 与同源后台 `/admin/`。开发服务器在该提交 CI 成功后执行本地构建、后端测试及实际发布核验，再切换独立开发版本；正式站不随开发分支更新。独立目录、用户、数据、失败恢复、定时器和域名/证书准备见[开发站发布说明](deploy/dev-README.md)。首次配置和真实交付状态以对应回执为准，不由文档或 CI 推断已上线。正式后台域名迁移留待后续获授权的正式站升级处理。
+
+后台访问概览新增离线 IP 国家与中国省级统计，只有新页面访问会记录粗粒度归属，不保存原始 IP，不回填历史数据。数据库不进入 Git 或公开包；缺失、损坏、保留地址或查不到的地址正常降级，来源与局限在后台披露。配置与数据边界见[后端说明](backend/README.md)；运行 `node qa/regression-admin.mjs`、`node qa/regression-visitor-geo.mjs` 以及 `uv run --frozen pytest -q` 验证管理员交互、移动端地域显示和私有 API。
+
 200 张历史写真于 2026-11-11 从 PNG 转为原尺寸有损 WebP，FFmpeg/libwebp 质量 85、压缩级别 6，总计 48,176,224 字节；原始 PNG 保留在 Git 历史。新增基础体为 1536 × 1024、71,786 字节，未裁剪。新图片采用同样的 WebP 质量起点，实际尺寸和哈希以各自清单为准，不依赖编码器跨版本字节一致。
 
 生产模板及验证步骤见 [deploy/README.md](deploy/README.md)，私人照片处理规则见[试穿实施说明](docs/ai-tryon-backend-design.md)。[Cloudflare 可行性调查](docs/deployment-feasibility.md)是历史参考，不代表当前部署方案。

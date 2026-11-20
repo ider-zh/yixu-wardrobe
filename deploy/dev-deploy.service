@@ -1,0 +1,14 @@
+[Unit]
+Description=Verify and deliver the successful Yixu dev branch
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=/usr/local/libexec/yixu-dev-release.py
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /usr/local/libexec/yixu-dev-release.py
+TimeoutStartSec=30min
+UMask=0077
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7

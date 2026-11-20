@@ -89,5 +89,6 @@
 !/deploy/
 !/deploy/*.py
 !/deploy/*.service
+!/deploy/dev-deploy.timer
 !/deploy/*.conf
 !/deploy/*.md

@@ -129,6 +129,7 @@ class GeoLocator:
             maxminddb.InvalidDatabaseError,
         ):
             self.close()
+            self.signature = signature
             self.status = "unavailable"
             log.warning("Offline geolocation database cannot be opened")
 
