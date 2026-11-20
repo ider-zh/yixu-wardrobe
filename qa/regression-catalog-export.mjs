@@ -18,7 +18,10 @@ try {
  assert.deepEqual(data.looks.map(look=>look.id).sort((a,b)=>a-b),expectedIds);
  assert.equal(data.looks[0].id,1);
  assert.equal(data.looks[0].versions.v1,undefined);
- assert.equal(data.looks[0].versions.v2.image,'images-v2/look-001.webp');
+ const revisionFile=path.join(root,'content/look-revisions.json');
+ const revision=fs.existsSync(revisionFile)&&JSON.parse(fs.readFileSync(revisionFile,'utf8')).revisions.find(item=>item.look_id===1);
+ assert.equal(data.looks[0].versions.v2.image,revision?.asset.file??baseline.looks[0].versions.v2.asset.file);
+ assert.equal(data.looks[0].published_at,null);
  assert.equal(data.looks[0].versions.v2.shots.length,9);
  assert.equal(data.target,expectedIds.length);
  assert.ok(!fs.readFileSync(output,'utf8').includes('window.WARDROBE'));

@@ -1931,6 +1931,270 @@
           "shot_index": 7
         }
       ]
+    },
+    {
+      "product_id": "oat-tailored-blazer-001",
+      "name": "燕麦色西装外套",
+      "category": "外套",
+      "subtitle": "自然肩线、平驳领和盖袋撑起整套纵向比例。",
+      "description": "中等宽度的平驳领与燕麦米前身保留旧版的轻松通勤感。正面陈列清楚显示低位盖袋，并保留自然的肩线。独立图是原搭配所见结构的设计演绎。",
+      "color_name": "燕麦米",
+      "color_hex": "#b4a18a",
+      "design_material": "细而克制的混色织纹，呈哑光挺括的西装面料观感。",
+      "notes": [
+        "沿用原搭配的平驳领、低位盖袋和小暖棕扣。",
+        "完整独立陈列会补足原写真遮住的局部，不涉及内里、扣眼或实物工艺判断。"
+      ],
+      "asset": {
+        "asset_id": "product-oat-tailored-blazer-001-r1",
+        "file": "assets/products/look-001/blazer-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1120,
+        "height": 1400,
+        "bytes": 110428,
+        "sha256": "893098336ab31e6074a3d43b3930844b7b5573e11eb56de518c255f61ab7b0d8",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 1,
+          "piece_index": 1,
+          "reference_asset_id": "look-001-female-01-v2-r2",
+          "shot_index": 7
+        }
+      ],
+      "gallery": [
+        {
+          "title": "平驳领与肩线",
+          "caption": "斜侧光照亮驳口的折面和肩线弧度。近景为纹理与造型的设计演绎。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-oat-tailored-blazer-001-lapel-r1",
+            "file": "assets/products/look-001/blazer-lapel-r1.webp",
+            "mime": "image/webp",
+            "width": 1120,
+            "height": 1400,
+            "bytes": 288788,
+            "sha256": "8029218c31c588f523d5210ac3b433ece72b345553f70de609c7c1b7e8158be9",
+            "visibility": "public"
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "oat-straight-trousers-001",
+      "name": "燕麦色高腰直筒西裤",
+      "category": "下装",
+      "subtitle": "从高腰到裤口，保持平直的向下线条。",
+      "description": "同色西裤的腰袢、前褶与压线在原搭配里共同拉长纵向比例。完整陈列展示高腰、顺直裤腿及干净的裤脚，未展示内里及背部结构。",
+      "color_name": "燕麦米",
+      "color_hex": "#b4a18a",
+      "design_material": "与外套呼应的哑光细织纹，表达清楚的中缝和自然垂坠。",
+      "notes": [
+        "直筒而非阔腿、喇叭或紧腿。",
+        "去除穿着时搭配的腰带，以便看清同色腰头；看不到的闭合结构只作克制补足。"
+      ],
+      "asset": {
+        "asset_id": "product-oat-straight-trousers-001-r1",
+        "file": "assets/products/look-001/trousers-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1120,
+        "height": 1400,
+        "bytes": 103646,
+        "sha256": "26e005f825a41cbf50e6f74ea0b53065d13feeb85a2bc10854d1a1be6423ff31",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 1,
+          "piece_index": 2,
+          "reference_asset_id": "look-001-female-01-v2-r2",
+          "shot_index": 6
+        }
+      ],
+      "gallery": [
+        {
+          "title": "高腰腰头与前褶",
+          "caption": "新取景聚焦腰袢和前褶如何相接，闭合部分简洁处理。细节属于设计演绎。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-oat-straight-trousers-001-waist-r1",
+            "file": "assets/products/look-001/trousers-waist-r1.webp",
+            "mime": "image/webp",
+            "width": 1120,
+            "height": 1400,
+            "bytes": 242754,
+            "sha256": "24335f3af12b7bc331ef7d81daa9f2297ad5cfde2b93736b3f36b6c933d3c09a",
+            "visibility": "public"
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "ivory-knit-shell-001",
+      "name": "象牙白圆领针织背心",
+      "category": "上装",
+      "subtitle": "克制的圆领与细罗纹衔接开放的西装前襟。",
+      "description": "旧写真能看到贴近颈部的圆领和细罗纹。背心按原清单做无袖完整主图，原图被西装与裤腰遮住的袖窿和衣摆属于设计补充。",
+      "color_name": "象牙白",
+      "color_hex": "#eee8dc",
+      "design_material": "细密纵纹与柔软哑光表面，表达轻薄针织的设计观感。",
+      "notes": [
+        "完整袖窿和衣长是依据叠穿关系完成的设计推演。",
+        "画面不验证成分、纱线或真实工艺。"
+      ],
+      "asset": {
+        "asset_id": "product-ivory-knit-shell-001-r1",
+        "file": "assets/products/look-001/shell-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1120,
+        "height": 1400,
+        "bytes": 81682,
+        "sha256": "844958344110f392e483ff4caf70fe9ff518c5c0b58fcf497295d081c7057ea9",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 1,
+          "piece_index": 3,
+          "reference_asset_id": "look-001-female-01-v2-r2",
+          "shot_index": 5
+        }
+      ],
+      "gallery": [
+        {
+          "title": "圆领与细罗纹",
+          "caption": "近景观察小圆领边缘和细密纵纹。纱线表面为 AI 设计表达。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-ivory-knit-shell-001-neckline-r1",
+            "file": "assets/products/look-001/shell-neckline-r1.webp",
+            "mime": "image/webp",
+            "width": 1120,
+            "height": 1400,
+            "bytes": 216424,
+            "sha256": "47bbd475e63fefd0620d5d380d6c42616b3b4cda413e75b73470a6e1e29279af",
+            "visibility": "public"
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "espresso-belt-001",
+      "name": "深棕细腰带",
+      "category": "配饰",
+      "subtitle": "细带和小矩形扣在同色套装之间划出一道暖棕线。",
+      "description": "保持原写真中的深棕窄带和低调矩形针扣。完整弧形陈列用于识别，末端与孔位数量取克制设计，无法从穿着远景逐一确认。",
+      "color_name": "浓咖棕",
+      "color_hex": "#4f352b",
+      "design_material": "素面皮革观感配低光泽暖金属色扣具。",
+      "notes": [
+        "扣具仅表达哑暖金属色，不推断金属材质。",
+        "带背细部、缝线与内部结构不能从穿着照片确认。"
+      ],
+      "asset": {
+        "asset_id": "product-espresso-belt-001-r1",
+        "file": "assets/products/look-001/belt-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1120,
+        "height": 1400,
+        "bytes": 77750,
+        "sha256": "c7b5b3e40e3cae8c18f76a72dd0488467aa8c6afc2c638f627e9787431056930",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 1,
+          "piece_index": 4,
+          "reference_asset_id": "look-001-female-01-v2-r2",
+          "shot_index": 5
+        }
+      ]
+    },
+    {
+      "product_id": "espresso-penny-loafers-001",
+      "name": "深棕便士乐福鞋",
+      "category": "鞋履",
+      "subtitle": "鞋面横带与低跟延续腰带的深棕色。",
+      "description": "保留旧搭配的低跟、圆杏形鞋头与鞋面便士横带。双鞋错位陈列同时让前掌和后跟看得清楚，鞋底花纹和里料结构无法通过此图组确认。",
+      "color_name": "浓咖棕",
+      "color_hex": "#4b362e",
+      "design_material": "深棕软光泽面料观感，保留低叠跟与沉稳的鞋底边缘。",
+      "notes": [
+        "成对双鞋是同款同色，前掌线条不过分尖窄。",
+        "近景展示可读轮廓，表面纹理并非实物工艺证据。"
+      ],
+      "asset": {
+        "asset_id": "product-espresso-penny-loafers-001-r1",
+        "file": "assets/products/look-001/loafers-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1120,
+        "height": 1400,
+        "bytes": 91738,
+        "sha256": "351a875bd5a1e62be15c69c3452d2181ad03d6e4b6773107d4c5c3c8acd8bc63",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 1,
+          "piece_index": 5,
+          "reference_asset_id": "look-001-female-01-v2-r2",
+          "shot_index": 4
+        }
+      ],
+      "gallery": [
+        {
+          "title": "鞋头与便士横带",
+          "caption": "从前侧单独取景，观察圆杏鞋头、横带与鞋面反光关系。微观纹理为设计演绎。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-espresso-penny-loafers-001-vamp-r1",
+            "file": "assets/products/look-001/loafers-vamp-r1.webp",
+            "mime": "image/webp",
+            "width": 1120,
+            "height": 1400,
+            "bytes": 126242,
+            "sha256": "32c34300ebccd9e58935d1662700a5d3d66e7bc8f3340f75b488d4343bb34f18",
+            "visibility": "public"
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "gold-round-studs-001",
+      "name": "小圆面金色耳钉",
+      "category": "配饰",
+      "subtitle": "原照片耳畔一处低调的暖金光点。",
+      "description": "耳部在原写真中只能读出细小暖金圆点。独立图以两件对称、小圆面、低起伏的方式设计推演，不把轮廓、材质或结构写成实物事实。",
+      "color_name": "柔金色",
+      "color_hex": "#a98047",
+      "design_material": "温和金色与低起伏圆面，表达小型配饰的简洁反光。",
+      "notes": [
+        "原参考分辨率不足，整件独立图仅为外观设计推演。",
+        "采用正面双枚以交代形状，不展示耳针、耳堵、尺寸比例尺或真实成色。"
+      ],
+      "asset": {
+        "asset_id": "product-gold-round-studs-001-r1",
+        "file": "assets/products/look-001/studs-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1120,
+        "height": 1400,
+        "bytes": 46394,
+        "sha256": "e2e5178d3b297e16abf55459a50f2b43152b7265d109a7546875d2751ce17cac",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 1,
+          "piece_index": 6,
+          "reference_asset_id": "look-001-female-01-v2-r2",
+          "shot_index": 2
+        }
+      ]
     }
   ]
 }

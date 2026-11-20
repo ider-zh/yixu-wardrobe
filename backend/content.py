@@ -12,7 +12,7 @@ import re
 import sqlite3
 from datetime import UTC, date, datetime
 from pathlib import PurePosixPath
-from typing import Literal
+from typing import Annotated, Literal
 from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, HTTPException, Query
@@ -79,6 +79,45 @@ class Shot(Strict):
     emotion: str = Field(min_length=1, max_length=1000)
     pose: str = Field(min_length=1, max_length=1000)
     framing: str = Field(min_length=1, max_length=1000)
+
+
+class RevisionLayout(Layout):
+    preview_panel: int = Field(strict=True, ge=1, le=9)
+
+
+class RevisionAsset(Asset):
+    visibility: Literal["public"]
+    layout: RevisionLayout
+
+
+class LookRevision(Strict):
+    look_id: int = Field(strict=True, ge=1, le=100)
+    replaces_asset_id: str = Field(pattern=r"^[A-Za-z0-9_-]{1,128}$")
+    model_id: str = Field(pattern=r"^[A-Za-z0-9_-]{1,128}$")
+    model_reference_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    asset: RevisionAsset
+    shots: list[Shot] = Field(min_length=9, max_length=9)
+    story: str = Field(min_length=1, max_length=200, pattern=r"\S")
+    summary: str = Field(min_length=1, max_length=2000, pattern=r"\S")
+    moods: list[Annotated[str, Field(min_length=1, max_length=500, pattern=r"\S")]] = Field(
+        min_length=1, max_length=9
+    )
+
+    @field_validator("shots")
+    @classmethod
+    def ordered_descriptions(cls, shots):
+        if [shot.index for shot in shots] != list(range(1, 10)) or any(
+            not value.strip()
+            for shot in shots
+            for value in (shot.title, shot.emotion, shot.pose, shot.framing)
+        ):
+            raise ValueError("Expected nine ordered and fully described shots")
+        return shots
+
+
+class LookRevisions(Strict):
+    schema_version: int = Field(strict=True, ge=1, le=1)
+    revisions: list[LookRevision] = Field(min_length=1, max_length=100)
 
 
 class Piece(Strict):
@@ -482,6 +521,14 @@ class ContentService:
         categories = baseline["categoryOrder"]
         if not categories or len(set(categories)) != len(categories):
             raise ValueError("Invalid category order")
+        revisions: dict[int, LookRevision] = {}
+        revisions_path = self.source_root / "look-revisions.json"
+        if revisions_path.exists() or revisions_path.is_symlink():
+            revision_manifest = LookRevisions.model_validate(self._read_json(revisions_path))
+            for revision in revision_manifest.revisions:
+                if revision.look_id in revisions:
+                    raise ValueError("Duplicate historical look revision")
+                revisions[revision.look_id] = revision
         records, blobs, model_map = {}, {}, {}
 
         def register(value, grid=False):
@@ -523,6 +570,34 @@ class ContentService:
             asset = register(version["asset"], grid=True)
             if len(version["shots"]) != 9 or look["category"] not in categories:
                 raise ValueError("Invalid baseline grid/category")
+            if (revised := revisions.get(key)) is not None:
+                model = model_map.get(revised.model_id)
+                if (
+                    revised.replaces_asset_id != asset["asset_id"]
+                    or not model
+                    or not model["enabled"]
+                    or model["reference"]["sha256"] != revised.model_reference_sha256
+                    or not revised.asset.file.startswith("assets/looks/")
+                    or any(
+                        getattr(revised.asset, field) == asset[field]
+                        for field in ("asset_id", "file", "sha256")
+                    )
+                ):
+                    raise ValueError("Invalid historical look revision")
+                asset = register(revised.asset.model_dump(exclude_none=True), grid=True)
+                look.update(
+                    model_id=revised.model_id,
+                    model_reference_sha256=revised.model_reference_sha256,
+                )
+                version.update(
+                    asset=asset,
+                    previewPanel=asset["layout"]["preview_panel"],
+                    ready=True,
+                    story=revised.story,
+                    summary=revised.summary,
+                    moods=revised.moods,
+                    shots=[shot.model_dump() for shot in revised.shots],
+                )
             version["image"] = asset["file"]
             look["image"], look["ready"] = asset["file"], True
             # Legacy publication dates are unknown, including after image revisions.

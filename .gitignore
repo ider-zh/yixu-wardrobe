@@ -34,6 +34,7 @@
 !/assets/products/**/*.webp
 !/content/
 !/content/catalog.json
+!/content/look-revisions.json
 !/content/models.json
 !/content/products.json
 !/content/products.schema.json

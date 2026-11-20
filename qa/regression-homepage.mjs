@@ -243,6 +243,7 @@ try{
  // Complete outfit samples prove the same product contract across styles;
  // their piece counts are fixtures, not limits on future catalog growth.
  const completeSamples=new Map([
+  [1,['oat-tailored-blazer-001','oat-straight-trousers-001','ivory-knit-shell-001','espresso-belt-001','espresso-penny-loafers-001','gold-round-studs-001']],
   [3,['jade-qipao-003','black-low-pumps-003','pearl-studs-003']],
   [5,['black-biker-jacket-005','white-crew-tee-005','charcoal-cargo-trousers-005','black-ankle-boots-005','silver-studs-005']],
   [7,['ivory-sundress-007','tan-flat-sandals-007','pearl-studs-007']],

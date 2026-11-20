@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "revisions": [
+    {
+      "look_id": 1,
+      "replaces_asset_id": "look-001-v2-r1",
+      "model_id": "female-01",
+      "model_reference_sha256": "dc0a221ff81250415bcfa3b320bc916dc02e2873f030e707083928505ca75066",
+      "asset": {
+        "asset_id": "look-001-female-01-v2-r2",
+        "file": "assets/looks/revisions/look-001-female-01-v2-r2.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 206634,
+        "sha256": "fe54b200c4058e630d28f5f3d4df6e592421d6d19eee0357f5e8b377c5cde296",
+        "visibility": "public",
+        "layout": {
+          "rows": 3,
+          "columns": 3,
+          "preview_panel": 6
+        }
+      },
+      "story": "廊道里的下班散步",
+      "summary": "玻璃上有一道反光，模特招呼观者绕过去看。两人在石凳边分享一个笑话，再沿着浅石廊道慢慢离开。",
+      "moods": [
+        "明朗",
+        "惊喜",
+        "好奇",
+        "开怀",
+        "松弛",
+        "俏皮",
+        "温柔"
+      ],
+      "shots": [
+        {
+          "index": 1,
+          "title": "刚好遇见你",
+          "emotion": "明朗露齿笑，目光直视镜头",
+          "pose": "迎面跨步，抬手招呼",
+          "framing": "正面全身，后鞋部分遮挡"
+        },
+        {
+          "index": 2,
+          "title": "原来是你",
+          "emotion": "睁眼扬眉、微张嘴的惊喜",
+          "pose": "抬手把近侧头发别向耳后，看向镜头",
+          "framing": "胸上近景，露出小金色耳钉和圆领"
+        },
+        {
+          "index": 3,
+          "title": "玻璃上有一道光",
+          "emotion": "侧目认真观察，嘴唇微启",
+          "pose": "稍提外套衣襟，一手入袋，望向廊道的反光",
+          "framing": "三分之四中景，腰带前扣可见"
+        },
+        {
+          "index": 4,
+          "title": "在石凳边笑开",
+          "emotion": "张口大笑，眼尾自然弯起",
+          "pose": "坐在石凳边，一手托住石凳，另一手松放膝上",
+          "framing": "坐姿全身，两只乐福鞋完整"
+        },
+        {
+          "index": 5,
+          "title": "听你说下去",
+          "emotion": "目光柔和，闭口浅笑",
+          "pose": "前臂搭在浅石矮台，侧头看向镜头",
+          "framing": "头至腰中近景，细针织圆领与矩形带扣可见"
+        },
+        {
+          "index": 6,
+          "title": "这边走",
+          "emotion": "温和露齿笑，回看镜头",
+          "pose": "跨步经过廊道，侧身向观者打开手掌",
+          "framing": "三分之四全身，双鞋完整"
+        },
+        {
+          "index": 7,
+          "title": "袖口先理一下",
+          "emotion": "一边挑眉，故作严肃地浅笑",
+          "pose": "肩靠石柱，双手轻理袖口",
+          "framing": "头至大腿中景，外套翻领和盖袋清楚"
+        },
+        {
+          "index": 8,
+          "title": "那边还有空位",
+          "emotion": "俏皮眨眼，嘴角含笑",
+          "pose": "转向镜头，用一侧掌心示意旁边的座位",
+          "framing": "腰上中景，手掌伸至画面边缘"
+        },
+        {
+          "index": 9,
+          "title": "明天还走这一段",
+          "emotion": "温柔闭口笑，越肩回望",
+          "pose": "沿廊道离开，双脚换步，双臂自然下垂",
+          "framing": "背面三分之四全身，双鞋完整"
+        }
+      ]
+    }
+  ]
+}

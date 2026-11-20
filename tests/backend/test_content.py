@@ -409,6 +409,131 @@ def test_previous_public_asset_url_survives_new_revision(content_fixture):
     assert restarted.asset(old_id)[0] == old_data
 
 
+def historical_revision(content_fixture):
+    settings, batch, models = content_fixture
+    asset = metadata(
+        settings.catalog_image_root,
+        "assets/looks/revisions/look-001.webp",
+        "legacy-1-r2",
+        (80, 120),
+    )
+    asset["layout"]["preview_panel"] = 6
+    return {
+        "look_id": 1,
+        "replaces_asset_id": "legacy-1",
+        "model_id": "female-01",
+        "model_reference_sha256": models["models"][0]["reference"]["sha256"],
+        "asset": asset,
+        "shots": copy.deepcopy(batch["looks"][0]["shots"]),
+        "story": "廊下同行",
+        "summary": "重制的生动穿搭",
+        "moods": ["轻快"],
+    }
+
+
+def test_historical_revision_preserves_look_identity_and_previous_asset(content_fixture):
+    settings, _, _ = content_fixture
+    baseline_path = settings.content_root / "catalog.json"
+    baseline = json.loads(baseline_path.read_text())
+    pieces = [{"role": "主体", "name": "外套"}]
+    baseline["looks"][0]["pieces"] = pieces
+    write_json(baseline_path, baseline)
+    previous = ContentService(settings)
+    before = previous.catalog()
+    old_bytes, old_asset = previous.asset("legacy-1")
+
+    revision = historical_revision(content_fixture)
+    write_json(
+        settings.content_root / "look-revisions.json",
+        {"schema_version": 1, "revisions": [revision]},
+    )
+    product = {
+        "product_id": "historical-jacket",
+        "name": "外套",
+        "category": "外套",
+        "subtitle": "历史单品",
+        "description": "按历史写真还原",
+        "color_name": "燕麦色",
+        "color_hex": "#ccbeab",
+        "design_material": "梭织质感",
+        "notes": ["保留原编号"],
+        "asset": metadata(
+            settings.catalog_image_root,
+            "assets/products/history.webp",
+            "history-jacket",
+            (80, 100),
+            False,
+        ),
+        "appearances": [
+            {"look_id": 1, "piece_index": 1, "reference_asset_id": "legacy-1-r2", "shot_index": 6}
+        ],
+    }
+    write_json(
+        settings.content_root / "products.json", {"schema_version": 1, "products": [product]}
+    )
+
+    app = create_app(settings, provider=Provider(), detector=Detector(), clock=Clock())
+    with TestClient(app, base_url="https://localhost") as client:
+        after = client.get("/api/content/catalog").json()
+        assert after["revision"] != before["revision"]
+        for key in ("counts", "home", "latestOrder", "displayOrder", "batches"):
+            assert after[key] == before[key]
+        look = client.get("/api/content/looks/1").json()
+        assert look["id"] == 1 and look["title"] == before["looks"][0]["title"]
+        assert look["pieces"] == pieces
+        assert look["published_at"] is None
+        assert look["model_id"] == "female-01"
+        assert set(look["versions"]) == {"v2"}
+        version = look["versions"]["v2"]
+        assert version["asset"]["asset_id"] == "legacy-1-r2"
+        assert version["previewPanel"] == 6 and version["shots"] == revision["shots"]
+        assert version["story"] == revision["story"]
+        assert (
+            client.get(look["source_url"]).content
+            == (settings.catalog_image_root / revision["asset"]["file"]).read_bytes()
+        )
+        assert client.get("/api/content/assets/legacy-1").content == old_bytes
+        listing = client.get("/api/content/products?look_id=1").json()
+        assert listing["total"] == 1
+        assert listing["items"][0]["appearances"] == product["appearances"]
+
+    restarted = ContentService(settings)
+    assert restarted.catalog()["revision"] == after["revision"]
+    assert restarted.asset("legacy-1") == (old_bytes, old_asset)
+
+
+@pytest.mark.parametrize(
+    "invalid", ["duplicate", "stale", "wrong_id", "model_hash", "old_pixels", "shot_order"]
+)
+def test_invalid_historical_revision_never_activates(content_fixture, invalid):
+    settings, _, _ = content_fixture
+    service = ContentService(settings)
+    original = service.catalog()
+    revision = historical_revision(content_fixture)
+    revisions = [revision]
+    if invalid == "duplicate":
+        revisions.append(copy.deepcopy(revision))
+    elif invalid == "stale":
+        revision["replaces_asset_id"] = "legacy-999"
+    elif invalid == "wrong_id":
+        revision["look_id"] = 101
+    elif invalid == "model_hash":
+        revision["model_reference_sha256"] = "0" * 64
+    elif invalid == "old_pixels":
+        revision["asset"] = metadata(
+            settings.catalog_image_root, "assets/looks/revisions/look-001.webp", "legacy-1-r2"
+        )
+    elif invalid == "shot_order":
+        revision["shots"][0]["index"] = 2
+    write_json(
+        settings.content_root / "look-revisions.json", {"schema_version": 1, "revisions": revisions}
+    )
+
+    assert not service.import_content()
+    assert service.catalog() == original
+    assert "legacy-1-r2" not in {record["asset_id"] for record in service.asset_records()}
+
+
 def test_products_are_public_archived_and_linked_to_exact_outfit(content_fixture):
     from pathlib import Path
 

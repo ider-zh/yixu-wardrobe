@@ -106,4 +106,81 @@ try {
   assert.throws(()=>loadContent(fixture),/Symlink/);
   fs.unlinkSync(assetPath);fs.writeFileSync(assetPath,original);
   console.log('PASS content rejects conflicting IDs, stale model/image hashes, private/v1 assets, invalid grids, traversal and symlinks');
+
+  // Isolate the synthetic revision from revisions and product links in the release corpus.
+  const revisionPath = 'content/look-revisions.json';
+  for (const file of [revisionPath, 'content/products.json']) {
+    fs.rmSync(path.join(fixture, file), {force:true});
+  }
+  const unrevised = loadContent(fixture);
+  const historical = unrevised.catalog.looks.find(look => look.id === 1);
+  const originalAsset = historical.versions.v2.asset;
+  const otherAsset = unrevised.catalog.looks.find(look => look.id === 2).versions.v2.asset;
+  const newFile = 'assets/looks/revision-fixture/look-001-v2-test.webp';
+  fs.mkdirSync(path.dirname(path.join(fixture, newFile)), {recursive:true});
+  fs.copyFileSync(path.join(fixture, otherAsset.file), path.join(fixture, newFile));
+  const fixtureRevision = {
+    look_id:1, replaces_asset_id:originalAsset.asset_id, model_id:second.model_id,
+    model_reference_sha256:second.reference.sha256,
+    asset:{...otherAsset, asset_id:'fixture-look-001-v2-revised', file:newFile},
+    shots:structuredClone(batch.looks[0].shots), story:'Synthetic revised story',
+    summary:'Synthetic revised summary', moods:['开心'],
+  };
+  const revisionManifest = {schema_version:1, revisions:[fixtureRevision]};
+  const linkedProduct = {
+    ...JSON.parse(validProducts).products[0],
+    appearances:[{look_id:1, piece_index:1, reference_asset_id:fixtureRevision.asset.asset_id, shot_index:1}],
+  };
+  write(revisionPath, revisionManifest);
+  const revised = loadContent(fixture);
+  const revisedLook = revised.catalog.looks.find(look => look.id === 1);
+  assert.equal(revisedLook.model_id, second.model_id);
+  assert.equal(revisedLook.source_url, newFile);
+  assert.equal(revisedLook.versions.v2.asset.asset_id, fixtureRevision.asset.asset_id);
+  assert.equal(revisedLook.versions.v2.story, fixtureRevision.story);
+  assert.deepEqual(revisedLook.versions.v2.shots, fixtureRevision.shots);
+  assert.deepEqual(revisedLook.pieces, historical.pieces);
+  assert.equal(revisedLook.published_at, null);
+  assert.equal(revisedLook.versions.v1, undefined);
+  assert.equal(revised.catalog.looks.length, unrevised.catalog.looks.length);
+  assert.deepEqual(revised.catalog.displayOrder, unrevised.catalog.displayOrder);
+  assert.deepEqual(revised.catalog.latestOrder, unrevised.catalog.latestOrder);
+  assert.deepEqual(revised.catalog.home, unrevised.catalog.home);
+  assert.notEqual(revised.catalog.revision, unrevised.catalog.revision);
+  assert.ok(revised.publicAssets.some(asset => asset.asset_id === originalAsset.asset_id));
+  assert.ok(revised.publicAssets.some(asset => asset.asset_id === fixtureRevision.asset.asset_id));
+  write('content/products.json', {schema_version:1, products:[linkedProduct]});
+  assert.deepEqual(loadContent(fixture).catalog.products[0].appearances, linkedProduct.appearances);
+  const builtRevision = spawnSync(process.execPath, ['scripts/build.mjs'], {cwd:fixture, encoding:'utf8', timeout:30000});
+  assert.equal(builtRevision.status, 0, builtRevision.stderr);
+  const publicCatalogPath = path.join(fixture, 'public/catalog.js');
+  const publicCatalog = fs.readFileSync(publicCatalogPath, 'utf8');
+  assert.ok(fs.existsSync(path.join(fixture, 'public', originalAsset.file)));
+  assert.ok(fs.existsSync(path.join(fixture, 'public', newFile)));
+  linkedProduct.appearances[0].reference_asset_id = originalAsset.asset_id;
+  write('content/products.json', {schema_version:1, products:[linkedProduct]});
+  assert.throws(() => loadContent(fixture), /product appearance/);
+  linkedProduct.appearances[0].reference_asset_id = fixtureRevision.asset.asset_id;
+  write('content/products.json', {schema_version:1, products:[linkedProduct]});
+  for (const [label, mutate] of [
+    ['duplicate revision', m => m.revisions.push(structuredClone(m.revisions[0]))],
+    ['non-historical ID', m => m.revisions[0].look_id = nextId],
+    ['wrong original ID', m => m.revisions[0].replaces_asset_id = 'wrong-original'],
+    ['rewritten original image', m => m.revisions[0].asset.sha256 = originalAsset.sha256],
+    ['stale model', m => m.revisions[0].model_reference_sha256 = '0'.repeat(64)],
+    ['private revision image', m => m.revisions[0].asset.visibility = 'private'],
+    ['missing shot', m => m.revisions[0].shots.pop()],
+    ['misordered shot', m => m.revisions[0].shots[1].index = 1],
+    ['blank emotion', m => m.revisions[0].shots[0].emotion = ' '],
+    ['added date', m => m.revisions[0].publish_date = publishDate],
+  ]) {
+    const invalid = structuredClone(revisionManifest);
+    mutate(invalid);
+    write(revisionPath, invalid);
+    assert.throws(() => loadContent(fixture), undefined, label);
+  }
+  const invalidBuild = spawnSync(process.execPath, ['scripts/build.mjs'], {cwd:fixture, encoding:'utf8', timeout:30000});
+  assert.notEqual(invalidBuild.status, 0);
+  assert.equal(fs.readFileSync(publicCatalogPath, 'utf8'), publicCatalog);
+  console.log('PASS historical revision retains original assets and homepage order, requires current product links, and rejects invalid builds atomically');
 } finally {fs.rmSync(fixture,{recursive:true,force:true});}

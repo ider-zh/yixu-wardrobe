@@ -63,6 +63,37 @@ export function verifyWebp(root, record) {
   return bytes;
 }
 
+function lookRevisions(manifest, models) {
+  const exactFields = (value, fields) => object(value) &&
+    Object.keys(value).length === fields.length && fields.every(key => Object.hasOwn(value, key));
+  const boundedText = (value, limit) => text(value) && [...value].length <= limit;
+  fail(exactFields(manifest, ['schema_version', 'revisions']) && manifest.schema_version === 1 &&
+    Array.isArray(manifest.revisions) && manifest.revisions.length >= 1 && manifest.revisions.length <= 100,
+  'Invalid look revision manifest');
+
+  const revisions = new Map();
+  for (const revision of manifest.revisions) {
+    fail(exactFields(revision, ['look_id', 'replaces_asset_id', 'model_id', 'model_reference_sha256', 'asset', 'shots', 'story', 'summary', 'moods']),
+      'Invalid look revision fields');
+    const {look_id: id, replaces_asset_id: replaced, model_id: modelId, model_reference_sha256: reference, asset, shots, story, summary, moods} = revision;
+    fail(Number.isInteger(id) && id >= 1 && id <= 100 && !revisions.has(id) && assetId(replaced), 'Invalid or duplicate historical revision target');
+    const model = models.get(modelId);
+    fail(model && model.enabled !== false && reference === model.reference.sha256, 'Missing, disabled or stale revision model reference');
+    fail(exactFields(asset, ['asset_id', 'file', 'mime', 'width', 'height', 'bytes', 'sha256', 'visibility', 'layout']) &&
+      asset.visibility === 'public' && typeof asset.file === 'string' && asset.file.startsWith('assets/looks/') &&
+      exactFields(asset.layout, ['rows', 'columns', 'preview_panel']),
+    'Revision requires an independent public look image');
+    fail(Array.isArray(shots) && shots.length === 9 && shots.every((shot, index) =>
+      exactFields(shot, ['index', 'title', 'emotion', 'pose', 'framing']) && shot.index === index + 1 &&
+      boundedText(shot.title, 200) && ['emotion', 'pose', 'framing'].every(key => boundedText(shot[key], 1000))),
+    'Nine ordered revision shot descriptions required');
+    fail(boundedText(story, 200) && boundedText(summary, 2000) && Array.isArray(moods) &&
+      moods.length >= 1 && moods.length <= 9 && moods.every(mood => boundedText(mood, 500)), 'Invalid revision story or moods');
+    revisions.set(id, revision);
+  }
+  return revisions;
+}
+
 export function loadContent(root) {
   const sources = [];
   function json(relative) {
@@ -103,6 +134,8 @@ export function loadContent(root) {
     models.set(model.model_id, model);
   }
   fail(models.has('female-01'), 'The first model reference must remain registered');
+  const revisions = fs.readdirSync(path.join(root, 'content')).includes('look-revisions.json')
+    ? lookRevisions(json('content/look-revisions.json'), models) : new Map();
   const looks = new Map();
   function addLook(input, batch = null) {
     fail(object(input) && Number.isSafeInteger(input.id) && input.id > 0 && input.id <= 2147483647 && !looks.has(input.id), 'Invalid or duplicate look ID');
@@ -116,7 +149,7 @@ export function loadContent(root) {
       fail(input.edition === 'v2', 'New outfits must be expressive only');
       fail(text(input.mood) && text(input.scene) && Array.isArray(input.tags) && input.tags.length > 0 && input.tags.every(text), 'Expressive mood, scene and tags required');
     }
-    const version = batch ? {
+    let version = batch ? {
       image: input.asset?.file, asset: input.asset, shots: input.shots,
       story: input.story || input.title, summary: input.summary || input.description,
       moods: input.mood ? [input.mood] : [],
@@ -125,14 +158,24 @@ export function loadContent(root) {
     fail(version.shots.every((shot, i) => object(shot) && text(shot.title) && (!batch || (shot.index === i + 1 && text(shot.emotion) && text(shot.pose) && text(shot.framing)))), 'Invalid expressive shot descriptions');
     registerAsset(version.asset, true);
     fail(version.image === version.asset.file, 'Look image and asset must agree');
+    const revised = batch ? undefined : revisions.get(input.id);
+    if (revised) {
+      const old = version.asset;
+      const {asset, shots, story, summary, moods} = revised;
+      fail(revised.replaces_asset_id === old.asset_id, 'Historical revision must name the original asset');
+      fail(asset.asset_id !== old.asset_id && asset.file !== old.file && asset.sha256 !== old.sha256,
+        'Historical revision cannot reuse the original asset');
+      registerAsset(asset, true);
+      version = {image: asset.file, asset, shots, story, summary, moods};
+    }
     const source = version.asset.file;
     const out = {};
     for (const key of ['id', 'title', 'category', 'season', 'palette', 'description', 'pieces', 'details', 'tags', 'scene', 'editorialOrder']) {
       if (input[key] !== undefined) out[key] = structuredClone(input[key]);
     }
     Object.assign(out, {
-      model_id: input.model_id ?? null,
-      model_reference_sha256: input.model_reference_sha256 ?? null,
+      model_id: revised?.model_id ?? input.model_id ?? null,
+      model_reference_sha256: revised?.model_reference_sha256 ?? input.model_reference_sha256 ?? null,
       batch_id: batch?.batch_id ?? input.batch_id ?? null,
       publish_date: batch?.publish_date ?? input.publish_date ?? null,
       published_at: batch ? publicationTime(batch) : null,
@@ -152,6 +195,7 @@ export function loadContent(root) {
     looks.set(input.id, out);
   }
   for (const look of base.looks) addLook(look);
+  fail([...revisions.keys()].every(id => looks.has(id)), 'Historical revision target missing from baseline');
   const batches = [];
   const batchIds = new Set();
   const dates = new Set();
