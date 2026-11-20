@@ -20,7 +20,7 @@ assert.match(read('deploy/dev-api.service'),/ReadWritePaths=\/var\/lib\/yixu-war
 assert.match(read('deploy/dev-deploy.timer'),/OnUnitInactiveSec=60s/);
 
 const python=String.raw`
-import importlib.util,json,os,pathlib,pwd,sys,tempfile,urllib.error
+import importlib.util,json,os,pathlib,pwd,subprocess,sys,tempfile,urllib.error
 spec=importlib.util.spec_from_file_location('deployment',sys.argv[1]);m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
 real_verify=m.verify
 sha='a'*40;old='b'*40
@@ -71,7 +71,23 @@ with tempfile.TemporaryDirectory() as temporary:
  try:m.verify(release,'http://127.0.0.1')
  except RuntimeError as error:assert 'stale' in str(error)
  else:raise AssertionError('stale administrator code must fail delivery')
-print('PASS dev deployment CI gate, isolated activation, auth/static integrity, rollback, persistent data and failed-SHA no-retry')
+ # Real filesystem check: fix private build staging modes only below web roots.
+ m.run=lambda args,**kw:subprocess.check_output(list(map(str,args)),text=True).strip()
+ protected=state/'private-record';protected.write_bytes(b'private');protected.chmod(0o600)
+ for name in ('public','admin'):
+  (release/name).chmod(0o700)
+  for file in (release/name).iterdir():file.chmod(0o600)
+ m.make_web_readable(release)
+ for name in ('public','admin'):
+  assert (release/name).stat().st_mode&0o777==0o755
+  assert all(file.stat().st_mode&0o777==0o644 for file in (release/name).iterdir())
+ assert protected.stat().st_mode&0o777==0o600
+ (release/'public'/'unsafe-link').symlink_to(protected)
+ try:m.make_web_readable(release)
+ except RuntimeError:pass
+ else:raise AssertionError('web-root links must not broaden private permissions')
+ assert protected.stat().st_mode&0o777==0o600
+print('PASS dev deployment CI gate, isolated activation, auth/static integrity, rollback, persistent data, web-root-only modes and failed-SHA no-retry')
 `;
 const result=spawnSync('python3',['-c',python,root+'deploy/dev-release.py'],{encoding:'utf8',timeout:10000});
 assert.equal(result.status,0,result.stderr||result.stdout);

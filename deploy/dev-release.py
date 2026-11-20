@@ -87,7 +87,7 @@ def run(args, *, cwd=None):
         args[1:1] = ["-c", "http.proxy=" + DOWNLOAD_PROXY]
     completed = subprocess.run(
         ["/usr/sbin/runuser", "-u", USER, "--", *map(str, args)],
-        cwd=cwd,
+        cwd=cwd or ROOT,
         env=ENV,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
@@ -227,6 +227,21 @@ def restart():
     subprocess.run(["/usr/bin/systemctl", "restart", UNIT], check=True, timeout=60)
 
 
+def make_web_readable(release):
+    # Build staging directories are private by default. Only the explicit web
+    # roots become readable by Nginx; private app data and backend stay private.
+    for name in ("public", "admin"):
+        directory = release / name
+        if directory.is_symlink() or run(["/usr/bin/find", directory, "-type", "l"]):
+            raise RuntimeError("Development web roots must contain no symlinks")
+        run(
+            ["/usr/bin/find", directory, "-type", "d", "-exec", "/usr/bin/chmod", "0755", "{}", "+"]
+        )
+        run(
+            ["/usr/bin/find", directory, "-type", "f", "-exec", "/usr/bin/chmod", "0644", "{}", "+"]
+        )
+
+
 def build(sha):
     release = ROOT / "releases" / sha
     if release.exists():
@@ -264,6 +279,7 @@ def build(sha):
     run([NODE, "scripts/check.mjs"], cwd=release)
     run([NODE, "qa/regression-expressive.mjs"], cwd=release)
     run([NODE, "scripts/build.mjs"], cwd=release)
+    make_web_readable(release)
     run([release / ".venv/bin/python", "-m", "pytest", "tests/backend", "-q"], cwd=release)
     # Fail on unsafe coarse-geography or same-origin boundaries through the normal suite.
     snapshot(release)
@@ -322,6 +338,7 @@ def deliver(origin, retry=False):
         receipt = {
             "status": "verified",
             "git_head": sha,
+            "origin": origin,
             "verified_at": datetime.datetime.now(datetime.UTC).isoformat(),
             **result,
         }
