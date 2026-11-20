@@ -81,7 +81,7 @@ test('photo try-on copy stays brief before and after real API bootstrap', async 
   const purpose = '照片交由第三方 AI 生成试穿图，结果可供后台评估。';
   const assertBriefCopy = document => {
     assert.match(document.getElementById('detail-tryon').textContent, /^拍照试穿/);
-    assert.equal(document.getElementById('tryon-title').textContent, '拍照试穿');
+    assert.equal(document.getElementById('tryon-title').textContent, '让喜欢，穿在你身上。');
     assert.equal(document.getElementById('tryon-disclosure-title').textContent, '照片用途');
     assert.deepEqual([...document.querySelectorAll('#tryon-disclosure li')].map(li => li.textContent), [purpose], 'One purpose notice, not static/API duplicates');
     assert.match(document.getElementById('tryon-consent-label').textContent, /本人同意.*同意上述用途/);
@@ -100,7 +100,7 @@ test('photo try-on copy stays brief before and after real API bootstrap', async 
   h.$('tryon-refresh').click();
   await wait(() => !h.$('tryon-refresh').disabled);
   assertBriefCopy(h.document);
-  assert.match(h.$('tryon-jobs-status').textContent, /访问凭证.*无法恢复/);
+  assert.doesNotMatch(h.$('tryon-jobs-status').textContent, /访问凭证.*无法恢复/, 'Refreshing an intact session does not invent credential loss');
   assert.equal(h.calls.filter(c => c.method === 'POST' && c.path === '/api/tryons').length, 0);
 });
 
