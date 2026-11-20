@@ -316,9 +316,17 @@ try{
  }
  // Each published product is the same public contract, regardless of category or gallery size.
  const galleryFavoritesBefore=await evaluate('localStorage.getItem("yixu:product-favorites:v1")');
+ const galleryFixtureUrl=pathToFileURL(path.join(output,'index.html')).href;
  for(const viewport of [{width:390,height:844},{width:1440,height:1000}]){
   await client('Emulation.setDeviceMetricsOverride',{...viewport,deviceScaleFactor:1,mobile:viewport.width<600});
-  for(const product of sampleProducts){
+  for(const [productIndex,product] of sampleProducts.entries()){
+   // A fresh document prevents this accelerated sweep from exhausting the
+   // browser's same-document navigation budget as the product catalog grows.
+   if(productIndex%12===0){
+    await client('Page.navigate',{url:'about:blank'});
+    await wait('location.href==="about:blank"');
+    await navigate(galleryFixtureUrl);
+   }
    const hash='#/product/'+product.product_id;
    await route(hash);await wait('!document.getElementById("product-page").hidden&&document.querySelector(".product-main-image img").naturalWidth>0');
    assert.equal(await evaluate('document.querySelector("#product-page h1").textContent'),product.copy?.hero_title||product.name,product.product_id+' uses its published copy');
