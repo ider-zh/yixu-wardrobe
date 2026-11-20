@@ -1,0 +1,134 @@
+// Disposable DOM/browser fixtures: no server private state, credentials or AI calls.
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import http from 'node:http';
+import vm from 'node:vm';
+import {createRequire} from 'node:module';
+import {spawn,spawnSync} from 'node:child_process';
+import {once} from 'node:events';
+import {fileURLToPath,pathToFileURL} from 'node:url';
+import {loadContent} from '../scripts/content-lib.mjs';
+import {readSiteResources} from '../scripts/site-resources.mjs';
+const root=fileURLToPath(new URL('../',import.meta.url)),key='yixu:site-theme:v1';
+const require=createRequire(new URL('../admin/package.json',import.meta.url));
+const {parseHTML}=require('linkedom');
+function fixtureStore(){let writes=0;const values=new Map();return {values,get writes(){return writes;},getItem:k=>values.get(k)||null,setItem(k,v){writes++;values.set(k,v);},removeItem(k){writes++;values.delete(k);}};}
+function dom(storage){const {window,document}=parseHTML('<html><body><header><div data-site-theme-control></div></header><div class="latest-hero"><div class="hero-copy"></div><div class="hero-art"></div></div><div id="workspace" hidden><div class="session-bar"></div><nav class="section-nav"></nav><section class="panel"><input id="draft"><div id="private-record">private-marker</div></section></div></body></html>');window.localStorage=storage;vm.runInNewContext(fs.readFileSync(path.join(root,'site-theme.js'),'utf8'),{window,document,console});return {window,document,theme:window.YixuSiteTheme};}
+{
+ const storage=fixtureStore(),{window,document,theme}=dom(storage),input=document.getElementById('draft'),record=document.getElementById('private-record');
+ input.value='unsaved model';assert.equal(theme.preference(),null);assert.equal(theme.resolve('studio','invalid'), 'studio');
+ theme.choose('studio');assert.equal(theme.resolve('editorial','invalid'),'studio');assert.equal(theme.resolve('studio','editorial'),'editorial');assert.equal(document.querySelector('.latest-hero').lastElementChild.className,'hero-copy');
+ assert.equal(document.getElementById('draft'),input);assert.equal(input.value,'unsaved model');assert.ok(document.getElementById('workspace').contains(record));assert.equal(document.getElementById('workspace').hidden,true);
+ record.replaceChildren();theme.choose('editorial');theme.choose('studio');assert.equal(record.textContent,'');assert.equal(document.getElementById('workspace').hidden,true);
+ const writes=storage.writes;const event=new window.Event('storage');Object.assign(event,{key,newValue:null});window.dispatchEvent(event);assert.equal(theme.preference(),null);assert.equal(storage.writes,writes,'Storage sync never writes back');
+ const clear=new window.Event('storage');Object.assign(clear,{key:null,newValue:null});window.dispatchEvent(clear);assert.equal(theme.preference(),null);
+ theme.choose('https://untrusted.invalid/code.js');assert.equal(theme.resolve(),'editorial');assert.equal(document.querySelectorAll('script,link').length,0);
+ const blocked=dom({getItem(){throw Error('disabled');},setItem(){throw Error('disabled');},removeItem(){throw Error('disabled');}});blocked.theme.choose('studio');assert.equal(blocked.theme.resolve(),'studio');assert.match(blocked.document.querySelector('.site-theme-note').textContent,/当前页面/);
+ console.log('PASS theme Module: real adapters, safe precedence, null default, storage failure/clear, private-node identity and no data resurrection');
+}
+// A declared script cannot smuggle an outside private file into a public build.
+{
+ const temp=fs.mkdtempSync(path.join(os.tmpdir(),'yixu-shell-seam-')),fixture=path.join(temp,'fixture');fs.mkdirSync(fixture);fs.mkdirSync(path.join(fixture,'admin'));fs.mkdirSync(path.join(fixture,'scripts'));fs.mkdirSync(path.join(fixture,'public'));
+ fs.writeFileSync(path.join(fixture,'index.html'),'<script src="app.js"></script>');fs.writeFileSync(path.join(fixture,'admin/index.html'),'<script src="./app.mjs"></script>');fs.writeFileSync(path.join(fixture,'admin/app.mjs'),'');
+ fs.writeFileSync(path.join(fixture,'site-resources.json'),JSON.stringify({schema_version:1,public:['index.html','app.js'],admin:['index.html','app.mjs']}));
+ fs.writeFileSync(path.join(temp,'private.js'),'outside-private-marker');fs.symlinkSync(path.join(temp,'private.js'),path.join(fixture,'app.js'));fs.writeFileSync(path.join(fixture,'public/index.html'),'previous working output');
+ for(const name of ['build.mjs','content-lib.mjs','site-resources.mjs'])fs.copyFileSync(path.join(root,'scripts',name),path.join(fixture,'scripts',name));
+ assert.throws(()=>readSiteResources(fixture),/symlink/);
+ const result=spawnSync(process.execPath,['scripts/build.mjs'],{cwd:fixture,encoding:'utf8'});assert.notEqual(result.status,0);assert.match(result.stderr,/symlink/);assert.ok(!result.stderr.includes('outside-private-marker'));assert.equal(fs.readFileSync(path.join(fixture,'public/index.html'),'utf8'),'previous working output');fs.rmSync(temp,{recursive:true,force:true});
+ console.log('PASS shell contract/build reject an outside private symlink before reading assets or replacing live output');
+}
+const scratch=fs.mkdtempSync(path.join(os.tmpdir(),'yixu-theme-')),output=path.join(scratch,'site');
+const built=spawnSync(process.execPath,['scripts/build.mjs','--output',output],{cwd:root,encoding:'utf8'});assert.equal(built.status,0,built.stderr||built.stdout);
+const catalog=loadContent(root).catalog,featured=catalog.looks.find(l=>l.id===catalog.home.featured_look_id),boots=catalog.products.find(p=>p.product_id==='brown-boots-102');
+let authenticated=true,force401=false,jobs=[],posts=0;const requested=[];
+const json=(res,data,status=200)=>{res.statusCode=status;res.setHeader('Content-Type','application/json');res.end(JSON.stringify(data));};
+const server=http.createServer(async(req,res)=>{
+ requested.push(req.url);res.setHeader('Cache-Control','no-store');
+ if(req.url==='/api/content/catalog')return json(res,catalog);
+ if(req.url==='/api/bootstrap')return json(res,{csrf_token:'fixture-csrf',visitor:{id:'fixture'},generation_available:true,disclosure:{accepted:true,version:'fixture-v1',title:'照片用途',items:['仅为合成测试']}});
+ if(req.url.startsWith('/api/admin/')){
+  if(req.url==='/api/admin/bootstrap')return json(res,{authenticated,csrf_token:'fixture-admin-csrf'});
+  if(req.url==='/api/admin/logout'){authenticated=false;return json(res,{authenticated:false});}
+  if(!authenticated||force401){authenticated=false;return json(res,{error:{code:'admin_auth',message:'登录已失效'}},401);}
+  if(req.url==='/api/admin/overview')return json(res,{visits:37,look_opens:2,tryons_total:0,queued:0,running:0,succeeded:0,failed:0,unknown:0,result_count:0,result_bytes:0,popular_looks:[],recent_jobs:[{id:'private-theme-job',look_id:1,edition:'v2',shot_index:1,status:'queued',created_at:'2026-11-20T00:00:00Z'}]});
+  if(req.url==='/api/admin/settings')return json(res,{enabled:false,model:'fixture-model',api_key_configured:false});
+  if(req.url.startsWith('/api/admin/results'))return json(res,{items:[],has_more:false});
+  if(req.url==='/api/admin/content/overview')return json(res,{content_ready:false,cdn:{config:{configured:false},counts:{},jobs:[],total:0,bytes:0,verified_bytes:0}});
+  if(req.url==='/api/admin/content/models')return json(res,{models:[]});
+ }
+ if(req.url==='/api/events')return json(res,{accepted:true});
+ if(req.url==='/api/tryons'&&req.method==='POST'){
+  for await(const _chunk of req){}posts++;jobs=[{id:'theme-queued-job',status:'queued',look_id:featured.id,edition:'v2',shot_index:3,queue_position:1,created_at:'2026-11-20T00:00:00Z',image_url:null,download_url:null,error_code:null,error_message:null}];return json(res,jobs[0],202);
+ }
+ if(req.url.startsWith('/api/tryons'))return json(res,{items:jobs,has_more:false});
+ if(req.url.startsWith('/api/'))return json(res,{error:{code:'fixture',message:'test only'}},404);
+ let filename;if(req.url==='/admin/'||req.url==='/admin/index.html')filename=path.join(root,'admin/index.html');else if(req.url.startsWith('/admin/'))filename=path.join(root,req.url.slice(1));else filename=path.join(output,req.url==='/'?'index.html':req.url.split('?')[0]);
+ if(!filename.startsWith(root)&&!filename.startsWith(output)){res.statusCode=404;res.end();return;}
+ if(!fs.existsSync(filename)||!fs.statSync(filename).isFile()){res.statusCode=404;res.end();return;}
+ res.setHeader('Content-Type',({'.html':'text/html','.js':'text/javascript','.mjs':'text/javascript','.css':'text/css','.webp':'image/webp','.svg':'image/svg+xml'})[path.extname(filename)]||'application/octet-stream');
+ if(req.url==='/admin/')res.setHeader('Content-Security-Policy',"default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'");
+ res.end(fs.readFileSync(filename));
+});
+server.listen(0,'127.0.0.1');await once(server,'listening');const origin=`http://127.0.0.1:${server.address().port}`;
+const chrome=[process.env.CHROME_BIN,'/usr/bin/chromium','/usr/bin/google-chrome',...['1255','1248','1243'].map(v=>path.join(os.homedir(),`.cache/ms-playwright/chromium-${v}/chrome-linux64/chrome`))].filter(Boolean).find(f=>fs.existsSync(f));assert.ok(chrome,'Chromium required');
+const profile=path.join(scratch,'chrome'),browser=spawn(chrome,['--headless','--no-sandbox','--disable-dev-shm-usage','--remote-debugging-port=0',`--user-data-dir=${profile}`,'about:blank'],{stdio:['ignore','ignore','pipe'],detached:true});
+const sockets=[];let endpoint,client;
+function connect(url){return new Promise((resolve,reject)=>{const socket=new WebSocket(url);sockets.push(socket);let sequence=0;const pending=new Map();socket.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(Error(m.error.message)):p.resolve(m.result);}};socket.onopen=()=>resolve((method,params={})=>new Promise((resolve,reject)=>{const id=++sequence;pending.set(id,{resolve,reject});socket.send(JSON.stringify({id,method,params}));}));socket.onerror=reject;});}
+try{
+ let stderr='';endpoint=await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error(stderr)),15000);browser.stderr.on('data',chunk=>{stderr+=chunk;const match=stderr.match(/DevTools listening on (ws:\/\/[^\s]+)/);if(match){clearTimeout(timer);resolve(match[1]);}});browser.once('error',reject);});
+ const debug=endpoint.replace('ws:','http:').replace(/\/devtools\/browser\/.*/,'');const targets=await(await fetch(debug+'/json/list')).json();client=await connect(targets.find(t=>t.type==='page').webSocketDebuggerUrl);
+ const evaluate=async(expression,c=client)=>{const r=await c('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw Error(JSON.stringify(r.exceptionDetails));return r.result.value;};
+ const wait=async expression=>{for(let n=0;n<180;n++){if(await evaluate(expression))return;await new Promise(r=>setTimeout(r,25));}throw Error('DOM timeout: '+expression);};
+ const navigate=async url=>{await client('Page.navigate',{url});await wait('document.readyState==="complete"&&!!window.YixuSiteTheme');};
+ const choose=async name=>{await evaluate(`window.YixuSiteTheme.choose(${JSON.stringify(name)})`);await wait(`document.documentElement.dataset.siteTheme===${JSON.stringify(name==='auto'?'editorial':name)}`);};
+ const route=async hash=>{await evaluate(`location.hash=${JSON.stringify(hash)}`);await wait(`location.hash===${JSON.stringify(hash)}`);await evaluate('new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))');};
+ const noOverflow=async label=>assert.ok(await evaluate('document.documentElement.scrollWidth<=innerWidth+1'),label);
+ const capture=async name=>{if(!process.env.YIXU_SCREENSHOT_DIR)return;fs.mkdirSync(process.env.YIXU_SCREENSHOT_DIR,{recursive:true,mode:0o700});const r=await client('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(process.env.YIXU_SCREENSHOT_DIR,name+'.png'),Buffer.from(r.data,'base64'),{mode:0o600});};
+ await client('Page.enable');await client('Runtime.enable');
+ for(const width of [320,390,1440]){
+  await client('Emulation.setDeviceMetricsOverride',{width,height:1000,deviceScaleFactor:1,mobile:width<600});await navigate(origin);await wait('document.getElementById("hero-image-0").naturalWidth>0');
+  await evaluate(`localStorage.setItem('wardrobe99:favorites:v1','[1,99999]');localStorage.setItem('yixu:product-favorites:v1','["brown-boots-102","unknown-design"]')`);
+  await evaluate(`window.dispatchEvent(new StorageEvent('storage',{key:'wardrobe99:favorites:v1',newValue:'[1,99999]'}));window.dispatchEvent(new StorageEvent('storage',{key:'yixu:product-favorites:v1',newValue:'["brown-boots-102","unknown-design"]'}))`);
+  for(const theme of ['editorial','studio']){
+   await route('#/home');await choose(theme);await noOverflow('home '+theme+' '+width);assert.equal(await evaluate('document.querySelector(".latest-hero").firstElementChild.classList.contains("hero-copy")'),theme==='editorial');await capture('theme-home-'+theme+'-'+width);
+   for(const hash of ['#/looks?q='+encodeURIComponent('针织'),'#/favorites','#/models','#/products']){await route(hash);const before=await evaluate('location.hash');await choose(theme==='studio'?'editorial':'studio');await choose(theme);assert.equal(await evaluate('location.hash'),before);await noOverflow(hash+' '+theme+' '+width);}
+  }
+  await route('#/product/'+boots.product_id);await choose('studio');await wait('document.getElementById("product-page").dataset.productTheme==="studio"');
+  const saveButton='#product-page .product-actions [data-product-favorite]';
+  await evaluate(`document.querySelector(${JSON.stringify(saveButton)}).click()`);await choose('editorial');assert.equal(await evaluate(`document.querySelector(${JSON.stringify(saveButton)}).getAttribute('aria-pressed')`),'false');
+  await evaluate(`document.querySelector(${JSON.stringify(saveButton)}).click()`);await choose('studio');assert.equal(await evaluate(`document.querySelector(${JSON.stringify(saveButton)}).getAttribute('aria-pressed')`),'true');assert.match(await evaluate(`document.querySelector(${JSON.stringify(saveButton)}).textContent`),/已收藏/);assert.ok(JSON.parse(await evaluate('localStorage.getItem("yixu:product-favorites:v1")')).includes(boots.product_id));
+  await evaluate(`document.querySelector(${JSON.stringify(saveButton)}).click()`);await choose('editorial');assert.equal(await evaluate(`document.querySelector(${JSON.stringify(saveButton)}).getAttribute('aria-pressed')`),'false');assert.ok(!JSON.parse(await evaluate('localStorage.getItem("yixu:product-favorites:v1")')).includes(boots.product_id));
+  await evaluate(`document.querySelector(${JSON.stringify(saveButton)}).click()`);
+  await evaluate(`document.querySelector('[data-product-index="3"]').click();document.querySelector('.product-main-image').focus()`);await choose('studio');assert.equal(await evaluate('document.activeElement.matches(".product-main-image")'),true);await evaluate('document.querySelector(".product-main-image").click()');await wait('document.getElementById("product-image-dialog").open');
+  const selected=await evaluate('document.querySelector(".product-main-image img").getAttribute("src")'),zoom=await evaluate('document.getElementById("product-zoom-image").getAttribute("src")');
+  await choose('editorial');assert.equal(await evaluate('document.getElementById("product-image-dialog").open'),true);assert.equal(await evaluate('document.querySelector(".product-main-image img").getAttribute("src")'),selected);assert.equal(await evaluate('document.getElementById("product-zoom-image").getAttribute("src")'),zoom);assert.equal(await evaluate('document.getElementById("product-image-position").textContent'),'4 / '+(boots.gallery.length+1));await client('Input.dispatchKeyEvent',{type:'keyDown',key:'ArrowRight',code:'ArrowRight',windowsVirtualKeyCode:39});assert.equal(await evaluate('document.getElementById("product-image-position").textContent'),'5 / '+(boots.gallery.length+1));await evaluate('document.getElementById("close-product-image").click()');
+  await choose('auto');assert.equal(await evaluate('document.getElementById("product-page").dataset.productTheme'),'studio','Content recommendation survives reset');await choose('editorial');await route('#/product/'+boots.product_id+'?theme=studio');assert.equal(await evaluate('document.getElementById("product-page").dataset.productTheme'),'studio');await choose('studio');await route('#/product/'+boots.product_id+'?theme=unknown');assert.equal(await evaluate('document.getElementById("product-page").dataset.productTheme'),'studio','Invalid URL cannot erase a valid preference');
+  assert.equal(await evaluate('localStorage.getItem("wardrobe99:favorites:v1")'),'[1,99999]');assert.deepEqual(JSON.parse(await evaluate('localStorage.getItem("yixu:product-favorites:v1")')).sort(),['brown-boots-102','unknown-design'].sort());
+ }
+ await route('#/home');await choose('studio');
+ await evaluate('document.querySelector(".site-theme-chooser summary").focus()');
+ assert.equal(await evaluate('document.activeElement.matches(".site-theme-chooser summary")'),true,JSON.stringify(await evaluate('({active:document.activeElement.outerHTML.slice(0,200),dialogs:[...document.querySelectorAll("dialog[open]")].map(d=>d.id)})')));
+ await client('Input.dispatchKeyEvent',{type:'keyDown',key:'Enter',code:'Enter',windowsVirtualKeyCode:13,text:'\r',unmodifiedText:'\r'});await client('Input.dispatchKeyEvent',{type:'keyUp',key:'Enter',code:'Enter',windowsVirtualKeyCode:13});await wait('document.querySelector(".site-theme-chooser").open');
+ await evaluate('document.querySelector(".site-theme-control select").focus()');
+ await client('Input.dispatchKeyEvent',{type:'keyDown',key:'Home',code:'Home',windowsVirtualKeyCode:36});await client('Input.dispatchKeyEvent',{type:'keyUp',key:'Home',code:'Home',windowsVirtualKeyCode:36});await wait('window.YixuSiteTheme.preference()===null');
+ await client('Input.dispatchKeyEvent',{type:'keyDown',key:'End',code:'End',windowsVirtualKeyCode:35});await client('Input.dispatchKeyEvent',{type:'keyUp',key:'End',code:'End',windowsVirtualKeyCode:35});await wait('window.YixuSiteTheme.preference()==="studio"');
+ await client('Input.dispatchKeyEvent',{type:'keyDown',key:'Escape',code:'Escape',windowsVirtualKeyCode:27});await client('Input.dispatchKeyEvent',{type:'keyUp',key:'Escape',code:'Escape',windowsVirtualKeyCode:27});await wait('!document.querySelector(".site-theme-chooser").open');
+ await choose('editorial');await evaluate('document.getElementById("hero-detail").click()');await wait('document.getElementById("detail-dialog").open');await evaluate('document.querySelector("[data-view=\\"3\\"]").click();document.getElementById("detail-tryon").click()');await wait('document.getElementById("tryon-dialog").open&&document.querySelectorAll("#tryon-reference-picker input").length===9');
+ await evaluate(`new Promise(resolve=>{const canvas=document.createElement('canvas');canvas.width=300;canvas.height=400;canvas.getContext('2d').fillRect(0,0,300,400);canvas.toBlob(blob=>{const transfer=new DataTransfer();transfer.items.add(new File([blob],'theme-fixture.png',{type:'image/png'}));const input=document.getElementById('tryon-album');input.files=transfer.files;input.dispatchEvent(new Event('change',{bubbles:true}));window.retainedInput=input;window.retainedPreview=document.getElementById('tryon-local-preview');resolve();},'image/png')})`);await wait('!document.getElementById("tryon-local-preview").hidden');
+ const blob=await evaluate('document.getElementById("tryon-local-preview").src');await choose('studio');assert.equal(await evaluate('window.retainedInput===document.getElementById("tryon-album")&&window.retainedPreview===document.getElementById("tryon-local-preview")'),true);assert.equal(await evaluate('document.getElementById("tryon-local-preview").src'),blob);assert.equal(await evaluate('document.querySelector("#tryon-reference-picker input:checked").value'),'3');
+ const tab=await(await fetch(debug+'/json/new?'+encodeURIComponent(origin),{method:'PUT'})).json(),other=await connect(tab.webSocketDebuggerUrl);await new Promise(r=>setTimeout(r,250));await evaluate(`localStorage.setItem(${JSON.stringify(key)},'editorial')`,other);await wait('document.documentElement.dataset.siteTheme==="editorial"');assert.equal(await evaluate('document.getElementById("tryon-local-preview").src'),blob);await fetch(debug+'/json/close/'+tab.id);
+ await wait('!document.getElementById("tryon-submit").disabled');await evaluate('document.getElementById("tryon-submit").click()');await wait('document.getElementById("tryon-jobs").textContent.includes("排队")');await evaluate('window.retainedJob=document.getElementById("tryon-jobs").firstElementChild');await choose('studio');assert.equal(await evaluate('window.retainedJob===document.getElementById("tryon-jobs").firstElementChild'),true);assert.equal(posts,1);await capture('theme-tryon-queued');
+ await evaluate('document.getElementById("tryon-close").click()');await navigate(origin+'/admin/');await wait('!document.getElementById("workspace").hidden&&document.querySelector("[data-metric=visits]").textContent==="37"');assert.equal(await evaluate('document.documentElement.dataset.siteTheme'),'studio','Same-origin administrator shares the saved preference');
+ for(const width of [320,390,1440]){
+  await client('Emulation.setDeviceMetricsOverride',{width,height:1000,deviceScaleFactor:1,mobile:width<600});
+  for(const theme of ['editorial','studio']){await choose(theme);await noOverflow('admin '+theme+' '+width);assert.equal(await evaluate('document.querySelector(".site-admin-layout")!==null'),theme==='studio');assert.equal(await evaluate('document.getElementById("workspace").contains(document.getElementById("metrics"))'),true);await capture('theme-admin-'+theme+'-'+width);}
+ }
+ await evaluate('document.getElementById("provider-model").value="unsaved model draft";window.metricNode=document.getElementById("metrics")');await choose('editorial');assert.equal(await evaluate('document.getElementById("provider-model").value'),'unsaved model draft');assert.equal(await evaluate('window.metricNode===document.getElementById("metrics")'),true);
+ await evaluate('document.getElementById("logout").click()');await wait('document.getElementById("workspace").hidden');for(const theme of ['editorial','studio']){await choose(theme);assert.equal(await evaluate('document.getElementById("workspace").hidden'),true);assert.equal(await evaluate('document.body.textContent.includes("private-theme-job")'),false);}
+ authenticated=true;await navigate(origin+'/admin/');await wait('!document.getElementById("workspace").hidden');force401=true;await evaluate('document.getElementById("refresh-overview").click()');await wait('document.getElementById("workspace").hidden');await choose('editorial');await choose('studio');assert.equal(await evaluate('document.body.textContent.includes("private-theme-job")'),false);
+ await navigate(origin);await choose('studio');await navigate(origin);assert.equal(await evaluate('document.documentElement.dataset.siteTheme'),'studio','Reload restores preference');await evaluate(`localStorage.setItem(${JSON.stringify(key)},'https://untrusted.invalid/layout.js')`);await navigate(origin);assert.equal(await evaluate('document.documentElement.dataset.siteTheme'),'editorial');assert.equal(await evaluate('document.querySelectorAll("script[src^=https]").length'),0);
+ await navigate(pathToFileURL(path.join(output,'index.html')).href);await wait('document.getElementById("hero-image-0").naturalWidth>0');await choose('studio');assert.equal(await evaluate('location.protocol'),'file:');await noOverflow('offline studio');await capture('theme-offline-studio');
+ console.log('PASS real Chromium: 320/390/1440 public/admin adapters, all routes, selected product/zoom, local photo/radio/queued job identity, shared cross-tab preference, null reset, URL precedence, reload/file://, private logout/401 and no overflow');
+}finally{for(const socket of sockets)try{socket.close();}catch{}try{process.kill(-browser.pid,'SIGTERM');}catch{}if(browser.exitCode===null&&browser.signalCode===null)await Promise.race([once(browser,'exit'),new Promise(resolve=>setTimeout(resolve,1500))]);await new Promise(resolve=>server.close(resolve));fs.rmSync(scratch,{recursive:true,force:true,maxRetries:8,retryDelay:100});}

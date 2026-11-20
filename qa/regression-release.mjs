@@ -21,7 +21,11 @@ function fixture() {
   const oldCatalog = {...expected, revision: 'c'.repeat(64)};
   fs.mkdirSync(path.join(root, 'public'));
   fs.writeFileSync(path.join(root, 'public/catalog.js'), json(oldCatalog));
-  const staticFiles = {'index.html': '<html><link rel="stylesheet" href="product-themes.css"><script src="product-themes.js"></script><script src="product-page.js"></script><script src="app.js"></script></html>', 'app.js': 'window.current=true;', 'product-themes.js':'window.themes=true;', 'product-page.js':'window.products=true;', 'product-themes.css':'.product-studio-layout{display:grid}', 'style.css':'body{margin:0}', 'expressive.css':'.look{display:block}', 'tryon.js':'window.tryon=true;', 'tryon.css':'.tryon{display:none}', 'favicon.svg':'<svg></svg>'};
+  const staticFiles = {'index.html': '<html><link rel="stylesheet" href="product-themes.css"><script src="product-themes.js"></script><script src="product-page.js"></script><script src="app.js"></script></html>', 'app.js': 'window.current=true;', 'site-theme.js':'window.layout=true;', 'site-theme.css':'.site-theme{display:grid}', 'product-themes.js':'window.themes=true;', 'product-page.js':'window.products=true;', 'product-themes.css':'.product-studio-layout{display:grid}', 'style.css':'body{margin:0}', 'expressive.css':'.look{display:block}', 'tryon.js':'window.tryon=true;', 'tryon.css':'.tryon{display:none}', 'favicon.svg':'<svg></svg>'};
+  for(const [name,body] of Object.entries(staticFiles))fs.writeFileSync(path.join(root,name),body);
+  fs.mkdirSync(path.join(root,'admin'));
+  for(const name of ['index.html','app.mjs','admin.css'])fs.writeFileSync(path.join(root,'admin',name),name==='index.html'?'<script src="./app.mjs"></script>':'fixture admin');
+  fs.writeFileSync(path.join(root,'site-resources.json'),JSON.stringify({schema_version:1,public:Object.keys(staticFiles),admin:['index.html','app.mjs','admin.css']}));
   const commands = [];
   function execute(command, args) {
     commands.push([command, args]);
@@ -62,6 +66,16 @@ test('explicit delivery checks source/static/API before writing private publicat
   assert.equal(fs.statSync(path.join(f.state, 'publication.json')).mode & 0o777, 0o600);
   assert.equal(JSON.stringify(proof).includes(f.directory), false);
   assert.equal(fs.existsSync(path.join(f.state, 'release.lock')), false);
+}));
+
+test('candidate shell contract, not the executing repository, governs publication verification', async () => useFixture(async f => {
+  const manifest=JSON.parse(fs.readFileSync(path.join(f.root,'site-resources.json'),'utf8'));
+  manifest.public.push('extra.css');fs.writeFileSync(path.join(f.root,'site-resources.json'),JSON.stringify(manifest));
+  fs.writeFileSync(path.join(f.root,'extra.css'),'candidate CSS');f.staticFiles['extra.css']='candidate CSS';
+  const requested=[];const fetcher=async(url,options)=>{const name=new URL(url).pathname;requested.push(name);return name==='/extra.css'?new Response('previous CSS'):f.fetcher(url,options);};
+  await assert.rejects(runRelease(f.options,{...f.dependencies,fetcher}),/extra\.css.*stale/);
+  assert.ok(requested.includes('/extra.css'),'Candidate-specific resources must actually be fetched');
+  assert.equal(JSON.parse(fs.readFileSync(path.join(f.state,'publication.json'),'utf8')).status,'activation_failed');
 }));
 
 test('validation failure retains prior public and proof without restart', async () => useFixture(async f => {
@@ -124,7 +138,7 @@ test('HTTP probe uses actual public routes and validates byte hash without CDN',
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   try {
     const origin = 'http://127.0.0.1:' + server.address().port;
-    const receipt = await verifyPublication({origin, expected: f.expected, publicRoot});
+    const receipt = await verifyPublication({origin, expected: f.expected, publicRoot, sourceRoot: f.root});
     assert.equal(receipt.source_verified, true);
   } finally { await new Promise(resolve => server.close(resolve)); }
 }));

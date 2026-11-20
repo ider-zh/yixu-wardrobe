@@ -2,7 +2,7 @@
 (() => {
 'use strict';
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function create({root,dialog,media,renderCard,renderWorn}){
+function create({root,dialog,media,renderCard,renderWorn,isLiked}){
  const imageAttributes=media.attributes;
  const $=id=>document.getElementById(id);
  let current=null,selectedProduct=null,selectedAsset=null,zoomIndex=null;
@@ -17,8 +17,8 @@ function productImageButton(product,image,index,className){
  return `<button class="${className}" data-product-zoom="${esc(product.product_id)}" data-product-frame-index="${index}" aria-label="放大查看 ${esc(productImageAlt(product,image))}"><img ${imageAttributes(image.asset)} alt="${esc(productImageAlt(product,image))}" width="${image.asset.width}" height="${image.asset.height}" ${index?'loading="lazy"':'fetchpriority="high"'} decoding="async"><span class="product-design-badge" ${image.design_study?'':'hidden'}>设计推演</span><span class="product-image-hint" aria-hidden="true">↗</span></button>`;
 }
 function render(view){
- current=view;
- const {product,number,liked,appearances,related,themeOverride}=view;
+ current={...view,liked:view.product&&isLiked?isLiked(view.product.product_id):view.liked};
+ const {product,number,liked,appearances,related,themeOverride}=current;
  const id=product?.product_id;
  if(!product){selectedProduct=null;selectedAsset=null;delete root.dataset.productTheme;delete root.dataset.productPreset;root.innerHTML='<p class="eyebrow">THE OBJECT EDIT</p><h1>这件单品暂未发布。</h1><a class="outline-button" href="#/products">浏览全部单品 ↗</a>';return;}
  const theme=window.YixuProductThemes.resolve(product.presentation,themeOverride);
@@ -73,6 +73,16 @@ $('product-image-next').addEventListener('click',()=>{if(zoomIndex!==null)showIm
 // A native close event can arrive after the user has already reopened the gallery.
 dialog.addEventListener('close',()=>{if(!dialog.open)zoomIndex=null;});
 dialog.addEventListener('keydown',event=>{if(zoomIndex===null||!['ArrowLeft','ArrowRight'].includes(event.key))return;event.preventDefault();showImage(zoomIndex+(event.key==='ArrowLeft'?-1:1));});
+window.YixuSiteTheme?.subscribe(()=>{
+ if(!current?.product||root.hidden)return;
+ const active=document.activeElement,focusIndex=active?.dataset?.productIndex,mainFocused=active?.matches?.('.product-main-image');
+ const top=root.ownerDocument.defaultView?.scrollY||0;
+ render(current);
+ if(focusIndex!==undefined)root.querySelector('[data-product-index="'+focusIndex+'"]')?.focus({preventScroll:true});
+ else if(mainFocused)root.querySelector('.product-main-image')?.focus({preventScroll:true});
+ else if(active?.isConnected)active.focus?.({preventScroll:true});
+ root.ownerDocument.defaultView?.scrollTo?.({top,behavior:'instant'});
+});
 return Object.freeze({render});
 }
 window.YixuProductPage=Object.freeze({create});

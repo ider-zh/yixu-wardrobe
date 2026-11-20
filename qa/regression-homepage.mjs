@@ -434,7 +434,7 @@ try{
  await wait('document.getElementById("product-page").dataset.productTheme==="editorial"');
  assert.equal(await evaluate('document.querySelector(".product-main-image img").getAttribute("src")'),selectedSource);
  await route(bootsHash+'?theme=future-theme');
- assert.equal(await evaluate('document.getElementById("product-page").dataset.productTheme'),'editorial','Unknown safe theme uses built-in fallback');
+ assert.equal(await evaluate('document.getElementById("product-page").dataset.productTheme'),boots.presentation?.theme==='studio'?'studio':'editorial','Invalid URL theme preserves the valid content recommendation');
  await navigate(pathToFileURL(path.join(output,'index.html')).href+bootsHash+'?theme=studio');
  assert.equal(await evaluate('document.getElementById("product-page").dataset.productTheme'),'studio','Theme review route reloads offline');
  await evaluate('document.querySelector("[data-product-index=\\"0\\"]").click();document.querySelector(".product-main-image").click();document.getElementById("product-image-dialog").close();document.querySelector(".product-main-image").click()');

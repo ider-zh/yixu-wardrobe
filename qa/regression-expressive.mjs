@@ -159,7 +159,7 @@ check('an intentionally empty valid catalog renders gracefully without deleting 
   a.adoptCatalog(baseline);assert.equal(a.byId.size,baseline.looks.length);
 });
 check('page styles and scripts retain local dependencies for direct offline opening',()=>{
-  const styles=['style.css','expressive.css','product-themes.css','tryon.css'].map(file=>fs.readFileSync(path.join(root,file),'utf8')).join('\n');assert.doesNotMatch(html,/<(?:script|link)[^>]+(?:src|href)=["'](?:https?:)?\/\//i);assert.doesNotMatch(styles,/@import\s|url\(\s*["']?(?:https?:)?\/\//i);
+  const styles=['style.css','expressive.css','product-themes.css','tryon.css','site-theme.css'].map(file=>fs.readFileSync(path.join(root,file),'utf8')).join('\n');assert.doesNotMatch(html,/<(?:script|link)[^>]+(?:src|href)=["'](?:https?:)?\/\//i);assert.doesNotMatch(styles,/@import\s|url\(\s*["']?(?:https?:)?\/\//i);
 });
 for(const name of checks)console.log('PASS '+name);
 console.log('Synthetic DOM regression: '+checks.length+' checks passed.');

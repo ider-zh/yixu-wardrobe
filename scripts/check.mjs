@@ -1,3 +1,4 @@
+import {readSiteResources} from './site-resources.mjs';
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
@@ -69,6 +70,7 @@ assert.equal(manifest.modelBases[0].id, 'female-01');
 assert.equal(manifest.modelBases[0].file, 'assets/model-bases/female-01.webp');
 const modelBaseBytes = verifyImage(manifest.modelBases[0]).bytes;
 const content = loadContent(root);
+readSiteResources(root);
 assert.ok(content.catalog.looks.length >= 100, 'Historical outfits must remain available');
 for (const id of expectedIds) {
   const current = content.catalog.looks.find(look => look.id === id);
@@ -78,7 +80,7 @@ assert.ok(content.catalog.looks.every(look => !look.versions.v1), 'Public catalo
 const html = read('index.html');
 const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]);
 assert.equal(ids.length, new Set(ids).size);
-for(const file of ['app.js','tryon.js','product-themes.js','product-page.js']) {
+for(const file of ['app.js','tryon.js','product-themes.js','product-page.js','site-theme.js']) {
   new vm.Script(read(file),{filename:file});
   for (const match of read(file).matchAll(/\$\('([^']+)'\)/g)) {
     assert.ok(ids.includes(match[1]), `Missing UI target: ${match[1]}`);

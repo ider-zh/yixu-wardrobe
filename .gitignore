@@ -10,6 +10,7 @@
 !/product-page.js
 !/site-theme.js
 !/site-theme.css
+!/site-resources.json
 !/product-themes.js
 !/product-themes.css
 !/catalog.js
@@ -94,5 +95,6 @@
 !/deploy/*.py
 !/deploy/*.service
 !/deploy/dev-deploy.timer
+!/deploy/dev-cert-renew.timer
 !/deploy/*.conf
 !/deploy/*.md

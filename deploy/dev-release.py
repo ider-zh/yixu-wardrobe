@@ -181,6 +181,67 @@ def snapshot(release):
     return json.loads(match[1])
 
 
+def shell_resources(release):
+    manifest = release / "site-resources.json"
+    if manifest.is_symlink() or (release / "admin").is_symlink():
+        raise ValueError("Shell manifests and admin directories must not be symlinks")
+    if manifest.exists():
+        if not manifest.is_file():
+            raise ValueError("Shell manifest must be a regular file")
+        resources = json.loads(manifest.read_text())
+        if (
+            set(resources) != {"schema_version", "public", "admin"}
+            or type(resources["schema_version"]) is not int
+            or resources["schema_version"] != 1
+        ):
+            raise ValueError("Unsupported local shell resource contract")
+        for group in ("public", "admin"):
+            names = resources[group]
+            if (
+                not isinstance(names, list)
+                or not 0 < len(names) <= 50
+                or not all(
+                    isinstance(name, str)
+                    and re.fullmatch(r"[A-Za-z0-9_-]+\.(?:html|js|mjs|css|svg)", name)
+                    for name in names
+                )
+                or len(set(names)) != len(names)
+                or "index.html" not in names
+            ):
+                raise ValueError("Only unique local shell resource filenames are accepted")
+        for group in ("public", "admin"):
+            directory = release / "admin" if group == "admin" else release
+            for name in resources[group]:
+                resource = directory / name
+                if resource.is_symlink() or not resource.is_file():
+                    raise ValueError("Source shell resources must be regular files, never symlinks")
+        if "catalog.js" in resources["public"]:
+            raise ValueError("The generated catalog is not a source shell resource")
+    else:
+        # Existing deployments predate the shared source contract.
+        resources = {
+            "public": [
+                "index.html",
+                "app.js",
+                "style.css",
+                "expressive.css",
+                "tryon.js",
+                "tryon.css",
+                "product-themes.js",
+                "product-page.js",
+                "product-themes.css",
+                "favicon.svg",
+            ],
+            "admin": ["index.html", "app.mjs", "admin.css"],
+        }
+    checks = [
+        ("public/" + name, "/" + ("" if name == "index.html" else name))
+        for name in [*resources["public"], "catalog.js"]
+    ]
+    checks += [("admin/" + name, "/admin/" + name) for name in resources["admin"]]
+    return checks
+
+
 def verify(release, origin):
     catalog = snapshot(release)
     health = json.loads(get("http://127.0.0.1:8766/api/health", DOMAIN))
@@ -206,25 +267,7 @@ def verify(release, origin):
     except urllib.error.HTTPError as error:
         if error.code != 401:
             raise
-    checks = [
-        ("public/" + name, "/" + ("" if name == "index.html" else name))
-        for name in [
-            "index.html",
-            "app.js",
-            "catalog.js",
-            "style.css",
-            "expressive.css",
-            "tryon.js",
-            "tryon.css",
-            "product-themes.js",
-            "product-page.js",
-            "product-themes.css",
-            "favicon.svg",
-        ]
-    ]
-    checks += [
-        ("admin/" + name, "/admin/" + name) for name in ["index.html", "app.mjs", "admin.css"]
-    ]
+    checks = shell_resources(release)
     for local, remote in checks:
         data = get(origin.rstrip("/") + remote, DOMAIN)
         if hashlib.sha256(data).digest() != hashlib.sha256((release / local).read_bytes()).digest():

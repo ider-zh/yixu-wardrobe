@@ -43,6 +43,7 @@ const server = http.createServer((request, response) => {
   if (request.url === '/api/admin/content/models') return json({ models: [] });
   if (request.url === '/api/admin/results?offset=0&limit=24') return json({ items: [], has_more: false });
   if (request.url === '/api/admin/settings') return json({ enabled: false, api_key_configured: false });
+  if (request.url === '/site-theme.js' || request.url === '/site-theme.css') { response.setHeader('Content-Type', request.url.endsWith('.js') ? 'text/javascript' : 'text/css'); response.end(fs.readFileSync(path.join(root, '..', request.url.slice(1)))); return; }
   const file = { '/admin/': 'index.html', '/admin/admin.css': 'admin.css', '/admin/app.mjs': 'app.mjs' }[request.url];
   if (!file) { response.statusCode = 404; response.end(); return; }
   response.setHeader('Content-Type', { 'index.html': 'text/html; charset=utf-8', 'admin.css': 'text/css', 'app.mjs': 'text/javascript' }[file]);

@@ -5,6 +5,7 @@ import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath, pathToFileURL} from 'node:url';
 import {loadContent, digest} from './content-lib.mjs';
+import {readSiteResources} from './site-resources.mjs';
 
 const repository = fileURLToPath(new URL('../', import.meta.url));
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -61,7 +62,7 @@ function originUrl(value) {
   return url.origin;
 }
 
-export async function verifyPublication({origin, expected, publicRoot, fetcher = fetch}) {
+export async function verifyPublication({origin, expected, publicRoot, sourceRoot = repository, fetcher = fetch}) {
   const get = async relative => {
     const url = new URL(relative, origin + '/');
     assert.equal(url.origin, origin, 'Source image must use the project origin');
@@ -82,7 +83,7 @@ export async function verifyPublication({origin, expected, publicRoot, fetcher =
   const publicSnapshot = snapshotCatalog(await (await get('/catalog.js')).text());
   assert.equal(publicSnapshot.revision, expected.revision, 'Static snapshot differs from API revision');
   assert.equal(publicSnapshot.home?.featured_look_id, featuredId, 'Static homepage feature differs from API');
-  for (const file of ['index.html', 'app.js', 'product-themes.js', 'product-page.js', 'style.css', 'expressive.css', 'product-themes.css', 'tryon.js', 'tryon.css', 'favicon.svg']) {
+  for (const file of readSiteResources(sourceRoot).public) {
     const data = Buffer.from(await (await get('/' + (file === 'index.html' ? '' : file))).arrayBuffer());
     assert.equal(digest(data), digest(fs.readFileSync(path.join(publicRoot, file))), `Public ${file} is stale`);
   }
@@ -115,6 +116,7 @@ export async function runRelease(options, dependencies = {}) {
   let backedUp = false;
   try {
     const expected = (dependencies.loadContent || loadContent)(root).catalog;
+    readSiteResources(root);
     execute(process.execPath, ['scripts/check.mjs'], {cwd: root, stdio: 'pipe', timeout: 120000});
     execute(process.execPath, ['scripts/build.mjs', '--output', output], {cwd: root, stdio: 'pipe', timeout: 120000});
     const built = snapshotCatalog(fs.readFileSync(path.join(output, 'catalog.js'), 'utf8'));
@@ -137,7 +139,7 @@ export async function runRelease(options, dependencies = {}) {
     const attempts = dependencies.attempts || 20;
     for (let attempt = 0; attempt < attempts; attempt++) {
       try {
-        receipt = await verifyPublication({origin, expected, publicRoot: live, fetcher: dependencies.fetcher});
+        receipt = await verifyPublication({origin, expected, publicRoot: live, sourceRoot: root, fetcher: dependencies.fetcher});
         break;
       } catch (error) {
         lastError = error;

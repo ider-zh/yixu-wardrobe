@@ -13,9 +13,12 @@ const themes = Object.freeze({
 });
 window.YixuProductThemes=Object.freeze({
  resolve(presentation={},override){
-  const name=Object.hasOwn(themes,override||presentation.theme)?override||presentation.theme:'editorial';
+  const validOverride=Object.hasOwn(themes,override)?override:undefined;
+  const requested=window.YixuSiteTheme?.resolve(presentation.theme,validOverride)??(validOverride||presentation.theme);
+  const name=Object.hasOwn(themes,requested)?requested:'editorial';
   const adapter=themes[name];
-  const preset=['warm-paper','neutral-white'].includes(presentation.preset)?presentation.preset:adapter.preset;
+  const explicit=Object.hasOwn(themes,override)||!!window.YixuSiteTheme?.preference();
+  const preset=!explicit&&['warm-paper','neutral-white'].includes(presentation.preset)?presentation.preset:adapter.preset;
   return {name,preset,render:adapter.render};
  }
 });

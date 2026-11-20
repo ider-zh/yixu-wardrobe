@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {loadContent} from './content-lib.mjs';
+import {readSiteResources} from './site-resources.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const args = process.argv.slice(2);
@@ -19,11 +20,12 @@ if (candidateOnly && fs.existsSync(output)) {
 }
 // Validate before staging, and leave the currently served output intact until
 // every file and the complete offline snapshot have been written successfully.
+const shell = readSiteResources(root);
 const content = loadContent(root);
 const parent = path.dirname(output);
 fs.mkdirSync(parent, {recursive: true});
 const staging = fs.mkdtempSync(path.join(parent, '.yixu-build-'));
-const files = ['index.html', 'app.js', 'product-themes.js', 'product-page.js', 'style.css', 'expressive.css', 'product-themes.css', 'tryon.js', 'tryon.css', 'favicon.svg', ...new Set(content.publicAssets.map(asset => asset.file))];
+const files = [...shell.public, ...new Set(content.publicAssets.map(asset => asset.file))];
 let bytes = 0;
 let backup;
 try {

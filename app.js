@@ -3,6 +3,7 @@
 let data = {}, looks = [], categories = [], models = [];
 const byId = new Map();
 const $ = id => document.getElementById(id);
+window.YixuSiteTheme?.mount(document.querySelector('[data-site-theme-control]'));
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const number = id => String(id).padStart(3,'0');
 const storageKey = 'wardrobe99:favorites:v1';
@@ -420,6 +421,7 @@ function renderProducts(){
  $('product-gallery').innerHTML=selected.map(productCard).join('');$('product-empty').hidden=!!selected.length;
 }
 const productPage=window.YixuProductPage.create({
+ isLiked:id=>productFavorites.has(id),
  root:$('product-page'),dialog:$('product-image-dialog'),media:{attributes:imageAttributes,set:setImage},renderCard:productCard,
  renderWorn(a){
   const look=byId.get(a.look_id),version={...versionOf(look),previewPanel:a.shot_index};

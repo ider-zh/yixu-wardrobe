@@ -18,6 +18,8 @@ assert.doesNotMatch(site,/admin-dev\.|admin\.8882088|proxy_pass.*:8765/);
 assert.match(read('deploy/dev-api.service'),/User=yixu-dev/);
 assert.match(read('deploy/dev-api.service'),/ReadWritePaths=\/var\/lib\/yixu-wardrobe-dev/);
 assert.match(read('deploy/dev-deploy.timer'),/OnUnitInactiveSec=60s/);
+assert.match(read('deploy/dev-deploy.service'),/CPUQuota=50%/);
+assert.match(read('deploy/dev-deploy.service'),/MemoryMax=35%/);
 assert.match(read('deploy/dev-worker.service'),/User=yixu-dev/);
 assert.match(read('deploy/dev-worker.service'),/TimeoutStopSec=3700/);
 
@@ -70,6 +72,28 @@ with tempfile.TemporaryDirectory() as temporary:
   return routes[path]
  m.get=get;m.verify=real_verify
  assert m.verify(release,'http://127.0.0.1')['static_files_verified']==14
+ manifest={'schema_version':1,'public':['index.html','app.js','style.css','expressive.css','tryon.js','tryon.css','product-themes.js','product-page.js','product-themes.css','favicon.svg','site-theme.js','site-theme.css'],'admin':['index.html','app.mjs','admin.css']}
+ (release/'site-resources.json').write_text(json.dumps(manifest))
+ for name in ('site-theme.js','site-theme.css'):
+  data=('new theme asset '+name).encode();(release/'public'/name).write_bytes(data);routes['/'+name]=data
+ for name in manifest['public']:(release/name).write_bytes((release/'public'/name).read_bytes())
+ assert m.verify(release,'http://127.0.0.1')['static_files_verified']==16
+ outside=state/'outside-private.js';outside.write_bytes(b'not a web asset');outside.chmod(0o600)
+ source=release/'site-theme.js';original_source=source.read_bytes();source.unlink();source.symlink_to(outside)
+ try:m.shell_resources(release)
+ except ValueError as error:assert 'symlink' in str(error)
+ else:raise AssertionError('a declared source resource must not link to private server data')
+ source.unlink();source.write_bytes(original_source)
+ old_theme=routes['/site-theme.js'];routes['/site-theme.js']=b'stale theme'
+ try:m.verify(release,'http://127.0.0.1')
+ except RuntimeError as error:assert 'stale' in str(error)
+ else:raise AssertionError('new shared theme resources must be part of publication proof')
+ routes['/site-theme.js']=old_theme
+ manifest['public'].append('../private.css');(release/'site-resources.json').write_text(json.dumps(manifest))
+ try:m.shell_resources(release)
+ except ValueError:pass
+ else:raise AssertionError('static contract must not escape a web root')
+ manifest['public'].pop();(release/'site-resources.json').write_text(json.dumps(manifest))
  m.GENERATION_ENABLED=True
  routes['/api/health']=json.dumps({'ok':True,'provider_configured':True,'detector_ready':True}).encode()
  routes['/api/bootstrap']=json.dumps({'generation_available':True}).encode()

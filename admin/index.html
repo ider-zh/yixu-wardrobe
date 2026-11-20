@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-site-context="admin">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,10 +8,11 @@
   <meta name="theme-color" content="#f3f0e7">
   <title>衣序 · 管理工作台</title>
   <link rel="stylesheet" href="./admin.css">
+  <link rel="stylesheet" href="../site-theme.css">
 </head>
 <body>
   <a class="skip-link" href="#main">跳到主要内容</a>
-  <header class="site-header"><a class="brand" href="./" aria-label="衣序管理首页"><span>衣序</span><small>THE WARDROBE / ADMIN</small></a></header>
+  <header class="site-header"><a class="brand" href="./" aria-label="衣序管理首页"><span>衣序</span><small>THE WARDROBE / ADMIN</small></a><div data-site-theme-control></div></header>
   <main id="main">
     <div class="page-heading"><p class="eyebrow">BEHIND THE WARDROBE</p><h1>管理工作台<span>.</span></h1><p class="muted">记录真实使用，照看每一次生成。</p></div>
     <div class="connection-bar"><p id="notice" role="status" aria-live="polite">正在连接管理服务…</p><button id="reconnect" class="text-button" type="button">重新连接</button></div>
@@ -116,6 +117,7 @@
   </main>
   <footer><span class="brand-name">衣序</span><span>穿行于日常，停留在喜欢。</span><span>管理入口 · 需要独立登录</span></footer>
   <noscript><p>管理工作台需要 JavaScript。请启用后刷新；未加载时不会展示私有数据。</p></noscript>
+  <script src="../site-theme.js"></script>
   <script type="module" src="./app.mjs"></script>
 </body>
 </html>

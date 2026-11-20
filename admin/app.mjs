@@ -1,5 +1,6 @@
 export function createAdminApp({ document, fetch, confirm }) {
   const $ = (selector) => document.querySelector(selector);
+  globalThis.YixuSiteTheme?.mount(document.querySelector('[data-site-theme-control]'));
   let csrf = '';
   let pending = Promise.resolve();
   let busy = false;
