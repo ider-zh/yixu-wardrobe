@@ -1642,6 +1642,295 @@
           "shot_index": 7
         }
       ]
+    },
+    {
+      "product_id": "butter-cable-knit-104",
+      "name": "奶油黄圆领绞花针织衫",
+      "category": "上装",
+      "subtitle": "把柔软的明亮，留在日常里。",
+      "description": "奶油黄色、圆领罗纹和纵向绞花，组成轻松的长袖套头轮廓。独立图依照第104套实际可见衣装呈现，完整展开的衣摆与放大针目为AI设计补充，不作为真实材质或工艺依据。",
+      "color_name": "奶油黄",
+      "color_hex": "#e8d491",
+      "design_material": "中等厚度绞花针织与柔和毛感，仅为视觉设计描述。",
+      "notes": [
+        "圆领、罗纹袖口与三组主要纵向绞花保持一致",
+        "原写真前中衣摆收进裙腰，完整展开形态为AI设计补充",
+        "放大针目、肩袖连接与袖口内缘均按设计推演说明，不证明纤维或缝制工艺",
+        "省略未知背面、内标和内里，不虚构品牌、成分、尺寸、价格或货源"
+      ],
+      "presentation": {
+        "theme": "editorial",
+        "preset": "warm-paper"
+      },
+      "copy": {
+        "hero_title": "奶油黄绞花针织"
+      },
+      "appearances": [
+        {
+          "look_id": 104,
+          "piece_index": 1,
+          "reference_asset_id": "look-104-female-01-v2-r1",
+          "shot_index": 3
+        }
+      ],
+      "asset": {
+        "asset_id": "product-butter-cable-knit-104-main-r1",
+        "file": "assets/products/look-104/butter-cable-knit-104-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 277082,
+        "sha256": "8922050923b40830468257d79765079abccf69960fba9b76a4c06c70e0fda9d7",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "圆领与绞花衔接",
+          "caption": "独立新近景展示罗纹圆领、肩部与纵向绞花。原写真不足以验证领内衔接和放大针目，这些微观表现属于AI设计推演，不作为真实缝制或材质依据。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-butter-cable-knit-104-neckline-r1",
+            "file": "assets/products/look-104/butter-cable-knit-104-neckline-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 306976,
+            "sha256": "7ac8c93d7445353faf43b6ce9a74007637962c77bc9000a448f33b6db60dcf28",
+            "visibility": "public"
+          }
+        },
+        {
+          "title": "袖口轻叠，纹理起伏",
+          "caption": "长袖自然搭在同一针织衫前身，展示罗纹袖口与绞花过渡。袖口内缘、放大针目和连接细节为AI设计推演，不是主图裁切或真实工艺证明。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-butter-cable-knit-104-cuff-r1",
+            "file": "assets/products/look-104/butter-cable-knit-104-cuff-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 360242,
+            "sha256": "2b0288ac2828e7d6965eaba0643b36eb072896beb49287c5a9278a52ccf646c0",
+            "visibility": "public"
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "navy-boxpleat-skirt-104",
+      "name": "藏蓝箱褶中长裙",
+      "category": "下装",
+      "subtitle": "宽褶之间，留一段从容的线条。",
+      "description": "深墨藏蓝的宽箱褶沿简洁腰线展开，形成微A字中长轮廓。完整独立腰头及放大的褶面细节包含AI设计补充，不能将未展示的闭合结构或微观纹理当成原写真已验证的事实。",
+      "color_name": "深墨藏蓝",
+      "color_hex": "#252a37",
+      "design_material": "较厚哑光织物与柔和毛呢观感，仅为视觉设计描述。",
+      "notes": [
+        "宽箱褶与微A字中长轮廓延续原写真",
+        "针织遮挡部分腰线，独立完整腰头为AI设计补充，不绘制未知扣具或拉链",
+        "放大褶面、下摆和微观纹理为设计推演，不证明真实面料成分或工艺",
+        "省略未知背面、内里和闭合机构；原穿着上下文由精确写真关联展示"
+      ],
+      "presentation": {
+        "theme": "editorial",
+        "preset": "warm-paper"
+      },
+      "appearances": [
+        {
+          "look_id": 104,
+          "piece_index": 2,
+          "reference_asset_id": "look-104-female-01-v2-r1",
+          "shot_index": 2
+        }
+      ],
+      "asset": {
+        "asset_id": "product-navy-boxpleat-skirt-104-main-r1",
+        "file": "assets/products/look-104/navy-boxpleat-skirt-104-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 109124,
+        "sha256": "d9844dd5b2809e40de7626085ba7bccdb2e6358d5461e42778c1421709118524",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "腰线与箱褶展开",
+          "caption": "独立斜向近景展示简洁腰头与宽箱褶的衔接。原写真针织遮挡部分腰线，完整腰头和放大纹理为AI设计推演，不补造未见扣具、拉链或内里。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-navy-boxpleat-skirt-104-waist-pleats-r1",
+            "file": "assets/products/look-104/navy-boxpleat-skirt-104-waist-pleats-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 140758,
+            "sha256": "52dc4236b50be3b9000ed9ee81d10f6245a37396fda4925d1047b0bfb2f17fe9",
+            "visibility": "public"
+          }
+        },
+        {
+          "title": "宽褶落下的重量",
+          "caption": "独立新近景展示下摆、宽箱褶及自然折面。放大的表面和下摆细部为AI设计推演，不构成真实材质或工艺证据。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-navy-boxpleat-skirt-104-hem-r1",
+            "file": "assets/products/look-104/navy-boxpleat-skirt-104-hem-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 126116,
+            "sha256": "36984b0c49da2fe8f459775b27848bdfc5b85b64eaf11f37774737420b68310f",
+            "visibility": "public"
+          }
+        }
+      ]
+    },
+    {
+      "presentation": {
+        "theme": "studio",
+        "preset": "neutral-white"
+      },
+      "product_id": "oxblood-knee-boots-104",
+      "name": "牛血酒红圆头低跟长靴",
+      "category": "鞋履",
+      "subtitle": "一线酒红，接住裙摆下的暖意。",
+      "description": "深牛血酒红的长筒轮廓，配合圆头与低粗跟，在深色裙摆下保留柔和光泽。独立图依据原写真可见色型作 AI 设计演绎；裙摆遮挡的完整筒口、细纹与边缘形态属于设计补充，不是原款工艺证明。",
+      "color_name": "牛血酒红",
+      "color_hex": "#68383b",
+      "design_material": "柔和光泽皮面与深色鞋底观感，仅为视觉设计描述",
+      "notes": [
+        "圆头、及膝长筒与低粗跟，沿用写真中可见的穿着轮廓",
+        "完整筒口与近景细纹为 AI 设计补充，不证明实物成分或工艺",
+        "省略未知内里、拉链与鞋底纹路，不提供未经核实的尺寸、品牌或货源"
+      ],
+      "asset": {
+        "asset_id": "product-oxblood-knee-boots-104-main-r1",
+        "file": "assets/products/look-104/oxblood-knee-boots-104-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 40426,
+        "sha256": "442365627f6e63257fe9acad15a375f7e025a000d798f842c3b0bee3cbeabd27",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "低粗跟与踝部弧线",
+          "caption": "独立侧面近景呈现低粗跟与踝部折面的关系。原写真没有可核实的工艺近照，表面细纹、边缘与折面均为 AI 设计演绎；不展示未知鞋底或闭合结构。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-oxblood-knee-boots-104-heel-r1",
+            "file": "assets/products/look-104/oxblood-knee-boots-104-heel-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 99832,
+            "sha256": "c3e02e8deba66a4f051d4445080d324e0915ed4d2d54db4d192a950f923e0792",
+            "visibility": "public"
+          }
+        },
+        {
+          "title": "圆头的柔和光泽",
+          "caption": "从新角度观察圆头、前掌与柔和皮面观感。细纹与折面为 AI 设计演绎，不是主图裁切，也不构成真实材质或工艺证明。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-oxblood-knee-boots-104-toe-r1",
+            "file": "assets/products/look-104/oxblood-knee-boots-104-toe-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 80924,
+            "sha256": "ce4b550c11004b83075a85d44fc9976b971093ae344ca80c3991072e92816ea2",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 104,
+          "piece_index": 3,
+          "reference_asset_id": "look-104-female-01-v2-r1",
+          "shot_index": 5
+        }
+      ]
+    },
+    {
+      "presentation": {
+        "theme": "studio",
+        "preset": "neutral-white"
+      },
+      "product_id": "cocoa-bucket-bag-104",
+      "name": "可可棕短提手圆桶包",
+      "category": "配饰",
+      "subtitle": "一只圆桶，收拢午后温度。",
+      "description": "可可深棕的竖桶形包身，以圆底和单短弧提手保持干净轮廓。独立图依据原写真可见色型作 AI 设计演绎，完整提手接点、边缘与表面细纹属于设计补充，不证明原款工艺。",
+      "color_name": "可可深棕",
+      "color_hex": "#5d4236",
+      "design_material": "细纹皮面观感，仅为视觉设计描述",
+      "notes": [
+        "竖向圆桶形包身与单短弧提手，呼应写真中的轻巧比例",
+        "提手接点、圆底边缘与细纹为 AI 设计补充，不代表实物工艺或成分",
+        "不添加肩带、金属件或标识，省略未知闭合结构、内里与底部细节"
+      ],
+      "asset": {
+        "asset_id": "product-cocoa-bucket-bag-104-main-r1",
+        "file": "assets/products/look-104/cocoa-bucket-bag-104-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 51312,
+        "sha256": "4022739ad29b3983dba2402adccfe54aa43cd4fb130402d753be0941501862ac",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "提手与桶身接点",
+          "caption": "新近景呈现短提手直接衔接桶身的形态。原写真不足以核实接点做法，接点、细纹与边缘为 AI 设计演绎，不据此推定真实缝制或包口结构。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-cocoa-bucket-bag-104-handle-r1",
+            "file": "assets/products/look-104/cocoa-bucket-bag-104-handle-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 145146,
+            "sha256": "6d514e3c9288f3dcf8ca5daf11498a39e7d22586c3f91d4d0c27ad557960c276",
+            "visibility": "public"
+          }
+        },
+        {
+          "title": "圆底转折与表面",
+          "caption": "侧向柔光呈现竖桶身向圆底的过渡及细纹观感。表面与边缘为 AI 设计演绎，不是主图裁切，不构成真实材质证明，也不展示未知底面。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-cocoa-bucket-bag-104-base-r1",
+            "file": "assets/products/look-104/cocoa-bucket-bag-104-base-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 210532,
+            "sha256": "1aa833741bc9f16219d99ca2617ee5b90ec55bac3909c74616ecdd7a7ced4cf0",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 104,
+          "piece_index": 4,
+          "reference_asset_id": "look-104-female-01-v2-r1",
+          "shot_index": 7
+        }
+      ]
     }
   ]
 }
