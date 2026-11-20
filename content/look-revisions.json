@@ -684,6 +684,297 @@
       ]
     },
     {
+      "look_id": 11,
+      "replaces_asset_id": "look-011-v2-r1",
+      "model_id": "female-01",
+      "model_reference_sha256": "dc0a221ff81250415bcfa3b320bc916dc02e2873f030e707083928505ca75066",
+      "asset": {
+        "asset_id": "look-011-female-01-v2-r2",
+        "file": "assets/looks/revisions/look-011-female-01-v2-r2.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 150440,
+        "sha256": "ce89892d71eb79cd16e2c9b7484bcebb2ae31e5ae7b17a30fa9555d0693bedfb",
+        "visibility": "public",
+        "layout": {
+          "rows": 3,
+          "columns": 3,
+          "preview_panel": 7
+        }
+      },
+      "story": "沿馆墙找一条斜线",
+      "summary": "在当代艺术馆的灰石回廊，模特抬手和观者相认，坐在矮台边笑了起来。她看过展窗，又轻理袖口，转入墙角时伸手邀观者同行。",
+      "moods": [
+        "明朗",
+        "开怀",
+        "惊喜",
+        "专注",
+        "温柔",
+        "俏皮"
+      ],
+      "shots": [
+        {
+          "index": 1,
+          "title": "刚好在台阶前遇见",
+          "emotion": "望镜头露齿笑迎",
+          "pose": "站定抬手招呼，另一手提黑盒包",
+          "framing": "正面全身，双靴完整"
+        },
+        {
+          "index": 2,
+          "title": "矮台边笑开",
+          "emotion": "转向一侧张口开怀大笑",
+          "pose": "坐在灰石矮台边，双手垂近膝间，包放身侧",
+          "framing": "坐姿全身，双靴完整"
+        },
+        {
+          "index": 3,
+          "title": "耳边有一句新消息",
+          "emotion": "扬眉睁眼，略张嘴地直视镜头",
+          "pose": "抬手把一侧长发顺到耳旁",
+          "framing": "胸上近景，银色耳环可见"
+        },
+        {
+          "index": 4,
+          "title": "转身看玻璃里的画",
+          "emotion": "目光越过镜头，嘴角收住",
+          "pose": "斜向行走，一手提包，另一臂随步摆动",
+          "framing": "三分之四全身，前靴贴近格底"
+        },
+        {
+          "index": 5,
+          "title": "窗沿旁听你讲",
+          "emotion": "闭口柔和浅笑，直视观者",
+          "pose": "在展窗边斜靠矮台，一只前臂搭台",
+          "framing": "腰上中近景，腰带和围腰显露"
+        },
+        {
+          "index": 6,
+          "title": "把袖口顺一顺",
+          "emotion": "微扬眉，抿唇含笑看镜头",
+          "pose": "一手轻理另一侧袖口，肘部弯起",
+          "framing": "头至大腿中景，翻领、前扣、围腰可见"
+        },
+        {
+          "index": 7,
+          "title": "从灰墙这一边走",
+          "emotion": "直视观者的闭口浅笑",
+          "pose": "扶稳站姿，低伸空手掌心邀请，另一手提包",
+          "framing": "斜前全身，双靴完整并分开"
+        },
+        {
+          "index": 8,
+          "title": "打个默契暗号",
+          "emotion": "俏皮单眼轻眨，嘴角上扬",
+          "pose": "头轻轻偏向一侧，手不入脸前",
+          "framing": "肩上近景，高领和弧形耳环可见"
+        },
+        {
+          "index": 9,
+          "title": "在石柱边回看",
+          "emotion": "回首轻笑，视线偏向廊道",
+          "pose": "一手提包，另一手靠近围腰，脚尖斜向墙边",
+          "framing": "头至双脚的侧前全身，双靴贴近格底"
+        }
+      ]
+    },
+    {
+      "look_id": 15,
+      "replaces_asset_id": "look-015-v2-r1",
+      "model_id": "female-01",
+      "model_reference_sha256": "dc0a221ff81250415bcfa3b320bc916dc02e2873f030e707083928505ca75066",
+      "asset": {
+        "asset_id": "look-015-female-01-v2-r2",
+        "file": "assets/looks/revisions/look-015-female-01-v2-r2.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 233586,
+        "sha256": "73f7e7adca5116fbf32e6a20f1cee7d22625adca01c0d0ddb5945777cb315ba6",
+        "visibility": "public",
+        "layout": {
+          "rows": 3,
+          "columns": 3,
+          "preview_panel": 4
+        }
+      },
+      "story": "河边指给你看那座桥",
+      "summary": "沿白石河墙走来，模特边指桥边讲起趣事。她在石凳短坐，到转身时裙褶随着脚步扬起，最后又想起一件要告诉观者的事。",
+      "moods": [
+        "明朗",
+        "好奇",
+        "开怀",
+        "温柔",
+        "羞喜",
+        "惊喜",
+        "俏皮"
+      ],
+      "shots": [
+        {
+          "index": 1,
+          "title": "沿河墙笑着走来",
+          "emotion": "朝镜头明快露齿笑",
+          "pose": "单手持信封包，沿石径迎面迈步",
+          "framing": "正面全身，后鞋部分遮挡"
+        },
+        {
+          "index": 2,
+          "title": "你看桥那边",
+          "emotion": "眉眼抬起，好奇地看向远桥",
+          "pose": "伸出食指指向河对面，包手自然下垂",
+          "framing": "三分之四中景，可见马甲、细腰带"
+        },
+        {
+          "index": 3,
+          "title": "话还没说完就笑了",
+          "emotion": "眼角弯起，面对镜头张口大笑",
+          "pose": "微微抬头，长发拢向一侧",
+          "framing": "胸上近景，可见小珍珠耳钉"
+        },
+        {
+          "index": 4,
+          "title": "在这儿等一等",
+          "emotion": "偏头朝观者俏皮浅笑",
+          "pose": "双脚分开停住，一手向外摊开掌心，另一手持包",
+          "framing": "斜前全身，双鞋完整"
+        },
+        {
+          "index": 5,
+          "title": "石凳给你留了空位",
+          "emotion": "直视观者，安静闭口微笑",
+          "pose": "坐在石凳前缘，手搭膝旁信封包上",
+          "framing": "坐姿全身，双鞋完整"
+        },
+        {
+          "index": 6,
+          "title": "低头把袖边理平",
+          "emotion": "垂眼闭口忍笑",
+          "pose": "一手轻拉另一手的袖边，露出细银镯",
+          "framing": "头至腰近景，可见缎面和手镯"
+        },
+        {
+          "index": 7,
+          "title": "该绕回桥头了",
+          "emotion": "越肩回望，展颜露齿笑",
+          "pose": "从河边转身迈步，信封包在身体一侧",
+          "framing": "背后三分之四全身，双鞋完整可辨"
+        },
+        {
+          "index": 8,
+          "title": "说好了帮我保密",
+          "emotion": "单眼轻眨，嘴角小幅上扬",
+          "pose": "轻轻转头，肩和视线回到观者这一边",
+          "framing": "肩上近景，耳钉清楚"
+        },
+        {
+          "index": 9,
+          "title": "差点忘了件事",
+          "emotion": "眼睛睁大，微张口惊喜地看观者",
+          "pose": "一手靠近胸前，另一手抬稳信封包",
+          "framing": "腰上中景，腰带、信封翻盖可见"
+        }
+      ]
+    },
+    {
+      "look_id": 20,
+      "replaces_asset_id": "look-020-v2-r1",
+      "model_id": "female-01",
+      "model_reference_sha256": "dc0a221ff81250415bcfa3b320bc916dc02e2873f030e707083928505ca75066",
+      "asset": {
+        "asset_id": "look-020-female-01-v2-r2",
+        "file": "assets/looks/revisions/look-020-female-01-v2-r2.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 278856,
+        "sha256": "57109228805a0f0476433ee8b4a4b5a2b1ccd318b59adefdf32287b0a73ec6ab",
+        "visibility": "public",
+        "layout": {
+          "rows": 3,
+          "columns": 3,
+          "preview_panel": 7
+        }
+      },
+      "story": "在旧拱门下找回方向",
+      "summary": "走进旧大学的砖廊，模特抬手招呼并指出远处拱门。石座边的一阵笑声过后，她抚平翻领，提起书包，伸手邀观者接着走。",
+      "moods": [
+        "明朗",
+        "好奇",
+        "开怀",
+        "困惑",
+        "温柔",
+        "惊喜",
+        "羞喜",
+        "俏皮"
+      ],
+      "shots": [
+        {
+          "index": 1,
+          "title": "在砖拱下招手",
+          "emotion": "面对观者明朗露齿笑",
+          "pose": "走近镜头，一手抬起招呼，另一手提书包",
+          "framing": "正面全身，后靴略有遮挡"
+        },
+        {
+          "index": 2,
+          "title": "是不是可以从那儿过去",
+          "emotion": "侧眼认真好奇，眉眼稍抬",
+          "pose": "靠近石柱，一手插袋，抬另一手朝廊深处指路",
+          "framing": "斜侧中景，格纹外套可辨"
+        },
+        {
+          "index": 3,
+          "title": "在石座边听笑话",
+          "emotion": "面朝同行者，眼角弯起张口大笑",
+          "pose": "坐在石座前沿，一手撑石面一手临近膝边，书包落在身侧",
+          "framing": "坐姿全身，双靴完整"
+        },
+        {
+          "index": 4,
+          "title": "领带还没整理好",
+          "emotion": "眉头略皱，抿嘴故作困惑",
+          "pose": "轻拉深绿领带，斜眼看向观者",
+          "framing": "胸上近景，奶油领、领带、菱格清楚"
+        },
+        {
+          "index": 5,
+          "title": "走过石拱回头看",
+          "emotion": "闭口温柔微笑，越肩看观者",
+          "pose": "沿廊道侧身行走，微转上身，书包摆到后手",
+          "framing": "侧方全身，双靴完整"
+        },
+        {
+          "index": 6,
+          "title": "原来你也记得",
+          "emotion": "扬眉睁眼，微张口看观者",
+          "pose": "缘着廊柱略倾头，肩线放松",
+          "framing": "胸上近景，V 领叠层和领带可见"
+        },
+        {
+          "index": 7,
+          "title": "空出一只手邀请同行",
+          "emotion": "直视镜头露齿明朗笑",
+          "pose": "双脚分开站定，一手提包一手低伸掌心",
+          "framing": "斜前全身，两只系带短靴完整"
+        },
+        {
+          "index": 8,
+          "title": "把翻领捋好再走",
+          "emotion": "垂眼轻笑，略低头",
+          "pose": "抬两手轻抚外套翻领",
+          "framing": "腰上中景，领口、米绿菱格和矩形带扣清楚"
+        },
+        {
+          "index": 9,
+          "title": "向旁边眨下眼",
+          "emotion": "轻轻眨眼，嘴角俏皮扬起",
+          "pose": "偏头合拢双手，在低位提起书包",
+          "framing": "头至大腿中景，短提把与翻盖顶边可见"
+        }
+      ]
+    },
+    {
       "look_id": 30,
       "replaces_asset_id": "look-030-v2-r1",
       "model_id": "female-01",
@@ -777,6 +1068,105 @@
           "emotion": "同观者对视，露出轻笑",
           "pose": "转身挥手离开",
           "framing": "后侧全身，斜挎包与双鞋可见"
+        }
+      ]
+    },
+    {
+      "look_id": 31,
+      "replaces_asset_id": "look-031-v2-r1",
+      "model_id": "female-01",
+      "model_reference_sha256": "dc0a221ff81250415bcfa3b320bc916dc02e2873f030e707083928505ca75066",
+      "asset": {
+        "asset_id": "look-031-female-01-v2-r2",
+        "file": "assets/looks/revisions/look-031-female-01-v2-r2.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 203284,
+        "sha256": "1fc5ecc8628e726eb29a5256d1ea031b585bd674babdfa53db3fb53139d85a7a",
+        "visibility": "public",
+        "layout": {
+          "rows": 3,
+          "columns": 3,
+          "preview_panel": 7
+        }
+      },
+      "story": "沿着设计馆的斜墙往里走",
+      "summary": "从浅灰石墙转角碰面，在走动与石台小坐之间看见黑灰层次。她侧身招呼观者一起进馆，再指给观者看墙面的斜线。",
+      "moods": [
+        "明朗",
+        "好奇",
+        "开怀",
+        "友善",
+        "俏皮",
+        "专注",
+        "温和",
+        "惊讶",
+        "从容"
+      ],
+      "shots": [
+        {
+          "index": 1,
+          "title": "从转角走出来",
+          "emotion": "朝镜头露齿笑",
+          "pose": "提着折纸包，沿浅灰石墙迎面走来",
+          "framing": "全身，近侧短靴清楚，后足略被遮住"
+        },
+        {
+          "index": 2,
+          "title": "再看一眼领口",
+          "emotion": "挑眉，带点好奇的浅笑",
+          "pose": "用指尖轻触上衣圆领上沿",
+          "framing": "头肩近景，圆领与夹克翻领可见"
+        },
+        {
+          "index": 3,
+          "title": "沿斜线穿过去",
+          "emotion": "轻仰头张口大笑",
+          "pose": "转身跨步，围片和包随动作扬起",
+          "framing": "全身，双靴均完整"
+        },
+        {
+          "index": 4,
+          "title": "这里碰面",
+          "emotion": "闭口浅笑，直视观者",
+          "pose": "从肩旁抬手打招呼",
+          "framing": "半身中景，马甲斜摆露在夹克下方"
+        },
+        {
+          "index": 5,
+          "title": "菱形的一闪",
+          "emotion": "单眼眨眼，嘴角上扬",
+          "pose": "把一侧头发拢到耳后",
+          "framing": "头肩特写，银色耳饰清楚"
+        },
+        {
+          "index": 6,
+          "title": "在石台边坐坐",
+          "emotion": "垂眸专注，面色自然",
+          "pose": "坐在矮石台上，轻扶身旁折纸包",
+          "framing": "坐姿全身，双靴和工装裤侧袋完整"
+        },
+        {
+          "index": 7,
+          "title": "请往设计馆这边来",
+          "emotion": "温和浅笑，回头看观者",
+          "pose": "侧身伸掌指引门口，另一手提包",
+          "framing": "侧前全身，双靴与围片完整"
+        },
+        {
+          "index": 8,
+          "title": "听见意外的一句",
+          "emotion": "睁眼微张口，神情惊讶",
+          "pose": "举手轻触上衣靠近锁骨处",
+          "framing": "头至胯中景，白色圆领和双层翻折可见"
+        },
+        {
+          "index": 9,
+          "title": "把视线转向墙面",
+          "emotion": "会意浅笑，面向观者",
+          "pose": "抬起食指，把视线引向斜墙",
+          "framing": "头至大腿中景，夹克下的斜裁马甲可见"
         }
       ]
     },
@@ -880,6 +1270,105 @@
       ]
     },
     {
+      "look_id": 41,
+      "replaces_asset_id": "look-041-v2-r1",
+      "model_id": "female-01",
+      "model_reference_sha256": "dc0a221ff81250415bcfa3b320bc916dc02e2873f030e707083928505ca75066",
+      "asset": {
+        "asset_id": "look-041-female-01-v2-r2",
+        "file": "assets/looks/revisions/look-041-female-01-v2-r2.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 209032,
+        "sha256": "cdbd4367cfa097ec118502155fe771b2000b61fa28a364ecd4dc0d42e51f18a7",
+        "visibility": "public",
+        "layout": {
+          "rows": 3,
+          "columns": 3,
+          "preview_panel": 9
+        }
+      },
+      "story": "在临水回廊相遇",
+      "summary": "沿水榭回廊走来，在石凳边停步看水。灰蓝滚边从近景伸入全身镜头，最后随摊掌邀请延续到回廊另一端。",
+      "moods": [
+        "温和",
+        "明朗",
+        "惊讶",
+        "舒展",
+        "开怀",
+        "从容",
+        "俏皮",
+        "专注",
+        "亲近"
+      ],
+      "shots": [
+        {
+          "index": 1,
+          "title": "回廊碰面",
+          "emotion": "闭口浅笑，直视观者",
+          "pose": "轻靠石栏，右手自然平放",
+          "framing": "头至胯中景，灰蓝滚边和腰封清楚"
+        },
+        {
+          "index": 2,
+          "title": "听见脚步",
+          "emotion": "明朗露齿笑，向观者走近",
+          "pose": "左手低提褶面包，沿回廊走来",
+          "framing": "正面全身，双鞋可见，后足略被前足挡住"
+        },
+        {
+          "index": 3,
+          "title": "盘扣的结",
+          "emotion": "扬眉微张口，直视观者",
+          "pose": "指尖轻触已有盘扣",
+          "framing": "上半身近景，盘扣三处及圆领显露"
+        },
+        {
+          "index": 4,
+          "title": "石凳坐一会",
+          "emotion": "从容侧笑，眼神望向湖面",
+          "pose": "坐在石凳上，双手自然交叠，包放于身侧",
+          "framing": "坐姿全身，两只灰蓝鞋完整"
+        },
+        {
+          "index": 5,
+          "title": "终于笑出来",
+          "emotion": "张口大笑，双眼弯起",
+          "pose": "微倾向镜头分享笑意",
+          "framing": "头肩近景，灰蓝滚边和银耳钉可见"
+        },
+        {
+          "index": 6,
+          "title": "回头看水光",
+          "emotion": "收敛浅笑，越肩回望观者",
+          "pose": "走过一根木柱时转身低提银灰包",
+          "framing": "侧前全身，双鞋完整"
+        },
+        {
+          "index": 7,
+          "title": "招呼同行",
+          "emotion": "俏皮挑眉浅笑，直视镜头",
+          "pose": "肩旁抬手打招呼",
+          "framing": "头至胯中景，宽袖口完整"
+        },
+        {
+          "index": 8,
+          "title": "靠着石栏听水",
+          "emotion": "平静专注，侧望湖面",
+          "pose": "掌心轻放石栏，身体朝湖",
+          "framing": "侧脸中景，可见门襟和腰封"
+        },
+        {
+          "index": 9,
+          "title": "从回廊这边走",
+          "emotion": "友善露齿浅笑，面向镜头",
+          "pose": "跨一步并摊掌邀请观者同行",
+          "framing": "三分之二侧前全身，鞋履和包均完整"
+        }
+      ]
+    },
+    {
       "look_id": 50,
       "replaces_asset_id": "look-050-v2-r1",
       "model_id": "female-01",
@@ -979,6 +1468,295 @@
       ]
     },
     {
+      "look_id": 51,
+      "replaces_asset_id": "look-051-v2-r1",
+      "model_id": "female-01",
+      "model_reference_sha256": "dc0a221ff81250415bcfa3b320bc916dc02e2873f030e707083928505ca75066",
+      "asset": {
+        "asset_id": "look-051-female-01-v2-r2",
+        "file": "assets/looks/revisions/look-051-female-01-v2-r2.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 355932,
+        "sha256": "cf012e70bdeef46209cbf6b8936d90714d61b6a1d6a4595e682e663a2104ce28",
+        "visibility": "public",
+        "layout": {
+          "rows": 3,
+          "columns": 3,
+          "preview_panel": 8
+        }
+      },
+      "story": "花径旁约你看绣球",
+      "summary": "在浅石小路上遇见观者，抬手指向绣球，在蓝长凳旁歇脚。蓝线小花、暖光下的藤篮和柔软裙边随她回身继续向前。",
+      "moods": [
+        "明快",
+        "惊喜",
+        "温柔",
+        "开怀",
+        "好奇",
+        "专注",
+        "俏皮",
+        "从容",
+        "会意"
+      ],
+      "shots": [
+        {
+          "index": 1,
+          "title": "沿花径来会合",
+          "emotion": "温暖露齿笑，目光朝向观者",
+          "pose": "提藤篮走向镜头",
+          "framing": "正面全身，后方鞋略被遮挡"
+        },
+        {
+          "index": 2,
+          "title": "绣球开得正好",
+          "emotion": "睁眼、圆唇的惊喜表情",
+          "pose": "举手指向旁边绣球",
+          "framing": "腰上中景，泡袖、衣领蓝绣、腰带清楚"
+        },
+        {
+          "index": 3,
+          "title": "长凳边等你",
+          "emotion": "柔和闭口浅笑，正面看向观者",
+          "pose": "坐在蓝色长凳，双手轻托面颊，藤篮置于身侧",
+          "framing": "全身坐姿，双鞋和蓝绣裙边完整"
+        },
+        {
+          "index": 4,
+          "title": "笑声落在花叶间",
+          "emotion": "开怀张口大笑，眼神明亮",
+          "pose": "微微倾身，放松肩膀分享笑意",
+          "framing": "头肩近景，小蓝花耳坠和领绣清楚"
+        },
+        {
+          "index": 5,
+          "title": "走过去还会回头",
+          "emotion": "好奇回眸，嘴唇微启",
+          "pose": "向花园深处走，藤篮随步摆动",
+          "framing": "背侧全身，能看清两鞋和裙摆"
+        },
+        {
+          "index": 6,
+          "title": "安静看一簇蓝",
+          "emotion": "垂眼凝神，神色专注",
+          "pose": "轻托下颌，低头看近处绣球",
+          "framing": "近景，花未遮脸，领口蓝线清楚"
+        },
+        {
+          "index": 7,
+          "title": "向你招招手",
+          "emotion": "俏皮单眼眨眼，轻轻抿笑",
+          "pose": "一手举在肩旁招呼观者",
+          "framing": "上半身近景，短马甲和耳环可见"
+        },
+        {
+          "index": 8,
+          "title": "石墙旁这一条路",
+          "emotion": "从容浅笑，直视观者",
+          "pose": "提篮站在石径一侧，摊掌请观者同行",
+          "framing": "侧前全身，双鞋和完整绣边可见"
+        },
+        {
+          "index": 9,
+          "title": "还想逛一会儿",
+          "emotion": "会意浅笑，越肩回望",
+          "pose": "双手拢住藤篮提把并转身",
+          "framing": "上半身中景，后肩与耳环可见"
+        }
+      ]
+    },
+    {
+      "look_id": 60,
+      "replaces_asset_id": "look-060-v2-r1",
+      "model_id": "female-01",
+      "model_reference_sha256": "dc0a221ff81250415bcfa3b320bc916dc02e2873f030e707083928505ca75066",
+      "asset": {
+        "asset_id": "look-060-female-01-v2-r2",
+        "file": "assets/looks/revisions/look-060-female-01-v2-r2.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 157326,
+        "sha256": "2b20de1b34681ae5b47df461807b35731c08c343ef2937f69b8a5699ffb49353",
+        "visibility": "public",
+        "layout": {
+          "rows": 3,
+          "columns": 3,
+          "preview_panel": 3
+        }
+      },
+      "story": "美术馆里看完最后一件展品",
+      "summary": "从入口会合，沿着展柜走到窗边。停下来细看，然后一起笑着走向出口。",
+      "moods": [
+        "期待",
+        "好奇",
+        "会心",
+        "开怀",
+        "松弛"
+      ],
+      "shots": [
+        {
+          "index": 1,
+          "title": "入馆会合",
+          "emotion": "认出熟人的露齿笑",
+          "pose": "放慢脚步，抬手打招呼",
+          "framing": "全身"
+        },
+        {
+          "index": 2,
+          "title": "看见折面",
+          "emotion": "扬眉、睁大眼的惊喜",
+          "pose": "在抽象雕塑旁停步并看向镜头",
+          "framing": "头肩近景"
+        },
+        {
+          "index": 3,
+          "title": "走向窗边",
+          "emotion": "回看的浅笑",
+          "pose": "手持手包，侧身迈过石质长廊",
+          "framing": "侧前全身，完整双鞋"
+        },
+        {
+          "index": 4,
+          "title": "猜猜是哪一件",
+          "emotion": "单眉轻抬的俏皮神情",
+          "pose": "站到雕塑旁，掌心向上邀请观者猜测",
+          "framing": "腰上中景"
+        },
+        {
+          "index": 5,
+          "title": "听见笑话",
+          "emotion": "张口大笑",
+          "pose": "坐在石台边前倾，双手轻叠在手包上",
+          "framing": "坐姿全身，完整双鞋"
+        },
+        {
+          "index": 6,
+          "title": "看清手包",
+          "emotion": "若有所思",
+          "pose": "低眼把手包转向窗光，腕侧朝镜头",
+          "framing": "腰上近景"
+        },
+        {
+          "index": 7,
+          "title": "裙摆回旋",
+          "emotion": "舒展的笑",
+          "pose": "在长廊尽头回身，裙摆向后展开",
+          "framing": "全身动态，完整双鞋"
+        },
+        {
+          "index": 8,
+          "title": "展厅余光",
+          "emotion": "沉静的闭口微笑",
+          "pose": "坐靠石台，手臂放松，抬眼看镜头",
+          "framing": "腰上中景"
+        },
+        {
+          "index": 9,
+          "title": "留一会儿",
+          "emotion": "会心的露齿笑",
+          "pose": "将手包置于膝前，靠在座边回应观者",
+          "framing": "坐姿中景"
+        }
+      ]
+    },
+    {
+      "look_id": 70,
+      "replaces_asset_id": "look-070-v2-r1",
+      "model_id": "female-01",
+      "model_reference_sha256": "dc0a221ff81250415bcfa3b320bc916dc02e2873f030e707083928505ca75066",
+      "asset": {
+        "asset_id": "look-070-female-01-v2-r2",
+        "file": "assets/looks/revisions/look-070-female-01-v2-r2.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 255234,
+        "sha256": "18048d9a7936a36452b696ed5c35b843270c07c76f25a087372184667b439dbc",
+        "visibility": "public",
+        "layout": {
+          "rows": 3,
+          "columns": 3,
+          "preview_panel": 4
+        }
+      },
+      "story": "走上山脚步道",
+      "summary": "从山脚转上石阶，在转角停下来等同行的人，再沿坡道向绿荫走去。",
+      "moods": [
+        "轻快",
+        "专注",
+        "惊喜",
+        "开怀",
+        "松弛"
+      ],
+      "shots": [
+        {
+          "index": 1,
+          "title": "石阶入口",
+          "emotion": "露齿笑",
+          "pose": "迎面走到步道入口，扬手招呼",
+          "framing": "全身动态"
+        },
+        {
+          "index": 2,
+          "title": "整理肩带",
+          "emotion": "专注",
+          "pose": "低头轻握斜挎肩带，露出内层圆领",
+          "framing": "腰上中景"
+        },
+        {
+          "index": 3,
+          "title": "看见山景",
+          "emotion": "扬眉微张嘴的惊喜",
+          "pose": "侧身指向山坡，再回看镜头",
+          "framing": "头肩近景"
+        },
+        {
+          "index": 4,
+          "title": "扶栏停步",
+          "emotion": "安静的浅笑",
+          "pose": "手扶低石栏并收住脚步",
+          "framing": "三分之四全身，完整双鞋"
+        },
+        {
+          "index": 5,
+          "title": "石台笑声",
+          "emotion": "张口大笑",
+          "pose": "坐在台阶上向前倾身，手搭手腕",
+          "framing": "坐姿全身，完整双鞋"
+        },
+        {
+          "index": 6,
+          "title": "路口往哪边",
+          "emotion": "疑问和挑眉",
+          "pose": "举起空掌回应观者，另一手扶包",
+          "framing": "腰上中景"
+        },
+        {
+          "index": 7,
+          "title": "转上坡道",
+          "emotion": "回望时的微笑",
+          "pose": "跨步回头，衬衫长摆露在短外套下",
+          "framing": "侧后全身，双鞋在框内"
+        },
+        {
+          "index": 8,
+          "title": "听脚下风声",
+          "emotion": "若有所思",
+          "pose": "侧脸向绿荫，手掖耳边发丝",
+          "framing": "头肩近景"
+        },
+        {
+          "index": 9,
+          "title": "下个转角见",
+          "emotion": "爽朗的露齿笑",
+          "pose": "站定后向镜头招手",
+          "framing": "腰上中景"
+        }
+      ]
+    },
+    {
       "look_id": 80,
       "replaces_asset_id": "look-080-v2-r1",
       "model_id": "female-01",
@@ -1072,6 +1850,198 @@
           "emotion": "露齿回眸笑",
           "pose": "拎着草包从石栏前走过，回头望向观者",
           "framing": "侧向全身，双鞋、包柄和蓝巾都在框内"
+        }
+      ]
+    },
+    {
+      "look_id": 81,
+      "replaces_asset_id": "look-081-v2-r1",
+      "model_id": "female-01",
+      "model_reference_sha256": "dc0a221ff81250415bcfa3b320bc916dc02e2873f030e707083928505ca75066",
+      "asset": {
+        "asset_id": "look-081-female-01-v2-r2",
+        "file": "assets/looks/revisions/look-081-female-01-v2-r2.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 289028,
+        "sha256": "2929607514e6e3a819e419422583ea01655ddf7e837f8095135091fe5da85242",
+        "visibility": "public",
+        "layout": {
+          "rows": 3,
+          "columns": 3,
+          "preview_panel": 3
+        }
+      },
+      "story": "庭院花影里的片刻歇脚",
+      "summary": "沿着棕榈小径走进庭院，把包放在石台边。风吹过裙摆时抬头相视一笑。",
+      "moods": [
+        "明快",
+        "好奇",
+        "舒展",
+        "开怀",
+        "安静"
+      ],
+      "shots": [
+        {
+          "index": 1,
+          "title": "棕榈下见面",
+          "emotion": "明快的露齿笑",
+          "pose": "走过庭院树影，抬手招呼",
+          "framing": "全身动态"
+        },
+        {
+          "index": 2,
+          "title": "停看花影",
+          "emotion": "专注的轻松神情",
+          "pose": "略俯身看花，指尖靠近叶片",
+          "framing": "侧身全景"
+        },
+        {
+          "index": 3,
+          "title": "光下转身",
+          "emotion": "张口大笑",
+          "pose": "踏着石板轻转身，裙摆自然扬起",
+          "framing": "全身动态，完整双鞋"
+        },
+        {
+          "index": 4,
+          "title": "你也看见了",
+          "emotion": "抬眉微张嘴的惊喜",
+          "pose": "站定直看观者，耳饰露在发丝旁",
+          "framing": "头肩近景"
+        },
+        {
+          "index": 5,
+          "title": "石台歇脚",
+          "emotion": "柔和闭口笑",
+          "pose": "坐在矮石台边，把包放在身旁",
+          "framing": "坐姿中全身，完整双鞋"
+        },
+        {
+          "index": 6,
+          "title": "理一理丝带",
+          "emotion": "低头时的浅笑",
+          "pose": "用手轻扶包柄，丝带随光线展开",
+          "framing": "腰上中景"
+        },
+        {
+          "index": 7,
+          "title": "借花影走过",
+          "emotion": "回身含笑",
+          "pose": "沿台阶侧走并回头，裙边轻摆",
+          "framing": "侧全身，完整双鞋"
+        },
+        {
+          "index": 8,
+          "title": "听见庭院风",
+          "emotion": "沉静微笑",
+          "pose": "倚石墙抬眼",
+          "framing": "头肩近景"
+        },
+        {
+          "index": 9,
+          "title": "邀你再坐会儿",
+          "emotion": "俏皮会心的笑",
+          "pose": "向旁边矮台摊手，重新面对观者",
+          "framing": "膝上中景"
+        }
+      ]
+    },
+    {
+      "look_id": 90,
+      "replaces_asset_id": "look-090-v2-r1",
+      "model_id": "female-01",
+      "model_reference_sha256": "dc0a221ff81250415bcfa3b320bc916dc02e2873f030e707083928505ca75066",
+      "asset": {
+        "asset_id": "look-090-female-01-v2-r2",
+        "file": "assets/looks/revisions/look-090-female-01-v2-r2.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 231392,
+        "sha256": "60919cb72219b3ef072cbe89b5d3964691e1de1e48577a4b596e708f5756d5a3",
+        "visibility": "public",
+        "layout": {
+          "rows": 3,
+          "columns": 3,
+          "preview_panel": 3
+        }
+      },
+      "story": "台阶积雪边重逢",
+      "summary": "开馆前在冬日石阶遇见熟悉的人。招呼、笑声和石凳上短暂的停留，最后都接进同一条柱廊。",
+      "moods": [
+        "开朗",
+        "惊喜",
+        "开怀",
+        "专注",
+        "温暖",
+        "好奇",
+        "俏皮"
+      ],
+      "shots": [
+        {
+          "index": 1,
+          "title": "台阶边的招呼",
+          "emotion": "露齿笑，直视镜头",
+          "pose": "手抬起招呼，提包朝镜头走来",
+          "framing": "正面全身，后侧鞋头略被遮挡"
+        },
+        {
+          "index": 2,
+          "title": "听见熟悉的声音",
+          "emotion": "眉眼微张，唇轻启",
+          "pose": "头微偏，循声看向观者",
+          "framing": "胸上近景，高领和耳钉可见"
+        },
+        {
+          "index": 3,
+          "title": "被故事逗笑",
+          "emotion": "仰头张口笑，眼尾收起",
+          "pose": "一手握包，一手抓住大衣驳领",
+          "framing": "三分之四全身，两只长靴完整"
+        },
+        {
+          "index": 4,
+          "title": "把围巾理顺",
+          "emotion": "低眼专注，双唇放松",
+          "pose": "双手轻轻展开围巾的一端",
+          "framing": "腰上中景，V 领开衫和流苏可见"
+        },
+        {
+          "index": 5,
+          "title": "先在石凳坐一会儿",
+          "emotion": "歪头暖笑，目光朝向观者",
+          "pose": "一手撑石凳，另一手放在膝上，包搁在旁边",
+          "framing": "坐姿全身，两只长靴完整"
+        },
+        {
+          "index": 6,
+          "title": "回头继续听",
+          "emotion": "好奇抬眼，轻张唇",
+          "pose": "侧身，把一侧头发别到耳后",
+          "framing": "胸上近景，露出耳钉"
+        },
+        {
+          "index": 7,
+          "title": "再向上一阶",
+          "emotion": "闭口微笑，越肩望向观者",
+          "pose": "沿台阶向上，向身后低位伸掌",
+          "framing": "三分之四侧背全身，双靴完整"
+        },
+        {
+          "index": 8,
+          "title": "柱子边的眨眼",
+          "emotion": "俏皮眨眼，收唇浅笑",
+          "pose": "斜靠石柱，双手握住托特短柄",
+          "framing": "腰上中景，双柄和大衣格纹可见"
+        },
+        {
+          "index": 9,
+          "title": "顺着柱廊走",
+          "emotion": "回头露齿浅笑",
+          "pose": "侧向迈步，手提托特，大衣随步展开",
+          "framing": "侧面全身，双靴完整"
         }
       ]
     }
