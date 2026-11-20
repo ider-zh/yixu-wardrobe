@@ -386,12 +386,37 @@ try {
   const deleteIndex=requests.findIndex(r=>r.method==='DELETE');assert.ok(requests.slice(deleteIndex+1).some(r=>r.url==='/api/tryons'&&r.method==='GET'),'Deletion verified by reading owner list back');
   console.log('PASS durable queue restore, truthful states, real private preview/download bytes, delete and readback, no automatic generation replay');
   await evaluate('document.getElementById("tryon-close").click();document.querySelector("[data-open]").click();document.querySelector("[data-view=\\"4\\"]").click();document.getElementById("detail-tryon").click()');
-  for(const [error,expected] of [[{error:{code:'provider_unavailable',message:'外部服务未配置'}},'provider_unavailable'],[{detail:'测试 detail 后备错误'},'测试 detail 后备错误']]){
-    uploadError=error;await choosePhoto('tryon-camera');
+  await wait('!document.getElementById("tryon-refresh").disabled');
+  const photoAndReference=`({
+    preview:document.getElementById('tryon-local-preview').src,
+    reference:document.getElementById('tryon-reference-image').src,
+    shot:document.querySelector('#tryon-reference-picker input:checked').value
+  })`;
+  for(const [code,guidance] of [['face_too_small',/更清晰的全身原图/],['face_count',/单人正面全身照/]]){
+    uploadErrorStatus=422;uploadError={error:{code,message:'Test photo rejection'}};
+    await choosePhoto('tryon-album',600,1200);
+    await wait('!document.getElementById("tryon-submit").disabled');
+    const selected=await evaluate(photoAndReference),requestIndex=requests.length;
+    await evaluate('document.getElementById("tryon-submit").click()');
+    await wait('document.getElementById("tryon-status").textContent.includes("未创建试穿任务") && document.getElementById("tryon-composer").getAttribute("aria-busy")==="false"');
+    const status=await evaluate('document.getElementById("tryon-status").textContent');
+    assert.match(status,guidance);
+    assert.match(status,/保留头顶和鞋履/);
+    assert.doesNotMatch(status,/刷新进度/);
+    assert.match(selected.preview,/^blob:/);
+    assert.equal(selected.shot,'4');
+    assert.deepEqual(await evaluate(photoAndReference),selected,'Known rejection retains selected photo and exact reference artwork');
+    assert.equal(await evaluate('document.getElementById("tryon-submit").disabled'),true,'Known rejected photo needs re-selection before another submission');
+    assert.equal(await evaluate('document.querySelectorAll("[data-job-id]").length'),0);
+    assert.deepEqual(requests.slice(requestIndex).filter(r=>r.url==='/api/tryons').map(r=>r.method),['POST'],'Known rejection triggers no automatic upload or history request');
+  }
+  console.log('PASS explicit photo rejections preserve the full-body preview and reference, prompt re-selection and create no job');
+  for(const [status,error,expected] of [[503,{error:{code:'provider_unavailable',message:'外部服务未配置'}},'provider_unavailable'],[503,{detail:'测试 detail 后备错误'},'测试 detail 后备错误'],[202,{},'暂未收到有效的试穿回执']]){
+    uploadErrorStatus=status;uploadError=error;await choosePhoto('tryon-camera');
     await wait('!document.getElementById("tryon-submit").disabled');
     await evaluate('document.getElementById("tryon-submit").click()');
     await wait('document.getElementById("tryon-status").textContent.includes('+JSON.stringify(expected)+')');
-    assert.match(await evaluate('document.getElementById("tryon-status").textContent'),/未自动重试/);
+    assert.match(await evaluate('document.getElementById("tryon-status").textContent'),/未自动重试.*刷新进度/);
     assert.equal(await evaluate('document.querySelectorAll("[data-job-id]").length'),0,'Errors never manufacture success');
     assert.match(await evaluate('document.getElementById("tryon-local-preview").src'),/^blob:/,'A rejected upload preserves the local photo for explicit retry');
     assert.equal(await evaluate('document.getElementById("tryon-panel").value'),'4','A rejected upload preserves the reference');

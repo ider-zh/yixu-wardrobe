@@ -1,5 +1,6 @@
 import json
 import stat
+from dataclasses import replace
 
 import pytest
 from fastapi.testclient import TestClient
@@ -107,6 +108,38 @@ def test_admin_first_init_persistent_hash_login_password_logout(tmp_path):
         json.loads(credentials)["password"].encode()
         not in (tmp_path / "state.sqlite3").read_bytes()
     )
+
+
+@pytest.mark.parametrize("configured_minimum", [None, 8])
+def test_admin_password_length_is_enforced_per_deployment(tmp_path, configured_minimum):
+    settings = Settings(data_dir=tmp_path)
+    if configured_minimum is not None:
+        settings = replace(settings, admin_password_min_length=configured_minimum)
+    minimum = configured_minimum or 16
+    with TestClient(create_app(settings), base_url="https://admin.localhost") as client:
+        assert "password_min_length" not in client.get("/api/admin/bootstrap").json()
+        credentials = json.loads((tmp_path / "initial-admin.json").read_text())
+        headers = login(client, tmp_path)
+        assert client.get("/api/admin/bootstrap").json()["password_min_length"] == minimum
+
+        payload = {"current_password": credentials["password"], "new_password": "a" * (minimum - 1)}
+        denied = client.post("/api/admin/password", json=payload, headers=headers)
+        assert denied.status_code == 422
+        assert denied.json()["error"]["code"] == "password_too_short"
+        assert client.get("/api/admin/bootstrap").json()["authenticated"] is True
+
+        payload["new_password"] = "a" * minimum
+        assert client.post("/api/admin/password", json=payload, headers=headers).json() == {
+            "changed": True
+        }
+        bootstrap = client.get("/api/admin/bootstrap").json()
+        assert bootstrap["authenticated"] is False
+        headers["X-CSRF-Token"] = bootstrap["csrf_token"]
+        assert client.post("/api/admin/login", json=credentials, headers=headers).status_code == 401
+        credentials["password"] = payload["new_password"]
+        signed_in = client.post("/api/admin/login", json=credentials, headers=headers)
+        assert signed_in.status_code == 200
+        assert signed_in.json()["password_min_length"] == minimum
 
 
 def test_runtime_settings_redacted_atomic_persistent_and_disabled_without_key(tmp_path):

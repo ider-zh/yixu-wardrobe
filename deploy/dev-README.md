@@ -37,7 +37,10 @@ YIXU_SECURE_COOKIES=true
 YIXU_CONTENT_ROOT=/srv/yixu-wardrobe-dev/current/content
 YIXU_IMAGE_ROOT=/srv/yixu-wardrobe-dev/current/public
 YIXU_GEOIP_DATABASE=/var/lib/yixu-wardrobe-dev/geoip/city.mmdb
+YIXU_ADMIN_PASSWORD_MIN_LENGTH=8
 ```
+
+开发管理员在「账户安全」修改密码时使用此部署的最低长度。服务端允许配置 8–16 个字符，未设置时为 16。仍需输入当前密码，保存后须用新密码重新登录。
 
 服务器下载进程如需既有 loopback 传输，可在私有 `deploy.json` 中显式设置 `download_proxy` 为 `http://127.0.0.1:端口`。控制器只接受无账户、无路径和无查询参数的 loopback HTTP 地址；设置仅传给 Git、uv 与发布核验请求，不传给 API，不改变全局 DNS、路由、生产服务或现有代理配置。未配置时使用普通 HTTPS；不自动切换网络出口。
 

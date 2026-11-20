@@ -3,14 +3,20 @@ export function createAdminApp({ document, fetch, confirm, applySiteTheme = them
   let csrf = '';
   let pending = Promise.resolve();
   let busy = false;
+  let passwordMinimum = 16;
   let savedSiteTheme = null;
   let resultOffset = 0;
   const resultIds = new Set();
   const runtimeFields = { model: '#provider-model', api_base: '#provider-api-base', proxy_url: '#provider-proxy', size: '#provider-size', quality: '#provider-quality', provider_timeout_seconds: '#provider-timeout' };
   let supportedRuntime = new Set();
-  const showSession = (authenticated) => {
+  const showSession = (authenticated, minimum) => {
     $('#login-panel').hidden = authenticated;
     $('#workspace').hidden = !authenticated;
+    passwordMinimum = authenticated && Number.isInteger(minimum) && minimum >= 8 && minimum <= 16 ? minimum : 16;
+    for (const selector of ['#new-password', '#confirm-password']) {
+      $(selector).setAttribute('minlength', String(passwordMinimum));
+    }
+    $('#password-help').textContent = `至少 ${passwordMinimum} 个字符，建议使用密码管理器创建并保存独立密码。`;
   };
   function run(action) {
     if (busy) return pending;
@@ -448,7 +454,7 @@ export function createAdminApp({ document, fetch, confirm, applySiteTheme = them
     showSession(false);
     const data = await request('/bootstrap');
     csrf = data.csrf_token;
-    showSession(data.authenticated);
+    showSession(data.authenticated, data.password_min_length);
     $('#notice').textContent = data.authenticated ? '已登录。' : '请使用管理员凭据登录。';
     if (data.authenticated) await loadDashboard();
   }
@@ -460,7 +466,7 @@ export function createAdminApp({ document, fetch, confirm, applySiteTheme = them
       $('#login-password').value = '';
       const data = await request('/login', { method: 'POST', body: { username: $('#login-username').value.trim(), password } });
       csrf = data.csrf_token;
-      showSession(true);
+      showSession(true, data.password_min_length);
       await loadDashboard();
     });
   });
@@ -472,7 +478,7 @@ export function createAdminApp({ document, fetch, confirm, applySiteTheme = them
       const confirmation = $('#confirm-password').value;
       clearPasswordInputs();
       if (new_password !== confirmation) throw new Error('两次新密码不一致，请重新输入。');
-      if (new_password.length < 16) throw new Error('新密码至少需要 16 个字符。');
+      if ([...new_password].length < passwordMinimum) throw new Error(`新密码至少需要 ${passwordMinimum} 个字符。`);
       await request('/password', { method: 'POST', body: { current_password, new_password } });
       clearPrivate();
       showSession(false);

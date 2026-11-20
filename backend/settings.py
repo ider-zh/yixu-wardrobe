@@ -17,10 +17,10 @@ class Settings:
     max_pixels: int = 24_000_000
     max_image_dimension: int = 8000
     face_min_pixels: int = 40
-    face_min_fraction: float = 0.025
     detector_score_threshold: float = 0.85
     image_concurrency: int = 1
     geoip_database: Path | None = None
+    admin_password_min_length: int = 16
 
     @classmethod
     def from_env(cls):
@@ -48,10 +48,12 @@ class Settings:
             max_pixels=int(os.environ.get("YIXU_MAX_PIXELS", "24000000")),
             max_image_dimension=int(os.environ.get("YIXU_MAX_IMAGE_DIMENSION", "8000")),
             face_min_pixels=int(os.environ.get("YIXU_FACE_MIN_PIXELS", "40")),
-            face_min_fraction=float(os.environ.get("YIXU_FACE_MIN_FRACTION", "0.025")),
             detector_score_threshold=float(os.environ.get("YIXU_DETECTOR_SCORE_THRESHOLD", "0.85")),
             image_concurrency=int(os.environ.get("YIXU_IMAGE_CONCURRENCY", "1")),
             geoip_database=path("YIXU_GEOIP_DATABASE"),
+            admin_password_min_length=min(
+                16, max(8, int(os.environ.get("YIXU_ADMIN_PASSWORD_MIN_LENGTH", "16")))
+            ),
         )
 
 

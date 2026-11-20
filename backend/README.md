@@ -91,7 +91,15 @@ The operator supplies an official YuNet ONNX model and license. Initialization
 runs real blank-image inference before claiming readiness. Local validation
 rejects malformed/animated/unsupported, oversized/pixel-bomb, no-face, multiple-face
 and too-small-face photos; corrects orientation and strips source metadata.
-Detection runs locally on CPU with bounded resized dimensions.
+Detection runs locally on CPU with bounded resized dimensions. The gate measures
+face size in visible original pixels (`YIXU_FACE_MIN_PIXELS`, default 40) so a clear
+face does not need to occupy a fixed percentage of a full-body photo. When the
+resized whole frame misses a face or detects a single undersized face, a bounded
+second pass checks up to four overlapping crops of the original. Matches are
+deduplicated in the original coordinates. The configured detector confidence
+still applies. The queue and image provider receive the full normalized photo,
+and the temporary crops stay inside validation. Input rejection happens before
+a new generation task is created.
 
 ## State, privacy and recovery
 

@@ -28,7 +28,7 @@ class Login(BaseModel):
 class PasswordChange(BaseModel):
     model_config = ConfigDict(extra="forbid")
     current_password: str = Field(max_length=1024)
-    new_password: str = Field(min_length=16, max_length=1024)
+    new_password: str = Field(max_length=1024)
 
 
 class SiteTheme(BaseModel):
@@ -86,6 +86,12 @@ class Admin:
         if not valid or not hmac.compare_digest(username, row["username"]):
             raise HTTPException(401, "admin_auth:Invalid administrator credentials")
 
+    def session_data(self, authenticated: bool, csrf: str) -> dict:
+        data = {"authenticated": authenticated, "csrf_token": csrf}
+        if authenticated:
+            data["password_min_length"] = self.settings.admin_password_min_length
+        return data
+
     def router(self):
         router = APIRouter(prefix="/api/admin")
 
@@ -103,7 +109,7 @@ class Admin:
                         (digest(token), session["csrf"]),
                     )
             response = JSONResponse(
-                {"authenticated": bool(session["authenticated"]), "csrf_token": session["csrf"]}
+                self.session_data(bool(session["authenticated"]), session["csrf"])
             )
             if token:
                 self.cookie(response, token)
@@ -120,7 +126,7 @@ class Admin:
                 self.verify(db, data.username, data.password)
                 db.execute("DELETE FROM admin_sessions WHERE token_hash=?", (old["token_hash"],))
                 db.execute("INSERT INTO admin_sessions VALUES (?,?,1)", (digest(token), csrf))
-            response = JSONResponse({"authenticated": True, "csrf_token": csrf})
+            response = JSONResponse(self.session_data(True, csrf))
             self.cookie(response, token)
             return response
 
@@ -144,6 +150,11 @@ class Admin:
         @router.post("/password")
         def password(request: Request, data: PasswordChange):
             self.session(request, mutate=True)
+            minimum = self.settings.admin_password_min_length
+            if len(data.new_password) < minimum:
+                raise HTTPException(
+                    422, f"password_too_short:New password must be at least {minimum} characters"
+                )
             with self.store.connect() as db:
                 db.execute("BEGIN IMMEDIATE")
                 username = db.execute("SELECT username FROM administrator").fetchone()[0]

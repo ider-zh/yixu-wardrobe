@@ -336,6 +336,41 @@ test('password change validates confirmation, submits exact fields and returns t
   assert.match(h.document.querySelector('#notice').textContent, /密码已修改.*重新登录/);
 });
 
+test('password form follows the authenticated deployment minimum after login and reload', async () => {
+  const routes = sessionRoutes();
+  routes['POST /api/admin/login'].password_min_length = 8;
+  routes['POST /api/admin/password'] = { changed: true };
+  const h = await harness(routes);
+  await login(h);
+  const expectMinimum = value => {
+    for (const id of ['new-password', 'confirm-password']) {
+      assert.equal(h.document.querySelector(`#${id}`).getAttribute('minlength'), String(value));
+    }
+    assert.match(h.document.querySelector('#password-help').textContent, new RegExp(`至少 ${value} 个字符`));
+  };
+  expectMinimum(8);
+  h.routes['GET /api/admin/bootstrap'] = { authenticated: true, csrf_token: 'fixture-reloaded', password_min_length: 8 };
+  await h.fire('#reconnect', 'click');
+  expectMinimum(8);
+  const fill = value => {
+    h.document.querySelector('#current-password').value = 'fixture-old-password';
+    h.document.querySelector('#new-password').value = value;
+    h.document.querySelector('#confirm-password').value = value;
+  };
+  fill('abcdefg');
+  await h.fire('#password-form');
+  assert.equal(h.requests.some(r => r.url.endsWith('/password')), false);
+  assert.match(h.document.querySelector('#error').textContent, /至少需要 8 个字符/);
+  fill('abcdefgh');
+  h.routes['GET /api/admin/bootstrap'] = { authenticated: false, csrf_token: 'fixture-reauthenticate' };
+  await h.fire('#password-form');
+  const change = h.requests.find(r => r.url.endsWith('/password'));
+  assert.equal(change.headers['X-CSRF-Token'], 'fixture-reloaded');
+  assert.equal(change.body.new_password, 'abcdefgh');
+  expectMinimum(16);
+  assert.equal(h.document.querySelector('#workspace').hidden, true);
+});
+
 test('incorrect current password preserves authenticated workspace and shows field validation without a bootstrap or retry', async () => {
   const routes = sessionRoutes();
   routes['POST /api/admin/password'] = () => json({ error: { code: 'current_password', message: 'Current password is incorrect' } }, 403);
