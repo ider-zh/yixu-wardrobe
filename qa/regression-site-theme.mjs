@@ -95,6 +95,22 @@ try{
  };
  const route=async hash=>{await evaluate(`location.hash=${JSON.stringify(hash)}`);await wait(`location.hash===${JSON.stringify(hash)}`);await evaluate('new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))');};
  const noOverflow=async label=>assert.ok(await evaluate('document.documentElement.scrollWidth<=innerWidth+1'),label);
+ const readableText=async (selector,label)=>{
+  const undersized=await evaluate(`(()=>{
+   const root=document.querySelector(${JSON.stringify(selector)});
+   const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+   const issues=new Set();
+   while(walker.nextNode()){
+    const text=walker.currentNode, element=text.parentElement;
+    if(!text.data.trim()||!element.getClientRects().length||
+       element.closest('.sr-only, svg')||element.checkVisibility?.({visibilityProperty:true})===false)continue;
+    const size=parseFloat(getComputedStyle(element).fontSize);
+    if(size<13)issues.add(text.data.trim().slice(0,35)+' ('+size+'px)');
+   }
+   return [...issues];
+  })()`);
+  assert.deepEqual(undersized,[],label);
+ };
  const capture=async name=>{if(!process.env.YIXU_SCREENSHOT_DIR)return;fs.mkdirSync(process.env.YIXU_SCREENSHOT_DIR,{recursive:true,mode:0o700});const r=await client('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(process.env.YIXU_SCREENSHOT_DIR,name+'.png'),Buffer.from(r.data,'base64'),{mode:0o600});};
  await client('Page.enable');await client('Runtime.enable');
  const desktopDesigns=new Set();
@@ -121,17 +137,20 @@ try{
      return Math.abs(frame.width-photo.width)<3&&Math.abs(frame.height-photo.height)<3;
     })()`), 'Contact sheet shows the complete source image');
    }
+   await readableText('body','home text '+theme+' '+width);
    await capture('theme-home-'+theme+'-'+width);
    for(const hash of ['#/looks?q='+encodeURIComponent('针织'),'#/favorites','#/models','#/products','#/product/'+boots.product_id]){
     await route(hash);
     await choose(theme==='studio'?'editorial':'studio');await choose(theme);
     assert.equal(await evaluate('location.hash'),hash);
     await noOverflow(hash+' '+theme+' '+width);
+    await readableText('body',hash+' text '+theme+' '+width);
    }
    await route('#/home');
    await evaluate('document.getElementById("hero-detail").click()');
    await wait('document.getElementById("detail-dialog").open');
    assert.ok(await evaluate('document.getElementById("detail-dialog").scrollWidth<=document.getElementById("detail-dialog").clientWidth+1'), 'look dialog '+theme+' '+width);
+   await readableText('#detail-dialog','look dialog text '+theme+' '+width);
    await evaluate('document.getElementById("close-detail").click()');
   }
   await route('#/product/'+boots.product_id);await choose('studio');await wait('document.getElementById("product-page").dataset.productTheme==="studio"');
@@ -177,6 +196,7 @@ try{
  const blob=await evaluate('document.getElementById("tryon-local-preview").src');await choose('night-runway');assert.equal(await evaluate('window.retainedInput===document.getElementById("tryon-album")&&window.retainedPreview===document.getElementById("tryon-local-preview")'),true);assert.equal(await evaluate('document.getElementById("tryon-local-preview").src'),blob);assert.equal(await evaluate('document.querySelector("#tryon-reference-picker input:checked").value'),'3');
  await choose('editorial');assert.equal(await evaluate('document.getElementById("tryon-local-preview").src'),blob);
  await wait('!document.getElementById("tryon-submit").disabled');await evaluate('document.getElementById("tryon-submit").click()');await wait('document.getElementById("tryon-jobs").textContent.includes("排队")');await evaluate('window.retainedJob=document.getElementById("tryon-jobs").firstElementChild');await choose('studio');assert.equal(await evaluate('window.retainedJob===document.getElementById("tryon-jobs").firstElementChild'),true);assert.equal(posts,1);await capture('theme-tryon-queued');
+ await readableText('#tryon-dialog','try-on dialog text');
  await evaluate('document.getElementById("tryon-close").click()');
  const visitor=client;
  const adminTab=await(await fetch(debug+'/json/new?'+encodeURIComponent(origin+'/admin/'),{method:'PUT'})).json();
@@ -191,6 +211,7 @@ try{
    await save(theme);await noOverflow('admin '+theme+' '+width);
    assert.equal(await evaluate('document.querySelector(".site-admin-layout")!==null'),theme==='studio');
    assert.ok(await evaluate('document.getElementById("workspace").contains(document.getElementById("metrics"))'));
+   await readableText('#workspace','admin text '+theme+' '+width);
    await capture('theme-admin-'+theme+'-'+width);
   }
  }
