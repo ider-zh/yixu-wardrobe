@@ -1,0 +1,175 @@
+{
+  "schema_version": 1,
+  "batch_id": "2026-11-21-01",
+  "publish_date": "2026-11-21",
+  "timezone": "Asia/Shanghai",
+  "title": "杭州南山路 · 墨青展间",
+  "region": {
+    "country": "CN",
+    "city": "杭州"
+  },
+  "research": {
+    "trend_sources": [
+      {
+        "url": "https://www.whowhatwear.com/fashion/winter/french-girl-winter-wardrobe-2026",
+        "published_at": "2026-11-17",
+        "summary": "Who What Wear 的 Ruby Ford-Dunker 梳理冬季短呢外套、圆领针织和宽松西裤，并以红或青绿点亮中性色。本套的墨青、暗柿红和具体衣装为原创策划。"
+      },
+      {
+        "url": "https://www.vogue.co.uk/article/winter-outfits",
+        "published_at": "2026-11-18",
+        "summary": "British Vogue 的 Joy Montgomery 记录圆领针织、剪裁西裤与皮靴的冬日叠穿组合，为本套直筒西裤与短靴提供交叉参考。"
+      },
+      {
+        "url": "https://www.zjam.org.cn/site/exbition/ExbitionDetail.aspx?etid=2918&type=4",
+        "published_at": "2026-11-02",
+        "summary": "浙江美术馆公告载明《花影缤纷——张世简百年诞辰纪念展》展期至 11 月 21 日。写真以南山路看展为灵感，使用虚构石廊。"
+      }
+    ],
+    "weather": {
+      "url": "https://www.weather.com.cn/textFC/hd.shtml",
+      "forecast_date": "2026-11-21",
+      "summary": "中国天气网华东文字预报 11 月 21 日 07:30 发布。杭州白天晴 17℃、东北风小于 3 级，夜间晴 6℃、西南风小于 3 级。",
+      "styling_reason": "策划推断。短呢夹克叠细针织适用于午后短程步行及室内看展，室内可以脱夹克。长裤和包踝鞋履减少露肤。清晨和入夜长时间户外活动需另添保暖层。",
+      "checked_at": "2026-11-21T12:02:58+08:00"
+    },
+    "checked_at": "2026-11-21T12:02:58+08:00"
+  },
+  "looks": [
+    {
+      "id": 105,
+      "model_id": "female-01",
+      "model_reference_sha256": "dc0a221ff81250415bcfa3b320bc916dc02e2873f030e707083928505ca75066",
+      "title": "墨青·湖畔展间",
+      "category": "都市层次",
+      "season": "冬季",
+      "description": "墨青短呢夹克叠燕麦圆领针织，烟灰直筒西裤与深棕短靴把线条往下拉长，暗柿红小包呼应石廊外的秋叶。灵感来自杭州南山路的看展午后。",
+      "pieces": [
+        {
+          "role": "外层",
+          "name": "墨青小翻领箱形短呢夹克，暗色纽扣与低位平贴袋"
+        },
+        {
+          "role": "上装",
+          "name": "燕麦色圆领细针织长袖"
+        },
+        {
+          "role": "下装",
+          "name": "烟灰高腰单褶直筒西裤，裤脚轻触靴面"
+        },
+        {
+          "role": "鞋履",
+          "name": "深巧克力棕低方跟切尔西短靴"
+        },
+        {
+          "role": "包袋",
+          "name": "暗柿红梯形小号短提包"
+        }
+      ],
+      "palette": [
+        "#263e43",
+        "#ded1ba",
+        "#5b595b",
+        "#4b332b",
+        "#864f45"
+      ],
+      "details": [
+        "短夹克和高腰长裤拉开上下比例",
+        "燕麦米色衬出墨青呢面和小翻领",
+        "暗柿红小包呼应暖色枫叶"
+      ],
+      "tags": [
+        "短呢夹克",
+        "烟灰西裤",
+        "深棕短靴",
+        "墨青",
+        "杭州看展"
+      ],
+      "mood": "从发现廊下的光、招呼观者过来，到笑着约定散场再见。",
+      "scene": "杭州南山路看展情境。浅灰石廊、玻璃窗、石凳与稀疏枫叶，午后晴天斜光。空间为创作演绎。",
+      "edition": "v2",
+      "asset": {
+        "asset_id": "look-105-female-01-v2-r1",
+        "file": "assets/looks/2026-11-21/look-105-female-01-v2-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 213406,
+        "sha256": "8445889761d9fe1633beb5210152ceb7add98fced1dc1ca1715d0e47a37ac56c",
+        "visibility": "public",
+        "layout": {
+          "rows": 3,
+          "columns": 3,
+          "preview_panel": 4
+        }
+      },
+      "shots": [
+        {
+          "index": 1,
+          "title": "窗边有一道光",
+          "emotion": "眉眼抬起、微张唇",
+          "pose": "侧身用食指指向窗边，转眼看向观者",
+          "framing": "胸上近景，夹克翻领和针织圆领可见"
+        },
+        {
+          "index": 2,
+          "title": "过来一起看看",
+          "emotion": "露齿笑，直视镜头",
+          "pose": "提包向前一步，单手挥手",
+          "framing": "正前三分之四全身，靴子靠近分隔边"
+        },
+        {
+          "index": 3,
+          "title": "靠近一点",
+          "emotion": "轻眨一眼，含笑",
+          "pose": "斜倚石壁，向观者摊开一只手",
+          "framing": "腰上中景，掌心和夹克小翻领可见"
+        },
+        {
+          "index": 4,
+          "title": "坐下就笑开",
+          "emotion": "仰头张口大笑，眼睛弯起",
+          "pose": "坐上低石凳，一手撑凳，一手搭膝，小包放在身旁",
+          "framing": "坐姿全身，两只短靴完整"
+        },
+        {
+          "index": 5,
+          "title": "理一理翻领",
+          "emotion": "低头专注，双唇轻抿",
+          "pose": "指尖理平外套翻领，另一手握着包柄",
+          "framing": "胸腰中景，领口、贴袋和提手可见"
+        },
+        {
+          "index": 6,
+          "title": "听到一点动静",
+          "emotion": "睁圆眼、嘴轻张的惊喜",
+          "pose": "手轻触上胸，抬眼朝向观者",
+          "framing": "胸上近景，保留头部与手势"
+        },
+        {
+          "index": 7,
+          "title": "沿着窗走",
+          "emotion": "回望镜头时温和露齿笑",
+          "pose": "提小包横向跨步，肩转向观者",
+          "framing": "三分之四侧全身，两只短靴完整"
+        },
+        {
+          "index": 8,
+          "title": "再听你说一句",
+          "emotion": "温和闭口浅笑、直视镜头",
+          "pose": "手肘靠低石沿，一手托腮",
+          "framing": "眼平腰上近景"
+        },
+        {
+          "index": 9,
+          "title": "散场还在这里见",
+          "emotion": "回头露齿笑",
+          "pose": "转身向前走，一手提包，另一手向观者低位伸掌",
+          "framing": "背侧全身，两只短靴完整"
+        }
+      ]
+    }
+  ],
+  "cover_look_id": 105,
+  "published_at": "2026-11-21T12:09:27+08:00"
+}
