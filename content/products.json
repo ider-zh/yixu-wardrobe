@@ -7817,6 +7817,261 @@
           "shot_index": 6
         }
       ]
+    },
+    {
+      "product_id": "petrol-box-jacket-105",
+      "name": "墨青小翻领短呢夹克",
+      "category": "外套",
+      "subtitle": "深墨青和两个贴袋，留出短外套的干净轮廓。",
+      "description": "第 2 格展示夹克的上臀衣长和箱形轮廓，第 5 格能看清小翻领、暗色纽扣与低位贴袋。独立陈列中可见的内侧接缝为设计推演。",
+      "color_name": "墨青",
+      "color_hex": "#263e43",
+      "design_material": "细绒毛呢感，视觉设计描述",
+      "notes": [
+        "干净小翻领搭配暗色圆扣",
+        "方形低位贴袋延续短夹克的平直线条",
+        "内侧接缝为设计推演"
+      ],
+      "asset": {
+        "asset_id": "product-petrol-box-jacket-105-r1",
+        "file": "assets/products/look-105/petrol-box-jacket-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 67754,
+        "sha256": "3180ea44e8da022f6d37fbb22bbc816d26f9d3eda6385bf4de98915e95d4ba1c",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 105,
+          "piece_index": 1,
+          "reference_asset_id": "look-105-female-01-v2-r1",
+          "shot_index": 5
+        }
+      ],
+      "gallery": [
+        {
+          "title": "小翻领与暗色圆扣",
+          "caption": "从微侧角度看到墨青小翻领落在门襟上的弧度，以及暗色圆扣和细绒面的层次。近距离的针脚与纤维纹路为设计推演。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-petrol-box-jacket-105-lapel-and-buttons-r1",
+            "file": "assets/products/look-105/petrol-box-jacket-lapel-and-buttons-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 149906,
+            "sha256": "f8d69a1ae35c0072394cdc6fa6b8ab4744bce808b24feb3df67b186ba98c01f4",
+            "visibility": "public"
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "oat-crewneck-knit-105",
+      "name": "燕麦色圆领细针织",
+      "category": "上装",
+      "subtitle": "燕麦色把硬挺的夹克线条衬得柔和。",
+      "description": "穿着图能确认燕麦米灰、细针纹和清楚的小圆领。完整袖口与下摆被夹克及裤腰遮住，独立陈列中的这两处为设计推演。",
+      "color_name": "燕麦米灰",
+      "color_hex": "#ded1ba",
+      "design_material": "低对比细针织感，视觉设计描述",
+      "notes": [
+        "小圆领轻贴颈部",
+        "细针纹带出柔软的层次",
+        "完整袖口和下摆为设计推演"
+      ],
+      "asset": {
+        "asset_id": "product-oat-crewneck-knit-105-r1",
+        "file": "assets/products/look-105/oat-crewneck-knit-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 138314,
+        "sha256": "e7fa257922b551fab75c17c5ae2a329e0cd0d2500c8c767189787a5f678062d9",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 105,
+          "piece_index": 2,
+          "reference_asset_id": "look-105-female-01-v2-r1",
+          "shot_index": 6
+        }
+      ],
+      "gallery": [
+        {
+          "title": "细罗纹圆领",
+          "caption": "斜上方的新取景区分薄罗纹领边和细针纹衣身。写真无法辨认的纱线与缝合细节为设计推演。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-oat-crewneck-knit-105-crewneck-texture-r1",
+            "file": "assets/products/look-105/oat-crewneck-knit-crewneck-texture-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 268944,
+            "sha256": "590a50f2235cad22df6351972fd7cda3dac4631e1bce616c7eb1806311521e8a",
+            "visibility": "public"
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "smoke-gray-single-pleat-trousers-105",
+      "name": "烟灰高腰单褶直筒西裤",
+      "category": "下装",
+      "subtitle": "裤线垂到靴面，走动时仍有余量。",
+      "description": "保留第 2 格可见的高腰和前褶，以及第 4、7 格的顺直裤腿。原写真部分腰头被衣摆与手挡住，独立图的闭合细节为设计推演。",
+      "color_name": "烟灰",
+      "color_hex": "#5b595b",
+      "design_material": "挺垂哑光西装织物感，视觉设计描述",
+      "notes": [
+        "正面压线顺着裤腿向下延伸",
+        "裤腿留有余量，裤脚轻触短靴鞋面",
+        "腰头中部闭合细节为设计推演"
+      ],
+      "asset": {
+        "asset_id": "product-smoke-gray-single-pleat-trousers-105-r1",
+        "file": "assets/products/look-105/smoke-gray-single-pleat-trousers-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 54722,
+        "sha256": "a931434cdc5b73077ff945c0312dda745e2f51e2f253e6c1b1cfced537fb264c",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 105,
+          "piece_index": 3,
+          "reference_asset_id": "look-105-female-01-v2-r1",
+          "shot_index": 2
+        }
+      ],
+      "gallery": [
+        {
+          "title": "高腰与前褶",
+          "caption": "独立斜前近景体现单褶如何从简洁腰头落入裤腿。被针织衣摆遮住的闭合细节为设计推演。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-smoke-gray-single-pleat-trousers-105-front-pleat-r1",
+            "file": "assets/products/look-105/smoke-gray-single-pleat-trousers-front-pleat-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 141948,
+            "sha256": "4ca1882026ceaa0d4854cb614b5dec60c114345819c8c4a2a82f6fd7e9ca566a",
+            "visibility": "public"
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "chocolate-chelsea-boots-105",
+      "name": "深巧克力棕低方跟切尔西短靴",
+      "category": "鞋履",
+      "subtitle": "深棕短靴承接烟灰长裤，圆角方头留出柔和线条。",
+      "description": "沿用写真中的深棕鞋面、圆角方头与低方跟，筒身收至脚踝。主图按可见色型作 AI 设计演绎，裤脚遮住的弹力片轮廓和完整筒口属于设计补充。",
+      "color_name": "深巧克力棕",
+      "color_hex": "#49312a",
+      "design_material": "低光泽皮面、同色弹力织面与深色薄底观感，仅为视觉设计描述",
+      "notes": [
+        "圆角方头与低方跟沿用原写真中的侧面轮廓",
+        "短筒与裤脚自然衔接，第 7 格可看到完整鞋形",
+        "侧片边缘、完整筒口和微观纹理由 AI 补充，展示范围限于外侧"
+      ],
+      "asset": {
+        "asset_id": "product-chocolate-chelsea-boots-105-main-r1",
+        "file": "assets/products/look-105/chocolate-chelsea-boots-105-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 53698,
+        "sha256": "4d41d88210474b89e2a54972a4b0c7ab11b20fb20cb18ccb3ae880a93c2651bc",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "低方跟与外侧弹力片",
+          "caption": "从侧后方看低方跟、底边和踝部的过渡。裤脚遮挡了原写真的完整侧片，侧片边缘、接缝和近观细纹属于 AI 设计推演。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-chocolate-chelsea-boots-105-heel-r1",
+            "file": "assets/products/look-105/chocolate-chelsea-boots-105-heel-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 143392,
+            "sha256": "71799fff2d73febfc4c5560896f3bfd9d9b54fd50269926fc24b7f6291b4f007",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 105,
+          "piece_index": 4,
+          "reference_asset_id": "look-105-female-01-v2-r1",
+          "shot_index": 7
+        }
+      ]
+    },
+    {
+      "product_id": "persimmon-trapeze-bag-105",
+      "name": "暗柿红梯形小号短提包",
+      "category": "包袋",
+      "subtitle": "一只短弧提包，把石廊外的一点暖红带在手边。",
+      "description": "暗柿红包身向底部微展，单短弧提手紧贴包身比例。独立图依据原写真可见的颜色和轮廓演绎，提柄接点、侧折面和细纹为 AI 设计补充。",
+      "color_name": "暗柿红",
+      "color_hex": "#79443a",
+      "design_material": "柔哑细纹皮面观感，仅为视觉设计描述",
+      "notes": [
+        "略宽的梯形底部与短弧提手保持紧凑比例",
+        "第 7 格可见包身、提把与烟灰西裤的色彩对照",
+        "提柄固定方式、侧折面和细纹为 AI 设计补充"
+      ],
+      "asset": {
+        "asset_id": "product-persimmon-trapeze-bag-105-main-r1",
+        "file": "assets/products/look-105/persimmon-trapeze-bag-105-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 45728,
+        "sha256": "5fb64ac99efb4ab03d170d851f90a6d037ec0ba724cbca063066a8993a3179d9",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "提柄接点与侧折面",
+          "caption": "独立近景展示短弧提手靠近上沿的形态，以及侧缘向包身的过渡。写真中的接点和侧折面缺少工艺近照，这些部分和表面细纹均为 AI 设计推演。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-persimmon-trapeze-bag-105-handle-r1",
+            "file": "assets/products/look-105/persimmon-trapeze-bag-105-handle-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 101426,
+            "sha256": "ed37c1ab3239c9c633a160a0aed910261b1248b40964f8c802fcec53f55cc99b",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 105,
+          "piece_index": 5,
+          "reference_asset_id": "look-105-female-01-v2-r1",
+          "shot_index": 7
+        }
+      ]
     }
   ]
 }
