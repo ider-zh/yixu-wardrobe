@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#f3f0e7"><meta name="description" content="衣序，穿行于日常，停留在喜欢。"><title>衣序 · 生动衣橱</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="expressive.css"><link rel="stylesheet" href="tryon.css"><link rel="stylesheet" href="product-themes.css"><link rel="stylesheet" href="site-theme.css"><link rel="icon" href="favicon.svg" type="image/svg+xml"></head>
 <body>
-<header class="site-header"><a class="brand" href="#/home" aria-label="衣序 首页"><span class="brand-mark">衣序</span><span class="brand-en">THE WARDROBE</span></a><nav aria-label="主导航"><a href="#/home" data-page="home">首页</a><a class="collection-link" href="#/looks" data-page="looks">全部穿搭</a><a href="#/products" data-page="products">单品</a><a href="#/models" data-page="models">模特</a><a id="header-favorites" href="#/favorites" data-page="favorites">收藏 <span id="fav-top-count">0</span></a></nav></header>
+<header class="site-header"><a class="brand" href="#/home" aria-label="衣序 首页"><span class="brand-mark">衣序</span><span class="brand-en">THE WARDROBE</span></a><nav aria-label="主导航"><a href="#/home" data-page="home">首页</a><a class="collection-link" href="#/looks" data-page="looks">全部穿搭</a><a href="#/products" data-page="products">单品</a><a href="#/models" data-page="models">模特</a><button id="tryon-header" class="text-button" type="button" aria-haspopup="dialog" aria-controls="tryon-dialog">试穿</button><a id="header-favorites" href="#/favorites" data-page="favorites">收藏 <span id="fav-top-count">0</span></a></nav></header>
 <main>
 <p id="catalog-status" class="catalog-status site-status" role="status"></p>
 <div id="home-page">
@@ -23,7 +23,83 @@
 <dialog id="about-dialog" class="about-dialog" aria-labelledby="about-title"><button id="close-about" class="dialog-close" aria-label="关闭扉页">×</button><p class="eyebrow">THE WARDROBE</p><h2 id="about-title">衣着有形，心绪自由。</h2><p>让轮廓、肌理与色彩，接住每一种心情。</p><p>从安静的站姿，到不经意的笑场。翻过一页，再遇见她。</p><p>在线访问会使用离线 IP 库估算国家及中国省级归属，仅供管理员统计；不保存原始 IP，也不发送第三方查询。归属为近似网络出口，并非实际位置。</p><button id="about-to-gallery" class="solid-button">翻开衣橱 ↗</button></dialog>
 <dialog id="product-image-dialog" class="product-image-dialog" aria-label="单品大图" aria-describedby="product-image-caption product-image-note"><button id="close-product-image" class="dialog-close" aria-label="关闭单品大图">×</button><img id="product-zoom-image" alt=""><div class="product-image-toolbar"><p id="product-image-caption" aria-live="polite"></p><div class="product-image-controls"><button id="product-image-prev" aria-label="上一张单品图">←</button><span id="product-image-position" aria-live="polite"></span><button id="product-image-next" aria-label="下一张单品图">→</button></div></div><p id="product-image-note" class="product-image-note"></p></dialog>
 <div id="toast" class="toast" role="status" hidden></div>
-<section class="tryon-entry" aria-label="拍照试穿"><button id="tryon-history" class="outline-button">我的试穿 / 进度 ↗</button><span id="tryon-availability" role="status">正在连接试穿服务…</span></section>
-<dialog id="tryon-dialog" class="tryon-dialog" aria-labelledby="tryon-title"><button id="tryon-close" class="dialog-close" aria-label="关闭试穿">×</button><div class="tryon-dialog-header"><div><p class="eyebrow">YOUR OWN WARDROBE</p><h2 id="tryon-title">让喜欢，穿在你身上。</h2><p class="tryon-intro">选一张自己的照片，看看这套穿搭的新模样。</p></div></div><ol class="tryon-flow" aria-label="试穿步骤"><li id="tryon-step-prepare" aria-current="step"><span>01</span> 准备照片</li><li id="tryon-step-generate"><span>02</span> 生成试穿</li><li id="tryon-step-result"><span>03</span> 查看成片</li></ol><div id="tryon-composer" class="tryon-composer"><div class="tryon-preparation"><section class="tryon-photo-section" aria-labelledby="tryon-photo-title"><p class="tryon-section-kicker">YOUR PHOTO</p><h3 id="tryon-photo-title">先选一张清晰的自己</h3><p class="tryon-hint" id="tryon-photo-guidance">选清晰的单人正面全身原图，保留头顶和鞋履。光线均匀，避免遮脸、镜面反光与多人合照。</p><div id="tryon-photo-stage" class="tryon-photo-stage"><div id="tryon-photo-placeholder" class="tryon-photo-placeholder" aria-hidden="true"><span class="tryon-person-shape"></span><span>你的照片</span></div><img id="tryon-local-preview" class="tryon-local-preview" alt="仅本地预览的所选照片" hidden></div><div class="tryon-photo-inputs"><label class="solid-button" for="tryon-camera">拍一张<input id="tryon-camera" type="file" accept="image/jpeg,image/png,image/webp" capture="user" aria-describedby="tryon-photo-guidance"></label><label class="outline-button" for="tryon-album">从相册选<input id="tryon-album" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="tryon-photo-guidance"></label><button id="tryon-remove-photo" class="text-button" type="button" hidden>移除照片</button></div><p class="tryon-local-note" id="tryon-local-note">照片仅在本机预览，点击开始后才上传。</p></section><section id="tryon-selection" class="tryon-reference-section" aria-labelledby="tryon-reference-title"><p class="tryon-section-kicker">THE LOOK</p><h3 id="tryon-reference-title">再确认喜欢的这一套</h3><p id="tryon-context"></p><p class="tryon-picker-label" id="tryon-reference-picker-title">点选一张参考写真</p><div id="tryon-reference-picker" class="tryon-reference-picker" role="radiogroup" aria-labelledby="tryon-reference-picker-title" aria-describedby="tryon-reference-framing"></div><p id="tryon-reference-error" class="tryon-hint" role="status" hidden></p><select id="tryon-panel" aria-describedby="tryon-reference-framing" hidden aria-hidden="true" tabindex="-1"></select><div class="tryon-reference-summary"><div class="tryon-reference" id="tryon-reference" hidden><img id="tryon-reference-image" alt="所选试穿参考写真"></div><p id="tryon-reference-framing" class="tryon-reference-framing" aria-live="polite">请选择一张参考写真，并查看画面确认覆盖的衣装。</p></div><p class="tryon-hint">想看整套搭配，优先选择包含鞋履的全身画面；近景只提供画面里可见的衣装参考。</p></section></div><section id="tryon-disclosure" class="tryon-disclosure" aria-labelledby="tryon-disclosure-title"><h3 id="tryon-disclosure-title">照片用途</h3><ul id="tryon-disclosure-items"><li>照片交由第三方 AI 生成试穿图，结果可供后台评估。</li></ul><label id="tryon-consent-label"><input id="tryon-consent" type="checkbox">我已获照片本人同意，并同意上述用途</label></section><div class="tryon-submit-area"><div><p id="tryon-readiness" class="tryon-readiness">准备照片和参考写真后，即可开始。</p><p id="tryon-status" role="status" aria-live="polite"></p></div><button id="tryon-submit" class="solid-button" disabled>同意并开始试穿</button></div></div><section class="tryon-history-area" aria-labelledby="tryon-jobs-title"><div class="tryon-history-heading"><div><p class="tryon-section-kicker">YOUR FITTING ROOM</p><h3 id="tryon-jobs-title">我的试穿</h3></div><button id="tryon-refresh" class="outline-button">刷新进度</button></div><p class="tryon-hint">生成时可以关闭此页继续逛，回来仍可查看进度。请使用当前浏览器。</p><p id="tryon-jobs-status" role="status" aria-live="polite"></p><div id="tryon-jobs"></div><p id="tryon-more-note" hidden>当前仅显示部分记录。</p><button id="tryon-more" class="outline-button" hidden>加载更早的记录 ↓</button></section></dialog>
-<script src="site-theme.js"></script><script src="catalog.js"></script><script src="tryon.js"></script><script src="product-themes.js"></script><script src="product-page.js"></script><script src="app.js"></script>
+<section class="tryon-entry" aria-label="拍照试穿">
+  <button id="tryon-history" class="outline-button">我的试穿 ↗</button>
+  <span id="tryon-availability" role="status">正在连接试穿服务…</span>
+</section>
+<dialog id="tryon-dialog" class="tryon-dialog" aria-labelledby="tryon-title" data-mode="dashboard">
+  <button id="tryon-close" class="dialog-close" aria-label="关闭试穿" type="button">×</button>
+  <header class="tryon-dialog-header">
+    <h2 id="tryon-title">我的试穿</h2>
+    <nav class="tryon-dashboard-nav" aria-label="试穿面板">
+      <button id="tryon-jump-photos" class="text-button" type="button">照片库</button>
+      <button id="tryon-jump-jobs" class="text-button" type="button">试穿记录</button>
+    </nav>
+  </header>
+  <ol id="tryon-flow" class="tryon-flow" aria-label="试穿步骤" hidden>
+    <li id="tryon-step-prepare" aria-current="step">准备照片</li>
+    <li id="tryon-step-generate">生成试穿</li>
+    <li id="tryon-step-result">查看成片</li>
+  </ol>
+  <div class="tryon-dashboard-layout">
+    <section class="tryon-photo-section" aria-labelledby="tryon-photo-title">
+      <h3 id="tryon-photo-title" tabindex="-1">照片库</h3>
+      <p id="tryon-local-note" class="tryon-local-note">照片保存在当前浏览器，提交试穿时才上传所选照片。清除站点数据会移除本机照片和成片。</p>
+      <p class="tryon-hint" id="tryon-photo-guidance">请选择清晰的单人正面全身照，保留头顶和鞋履，避免遮脸与反光。</p>
+      <div class="tryon-photo-inputs">
+        <label class="solid-button" for="tryon-camera">拍一张<input id="tryon-camera" type="file" accept="image/jpeg,image/png,image/webp" capture="user" aria-describedby="tryon-photo-guidance"></label>
+        <label class="outline-button" for="tryon-album">从相册选<input id="tryon-album" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="tryon-photo-guidance"></label>
+      </div>
+      <p id="tryon-library-status" class="tryon-local-note" role="status" aria-live="polite"></p>
+      <p id="tryon-no-photos" class="tryon-hint">还没有本机照片。</p>
+      <ul id="tryon-saved-photos" class="tryon-saved-photos" aria-label="本机照片" hidden></ul>
+      <div id="tryon-photo-stage" class="tryon-photo-stage">
+        <div id="tryon-photo-placeholder" class="tryon-photo-placeholder" aria-hidden="true"><span class="tryon-person-shape"></span><span>你的照片</span></div>
+        <img id="tryon-local-preview" class="tryon-local-preview" alt="所选照片预览" hidden>
+      </div>
+      <button id="tryon-remove-photo" class="text-button" type="button" hidden>取消选择</button>
+    </section>
+    <div id="tryon-composer" class="tryon-composer" hidden>
+      <section id="tryon-selection" class="tryon-reference-section" aria-labelledby="tryon-reference-title">
+        <h3 id="tryon-reference-title">选择参考写真</h3>
+        <p id="tryon-context"></p>
+        <p class="tryon-picker-label" id="tryon-reference-picker-title">点选一张参考写真</p>
+        <div id="tryon-reference-picker" class="tryon-reference-picker" role="radiogroup" aria-labelledby="tryon-reference-picker-title" aria-describedby="tryon-reference-framing"></div>
+        <p id="tryon-reference-error" class="tryon-hint" role="status" hidden></p>
+        <select id="tryon-panel" aria-describedby="tryon-reference-framing" hidden aria-hidden="true" tabindex="-1"></select>
+        <div class="tryon-reference-summary">
+          <div class="tryon-reference" id="tryon-reference" hidden><img id="tryon-reference-image" alt="所选试穿参考写真"></div>
+          <p id="tryon-reference-framing" class="tryon-reference-framing" aria-live="polite">请选择一张参考写真，并查看画面确认覆盖的衣装。</p>
+        </div>
+        <p class="tryon-hint">想看整套搭配，优先选择包含鞋履的全身画面；近景只提供画面里可见的衣装参考。</p>
+      </section>
+      <section id="tryon-disclosure" class="tryon-disclosure" aria-labelledby="tryon-disclosure-title">
+        <h3 id="tryon-disclosure-title">照片用途</h3>
+        <ul id="tryon-disclosure-items"><li>照片交由第三方 AI 生成试穿图，结果可供后台评估。</li></ul>
+        <label id="tryon-consent-label"><input id="tryon-consent" type="checkbox">我已获照片本人同意，并同意上述用途</label>
+      </section>
+      <div class="tryon-submit-area">
+        <div>
+          <p id="tryon-readiness" class="tryon-readiness">准备照片和参考写真后，即可开始。</p>
+          <p id="tryon-status" role="status" aria-live="polite"></p>
+        </div>
+        <button id="tryon-submit" class="solid-button" type="button" disabled>同意并开始试穿</button>
+      </div>
+    </div>
+  </div>
+  <section class="tryon-history-area" aria-labelledby="tryon-jobs-title">
+    <div class="tryon-history-heading">
+      <h3 id="tryon-jobs-title" tabindex="-1">试穿记录</h3>
+      <button id="tryon-refresh" class="outline-button" type="button">刷新进度</button>
+    </div>
+    <p class="tryon-hint">试穿完成并保存到本机后，可在当前浏览器查看成片。</p>
+    <p id="tryon-jobs-status" role="status" aria-live="polite"></p>
+    <p id="tryon-storage-status" class="tryon-hint" role="status"></p>
+    <p id="tryon-pending-deletion" class="tryon-hint" hidden>本机记录已删除；可访问该任务时会同步清除在线结果。</p>
+    <div id="tryon-jobs"></div>
+    <p id="tryon-more-note" hidden>还有更早的在线记录。</p>
+    <button id="tryon-more" class="outline-button" type="button" hidden>加载更早的记录 ↓</button>
+  </section>
+</dialog>
+<script src="site-theme.js"></script><script src="catalog.js"></script><script src="tryon-storage.js"></script><script src="tryon.js"></script><script src="product-themes.js"></script><script src="product-page.js"></script><script src="app.js"></script>
 </body></html>

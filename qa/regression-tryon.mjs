@@ -19,6 +19,7 @@ const candidates = [process.env.CHROME_BIN, '/usr/bin/chromium', '/usr/bin/googl
 const chrome = candidates.find(p => fs.existsSync(p));
 assert.ok(chrome, 'Real DOM tests require Chromium; set CHROME_BIN (no production dependency).');
 let available = false, jobs = [], accept = false, uploadError = null, uploadErrorStatus=503, bootstrapError = null, paginate=false, holdList=false, heldList=null,holdUpload=false,heldUpload=null;
+let nextJobId='fixture-job-1';
 const requests = [];
 let catalogFixture=null;
 let resultImage = null; // Browser-encoded synthetic WebP; never a provider output.
@@ -48,8 +49,8 @@ const server = http.createServer(async (req,res) => {
       if(holdList){holdList=false;heldList=()=>res.end(payload);return;}
       res.end(payload);return;
     }
-    if(req.url==='/api/tryons/fixture-job-1'&&req.method==='DELETE'){
-      assert.equal(req.headers['x-csrf-token'],'test-csrf');jobs=[];res.end('{"deleted":true}');return;
+    if(/^\/api\/tryons\/fixture-[a-z0-9-]+$/.test(req.url)&&req.method==='DELETE'){
+      assert.equal(req.headers['x-csrf-token'],'test-csrf');jobs=jobs.filter(job=>job.id!==req.url.split('/').at(-1));res.end('{"deleted":true}');return;
     }
     if(req.url==='/api/tryons/fixture-job-1/image'||req.url==='/api/tryons/fixture-job-1/download'||/^\/api\/tryons\/fixture-aspect-\d+-(portrait|landscape|square)\/(image|download)$/.test(req.url)){
       assert.match(req.headers.cookie||'',/visitor_fixture=/);res.setHeader('Content-Type','image/webp');
@@ -65,7 +66,7 @@ const server = http.createServer(async (req,res) => {
       if(uploadError){res.statusCode=uploadErrorStatus;res.end(JSON.stringify(uploadError));return;}
       assert.equal(accept,true,'Consent must precede reception of photo');
       assert.equal(req.headers['x-csrf-token'],'test-csrf');assert.match(req.headers.cookie||'',/visitor_fixture=/);
-      const job={id:'fixture-job-1',status:'queued',look_id:100,edition:'v2',shot_index:4,queue_position:7,created_at:'2026-11-11T00:00:00Z',original_expires_at:'2026-11-11T01:00:00Z',image_url:null,download_url:null,error_code:null,error_message:null};
+      const job={id:nextJobId,status:'queued',look_id:100,edition:'v2',shot_index:4,queue_position:7,created_at:'2026-11-11T00:00:00Z',original_expires_at:'2026-11-11T01:00:00Z',image_url:null,download_url:null,error_code:null,error_message:null};
       jobs=[job];res.statusCode=202;
       const finish=()=>res.end(JSON.stringify(job));
       if(holdUpload){holdUpload=false;heldUpload=finish;return;}
@@ -294,9 +295,9 @@ try {
   assert.equal(multipart.get('look_id'),'100');assert.equal(multipart.get('edition'),'v2');assert.equal(multipart.get('shot_index'),'4');
   assert.equal(multipart.get('disclosure_version'),'test-v1');assert.match(multipart.get('idempotency_key'),/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/);
   assert.equal(multipart.get('photo').type,'image/png');assert.ok(multipart.get('photo').size>0);
-  assert.equal(await evaluate('localStorage.length+sessionStorage.length'),0,'No browser credential/photo persistence');
+  assert.equal(await evaluate('localStorage.length+sessionStorage.length'),0,'No credentials or base64 photos in Web Storage');
   assert.equal(await evaluate('document.getElementById("tryon-local-preview").hasAttribute("src")'),false,'Release local photo after submission');
-  console.log('PASS active consent before multipart upload, frozen context, random idempotency, camera/album local preview and no photo storage');
+  console.log('PASS active consent before multipart upload, frozen context, random idempotency and separate camera/album inputs');
   await wait('document.getElementById("tryon-jobs")?.textContent.includes("前方 7")');
   assert.equal(await evaluate('document.getElementById("tryon-step-generate").getAttribute("aria-current")'),'step');
   for(const viewport of viewports){
@@ -321,13 +322,12 @@ try {
   assert.ok(!(await evaluate('document.getElementById("tryon-jobs").textContent')).includes('%'));
   jobs[0]={...jobs[0],status:'succeeded',image_url:'/api/tryons/fixture-job-1/image',download_url:'/api/tryons/fixture-job-1/download'};
   await evaluate('document.getElementById("tryon-refresh").click()');
-  await wait('document.querySelector("[data-job-id] img")?.naturalWidth > 0');
-  assert.equal(await evaluate('document.querySelector("[data-job-id] img").getAttribute("src")'),'/api/tryons/fixture-job-1/image');
+  await wait('document.querySelector("[data-job-id=fixture-job-1] img")?.naturalWidth > 0 && document.querySelector("[data-job-id=fixture-job-1] img").src.startsWith("blob:")');
   await evaluate('document.querySelector("[data-job-action=download]").focus();document.getElementById("tryon-refresh").click()');
   await wait('!document.getElementById("tryon-refresh").disabled');
   assert.equal(await evaluate('document.activeElement.dataset.jobAction'),'download','Refreshing preserves keyboard focus on a result download');
   const downloaded=await evaluate(`(async()=>{const r=await fetch(document.querySelector('[data-job-id] a[download]').href,{credentials:'same-origin'});return {status:r.status,type:r.headers.get('content-type'),disposition:r.headers.get('content-disposition'),bytes:(await r.arrayBuffer()).byteLength};})()`);
-  assert.equal(downloaded.status,200);assert.equal(downloaded.type,'image/webp');assert.match(downloaded.disposition,/attachment/);assert.ok(downloaded.bytes>0);
+  assert.equal(downloaded.status,200);assert.equal(downloaded.type,'image/webp');assert.equal(downloaded.bytes, fs.statSync(path.join(root,'images/look-001.webp')).size);
   for(const viewport of viewports){
     await setViewport(viewport);
     for(const shape of shapes){
@@ -338,27 +338,32 @@ try {
       const id=`fixture-aspect-${viewport.width}-${shape.name}`;
       jobs[0]={...jobs[0],id,image_url:`/api/tryons/${id}/image`,download_url:`/api/tryons/${id}/download`};
       await evaluate('document.getElementById("tryon-refresh").click()');
-      await wait('document.querySelector("[data-job-id] img") && !document.getElementById("tryon-refresh").disabled');
-      await evaluate('document.querySelector("[data-job-id] img").scrollIntoView()');
-      await assertImageGeometry('[data-job-id] img',shape,viewport,'result',560);
+      const selector=`[data-job-id=${id}] img`;
+      await wait(`document.querySelector(${JSON.stringify(selector)}) && !document.getElementById("tryon-refresh").disabled`);
+      await evaluate(`document.querySelector(${JSON.stringify(selector)}).scrollIntoView()`);
+      await assertImageGeometry(selector,shape,viewport,'result',560);
     }
   }
   await client('Emulation.clearDeviceMetricsOverride');
   resultImage=null;
   jobs[0]={...jobs[0],id:'fixture-job-1',image_url:'/api/tryons/fixture-job-1/image',download_url:'/api/tryons/fixture-job-1/download'};
   await evaluate('document.getElementById("tryon-refresh").click()');
-  await wait('document.querySelector("[data-job-id=fixture-job-1] img")?.naturalWidth > 0');
+  await wait('document.querySelector("[data-job-id=fixture-job-1] img")?.naturalWidth > 0 && !document.getElementById("tryon-refresh").disabled');
   assert.equal(aspectChecks,viewports.length*shapes.length*3,'Every camera, album and result shape/viewport was measured');
   assert.deepEqual(aspectFailures,[],'Try-on image geometry must preserve intrinsic aspect ratio without overflow');
   console.log(`PASS ${aspectChecks} real Chromium camera/album/result aspect-ratio and bounds checks; intentional reference crop preserved`);
-  await evaluate('document.querySelector("[data-job-id] img").dispatchEvent(new Event("error"))');
-  assert.equal(await evaluate('document.querySelector("[data-job-id] img").hidden'),true);
-  assert.match(await evaluate('document.getElementById("tryon-jobs").textContent'),/结果暂时无法读取.*刷新/);
+  const resultFailure=await evaluate(`(()=>{
+    const card=document.querySelector('[data-job-id=fixture-job-1]'),image=card.querySelector('img');
+    image.dispatchEvent(new Event('error'));
+    return {hidden:image.hidden,notice:card.textContent};
+  })()`);
+  assert.equal(resultFailure.hidden,true);
+  assert.match(resultFailure.notice,/结果暂时无法读取.*刷新/);
   assert.doesNotMatch(await evaluate('document.getElementById("tryon-jobs").textContent'),/FIFO|淘汰|1000/);
   for(const [status,message] of [['unknown','不自动重试'],['needs_photo','重新选择'],['expired','过期'],['failed','失败'],['canceled','取消'],['validating','检查'],['generating','生成'],['postprocessing','处理']]){
-    jobs[0]={...jobs[0],status,image_url:null,download_url:null};
+    jobs[0]={...jobs[0],id:'fixture-progress',status,image_url:null,download_url:null};
     await evaluate('document.getElementById("tryon-refresh").click()');
-    await wait('document.querySelector("[data-job-id]").dataset.jobStatus==='+JSON.stringify(status)+' && document.getElementById("tryon-jobs").textContent.includes('+JSON.stringify(message)+')');
+    await wait('document.querySelector("[data-job-id=fixture-progress]")?.dataset.jobStatus==='+JSON.stringify(status)+' && document.querySelector("[data-job-id=fixture-progress]").textContent.includes('+JSON.stringify(message)+')');
     if(['validating','generating','postprocessing'].includes(status)){
       assert.equal(await evaluate('document.querySelector(".tryon-progress-steps [aria-current]").textContent'),{validating:'检查照片',generating:'生成试穿',postprocessing:'整理成片'}[status]);
       assert.doesNotMatch(await evaluate('document.querySelector(".tryon-waiting").textContent'),/\d+\s*%|\d+\s*秒|\d+\s*分钟/,'Progress never invents timing or percent');
@@ -377,11 +382,11 @@ try {
     }
   }
   assert.equal(requests.filter(r=>r.url==='/api/tryons'&&r.method==='POST').length,1,'State refresh never resubmits generation');
-  await evaluate('window.confirm=message=>{window.deleteNotice=message;return true;};document.querySelector("[data-job-delete]").click()');
+  await evaluate('window.confirm=message=>{window.deleteNotice=message;return true;};document.querySelector("[data-job-delete=fixture-progress]").click()');
   const deleteNotice=await evaluate('window.deleteNotice');
   assert.match(deleteNotice,/记录.*保留/);assert.match(deleteNotice,/生成无法撤回/);
   assert.doesNotMatch(deleteNotice,/外部调用/);
-  await wait('document.getElementById("tryon-jobs").textContent.includes("还没有试穿记录")');
+  await wait('!document.getElementById("tryon-refresh").disabled');
   assert.equal(jobs.length,0);assert.equal(requests.filter(r=>r.method==='DELETE').length,1);
   const deleteIndex=requests.findIndex(r=>r.method==='DELETE');assert.ok(requests.slice(deleteIndex+1).some(r=>r.url==='/api/tryons'&&r.method==='GET'),'Deletion verified by reading owner list back');
   console.log('PASS durable queue restore, truthful states, real private preview/download bytes, delete and readback, no automatic generation replay');
@@ -392,6 +397,7 @@ try {
     reference:document.getElementById('tryon-reference-image').src,
     shot:document.querySelector('#tryon-reference-picker input:checked').value
   })`;
+  const existingHistory=await evaluate('[...document.querySelectorAll("[data-job-id]")].map(card=>card.dataset.jobId).sort()');
   for(const [code,guidance] of [['face_too_small',/更清晰的全身原图/],['face_count',/单人正面全身照/]]){
     uploadErrorStatus=422;uploadError={error:{code,message:'Test photo rejection'}};
     await choosePhoto('tryon-album',600,1200);
@@ -407,7 +413,7 @@ try {
     assert.equal(selected.shot,'4');
     assert.deepEqual(await evaluate(photoAndReference),selected,'Known rejection retains selected photo and exact reference artwork');
     assert.equal(await evaluate('document.getElementById("tryon-submit").disabled'),true,'Known rejected photo needs re-selection before another submission');
-    assert.equal(await evaluate('document.querySelectorAll("[data-job-id]").length'),0);
+    assert.deepEqual(await evaluate('[...document.querySelectorAll("[data-job-id]")].map(card=>card.dataset.jobId).sort()'),existingHistory,'A rejected photo does not create a job');
     assert.deepEqual(requests.slice(requestIndex).filter(r=>r.url==='/api/tryons').map(r=>r.method),['POST'],'Known rejection triggers no automatic upload or history request');
   }
   console.log('PASS explicit photo rejections preserve the full-body preview and reference, prompt re-selection and create no job');
@@ -417,7 +423,7 @@ try {
     await evaluate('document.getElementById("tryon-submit").click()');
     await wait('document.getElementById("tryon-status").textContent.includes('+JSON.stringify(expected)+')');
     assert.match(await evaluate('document.getElementById("tryon-status").textContent'),/未自动重试.*刷新进度/);
-    assert.equal(await evaluate('document.querySelectorAll("[data-job-id]").length'),0,'Errors never manufacture success');
+    assert.deepEqual(await evaluate('[...document.querySelectorAll("[data-job-id]")].map(card=>card.dataset.jobId).sort()'),existingHistory,'Errors never manufacture success');
     assert.match(await evaluate('document.getElementById("tryon-local-preview").src'),/^blob:/,'A rejected upload preserves the local photo for explicit retry');
     assert.equal(await evaluate('document.getElementById("tryon-panel").value'),'4','A rejected upload preserves the reference');
     const first=requests.filter(r=>r.url==='/api/tryons'&&r.method==='POST').at(-1);
@@ -460,13 +466,13 @@ try {
   assert.equal(await evaluate('document.getElementById("tryon-more")?.hidden'),false,'Owner history with more pages must be accessible');
   await evaluate('document.getElementById("tryon-more").click()');
   await wait('document.querySelector("[data-job-id=fixture-b]")');
-  assert.equal(await evaluate('document.querySelectorAll("[data-job-id]").length'),2);
+  assert.equal(await evaluate('document.querySelectorAll("[data-job-id=fixture-a], [data-job-id=fixture-b]").length'),2);
   await evaluate('document.getElementById("tryon-refresh").click()');
   await wait('!document.getElementById("tryon-refresh").disabled');
-  assert.equal(await evaluate('document.querySelectorAll("[data-job-id]").length'),2,'Refresh preserves expanded history without duplicates');
+  assert.equal(await evaluate('document.querySelectorAll("[data-job-id=fixture-a], [data-job-id=fixture-b]").length'),2,'Refresh preserves expanded history without duplicates');
   console.log('PASS owner history pagination and expanded refresh (list pagination is not a generation quota)');
-  paginate=false;jobs=[];uploadError=null;await load();
-  await wait('document.getElementById("tryon-jobs")?.textContent.includes("还没有试穿记录")');
+  paginate=false;jobs=[];uploadError=null;nextJobId='fixture-stale-list';await load();
+  await wait('document.getElementById("tryon-jobs-status").textContent.includes("进度已更新")');
   holdList=true;
   await evaluate('document.getElementById("search").value="100";document.getElementById("search").dispatchEvent(new Event("input",{bubbles:true}));document.querySelector("[data-open]").click();document.querySelector("[data-view=\\"4\\"]").click();document.getElementById("detail-tryon").click()');
   await wait('document.getElementById("tryon-refresh").disabled');
@@ -489,7 +495,8 @@ try {
     const boots=requests.filter(r=>r.url==='/api/bootstrap').length;
     await evaluate('document.getElementById("tryon-submit").click()');
     await wait('document.getElementById("tryon-status").textContent.includes("未自动重试")');
-    assert.equal(await evaluate('document.querySelectorAll("[data-job-id]").length'),0,'Auth loss purges stale private results');
+    assert.match(await evaluate('document.querySelector("[data-job-id=fixture-job-1] img")?.src'),/^blob:/,'Auth loss retains a previously saved local result');
+    assert.ok(await evaluate('[...document.querySelectorAll("#tryon-jobs img")].every(image=>!image.src.includes("/api/tryons/"))'),'Auth loss removes remote private image URLs');
     assert.equal(await evaluate('document.getElementById("tryon-consent").checked'),false);
     assert.equal(await evaluate('document.getElementById("tryon-local-preview").hasAttribute("src")'),false);
     assert.equal(requests.filter(r=>r.url==='/api/bootstrap').length,boots,'Photo error does not silently reconnect');
@@ -501,7 +508,7 @@ try {
     assert.match(await evaluate('document.getElementById("tryon-jobs-status").textContent'),/访问凭证.*无法恢复/);
     assert.equal(await evaluate('localStorage.length+sessionStorage.length'),0);
   }
-  console.log('PASS 401/session and 403/CSRF photo failures purge private/local/consent state, explicit bootstrap renews without mutation replay');
+  console.log('PASS 401/session and 403/CSRF purge active photo/consent and remote URLs, retain local results, and never replay');
   // Exercise the same shipped page with a server-only full catalog revision.
   // No fixture content is written to the repository or treated as AI output.
   const snapshot={window:{}};vm.runInNewContext(fs.readFileSync(path.join(root,'catalog.js'),'utf8'),snapshot);
@@ -612,6 +619,70 @@ try {
   assert.ok(!requests.some(request=>request.url==='/api/admin/private-reference'),'Malformed private fallback is never requested');
   assert.equal(requests.filter(r=>r.method==='POST'&&r.url==='/api/tryons').length,uploadsBeforeFraming);
   console.log('PASS visual nine-image reference picker, native radios and 2D keyboard, accurate shot upload, busy lock, safe project fallback and explicit image failure without panel substitution');
+
+  // The fixture intentionally withholds the backend while serving the same origin.
+  // Use synthetic photos only, and verify the actual persisted bytes after a reload.
+  const cachedResult='[data-job-id=fixture-job-1]';
+  const previousPhotos=await evaluate('window.WardrobeTryOnStorage.listPhotos().then(rows=>rows.map(row=>row.id))');
+  const postsBeforeDashboard=requests.filter(r=>r.method==='POST'&&r.url==='/api/tryons').length;
+  bootstrapError={error:{code:'fixture_offline',message:'Synthetic service outage'}};
+  await load();
+  await evaluate('document.getElementById("tryon-history").click()');
+  await wait(`document.querySelector('${cachedResult} img')?.src.startsWith('blob:') && document.querySelector('${cachedResult} img').naturalWidth>0`);
+  await choosePhoto('tryon-camera',600,1200);
+  await wait(`window.WardrobeTryOnStorage.listPhotos().then(rows=>rows.length>${previousPhotos.length})`);
+  const saved=await evaluate(`(async()=>{
+    const entry=(await window.WardrobeTryOnStorage.listPhotos()).find(row=>!${JSON.stringify(previousPhotos)}.includes(row.id));
+    return {id:entry.id,bytes:Array.from(new Uint8Array(await entry.blob.arrayBuffer()))};
+  })()`);
+  await setViewport({width:390,height:844});
+  await load();
+  await evaluate('document.getElementById("tryon-history").click()');
+  const photoCard=`[data-saved-photo-id="${saved.id}"]`;
+  await wait(`document.querySelector(${JSON.stringify(photoCard+' img')})?.naturalWidth>0`);
+  assert.ok(await evaluate('document.getElementById("tryon-dialog").scrollWidth<=document.getElementById("tryon-dialog").clientWidth+1'),'Local dashboard does not overflow a phone');
+  await capture('dashboard-local-390');
+
+  const beforeOfflineDelete=requests.filter(r=>r.method==='DELETE').length;
+  await evaluate('window.confirm=()=>true;document.querySelector("[data-job-delete=fixture-job-1]").click()');
+  await wait(`!document.querySelector('${cachedResult}') && window.WardrobeTryOnStorage.listJobs().then(rows=>rows.some(j=>j.id==='fixture-job-1'&&j.deleted&&!j.cachedImage))`);
+  assert.equal(requests.filter(r=>r.method==='DELETE').length,beforeOfflineDelete,'Deleting offline erases the browser image without pretending to contact the server');
+
+  bootstrapError=null;
+  jobs=[{id:'fixture-job-1',status:'succeeded',look_id:100,edition:'v2',shot_index:4,created_at:'2026-11-11T00:00:00Z',image_url:'/api/tryons/fixture-job-1/image',download_url:'/api/tryons/fixture-job-1/download'}];
+  await load();
+  await wait('document.getElementById("tryon-availability").textContent.includes("已连接")');
+  await evaluate('document.getElementById("tryon-history").click()');
+  await wait(`window.WardrobeTryOnStorage.listJobs().then(rows=>rows.some(j=>j.id==='fixture-job-1'&&j.deleted&&!j.pending))`);
+  assert.equal(jobs.some(j=>j.id==='fixture-job-1'),false,'The matching owner session completes the requested result deletion');
+  assert.equal(await evaluate(`Boolean(document.querySelector('${cachedResult}'))`),false,'A remotely listed copy cannot resurrect a locally deleted result');
+  assert.equal(requests.filter(r=>r.method==='POST'&&r.url==='/api/tryons').length,postsBeforeDashboard,'Adding, reopening and deleting local data does not submit a try-on');
+
+  await evaluate(`document.getElementById('tryon-close').click();
+    window.WardrobeTryOn.setContext({look_id:100,edition:'v2',shot_index:4});document.getElementById('detail-tryon').click()`);
+  await wait(`document.querySelector(${JSON.stringify(photoCard+' [data-photo-select]')})`);
+  await evaluate(`document.querySelector(${JSON.stringify(photoCard+' [data-photo-select]')}).click()`);
+  await wait('!document.getElementById("tryon-submit").disabled');
+  assert.equal(requests.filter(r=>r.method==='POST'&&r.url==='/api/tryons').length,postsBeforeDashboard,'Selecting a saved photo alone never uploads it');
+  nextJobId='fixture-dashboard-reuse';
+  await evaluate('document.getElementById("tryon-submit").click()');
+  await wait('document.getElementById("tryon-status").textContent.includes("已提交")');
+  const lastUpload=requests.filter(r=>r.method==='POST'&&r.url==='/api/tryons').at(-1);
+  const reused=await new Request(origin,{method:'POST',headers:{'content-type':lastUpload.headers['content-type']},body:lastUpload.body}).formData();
+  assert.equal(reused.get('look_id'),'100');
+  assert.equal(reused.get('shot_index'),'4');
+  assert.deepEqual(Buffer.from(await reused.get('photo').arrayBuffer()),Buffer.from(saved.bytes),'Reused photo uploads the original bytes');
+  assert.equal(requests.filter(r=>r.method==='POST'&&r.url==='/api/tryons').length,postsBeforeDashboard+1);
+
+  await wait(`document.querySelector(${JSON.stringify(photoCard+' [data-photo-delete]')})?.disabled===false`);
+  await evaluate(`window.confirm=()=>true;document.querySelector(${JSON.stringify(photoCard+' [data-photo-delete]')}).click()`);
+  await wait(`window.WardrobeTryOnStorage.listPhotos().then(rows=>rows.every(row=>row.id!==${JSON.stringify(saved.id)}))`);
+  await load();
+  await evaluate('document.getElementById("tryon-history").click()');
+  await wait('document.querySelector("[data-job-id=fixture-dashboard-reuse]")');
+  assert.equal(await evaluate(`Boolean(document.querySelector(${JSON.stringify(photoCard)}))`),false,'Deleted local photo stays gone after reload');
+  assert.equal(requests.filter(r=>r.method==='POST'&&r.url==='/api/tryons').length,postsBeforeDashboard+1);
+  console.log('PASS no-login dashboard: reload persistence, offline result, local/owner deletion, phone layout and byte-exact reuse with explicit upload');
 } finally {
   if(client&&socket?.readyState===1)await Promise.race([client('Browser.close').catch(()=>{}),new Promise(resolve=>setTimeout(resolve,1000))]);
   if(processChrome.exitCode===null&&processChrome.signalCode===null){const exit=once(processChrome,'exit');try{process.kill(-processChrome.pid,'SIGTERM');}catch(error){if(error.code!=='ESRCH')throw error;}await exit;}

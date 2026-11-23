@@ -10,7 +10,7 @@ const root = fileURLToPath(new URL('../',import.meta.url));
 const fixture = fs.mkdtempSync(path.join(os.tmpdir(),'yixu-content-'));
 const write = (relative,value) => fs.writeFileSync(path.join(fixture,relative),JSON.stringify(value));
 try {
-  for(const name of ['site-resources.json','site-theme.js','site-theme.css','admin','content','images-v2','assets','scripts','index.html','app.js','style.css','expressive.css','product-themes.js','product-page.js','product-themes.css','tryon.js','tryon.css','favicon.svg']) {
+  for(const name of ['site-resources.json','site-theme.js','site-theme.css','admin','content','images-v2','assets','scripts','index.html','app.js','style.css','expressive.css','product-themes.js','product-page.js','product-themes.css','tryon-storage.js','tryon.js','tryon.css','favicon.svg']) {
     fs.cpSync(path.join(root,name),path.join(fixture,name),{recursive:true});
   }
   const validProducts=fs.readFileSync(path.join(fixture,'content/products.json'),'utf8');

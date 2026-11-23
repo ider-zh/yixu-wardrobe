@@ -80,7 +80,7 @@ assert.ok(content.catalog.looks.every(look => !look.versions.v1), 'Public catalo
 const html = read('index.html');
 const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]);
 assert.equal(ids.length, new Set(ids).size);
-for(const file of ['app.js','tryon.js','product-themes.js','product-page.js','site-theme.js']) {
+for(const file of ['app.js','tryon-storage.js','tryon.js','product-themes.js','product-page.js','site-theme.js']) {
   new vm.Script(read(file),{filename:file});
   for (const match of read(file).matchAll(/\$\('([^']+)'\)/g)) {
     assert.ok(ids.includes(match[1]), `Missing UI target: ${match[1]}`);

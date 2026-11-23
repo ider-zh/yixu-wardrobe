@@ -79,6 +79,7 @@
 !/admin/package-lock.json
 !/admin/*.css
 !/tryon.js
+!/tryon-storage.js
 !/tryon.css
 !/qa/regression-tryon.mjs
 !/qa/regression-admin.mjs

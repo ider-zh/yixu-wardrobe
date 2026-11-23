@@ -25,7 +25,7 @@ const output = path.join(root, 'public');
 const files = fs.readdirSync(output, {recursive: true}).filter(name => fs.statSync(path.join(output, name)).isFile());
 assert.equal(files.length, expected.length);
 assert.deepEqual([...files].sort(),expected.sort(),'Explicit public allowlist excludes backend/admin/private files');
-for(const asset of ['tryon.js','tryon.css','product-themes.js','product-page.js','product-themes.css'])assert.equal(digest(fs.readFileSync(path.join(output,asset))),digest(fs.readFileSync(path.join(root,asset))));
+for(const asset of ['tryon-storage.js','tryon.js','tryon.css','product-themes.js','product-page.js','product-themes.css'])assert.equal(digest(fs.readFileSync(path.join(output,asset))),digest(fs.readFileSync(path.join(root,asset))));
 assert.equal(files.filter(name => name.endsWith('.webp')).length, new Set(content.publicAssets.map(asset => asset.file)).size);
 assert.ok(!files.some(name => name.startsWith('images/')), 'Archived styling must not enter public output');
 const snapshot = fs.readFileSync(path.join(output,'catalog.js'),'utf8');
@@ -55,7 +55,7 @@ try {
 // Exercise the actual validation CLI in an isolated copy, never mutate source.
 const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'yixu-assets-'));
 try {
-  for (const name of ['site-resources.json', 'site-theme.js', 'site-theme.css', 'admin', 'scripts', 'content', 'backend', 'deploy', 'images', 'images-v2', 'assets', 'docs', 'catalog.js', 'app.js', 'index.html', 'style.css', 'expressive.css','product-themes.js','product-page.js','product-themes.css', 'tryon.js', 'tryon.css', 'favicon.svg', 'README.md', 'README.en.md', 'DEVELOPMENT.md', 'AGENTS.md', 'image-manifest-all.json']) {
+  for (const name of ['site-resources.json', 'site-theme.js', 'site-theme.css', 'admin', 'scripts', 'content', 'backend', 'deploy', 'images', 'images-v2', 'assets', 'docs', 'catalog.js', 'app.js', 'index.html', 'style.css', 'expressive.css','product-themes.js','product-page.js','product-themes.css', 'tryon-storage.js', 'tryon.js', 'tryon.css', 'favicon.svg', 'README.md', 'README.en.md', 'DEVELOPMENT.md', 'AGENTS.md', 'image-manifest-all.json']) {
     fs.cpSync(path.join(root, name), path.join(fixture, name), {recursive: true});
   }
   const control = run('scripts/check.mjs', fixture);
