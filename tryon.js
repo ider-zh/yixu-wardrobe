@@ -88,9 +88,9 @@ async function selectPhoto(event) {
     await storage.putPhoto({id,blob,createdAt:Date.now()});
     if(photo===blob)savedPhotoId=id;
     const loaded=await readPhotos();
-    if(loaded&&photo===blob)photoNotice('照片已保存到本机，尚未上传。');
+    if(loaded&&photo===blob)$('tryon-library-status').textContent='照片已保存到本机。';
   } catch {
-    if(photo===blob||(!photo&&dialog.open))photoNotice('照片未能保存到本机，仍可在本次试穿使用。');
+    if(photo===blob||(!photo&&dialog.open))$('tryon-library-status').textContent='照片未能保存到本机。';
   }
 }
 function releasePhotoURLs() {

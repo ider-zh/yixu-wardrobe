@@ -109,8 +109,8 @@ try {
   const load=async()=>{await client('Page.navigate',{url:origin});await wait('document.readyState === "complete"');};
   await client('Page.addScriptToEvaluateOnNewDocument',{source:'Object.defineProperty(globalThis.crypto,"randomUUID",{value:undefined,configurable:true});'});
   await load();
-  assert.ok(requests.some(r=>r.url==='/api/bootstrap'), 'Page load must securely bootstrap a visitor without requiring a try-on click');
   await wait('document.getElementById("tryon-availability")?.textContent.includes("暂不可用")');
+  assert.ok(requests.some(r=>r.url==='/api/bootstrap'), 'Page load must securely bootstrap a visitor without requiring a try-on click');
   assert.equal(await evaluate('document.cookie'),'','Visitor credential must be HttpOnly');
   assert.equal(await evaluate('localStorage.length'),0,'No visitor credential in local storage');
   await evaluate('document.querySelector("[data-open]").click()');
@@ -382,13 +382,19 @@ try {
     }
   }
   assert.equal(requests.filter(r=>r.url==='/api/tryons'&&r.method==='POST').length,1,'State refresh never resubmits generation');
+  const pendingDeleteIndex=requests.length;
   await evaluate('window.confirm=message=>{window.deleteNotice=message;return true;};document.querySelector("[data-job-delete=fixture-progress]").click()');
   const deleteNotice=await evaluate('window.deleteNotice');
   assert.match(deleteNotice,/记录.*保留/);assert.match(deleteNotice,/生成无法撤回/);
   assert.doesNotMatch(deleteNotice,/外部调用/);
+  const readBack=()=>{
+    const deleted=requests.findIndex((r,index)=>index>=pendingDeleteIndex&&r.method==='DELETE');
+    return deleted>=0&&requests.slice(deleted+1).some(r=>r.url==='/api/tryons'&&r.method==='GET');
+  };
+  for(let n=0;n<100&&!readBack();n++)await new Promise(resolve=>setTimeout(resolve,30));
+  assert.ok(readBack(),'Deletion verified by reading owner list back');
   await wait('!document.getElementById("tryon-refresh").disabled');
   assert.equal(jobs.length,0);assert.equal(requests.filter(r=>r.method==='DELETE').length,1);
-  const deleteIndex=requests.findIndex(r=>r.method==='DELETE');assert.ok(requests.slice(deleteIndex+1).some(r=>r.url==='/api/tryons'&&r.method==='GET'),'Deletion verified by reading owner list back');
   console.log('PASS durable queue restore, truthful states, real private preview/download bytes, delete and readback, no automatic generation replay');
   await evaluate('document.getElementById("tryon-close").click();document.querySelector("[data-open]").click();document.querySelector("[data-view=\\"4\\"]").click();document.getElementById("detail-tryon").click()');
   await wait('!document.getElementById("tryon-refresh").disabled');
@@ -418,11 +424,24 @@ try {
   }
   console.log('PASS explicit photo rejections preserve the full-body preview and reference, prompt re-selection and create no job');
   for(const [status,error,expected] of [[503,{error:{code:'provider_unavailable',message:'外部服务未配置'}},'provider_unavailable'],[503,{detail:'测试 detail 后备错误'},'测试 detail 后备错误'],[202,{},'暂未收到有效的试穿回执']]){
+    await evaluate(`(()=>{
+      const store=window.WardrobeTryOnStorage,save=store.putPhoto;
+      const pendingWrite=new Promise(resolve=>{window.finishPhotoWrite=resolve;});
+      store.putPhoto=async entry=>{
+        store.putPhoto=save;
+        await pendingWrite;
+        return save(entry);
+      };
+    })()`);
     uploadErrorStatus=status;uploadError=error;await choosePhoto('tryon-camera');
     await wait('!document.getElementById("tryon-submit").disabled');
     await evaluate('document.getElementById("tryon-submit").click()');
     await wait('document.getElementById("tryon-status").textContent.includes('+JSON.stringify(expected)+')');
-    assert.match(await evaluate('document.getElementById("tryon-status").textContent'),/未自动重试.*刷新进度/);
+    const submitNotice=await evaluate('document.getElementById("tryon-status").textContent');
+    assert.match(submitNotice,/未自动重试.*刷新进度/);
+    await evaluate('window.finishPhotoWrite()');
+    await wait('document.getElementById("tryon-library-status").textContent.includes("照片已保存到本机")');
+    assert.equal(await evaluate('document.getElementById("tryon-status").textContent'),submitNotice,'A late local photo write must preserve the submission error');
     assert.deepEqual(await evaluate('[...document.querySelectorAll("[data-job-id]")].map(card=>card.dataset.jobId).sort()'),existingHistory,'Errors never manufacture success');
     assert.match(await evaluate('document.getElementById("tryon-local-preview").src'),/^blob:/,'A rejected upload preserves the local photo for explicit retry');
     assert.equal(await evaluate('document.getElementById("tryon-panel").value'),'4','A rejected upload preserves the reference');
