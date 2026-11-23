@@ -1,0 +1,175 @@
+{
+  "schema_version": 1,
+  "batch_id": "2026-11-23-01",
+  "publish_date": "2026-11-23",
+  "timezone": "Asia/Shanghai",
+  "title": "上海青浦 · 雨窗观织",
+  "region": {
+    "country": "CN",
+    "city": "上海"
+  },
+  "research": {
+    "trend_sources": [
+      {
+        "url": "https://www.vogue.com/article/how-to-style-wide-leg-jeans",
+        "published_at": "2026-11-20",
+        "summary": "Vogue 的 Christina Holevas 整理当季牛仔街拍，比较弧形、高腰与深洗等设计，并给出针织、长风衣与宽松牛仔同穿的示例。本套借鉴轮廓与叠穿关系。"
+      },
+      {
+        "url": "https://www.whowhatwear.com/fashion/denim/winter-jeans-outfits-2026",
+        "published_at": "2026-11-19",
+        "summary": "Who What Wear UK 将长风衣、深色牛仔和冬季配件组合为独立穿搭案例。深靛裤脚窄折、灰紫内搭与姜黄小包是本套的编辑选择。"
+      },
+      {
+        "url": "https://www.shanghai.gov.cn/nw17239/20261104/61dc72ebd1524735878920dae7f73dc2.html",
+        "published_at": "2026-11-04",
+        "summary": "上海市政府门户列出中国国际纺织机械展暨 ITMA 亚洲展于 11 月 20–24 日在青浦国家会展中心举行。成片中的雨窗、木凳与纱线展示台构成原创场景。"
+      }
+    ],
+    "weather": {
+      "url": "https://www.weather.com.cn/textFC/hd.shtml",
+      "forecast_date": "2026-11-23",
+      "summary": "中国天气网华东文字预报 2026-11-23 07:30 发布。上海青浦当日白天小雨，最高 17℃，南风小于 3 级；夜间阴，最低 8℃，北风小于 3 级。",
+      "styling_reason": "策划推断。风衣叠针织适用于短时户外接驳与室内看展，九分裤脚和低方跟短靴给馆内步行留出余量。户外有雨，另备雨具。夜间长时户外活动需另添保暖层。",
+      "checked_at": "2026-11-23T14:10:58+08:00"
+    },
+    "checked_at": "2026-11-23T14:10:58+08:00"
+  },
+  "looks": [
+    {
+      "id": 106,
+      "model_id": "female-01",
+      "model_reference_sha256": "dc0a221ff81250415bcfa3b320bc916dc02e2873f030e707083928505ca75066",
+      "title": "雨窗观织",
+      "category": "轻雅日常",
+      "season": "冬季",
+      "description": "沙卡其长风衣敞开露出灰紫莓色半高领针织，搭配深靛弧形牛仔和深咖系带短靴。姜黄小包在雨窗的灰光里添一点暖色。灵感来自上海青浦雨天看纺织展的下午。",
+      "pieces": [
+        {
+          "role": "外层",
+          "name": "沙卡其过膝双排扣长风衣，宽驳领与深棕扣，敞穿"
+        },
+        {
+          "role": "上装",
+          "name": "灰紫莓色半高领细罗纹针织长袖"
+        },
+        {
+          "role": "下装",
+          "name": "深靛蓝高腰弧形九分牛仔裤，窄折裤边"
+        },
+        {
+          "role": "鞋履",
+          "name": "深咖圆头低方跟系带短靴"
+        },
+        {
+          "role": "包袋",
+          "name": "姜黄色横椭圆短柄小提包"
+        }
+      ],
+      "palette": [
+        "#a59179",
+        "#6c5e70",
+        "#29384d",
+        "#45342d",
+        "#ad8242"
+      ],
+      "details": [
+        "过膝风衣与弧形牛仔的窄折裤边形成长短对照",
+        "半高领细罗纹与横椭圆小包在近景里可见",
+        "低跟系带短靴搭九分裤脚，便于馆内步行"
+      ],
+      "tags": [
+        "长风衣",
+        "深靛牛仔",
+        "灰紫针织",
+        "姜黄小包",
+        "上海看展"
+      ],
+      "mood": "从进门相认、发现纱线的新鲜感，到坐下听一句笑话，再招呼观者继续逛。",
+      "scene": "以上海青浦纺织展为灵感的虚构现代门厅。雨水玻璃、焦糖色木凳、素色挂布与小型纱线展台，雨天窗光和室内微暖灯。",
+      "edition": "v2",
+      "shots": [
+        {
+          "index": 1,
+          "title": "你也到了",
+          "emotion": "露齿笑，目光朝向观者",
+          "pose": "在雨窗边站定，一手挥手，一手提小包",
+          "framing": "正面全身，头部与双靴完整，封面镜头"
+        },
+        {
+          "index": 2,
+          "title": "那是怎么织出来的",
+          "emotion": "扬眉睁眼、圆唇的惊喜",
+          "pose": "面向观者伸指示意旁边的纱锭",
+          "framing": "胸上近景，手势与头部均完整"
+        },
+        {
+          "index": 3,
+          "title": "看这排纱线",
+          "emotion": "垂目专注，唇线放松",
+          "pose": "侧身靠近展台，一手指向纱锭，另一手提包",
+          "framing": "腰上侧面中景，见包身、纱锭和叠穿"
+        },
+        {
+          "index": 4,
+          "title": "听到好笑的地方",
+          "emotion": "仰头张口大笑，眼尾弯起",
+          "pose": "坐上木凳，一手撑住凳边，一手落膝，小包置于身旁",
+          "framing": "坐姿全身，靴尖接近下边界"
+        },
+        {
+          "index": 5,
+          "title": "线头到底在哪",
+          "emotion": "皱眉、轻抿唇的故作认真",
+          "pose": "一手抵住下巴，另一前臂靠展台，抬眼望观者",
+          "framing": "胸腰中景，见半高领和纱锭"
+        },
+        {
+          "index": 6,
+          "title": "我也试着记住了",
+          "emotion": "单眼轻眨，嘴角含笑",
+          "pose": "一手轻扶风衣领边，另一手松握包提柄",
+          "framing": "斜前方腰上中近景"
+        },
+        {
+          "index": 7,
+          "title": "那边还有一排",
+          "emotion": "回头时明朗露齿笑",
+          "pose": "沿雨窗横向跨步，手提姜黄包，风衣下摆自然扬开",
+          "framing": "侧面全身，双靴均完整"
+        },
+        {
+          "index": 8,
+          "title": "慢慢说，我在听",
+          "emotion": "柔和闭口浅笑，目光直视",
+          "pose": "靠向展台，托腮安静听观者说",
+          "framing": "眼平胸上近景，见纱锭和针织袖口"
+        },
+        {
+          "index": 9,
+          "title": "跟我过来",
+          "emotion": "越肩回望时闭口浅笑",
+          "pose": "向前换步，一手提包，另一手向观者摊掌",
+          "framing": "背侧全身，完整头部与双靴"
+        }
+      ],
+      "asset": {
+        "asset_id": "look-106-female-01-v2-r1",
+        "file": "assets/looks/2026-11-23/look-106-female-01-v2-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 221594,
+        "sha256": "38d2cdfbdb98ad666e643b694697bca6884fa0f85c05c42d919c70a7ca7a804e",
+        "visibility": "public",
+        "layout": {
+          "rows": 3,
+          "columns": 3,
+          "preview_panel": 1
+        }
+      }
+    }
+  ],
+  "cover_look_id": 106,
+  "published_at": "2026-11-23T14:14:54+08:00"
+}
