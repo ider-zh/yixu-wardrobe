@@ -1,17 +1,18 @@
 /* Shared local layout vocabulary. Content and workflow nodes are never replaced. */
+:root { --small-text-size: 0.8125rem; }
 html[data-site-theme="studio"]{--paper:#fafaf8;--paper-light:#fff;--surface:#fff;--line:#d9dcd8;--ink:#252d28;background:var(--paper)}
 html[data-site-theme="studio"] body{background:var(--paper)}
 html[data-site-theme="studio"] .latest-hero{max-width:1440px;grid-template-columns:minmax(0,1.35fr) minmax(0,.8fr);gap:6%;padding:28px 6% 34px;min-height:610px}
 html[data-site-theme="studio"] .latest-hero .hero-cover{width:min(100%,350px);max-width:none;justify-self:start}
 html[data-site-theme="studio"] .hero-cover .photo-window{box-shadow:none;outline:1px solid var(--line)}
 html[data-site-theme="studio"] .latest-hero h1{font-size:clamp(30px,3.3vw,49px);letter-spacing:0;line-height:1.4}
-html[data-site-theme="studio"] .latest-hero .hero-description{font-size:12px;-webkit-line-clamp:4}
+html[data-site-theme="studio"] .latest-hero .hero-description{font-size:var(--small-text-size);-webkit-line-clamp:4}
 html[data-site-theme="studio"] .recent-section,html[data-site-theme="studio"] .collection,html[data-site-theme="studio"] .product-section,html[data-site-theme="studio"] .models-section{max-width:1520px;margin-left:auto;margin-right:auto;padding-left:5%;padding-right:5%}
 html[data-site-theme="studio"] .gallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:32px 28px}
 html[data-site-theme="studio"] .look-card{display:flex;flex-direction:column;gap:0;border:1px solid var(--line);background:white}
 html[data-site-theme="studio"] .card-meta{padding:15px 16px 18px}
 html[data-site-theme="studio"] .card-title{font-family:inherit;font-size:18px;letter-spacing:0}
-html[data-site-theme="studio"] .card-tags{font-size:10px;line-height:1.7}
+html[data-site-theme="studio"] .card-tags{font-size:var(--small-text-size);line-height:1.7}
 html[data-site-theme="studio"] .product-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
 html[data-site-theme="studio"] .product-card{border:1px solid var(--line);background:white;padding-bottom:14px}
 html[data-site-theme="studio"] .product-card> :not(.product-card-photo){margin-left:14px;margin-right:14px}
@@ -139,7 +140,7 @@ html[data-site-theme="contact-sheet"] .hero-cover .photo-window.full-sheet > img
 
 html[data-site-theme="contact-sheet"] .hero-cover-caption {
   margin: 8px 0 0;
-  font-size: 11px;
+  font-size: var(--small-text-size);
   line-height: 1.55;
   font-variant-numeric: tabular-nums;
 }
@@ -266,7 +267,7 @@ html[data-site-theme="contact-sheet"] .product-hero-figure {
 
 html[data-site-theme="contact-sheet"] .product-hero-figure figcaption {
   padding: 9px 0 0;
-  font-size: 11px;
+  font-size: var(--small-text-size);
 }
 
 html[data-site-theme="contact-sheet"] :is(.tryon-dialog, .tryon-submit-area) {
@@ -389,7 +390,7 @@ html[data-site-theme="contact-sheet"][data-site-context="admin"] .metrics dd {
   }
 
   html[data-site-theme="contact-sheet"] .hero-cover-caption {
-    font-size: 10px;
+    font-size: var(--small-text-size);
   }
 
   html[data-site-theme="contact-sheet"] .card-topline {
@@ -397,7 +398,7 @@ html[data-site-theme="contact-sheet"][data-site-context="admin"] .metrics dd {
   }
 
   html[data-site-theme="contact-sheet"] .product-hero-figure figcaption {
-    font-size: 9px;
+    font-size: var(--small-text-size);
   }
 }
 
@@ -475,7 +476,7 @@ html[data-site-theme="salon-album"] .hero-cover .photo-window {
 html[data-site-theme="salon-album"] .hero-cover-caption {
   margin-top: 9px;
   letter-spacing: .05em;
-  font-size: 11px;
+  font-size: var(--small-text-size);
 }
 
 html[data-site-theme="salon-album"] .hero-actions > button {
@@ -647,7 +648,7 @@ html[data-site-theme="salon-album"][data-site-context="admin"] button:not(.outli
   }
 
   html[data-site-theme="salon-album"] .hero-cover-caption {
-    font-size: 10px;
+    font-size: var(--small-text-size);
   }
 }
 
@@ -739,7 +740,7 @@ html[data-site-theme="wardrobe-index"] .hero-cover .photo-window {
 html[data-site-theme="wardrobe-index"] .hero-cover-caption {
   margin-top: 7px;
   letter-spacing: .02em;
-  font-size: 11px;
+  font-size: var(--small-text-size);
 }
 
 html[data-site-theme="wardrobe-index"] :is(.recent-section, .collection, .product-section, .models-section) {
@@ -793,7 +794,7 @@ html[data-site-theme="wardrobe-index"] .card-meta {
 html[data-site-theme="wardrobe-index"] .card-topline {
   align-items: flex-start;
   flex-wrap: wrap;
-  font-size: 10px;
+  font-size: var(--small-text-size);
 }
 
 html[data-site-theme="wardrobe-index"] .card-title {
@@ -804,7 +805,7 @@ html[data-site-theme="wardrobe-index"] .card-title {
 }
 
 html[data-site-theme="wardrobe-index"] :is(.card-publication, .card-tags) {
-  font-size: 11px;
+  font-size: var(--small-text-size);
 }
 
 html[data-site-theme="wardrobe-index"] .card-tags {
@@ -948,7 +949,7 @@ html[data-site-theme="wardrobe-index"][data-site-context="admin"] :is(input:not(
   }
 
   html[data-site-theme="wardrobe-index"] .hero-cover-caption {
-    font-size: 10px;
+    font-size: var(--small-text-size);
   }
 }
 
@@ -1018,7 +1019,7 @@ html[data-site-theme="linen-room"] .hero-cover .photo-window {
 
 html[data-site-theme="linen-room"] .hero-cover-caption {
   margin: 10px 0 1px;
-  font-size: 10px;
+  font-size: var(--small-text-size);
   line-height: 1.5;
 }
 
@@ -1381,7 +1382,7 @@ html[data-site-theme="porcelain-case"] .hero-cover .photo-window {
 html[data-site-theme="porcelain-case"] .hero-cover-caption {
   margin: 0;
   padding: 12px 4px;
-  font-size: 10px;
+  font-size: var(--small-text-size);
   text-align: center;
 }
 
@@ -1858,7 +1859,7 @@ html[data-site-theme="city-billboard"] .hero-cover-caption {
   margin: 0;
   padding: 9px 2px;
   color: #e3ebfb;
-  font-size: 11px;
+  font-size: var(--small-text-size);
 }
 
 html[data-site-theme="city-billboard"] :is(.solid-button, .toast) {
@@ -1903,7 +1904,7 @@ html[data-site-theme="city-billboard"] .card-number {
   padding: 3px 8px;
   background: var(--accent);
   color: #fff;
-  font: 700 12px/1.5 var(--sans);
+  font: 700 var(--small-text-size)/1.5 var(--sans);
   font-variant-numeric: tabular-nums;
 }
 
@@ -2172,7 +2173,7 @@ html[data-site-theme="sunset-notes"] .hero-publication {
 
 html[data-site-theme="sunset-notes"] .latest-hero .hero-description {
   color: var(--muted);
-  font-size: clamp(.75rem, 1.2vw, .875rem);
+  font-size: clamp(var(--small-text-size), 1.2vw, .875rem);
   max-width: 32em;
 }
 
