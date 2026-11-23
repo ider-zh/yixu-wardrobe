@@ -86,24 +86,37 @@
   if (admin || !['http:', 'https:'].includes(window.location?.protocol) ||
       typeof window.fetch !== 'function') return;
 
+  // Start in the head and reveal the document after the initial layout is ready.
+  root.dataset.siteThemePending = '';
+  const documentReady = document.readyState === 'loading' ? new Promise(resolve => {
+    document.addEventListener('DOMContentLoaded', resolve, {once: true});
+  }) : Promise.resolve();
   let revision = 0;
-  async function refresh() {
+  async function refresh(initial = false) {
+    if (!initial && Object.hasOwn(root.dataset, 'siteThemePending')) return;
     const request = ++revision;
     try {
       const response = await window.fetch('/api/site-theme', {
         credentials: 'omit',
         cache: 'no-store',
         headers: {Accept: 'application/json'},
+        ...(initial ? {signal: AbortSignal.timeout(1500)} : {}),
       });
       if (!response.ok) return;
       const setting = await response.json();
+      if (initial) await documentReady;
       if (request === revision) apply(setting?.theme);
     } catch {
       // Keep the current layout when the site setting is unavailable.
+    } finally {
+      if (initial) {
+        await documentReady;
+        delete root.dataset.siteThemePending;
+      }
     }
   }
 
-  refresh();
+  refresh(true);
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') refresh();
   });

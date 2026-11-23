@@ -29,6 +29,7 @@ const scratch=fs.mkdtempSync(path.join(os.tmpdir(),'yixu-theme-')),output=path.j
 const built=spawnSync(process.execPath,['scripts/build.mjs','--output',output],{cwd:root,encoding:'utf8'});assert.equal(built.status,0,built.stderr||built.stdout);
 const catalog=loadContent(root).catalog,featured=catalog.looks.find(l=>l.id===catalog.home.featured_look_id),boots=catalog.products.find(p=>p.product_id==='brown-boots-102');
 let authenticated=true,force401=false,jobs=[],posts=0,selectedTheme='editorial',themeReadFailure=false,themeWriteFailure=false,themeSaves=0;
+let themeDelay=0;
 const requested=[];
 const json=(res,data,status=200)=>{res.statusCode=status;res.setHeader('Content-Type','application/json');res.end(JSON.stringify(data));};
 const server=http.createServer(async(req,res)=>{
@@ -36,7 +37,9 @@ const server=http.createServer(async(req,res)=>{
  if(req.url==='/api/site-theme'){
   assert.equal(req.method,'GET');
   assert.equal(req.headers.cookie,undefined,'Public theme reads are anonymous');
-  return json(res,themeReadFailure?{error:'unavailable'}:{theme:selectedTheme},themeReadFailure?503:200);
+  const theme=selectedTheme;
+  if(themeDelay)await new Promise(resolve=>setTimeout(resolve,themeDelay));
+  return json(res,themeReadFailure?{error:'unavailable'}:{theme},themeReadFailure?503:200);
  }
  if(req.url==='/api/content/catalog')return json(res,catalog);
  if(req.url==='/api/bootstrap')return json(res,{csrf_token:'fixture-csrf',visitor:{id:'fixture'},generation_available:true,disclosure:{accepted:true,version:'fixture-v1',title:'照片用途',items:['仅为合成测试']}});
@@ -175,8 +178,30 @@ try{
  assert.equal(await evaluate('!!document.querySelector("[data-site-theme-control],#site-theme-form")'),false,'No visitor-facing theme control');
  assert.equal(await evaluate('typeof window.YixuSiteTheme.apply'),'undefined');
  await evaluate(`localStorage.setItem(${JSON.stringify(key)},'editorial')`);
- await navigate(origin);await wait(themeIs('studio'));
+ const paintHook=await client('Page.addScriptToEvaluateOnNewDocument',{source:`{
+  function observeFirstFrame() {
+   if (document.querySelector('.latest-hero') && getComputedStyle(document.documentElement).visibility === 'visible') {
+    window.firstVisibleTheme = document.documentElement.dataset.siteTheme;
+    return;
+   }
+   requestAnimationFrame(observeFirstFrame);
+  }
+  requestAnimationFrame(observeFirstFrame);
+ }`});
+ themeDelay=400;
+ const beforeReload=await evaluate('performance.timeOrigin');
+ await client('Page.reload');
+ await wait(`performance.timeOrigin>${beforeReload} && document.readyState==="complete"`);
+ await wait('!!window.firstVisibleTheme');
+ assert.equal(await evaluate('window.firstVisibleTheme'),'studio','A delayed theme response does not expose the default layout on reload');
  assert.equal(await evaluate('document.documentElement.dataset.siteTheme'),'studio','The browser still reads the server selection after reload');
+ await client('Page.removeScriptToEvaluateOnNewDocument',{identifier:paintHook.identifier});
+ themeDelay=2200;
+ await navigate(origin+'/index.html?theme-timeout-test');
+ await wait('location.search==="?theme-timeout-test" && !document.documentElement.hasAttribute("data-site-theme-pending")');
+ assert.ok(await evaluate(themeIs('editorial')),'An unavailable theme cannot keep the page hidden');
+ themeDelay=0;
+ await choose('studio');
  themeReadFailure=true;
  const reads=requested.filter(url=>url==='/api/site-theme').length;
  await refreshPublic();

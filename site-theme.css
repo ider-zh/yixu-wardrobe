@@ -1,5 +1,6 @@
 /* Shared local layout vocabulary. Content and workflow nodes are never replaced. */
 :root { --small-text-size: 0.8125rem; }
+html[data-site-theme-pending] { visibility: hidden; opacity: 0; }
 html[data-site-theme="studio"]{--paper:#fafaf8;--paper-light:#fff;--surface:#fff;--line:#d9dcd8;--ink:#252d28;background:var(--paper)}
 html[data-site-theme="studio"] body{background:var(--paper)}
 html[data-site-theme="studio"] .latest-hero{max-width:1440px;grid-template-columns:minmax(0,1.35fr) minmax(0,.8fr);gap:6%;padding:28px 6% 34px;min-height:610px}
