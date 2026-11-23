@@ -79,11 +79,12 @@ async function publicUI(t) {
 test('photo try-on copy stays brief before and after real API bootstrap', async t => {
   const staticDOM = parseHTML(fs.readFileSync(path.join(root, 'index.html'), 'utf8')).document;
   const purpose = '照片交由第三方 AI 生成试穿图，结果可供后台评估。';
+  const disclosures = [purpose, '选择九宫格姿态时，原图会嵌入成片中央，随私有成片保存和删除。后台评估时会遮住中央原图。'];
   const assertBriefCopy = document => {
     assert.match(document.getElementById('detail-tryon').textContent, /^拍照试穿/);
     assert.equal(document.getElementById('tryon-title').textContent, '我的试穿');
     assert.equal(document.getElementById('tryon-disclosure-title').textContent, '照片用途');
-    assert.deepEqual([...document.querySelectorAll('#tryon-disclosure li')].map(li => li.textContent), [purpose], 'One purpose notice, not static/API duplicates');
+    assert.deepEqual([...document.querySelectorAll('#tryon-disclosure li')].map(li => li.textContent), disclosures);
     assert.match(document.getElementById('tryon-consent-label').textContent, /本人同意.*同意上述用途/);
     assert.doesNotMatch(document.getElementById('tryon-dialog').textContent, /1 小时|一小时|1000|FIFO|持久队列|Cookie|CSRF|幂等|服务器|输入最晚保留至/);
   };
@@ -96,7 +97,7 @@ test('photo try-on copy stays brief before and after real API bootstrap', async 
   assert.match(h.$('tryon-jobs-status').textContent, /^进度已更新。/);
   const disclosure = (await h.rpc({ path: 'https://localhost/api/bootstrap' })).body.disclosure;
   assert.equal(disclosure.accepted, false);
-  assert.deepEqual(disclosure.items, [purpose]);
+  assert.deepEqual(disclosure.items, disclosures);
   h.$('tryon-refresh').click();
   await wait(() => !h.$('tryon-refresh').disabled);
   assertBriefCopy(h.document);
