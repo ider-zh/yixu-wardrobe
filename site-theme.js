@@ -95,12 +95,14 @@
   async function refresh(initial = false) {
     if (!initial && Object.hasOwn(root.dataset, 'siteThemePending')) return;
     const request = ++revision;
+    const controller = initial ? new AbortController() : null;
+    const timeout = controller ? window.setTimeout(() => controller.abort(), 1500) : undefined;
     try {
       const response = await window.fetch('/api/site-theme', {
         credentials: 'omit',
         cache: 'no-store',
         headers: {Accept: 'application/json'},
-        ...(initial ? {signal: AbortSignal.timeout(1500)} : {}),
+        signal: controller?.signal,
       });
       if (!response.ok) return;
       const setting = await response.json();
@@ -110,6 +112,7 @@
       // Keep the current layout when the site setting is unavailable.
     } finally {
       if (initial) {
+        window.clearTimeout(timeout);
         await documentReady;
         delete root.dataset.siteThemePending;
       }
