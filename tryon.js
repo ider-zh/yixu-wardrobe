@@ -18,6 +18,7 @@ function clearSession() {
   $('tryon-availability').textContent='需要重新连接';syncControls();
 }
 let photo = null, previewURL = null, previewGeneration = 0, busy = false, pendingKey = null, submittedJobId = null;
+let retryingUnknown = false;
 let savedPhotoId = null, savedPhotos = [], photoRead = 0;
 const photoURLs = [];
 const photoTypes = {'image/jpeg':'jpg','image/png':'png','image/webp':'webp'};
@@ -33,8 +34,9 @@ function syncFlow() {
   }
 }
 function syncControls() {
+  const submit = $('tryon-submit');
   $('tryon-composer').setAttribute('aria-busy',String(busy));
-  $('tryon-submit').disabled = busy || !session?.generation_available || !photo || Boolean(photoRejection) || !frozen?.shot_index || failedReferences.has(frozen.shot_index) || (!session.disclosure.accepted && !$('tryon-consent').checked);
+  submit.disabled = busy || !session?.generation_available || !photo || Boolean(photoRejection) || !frozen?.shot_index || failedReferences.has(frozen.shot_index) || (!session.disclosure.accepted && !$('tryon-consent').checked);
   for(const id of ['tryon-camera','tryon-album','tryon-panel','tryon-consent','tryon-remove-photo'])$(id).disabled=busy;
   for(const button of $('tryon-saved-photos').querySelectorAll('button')){
     button.disabled=busy;
@@ -42,7 +44,11 @@ function syncControls() {
   }
   $('tryon-reference-picker').setAttribute('aria-disabled',String(busy));
   for(const input of $('tryon-reference-picker').querySelectorAll('input'))input.disabled=busy||failedReferences.has(Number(input.value));
-  $('tryon-submit').textContent=busy?'正在提交…':session?.disclosure.accepted?'开始试穿':'同意并开始试穿';
+  const submitAction=retryingUnknown?'提交新试穿':'开始试穿';
+  submit.textContent=busy?'正在提交…':session?.disclosure.accepted?submitAction:'同意并'+submitAction;
+  $('tryon-retry-notice').hidden=!retryingUnknown;
+  if(retryingUnknown)submit.setAttribute('aria-describedby','tryon-retry-notice');
+  else submit.removeAttribute('aria-describedby');
   $('tryon-photo-placeholder').hidden=Boolean(photo);
   $('tryon-remove-photo').hidden=!photo;
   $('tryon-photo-stage').dataset.selected=String(Boolean(photo));
@@ -262,10 +268,11 @@ $('tryon-reference-picker').addEventListener('keydown',event=>{
     if(!inputs[index].disabled){inputs[index].focus({preventScroll:true});chooseReference(Number(inputs[index].value));revealReference(inputs[index]);break;}
   }
 });
-function prepareContext() {
+function prepareContext(context=currentContext, retryUnknown=false) {
   submittedJobId=null;
-  frozen=currentContext&&byId.has(currentContext.look_id)?{...currentContext}:null;
+  frozen=context&&byId.has(context.look_id)?{...context}:null;
   frozenLook=frozen?byId.get(frozen.look_id):null;
+  retryingUnknown=Boolean(frozen&&retryUnknown);
   const select=$('tryon-panel');select.replaceChildren();
   if(frozen){
     const shots=frozenLook.versions.v2.shots;
@@ -497,9 +504,13 @@ function renderJobs() {
       if(!imageURL&&dialog.open&&!job.cachedImage)card.append(element('p',job.online?'正在保存成片到本机…':'成片尚未保存在本机，可联网后刷新进度。','tryon-hint'));
       if(downloadURL){const link=element('a','下载结果 ↓','outline-button');link.href=downloadURL;link.download='tryon-'+job.id+'.webp';link.dataset.jobAction='download';card.append(link);}
     }
-    if(['failed','needs_photo','expired','canceled'].includes(job.status)&&job.edition==='v2'&&look){
-      const retry=element('button','重新准备照片','outline-button');retry.dataset.jobRetry=job.id;retry.dataset.jobAction='retry';retry.addEventListener('click',()=>{
-        if(busy)return;clearPhoto();currentContext={look_id:job.look_id,edition:'v2',shot_index:job.shot_index};prepareContext();
+    if(['unknown','failed','needs_photo','expired','canceled'].includes(job.status)&&job.edition==='v2'&&look?.versions.v2?.shots?.[job.shot_index-1]){
+      const uncertain=job.status==='unknown';
+      const retry=element('button',uncertain?'准备重试':'重新准备照片','outline-button');retry.dataset.jobRetry=job.id;retry.dataset.jobAction='retry';retry.addEventListener('click',()=>{
+        if(busy)return;
+        clearPhoto();
+        if(uncertain)$('tryon-status').textContent='';
+        prepareContext({look_id:job.look_id,edition:'v2',shot_index:job.shot_index},uncertain);
         jumpTo('tryon-photo-title');
       });card.append(retry);
     }
@@ -583,7 +594,7 @@ function photoValidationMessage(error) {
 }
 $('detail-tryon').addEventListener('click', () => {if(!busy)prepareContext();open();if(frozen)track('tryon_open',frozen);});
 function openDashboard() {
-  if(!busy){frozen=null;renderContext();syncControls();}
+  if(!busy){frozen=null;retryingUnknown=false;renderContext();syncControls();}
   open();
 }
 for(const id of ['tryon-history','tryon-header'])$(id).addEventListener('click',openDashboard);
@@ -607,6 +618,7 @@ $('tryon-submit').addEventListener('click',async()=>{
     submittedJobId=job.id;submittedReceipt={at:Date.now(),job};
     remoteJobs=[job,...remoteJobs.filter(item=>item.id!==job.id)];updateJobs();
     storeRemoteJobs([job],submittedReceipt.at,sessionRevision);
+    retryingUnknown=false;
     clearPhoto();
     $('tryon-library-status').textContent='';
     $('tryon-status').textContent='已提交 · '+(statusNames[job.status]||job.status)+'。可在我的试穿中查看进度。';

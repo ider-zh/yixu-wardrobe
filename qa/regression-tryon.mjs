@@ -67,7 +67,7 @@ const server = http.createServer(async (req,res) => {
       assert.equal(accept,true,'Consent must precede reception of photo');
       assert.equal(req.headers['x-csrf-token'],'test-csrf');assert.match(req.headers.cookie||'',/visitor_fixture=/);
       const job={id:nextJobId,status:'queued',look_id:100,edition:'v2',shot_index:4,queue_position:7,created_at:'2026-11-11T00:00:00Z',original_expires_at:'2026-11-11T01:00:00Z',image_url:null,download_url:null,error_code:null,error_message:null};
-      jobs=[job];res.statusCode=202;
+      jobs=[job,...jobs.filter(item=>item.id!==job.id&&item.status==='unknown')];res.statusCode=202;
       const finish=()=>res.end(JSON.stringify(job));
       if(holdUpload){holdUpload=false;heldUpload=finish;return;}
       finish();return;
@@ -368,7 +368,7 @@ try {
       assert.equal(await evaluate('document.querySelector(".tryon-progress-steps [aria-current]").textContent'),{validating:'检查照片',generating:'生成试穿',postprocessing:'整理成片'}[status]);
       assert.doesNotMatch(await evaluate('document.querySelector(".tryon-waiting").textContent'),/\d+\s*%|\d+\s*秒|\d+\s*分钟/,'Progress never invents timing or percent');
     }
-    if(status==='unknown')assert.equal(await evaluate('document.querySelector("[data-job-retry]")'),null,'Uncertain generation never offers an automatic retry');
+    if(status==='unknown')assert.equal(await evaluate('document.querySelector("[data-job-retry=fixture-progress]").textContent'),'准备重试');
     if(status==='failed'){
       await evaluate('document.querySelector("[data-job-action=retry]").focus();document.getElementById("tryon-refresh").click()');
       await wait('!document.getElementById("tryon-refresh").disabled');
@@ -677,21 +677,34 @@ try {
   assert.equal(await evaluate(`Boolean(document.querySelector('${cachedResult}'))`),false,'A remotely listed copy cannot resurrect a locally deleted result');
   assert.equal(requests.filter(r=>r.method==='POST'&&r.url==='/api/tryons').length,postsBeforeDashboard,'Adding, reopening and deleting local data does not submit a try-on');
 
-  await evaluate(`document.getElementById('tryon-close').click();
-    window.WardrobeTryOn.setContext({look_id:100,edition:'v2',shot_index:4});document.getElementById('detail-tryon').click()`);
+  jobs=[{id:'fixture-delivery-unknown',status:'unknown',look_id:100,edition:'v2',shot_index:4,created_at:'2026-11-11T00:00:00Z',error_code:'delivery_unknown',error_message:'Provider delivery is uncertain; this request will not be replayed'}];
+  await evaluate('document.getElementById("tryon-refresh").click()');
+  await wait('document.querySelector("[data-job-retry=fixture-delivery-unknown]")');
+  await evaluate('document.querySelector("[data-job-retry=fixture-delivery-unknown]").click()');
+  assert.equal(await evaluate('document.activeElement.id'),'tryon-photo-title');
+  assert.equal(await evaluate('document.getElementById("tryon-panel").value'),'4');
+  assert.equal(await evaluate('document.getElementById("tryon-submit").disabled'),true,'Preparing a retry requires choosing a photo');
+  assert.equal(await evaluate('document.getElementById("tryon-retry-notice").hidden'),false);
+  assert.match(await evaluate('document.getElementById("tryon-retry-notice").textContent'),/可能已被接收.*新建/);
+  assert.equal(requests.filter(r=>r.method==='POST'&&r.url==='/api/tryons').length,postsBeforeDashboard,'Preparing a retry never dispatches a request');
   await wait(`document.querySelector(${JSON.stringify(photoCard+' [data-photo-select]')})`);
   await evaluate(`document.querySelector(${JSON.stringify(photoCard+' [data-photo-select]')}).click()`);
   await wait('!document.getElementById("tryon-submit").disabled');
+  assert.equal(await evaluate('document.getElementById("tryon-submit").textContent'),'提交新试穿');
+  assert.equal(await evaluate('document.getElementById("tryon-submit").getAttribute("aria-describedby")'),'tryon-retry-notice');
   assert.equal(requests.filter(r=>r.method==='POST'&&r.url==='/api/tryons').length,postsBeforeDashboard,'Selecting a saved photo alone never uploads it');
   nextJobId='fixture-dashboard-reuse';
-  await evaluate('document.getElementById("tryon-submit").click()');
+  await evaluate('document.getElementById("tryon-submit").click();document.getElementById("tryon-submit").click()');
   await wait('document.getElementById("tryon-status").textContent.includes("已提交")');
   const lastUpload=requests.filter(r=>r.method==='POST'&&r.url==='/api/tryons').at(-1);
   const reused=await new Request(origin,{method:'POST',headers:{'content-type':lastUpload.headers['content-type']},body:lastUpload.body}).formData();
   assert.equal(reused.get('look_id'),'100');
+  assert.equal(reused.get('edition'),'v2');
   assert.equal(reused.get('shot_index'),'4');
+  assert.notEqual(reused.get('idempotency_key'),multipart.get('idempotency_key'),'The new attempt uses an independent request key');
   assert.deepEqual(Buffer.from(await reused.get('photo').arrayBuffer()),Buffer.from(saved.bytes),'Reused photo uploads the original bytes');
   assert.equal(requests.filter(r=>r.method==='POST'&&r.url==='/api/tryons').length,postsBeforeDashboard+1);
+  assert.equal(await evaluate('document.querySelector("[data-job-id=fixture-delivery-unknown]").dataset.jobStatus'),'unknown','An explicit attempt preserves the original uncertain record');
 
   await wait(`document.querySelector(${JSON.stringify(photoCard+' [data-photo-delete]')})?.disabled===false`);
   await evaluate(`window.confirm=()=>true;document.querySelector(${JSON.stringify(photoCard+' [data-photo-delete]')}).click()`);
@@ -701,7 +714,7 @@ try {
   await wait('document.querySelector("[data-job-id=fixture-dashboard-reuse]")');
   assert.equal(await evaluate(`Boolean(document.querySelector(${JSON.stringify(photoCard)}))`),false,'Deleted local photo stays gone after reload');
   assert.equal(requests.filter(r=>r.method==='POST'&&r.url==='/api/tryons').length,postsBeforeDashboard+1);
-  console.log('PASS no-login dashboard: reload persistence, offline result, local/owner deletion, phone layout and byte-exact reuse with explicit upload');
+  console.log('PASS no-login dashboard: persistence, deletion, phone layout and explicit retry with a new key, preserved history and byte-exact photo reuse');
 } finally {
   if(client&&socket?.readyState===1)await Promise.race([client('Browser.close').catch(()=>{}),new Promise(resolve=>setTimeout(resolve,1000))]);
   if(processChrome.exitCode===null&&processChrome.signalCode===null){const exit=once(processChrome,'exit');try{process.kill(-processChrome.pid,'SIGTERM');}catch(error){if(error.code!=='ESRCH')throw error;}await exit;}
