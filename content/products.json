@@ -8072,6 +8072,261 @@
           "shot_index": 7
         }
       ]
+    },
+    {
+      "product_id": "sand-khaki-trench-106",
+      "name": "沙卡其双排扣长风衣",
+      "category": "外套",
+      "subtitle": "宽驳领铺开，过膝衣摆随步子摆动。",
+      "description": "沙卡其长风衣敞开时露出灰紫针织。宽驳领与深棕双排扣在雾面衣身上形成层次。单品图的平铺造型、衣袋下缘与被遮挡的前襟细节为 AI 设计演绎。",
+      "color_name": "沙卡其",
+      "color_hex": "#a59179",
+      "design_material": "细绒雾面布感，视觉设计描述",
+      "notes": [
+        "宽驳领沿前襟展开",
+        "深棕双排扣呼应靴色",
+        "过膝下摆在侧身走动时自然摆开"
+      ],
+      "asset": {
+        "asset_id": "product-sand-khaki-trench-106-main-r1",
+        "file": "assets/products/look-106/sand-khaki-trench-106-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 141766,
+        "sha256": "46dad371bc06eefc80777e13f27fa3ecb3fb15a91d78febe73fccc10b7de25d6",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "宽驳领与深棕扣",
+          "caption": "近景呈现尖角宽驳领的折面与深棕纽扣。纽扣孔和布面微观纹理为 AI 设计演绎。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-sand-khaki-trench-106-lapels-r1",
+            "file": "assets/products/look-106/sand-khaki-trench-106-lapels-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 379272,
+            "sha256": "fb2f251fe1b7cf041bc2bc0a1f2253e39d74a10a1475822ba1a9345913398a69",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 106,
+          "piece_index": 1,
+          "reference_asset_id": "look-106-female-01-v2-r1",
+          "shot_index": 1
+        }
+      ]
+    },
+    {
+      "product_id": "mauve-rib-knit-106",
+      "name": "灰紫莓色半高领细罗纹针织",
+      "category": "上装",
+      "subtitle": "细密纵纹把灰紫色延伸到领口。",
+      "description": "低饱和的灰紫莓色收在半高领和细罗纹里。领口与袖口在风衣之间露出。写真遮住的完整衣长、肩线和衣摆为设计演绎。",
+      "color_name": "灰紫莓",
+      "color_hex": "#6c5e70",
+      "design_material": "细罗纹针织感，视觉设计描述",
+      "notes": [
+        "贴近颈部的短半高领",
+        "前身细密纵向罗纹",
+        "细罗纹袖口从风衣袖口露出"
+      ],
+      "asset": {
+        "asset_id": "product-mauve-rib-knit-106-main-r1",
+        "file": "assets/products/look-106/mauve-rib-knit-106-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 288200,
+        "sha256": "314abc96d006b0301bd8636cf33a8ae84c6ef16ca0572688071d50cf4fed70ed",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "半高领与细罗纹",
+          "caption": "半高领连接纵向的细罗纹前身。写真中不清楚的领口接缝与微观织纹为 AI 设计演绎。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-mauve-rib-knit-106-collar-r1",
+            "file": "assets/products/look-106/mauve-rib-knit-106-collar-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 512832,
+            "sha256": "f1edf7577a94ac875cd6a55cacb2e1ee23ae22a22cd61cee9e99b5c3f9a82147",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 106,
+          "piece_index": 2,
+          "reference_asset_id": "look-106-female-01-v2-r1",
+          "shot_index": 6
+        }
+      ]
+    },
+    {
+      "product_id": "indigo-barrel-jeans-106",
+      "name": "深靛蓝弧形九分牛仔裤",
+      "category": "下装",
+      "subtitle": "弧形裤腿收在一道窄折边。",
+      "description": "高腰深靛牛仔从膝部下方逐渐收窄。九分比例和窄折边给短靴留下间距。独立图的平铺弧形及被遮挡的完整腰头、袋口与车线为 AI 设计演绎。",
+      "color_name": "深靛蓝",
+      "color_hex": "#29384d",
+      "design_material": "深洗牛仔纹理，视觉设计描述",
+      "notes": [
+        "偏高的腰头与弧形裤腿",
+        "窄折边露出稍浅的反面色",
+        "九分比例与踝靴衔接"
+      ],
+      "asset": {
+        "asset_id": "product-indigo-barrel-jeans-106-main-r1",
+        "file": "assets/products/look-106/indigo-barrel-jeans-106-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 243634,
+        "sha256": "9e1e3d9ac3740057e8010d75226436cc5d13cfb600ebe93972718a6c1f184aa5",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "深靛裤脚的窄折边",
+          "caption": "裤脚的一道窄折露出较浅的灰蓝反面。折边针脚和近观斜纹为 AI 设计演绎。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-indigo-barrel-jeans-106-cuff-r1",
+            "file": "assets/products/look-106/indigo-barrel-jeans-106-cuff-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 404574,
+            "sha256": "b53a2a9347de110c52f7b31bbe9ff661d83f159d7c8662dcb03a1165638ff8c8",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 106,
+          "piece_index": 3,
+          "reference_asset_id": "look-106-female-01-v2-r1",
+          "shot_index": 4
+        }
+      ]
+    },
+    {
+      "product_id": "coffee-lace-up-boots-106",
+      "name": "深咖圆头低方跟系带短靴",
+      "category": "鞋履",
+      "subtitle": "圆鞋头与低方跟给步伐留出余地。",
+      "description": "深咖踝靴的细系带顺着鞋面排列，圆头与低方跟压住深靛牛仔的裤脚。照片中不清楚的鞋口细部和接缝为设计演绎。",
+      "color_name": "深咖",
+      "color_hex": "#45342d",
+      "design_material": "低光泽皮面感，视觉设计描述",
+      "notes": [
+        "圆头及素净细系带",
+        "短靴筒与窄折裤脚相接",
+        "低方跟与深色外底边缘"
+      ],
+      "asset": {
+        "asset_id": "product-coffee-lace-up-boots-106-main-r1",
+        "file": "assets/products/look-106/coffee-lace-up-boots-106-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 141166,
+        "sha256": "0db47dd8ed8081c92f6f0a040bf84c34b1b8d2a4375a4b6f23946fccf42c832d",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "圆头与低方跟侧面",
+          "caption": "单只短靴的完整侧形展示圆头、低方跟和外底边缘。近观皮纹、车线及写真被遮住的筒口细部为 AI 设计演绎。",
+          "role": "view",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-coffee-lace-up-boots-106-profile-r1",
+            "file": "assets/products/look-106/coffee-lace-up-boots-106-profile-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 132472,
+            "sha256": "40e7da730fd92c80cfd183e8a7573b73541bc6cdcdbd36e994959826405c173a",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 106,
+          "piece_index": 4,
+          "reference_asset_id": "look-106-female-01-v2-r1",
+          "shot_index": 7
+        }
+      ]
+    },
+    {
+      "product_id": "mustard-oval-bag-106",
+      "name": "姜黄色横椭圆短柄小提包",
+      "category": "包袋",
+      "subtitle": "一弯短柄，把暖姜黄色提在手边。",
+      "description": "横向圆角包身搭单根短柄，以细包边收住轮廓。带棕的姜黄在卡其与深靛之间提亮一处。被遮挡的提柄接合细节为设计演绎。",
+      "color_name": "姜黄",
+      "color_hex": "#ad8242",
+      "design_material": "细粒雾面皮质感，视觉设计描述",
+      "notes": [
+        "横椭圆小号包身",
+        "单根弧形短提柄",
+        "细包边沿圆角延展"
+      ],
+      "asset": {
+        "asset_id": "product-mustard-oval-bag-106-main-r1",
+        "file": "assets/products/look-106/mustard-oval-bag-106-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 115114,
+        "sha256": "9c6289392fc0475812ae396b93c37f2b3d904ccb47d650d3a6e4c4dad5b028ed",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "短提柄与弧形包边",
+          "caption": "近景呈现提柄靠近上沿的形态，以及包边绕过圆角的弧度。提柄接合和近观细纹为 AI 设计演绎。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-mustard-oval-bag-106-handle-r1",
+            "file": "assets/products/look-106/mustard-oval-bag-106-handle-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 330834,
+            "sha256": "397612e0f2e4963705806a88839da2572d98e94d911aebf885fd4f6905ec9990",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 106,
+          "piece_index": 5,
+          "reference_asset_id": "look-106-female-01-v2-r1",
+          "shot_index": 3
+        }
+      ]
     }
   ]
 }
