@@ -73,6 +73,14 @@
         </div>
         <p class="tryon-hint">想看整套搭配，优先选择包含鞋履的全身画面；近景只提供画面里可见的衣装参考。</p>
       </section>
+      <div id="tryon-pose-options" hidden>
+        <label for="tryon-pose-mode">试穿姿态</label>
+        <select id="tryon-pose-mode" aria-describedby="tryon-pose-description">
+          <option value="original">保留原姿态 · 单图</option>
+          <option value="pose_grid">变换姿态 · 九宫格</option>
+        </select>
+        <p id="tryon-pose-description" class="tryon-hint"></p>
+      </div>
       <section id="tryon-disclosure" class="tryon-disclosure" aria-labelledby="tryon-disclosure-title">
         <h3 id="tryon-disclosure-title">照片用途</h3>
         <ul id="tryon-disclosure-items"><li>照片交由第三方 AI 生成试穿图，结果可供后台评估。</li></ul>

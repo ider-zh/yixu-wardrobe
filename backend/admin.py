@@ -248,7 +248,9 @@ class Admin:
         @router.get("/results/{job_id}/image")
         def image(request: Request, job_id: str):
             self.session(request)
-            return request.app.state.jobs.image_response(require_result(request, job_id))
+            return request.app.state.jobs.image_response(
+                require_result(request, job_id), for_admin=True
+            )
 
         @router.post("/results/{job_id}/review")
         def review(request: Request, job_id: str, data: Review):

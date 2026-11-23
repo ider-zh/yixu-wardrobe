@@ -66,13 +66,15 @@ class Store:
                 CREATE TABLE IF NOT EXISTS admin_sessions (
                     token_hash TEXT PRIMARY KEY, csrf TEXT, authenticated INTEGER DEFAULT 0);
             """)
+            db.execute("BEGIN IMMEDIATE")
+            if "pose_mode" not in {row["name"] for row in db.execute("PRAGMA table_info(jobs)")}:
+                db.execute("ALTER TABLE jobs ADD COLUMN pose_mode TEXT NOT NULL DEFAULT 'original'")
             self._migrate_site_preferences(db)
         self.db_path.chmod(0o600)
 
     @staticmethod
     def _migrate_site_preferences(db: sqlite3.Connection) -> None:
         # Lock before inspecting the schema so concurrent starts see the completed migration.
-        db.execute("BEGIN IMMEDIATE")
         schema = db.execute(
             "SELECT sql FROM sqlite_schema WHERE type='table' AND name='site_preferences'"
         ).fetchone()

@@ -14,7 +14,7 @@ from starlette.formparsers import MultiPartParser
 from starlette.responses import JSONResponse
 
 from .files import atomic_write
-from .images import crop_reference, validate_photo
+from .images import crop_reference, hide_grid_original, validate_photo
 
 
 class Submission(BaseModel):
@@ -24,6 +24,7 @@ class Submission(BaseModel):
     shot_index: int = Field(ge=1, le=9)
     idempotency_key: str = Field(min_length=8, max_length=128, pattern=r"^[A-Za-z0-9_-]+$")
     disclosure_version: str
+    pose_mode: Literal["original", "pose_grid"] = "original"
 
 
 def timestamp(value):
@@ -70,6 +71,7 @@ class Jobs:
             "look_id": row["look_id"],
             "edition": row["edition"],
             "shot_index": row["shot_index"],
+            "pose_mode": row["pose_mode"],
             "created_at": timestamp(row["created"]),
             "original_expires_at": timestamp(row["expires"]),
             "queue_position": position,
@@ -80,8 +82,11 @@ class Jobs:
         }
 
     def accept(self, owner, data, raw, received):
+        selection = data.model_dump(exclude={"idempotency_key"})
+        if data.pose_mode == "original":
+            selection.pop("pose_mode")  # Keep existing single-image request keys compatible.
         fingerprint = hashlib.sha256(
-            raw + json.dumps(data.model_dump(exclude={"idempotency_key"}), sort_keys=True).encode()
+            raw + json.dumps(selection, sort_keys=True).encode()
         ).hexdigest()
         with self.store.connect() as db:
             old = db.execute(
@@ -118,7 +123,7 @@ class Jobs:
                 return self.shape(dict(old))
             db.execute(
                 """INSERT INTO jobs (id,owner,idempotency_key,fingerprint,status,
-                       look_id,edition,shot_index,created,expires) VALUES (?,?,?,?,'validating',?,?,?,?,?)""",
+                       look_id,edition,shot_index,created,expires,pose_mode) VALUES (?,?,?,?,'validating',?,?,?,?,?,?)""",
                 (
                     job_id,
                     owner,
@@ -129,6 +134,7 @@ class Jobs:
                     data.shot_index,
                     received,
                     received + 3600,
+                    data.pose_mode,
                 ),
             )
         if self.clock() >= received + 3599:
@@ -200,7 +206,7 @@ class Jobs:
             (self.outputs / f"{job_id}.webp").unlink(missing_ok=True)
         self.drop_inputs(job_id)
 
-    def image_response(self, row, attachment=False):
+    def image_response(self, row, attachment=False, *, for_admin=False):
         from starlette.responses import Response
 
         if row["status"] != "succeeded" or row["output_bytes"] <= 0:
@@ -209,6 +215,8 @@ class Jobs:
             data = (self.outputs / f"{row['id']}.webp").read_bytes()
         except FileNotFoundError:
             raise HTTPException(404, "no_result:No generated result") from None
+        if for_admin and row["pose_mode"] == "pose_grid":
+            data = hide_grid_original(data, self.settings)
         headers = {
             "Content-Disposition": ("attachment" if attachment else "inline")
             + f'; filename="yixu-{row["id"]}.webp"'
@@ -248,7 +256,7 @@ class Jobs:
                 request.headers,
                 limited_stream(),
                 max_files=1,
-                max_fields=6,
+                max_fields=7,
                 max_part_size=16 * 1024,
             )
             # No temporary raw-photo spool: bound the entire stream and keep parsing in memory.

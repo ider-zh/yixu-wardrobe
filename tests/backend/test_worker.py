@@ -1,8 +1,9 @@
 import io
 
-from conftest import consent, submit
+from conftest import consent, picture, submit
 from fastapi.testclient import TestClient
 from PIL import Image
+from test_admin import login
 
 
 def test_worker_publishes_private_labelled_webp_and_frozen_reference(setup):
@@ -41,6 +42,37 @@ def test_worker_publishes_private_labelled_webp_and_frozen_reference(setup):
     assert c.get("/api/tryons/" + job["id"]).json()["status"] == "canceled"
     assert c.get(result["image_url"]).status_code == 404
     assert not list((app.state.settings.data_dir / "results").iterdir())
+
+
+def test_pose_grid_composes_original_and_hides_it_in_admin_preview(setup):
+    from backend.worker import Worker
+
+    app, c, headers, bootstrap, provider, _detector, _clock = setup
+    consent(c, headers, bootstrap)
+    photo = picture("red", (400, 200))
+    job = submit(c, headers, bootstrap, image=photo, pose_mode="pose_grid").json()
+    assert job["pose_mode"] == "pose_grid"
+    with Worker(app) as worker:
+        assert worker.run_once()
+        assert not worker.run_once()
+    assert len(provider.calls) == 1
+    assert "3 by 3 contact sheet" in provider.calls[0]["prompt"]
+    assert not list(app.state.jobs.inputs.iterdir())
+    result = c.get("/api/tryons/" + job["id"]).json()
+    assert result["status"] == "succeeded"
+    with Image.open(io.BytesIO(c.get(result["image_url"]).content)) as output:
+        assert output.size == (256, 414)
+        red, green, blue = output.getpixel((128, 192))
+        assert red > 230 and green < 30 and blue < 30
+        assert min(output.getpixel((128, 140))) > 210
+        assert output.getpixel((40, 60))[2] > 100
+    with TestClient(app, base_url="https://admin.localhost") as admin:
+        login(admin, app.state.settings.data_dir)
+        response = admin.get(f"/api/admin/results/{job['id']}/image")
+        assert response.status_code == 200
+        with Image.open(io.BytesIO(response.content)) as output:
+            assert min(output.getpixel((128, 192))) > 210
+            assert output.getpixel((40, 60))[2] > 100
 
 
 def test_original_expiry_all_states_and_restart_never_replays_possible_send(setup):

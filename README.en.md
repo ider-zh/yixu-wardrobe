@@ -40,6 +40,8 @@ Online page visits use a local IP database to estimate the country and, for Chin
 
 Open My Try-ons to manage photos and history in your current browser. Photos taken with the camera or selected from your library are saved in this site's browser storage. You can reuse or delete them there. Choose a clear original photo of one person with their face, head and shoes visible. Select a reference shot and accept the disclosed use before submitting the photo. My Try-ons shows processing progress and finished images. You can still view and download results saved in the same browser. Clearing site data removes those local copies. Online generation requires an available backend and generation service, and administrators may assess generated images during development. User photos, private try-on results and credentials use private storage.
 
+Choose a single try-on that preserves the original pose, or a nine-cell grid. The grid puts the entire original photo in the center and shows the same outfit in eight poses around it. The center photo is stored with the private result and is masked in the administrator preview.
+
 Character and outfit images are generative artwork for styling inspiration and visual enjoyment. Details may vary; images do not establish actual size or fit.
 
 The main website uses HTTPS and displays ICP filing number [浙ICP备2026098002号](https://beian.miit.gov.cn/).

@@ -23,7 +23,7 @@ let nextJobId='fixture-job-1';
 const requests = [];
 let catalogFixture=null;
 let resultImage = null; // Browser-encoded synthetic WebP; never a provider output.
-const bootstrap = () => ({csrf_token:'test-csrf',visitor:{id:'test-visitor'},generation_available:available,
+const bootstrap = () => ({csrf_token:'test-csrf',visitor:{id:'test-visitor'},generation_available:available,pose_grid_available:true,
   disclosure:{version:'test-v1',title:'照片用途',items:['照片交由第三方 AI 生成试穿图，结果可供后台评估。'],accepted:accept},
   original_retention_seconds:3600,result_max_count:1000});
 const server = http.createServer(async (req,res) => {
@@ -67,6 +67,8 @@ const server = http.createServer(async (req,res) => {
       assert.equal(accept,true,'Consent must precede reception of photo');
       assert.equal(req.headers['x-csrf-token'],'test-csrf');assert.match(req.headers.cookie||'',/visitor_fixture=/);
       const job={id:nextJobId,status:'queued',look_id:100,edition:'v2',shot_index:4,queue_position:7,created_at:'2026-11-11T00:00:00Z',original_expires_at:'2026-11-11T01:00:00Z',image_url:null,download_url:null,error_code:null,error_message:null};
+      const data=await new Request('http://fixture',{method:'POST',headers:{'content-type':req.headers['content-type']},body}).formData();
+      job.pose_mode=data.get('pose_mode')||'original';
       jobs=[job,...jobs.filter(item=>item.id!==job.id&&item.status==='unknown')];res.statusCode=202;
       const finish=()=>res.end(JSON.stringify(job));
       if(holdUpload){holdUpload=false;heldUpload=finish;return;}
@@ -280,6 +282,9 @@ try {
   await evaluate('document.getElementById("tryon-panel").value="0";document.getElementById("tryon-panel").dispatchEvent(new Event("change",{bubbles:true}))');
   assert.equal(await evaluate('document.getElementById("tryon-submit").disabled'),true,'Montage 0 stays blocked even with photo and consent');
   await evaluate('document.querySelector("[data-reference-shot=\\"4\\"]").click()');
+  await evaluate('const mode=document.getElementById("tryon-pose-mode");mode.value="pose_grid";mode.dispatchEvent(new Event("change"))');
+  assert.match(await evaluate('document.getElementById("tryon-pose-description").textContent'),/中央保留你的完整原图/);
+  await evaluate('document.getElementById("tryon-pose-mode").value="original";document.getElementById("tryon-pose-mode").dispatchEvent(new Event("change"))');
   holdUpload=true;
   await evaluate('document.getElementById("tryon-submit").click();document.getElementById("tryon-submit").click()');
   for(let attempt=0;attempt<100&&!heldUpload;attempt++)await new Promise(resolve=>setTimeout(resolve,20));
@@ -677,7 +682,7 @@ try {
   assert.equal(await evaluate(`Boolean(document.querySelector('${cachedResult}'))`),false,'A remotely listed copy cannot resurrect a locally deleted result');
   assert.equal(requests.filter(r=>r.method==='POST'&&r.url==='/api/tryons').length,postsBeforeDashboard,'Adding, reopening and deleting local data does not submit a try-on');
 
-  jobs=[{id:'fixture-delivery-unknown',status:'unknown',look_id:100,edition:'v2',shot_index:4,created_at:'2026-11-11T00:00:00Z',error_code:'delivery_unknown',error_message:'Provider delivery is uncertain; this request will not be replayed'}];
+  jobs=[{id:'fixture-delivery-unknown',status:'unknown',pose_mode:'pose_grid',look_id:100,edition:'v2',shot_index:4,created_at:'2026-11-11T00:00:00Z',error_code:'delivery_unknown',error_message:'Provider delivery is uncertain; this request will not be replayed'}];
   await evaluate('document.getElementById("tryon-refresh").click()');
   await wait('document.querySelector("[data-job-retry=fixture-delivery-unknown]")');
   await evaluate('document.querySelector("[data-job-retry=fixture-delivery-unknown]").click()');
@@ -701,6 +706,7 @@ try {
   assert.equal(reused.get('look_id'),'100');
   assert.equal(reused.get('edition'),'v2');
   assert.equal(reused.get('shot_index'),'4');
+  assert.equal(reused.get('pose_mode'),'pose_grid','Retry preserves the original pose mode');
   assert.notEqual(reused.get('idempotency_key'),multipart.get('idempotency_key'),'The new attempt uses an independent request key');
   assert.deepEqual(Buffer.from(await reused.get('photo').arrayBuffer()),Buffer.from(saved.bytes),'Reused photo uploads the original bytes');
   assert.equal(requests.filter(r=>r.method==='POST'&&r.url==='/api/tryons').length,postsBeforeDashboard+1);

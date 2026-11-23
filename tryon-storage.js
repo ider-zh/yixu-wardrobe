@@ -5,7 +5,7 @@
   const photos = 'photos';
   const jobs = 'jobs';
   const jobFields = [
-    'status', 'look_id', 'edition', 'shot_index', 'created_at', 'original_expires_at',
+    'status', 'look_id', 'edition', 'shot_index', 'pose_mode', 'created_at', 'original_expires_at',
     'queue_position', 'error_code', 'error_message', 'look_title',
   ];
   let connection;

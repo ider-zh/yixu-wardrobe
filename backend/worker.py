@@ -26,6 +26,19 @@ PROMPT = (
     "Produce one person in one natural portrait photograph, no collage, montage, extra "
     "people or text. This is a consented AI clothing try-on, not a real photograph."
 )
+POSE_GRID_PROMPT_VERSION = "yixu-tryon-pose-grid-v1"
+POSE_GRID_PROMPT = (
+    "Create a clean edge-to-edge 3 by 3 contact sheet of exactly nine equal-size cells, "
+    "with boundaries at one-third and two-thirds of canvas width and height. No margins, "
+    "lettering, watermarks or overlapping cells. Leave the center cell plain neutral. "
+    "In all eight outer cells show the same person from Image 1. Preserve their facial "
+    "features, skin tone, hair and body build with coherent anatomy. Use Image 2 only "
+    "for the outfit; preserve visible garment design, colors and materials. Keep camera "
+    "distance sufficient to show the outfit, with consistent lighting and background. "
+    "Pose map, left to right and top to bottom: relaxed front stand, three-quarter turn, "
+    "walking toward camera; profile stand, blank center, seated upright; over-the-shoulder "
+    "turn, relaxed weight shift, and natural mid-step. Do not copy the reference model's identity."
+)
 
 
 class Worker:
@@ -190,11 +203,13 @@ class Worker:
             # Keep possible-send durable even if the process dies before entry.
             db.execute("UPDATE jobs SET status='generating' WHERE id=?", (row["id"],))
 
+        pose_grid = row["pose_mode"] == "pose_grid"
+        center_photo = photo if pose_grid else None
         try:
             result = provider.generate(
                 photo=photo,
                 reference=reference,
-                prompt=PROMPT,
+                prompt=POSE_GRID_PROMPT if pose_grid else PROMPT,
                 runtime=runtime,
                 timeout=timeout,
             )
@@ -227,12 +242,14 @@ class Worker:
                 self.settings,
                 {
                     "job_id": row["id"],
-                    "prompt_version": PROMPT_VERSION,
+                    "prompt_version": POSE_GRID_PROMPT_VERSION if pose_grid else PROMPT_VERSION,
                     "model": runtime.model,
                     "look_id": row["look_id"],
                     "edition": row["edition"],
                     "shot_index": row["shot_index"],
+                    "pose_mode": row["pose_mode"],
                 },
+                center_photo=center_photo,
             )
         except Exception:  # noqa: BLE001 - fail closed; never expose native/provider exceptions
             self.finish(row["id"], "failed", "invalid_output", "Provider returned an invalid image")

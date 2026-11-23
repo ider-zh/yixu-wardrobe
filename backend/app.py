@@ -9,11 +9,14 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from .settings import Settings
 from .store import Store
 
-DISCLOSURE_VERSION = "2026-11-12-v2"
+DISCLOSURE_VERSION = "2026-11-23-v3"
 DISCLOSURE = {
     "version": DISCLOSURE_VERSION,
     "title": "照片用途",
-    "items": ["照片交由第三方 AI 生成试穿图，结果可供后台评估。"],
+    "items": [
+        "照片交由第三方 AI 生成试穿图，结果可供后台评估。",
+        "选择九宫格姿态时，原图会嵌入成片中央，随私有成片保存和删除。后台评估时会遮住中央原图。",
+    ],
 }
 
 
@@ -206,6 +209,7 @@ def create_app(
                 if available()
                 else "provider_or_detector_or_catalog_unavailable",
                 "disclosure": {**DISCLOSURE, "accepted": visitor["accepted"] == DISCLOSURE_VERSION},
+                "pose_grid_available": True,
                 "original_retention_seconds": 3600,
                 "result_max_count": 1000,
             }

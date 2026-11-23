@@ -178,16 +178,34 @@ def validate_photo(data, settings, detector):
     return png(image)
 
 
-def labelled_webp(data, settings, provenance):
+def labelled_webp(data, settings, provenance, *, center_photo=None):
     from xml.sax.saxutils import escape
 
     from PIL import ImageDraw, ImageFont
 
     image = decode(data, settings)
     image.info.clear()
-    draw = ImageDraw.Draw(image)
     font = ImageFont.load_default(size=max(14, image.width // 45))
     band = max(30, image.height // 28)
+    if center_photo is not None:
+        band = max(30, image.width // 45 + 14)
+        w, h = image.size
+        left, top, right, bottom = w // 3, h // 3, 2 * w // 3, 2 * h // 3
+        original = ImageOps.contain(
+            decode(center_photo, settings), (right - left, bottom - top), Image.Resampling.LANCZOS
+        )
+        canvas = Image.new("RGB", (w, h + band), (20, 20, 20))
+        canvas.paste(image, (0, 0))
+        ImageDraw.Draw(canvas).rectangle((left, top, right - 1, bottom - 1), fill=(240, 238, 232))
+        canvas.paste(
+            original,
+            (
+                left + (right - left - original.width) // 2,
+                top + (bottom - top - original.height) // 2,
+            ),
+        )
+        image = canvas
+    draw = ImageDraw.Draw(image)
     draw.rectangle((0, image.height - band, image.width, image.height), fill=(20, 20, 20))
     draw.text((10, image.height - band + 5), "AI GENERATED | Yixu", fill="white", font=font)
     payload = escape(json.dumps(provenance, ensure_ascii=True, sort_keys=True))
@@ -200,7 +218,23 @@ def labelled_webp(data, settings, provenance):
         + "</yixu:request></rdf:Description></rdf:RDF></x:xmpmeta>"
     )
     out = io.BytesIO()
-    image.save(out, format="WEBP", quality=90, xmp=xmp.encode())
+    image.save(out, format="WEBP", quality=90, lossless=center_photo is not None, xmp=xmp.encode())
+    return out.getvalue()
+
+
+def hide_grid_original(data, settings):
+    from PIL import ImageDraw
+
+    image = decode(data, settings)
+    w, h = image.size
+    h -= max(30, w // 45 + 14)
+    if h < 32:
+        raise HTTPException(404, "no_result:No generated result")
+    ImageDraw.Draw(image).rectangle(
+        (w // 3, h // 3, 2 * w // 3 - 1, 2 * h // 3 - 1), fill=(240, 238, 232)
+    )
+    out = io.BytesIO()
+    image.save(out, format="WEBP", quality=90)
     return out.getvalue()
 
 
