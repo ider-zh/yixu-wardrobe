@@ -23,7 +23,7 @@ export function createAdminApp({ document, fetch, confirm, applySiteTheme = them
     busy = true;
     $('#error').hidden = true;
     $('#notice').textContent = '正在处理，请稍候…';
-    const controls = [...document.querySelectorAll('button')];
+    const controls = [...document.querySelectorAll('button:not([data-visitor-page])')];
     controls.forEach(button => { button.disabled = true; });
     $('#main').setAttribute('aria-busy', 'true');
     pending = (async () => {
@@ -294,15 +294,107 @@ export function createAdminApp({ document, fetch, confirm, applySiteTheme = them
   $('#refresh-results').addEventListener('click', () => run(() => loadResults()));
   $('#load-more-results').addEventListener('click', () => run(() => loadResults(false)));
   const countText = value => Number.isSafeInteger(value) && value >= 0 ? new Intl.NumberFormat('zh-CN').format(value) : '—';
+  const visitorPageSize = 10;
+  const visitorLocationStatus = {
+    private: '内网或保留地址，无法定位',
+    unknown: '地域未知',
+    unavailable: '数据库不可用，地域未知',
+    legacy: '历史记录，无地域信息',
+  };
+  let recentVisitors = [];
+  let visitorPage = 0;
+
+  function visitorOptions(select, placeholder, labels) {
+    const previous = select.value;
+    const options = [['', placeholder], ...[...labels].sort((a, b) => a[1].localeCompare(b[1], 'zh-CN'))];
+    select.replaceChildren(...options.map(([value, label]) => {
+      const option = node('option', label);
+      option.value = value;
+      return option;
+    }));
+    setFieldValue(select, labels.has(previous) ? previous : '');
+  }
+  function updateVisitorProvinces() {
+    const select = $('#visitor-province');
+    const chinaSelected = $('#visitor-country').value === 'CN';
+    const labels = new Map(chinaSelected ? recentVisitors.filter(row => row.countryCode === 'CN').map(row => [row.provinceKey, row.province]) : []);
+    visitorOptions(select, '全部省份', labels);
+    select.disabled = !labels.size;
+  }
+  function renderVisitorTable() {
+    const query = $('#visitor-search').value.trim().toLowerCase();
+    const country = $('#visitor-country').value;
+    const province = $('#visitor-province').value;
+    const oldestFirst = $('#visitor-sort').value === 'oldest';
+    const matching = recentVisitors.filter(row =>
+      (!country || row.countryCode === country) &&
+      (!province || row.provinceKey === province) &&
+      (!query || row.searchText.includes(query))
+    ).sort((a, b) => {
+      if (a.lastSeen === null) return b.lastSeen === null ? 0 : 1;
+      if (b.lastSeen === null) return -1;
+      return oldestFirst ? a.lastSeen - b.lastSeen : b.lastSeen - a.lastSeen;
+    });
+    const pages = Math.ceil(matching.length / visitorPageSize);
+    visitorPage = Math.min(visitorPage, Math.max(0, pages - 1));
+    const start = visitorPage * visitorPageSize;
+    const stamp = value => Number.isFinite(value) ? timeText(value * 1000) : '时间未知';
+    const page = matching.slice(start, start + visitorPageSize);
+    const rows = page.map(row => {
+      const tr = node('tr');
+      for (const text of [row.id, row.country, row.province || '—', countText(row.pageViews), stamp(row.lastSeen), stamp(row.firstSeen)]) tr.append(node('td', text));
+      return tr;
+    });
+    if (!rows.length) {
+      const cell = node('td', recentVisitors.length ? '没有符合筛选条件的访客。' : '暂无页面访问记录。', 'muted');
+      cell.setAttribute('colspan', '6');
+      const row = node('tr');
+      row.append(cell);
+      rows.push(row);
+    }
+    $('#recent-visitors').replaceChildren(...rows);
+    $('#visitor-time-heading').setAttribute('aria-sort', oldestFirst ? 'ascending' : 'descending');
+    $('#visitor-page-status').textContent = pages
+      ? `匹配 ${matching.length} / ${recentVisitors.length} · 第 ${visitorPage + 1} / ${pages} 页`
+      : `匹配 0 / ${recentVisitors.length}`;
+    $('#visitor-pagination').hidden = pages <= 1;
+    $('#visitor-prev').disabled = visitorPage === 0;
+    $('#visitor-next').disabled = visitorPage + 1 >= pages;
+  }
+  function resetVisitorPage() {
+    visitorPage = 0;
+    renderVisitorTable();
+  }
+  $('#visitor-search').addEventListener('input', resetVisitorPage);
+  $('#visitor-country').addEventListener('change', () => {
+    updateVisitorProvinces();
+    resetVisitorPage();
+  });
+  $('#visitor-province').addEventListener('change', resetVisitorPage);
+  $('#visitor-sort').addEventListener('change', resetVisitorPage);
+  for (const [selector, step] of [['#visitor-prev', -1], ['#visitor-next', 1]]) {
+    $(selector).addEventListener('click', () => {
+      visitorPage += step;
+      renderVisitorTable();
+    });
+  }
   function clearVisitorGeo() {
+    recentVisitors = [];
+    visitorPage = 0;
     $('#visitor-total').textContent = '—';
     $('#visitor-page-views').textContent = '—';
     $('#visitor-geo-status').textContent = '尚未读取地域统计。';
     for (const id of ['visitor-countries', 'visitor-provinces', 'recent-visitors']) $(`#${id}`).replaceChildren();
+    $('#visitor-search').value = '';
+    setFieldValue($('#visitor-sort'), 'newest');
+    visitorOptions($('#visitor-country'), '全部国家 / 地区', new Map());
+    updateVisitorProvinces();
+    $('#visitor-page-status').textContent = '';
+    $('#visitor-pagination').hidden = true;
   }
   function renderVisitorGeo(geo) {
-    clearVisitorGeo();
     if (!geo || typeof geo !== 'object') {
+      clearVisitorGeo();
       $('#visitor-geo-status').textContent = '当前服务尚未提供地域统计，历史访问不会推定归属地。';
       return;
     }
@@ -327,18 +419,23 @@ export function createAdminApp({ document, fetch, confirm, applySiteTheme = them
     };
     distribution('visitor-countries', geo.countries, row => row.country_name || row.country_code || '未知国家 / 地区', '暂无国家 / 地区访问记录。');
     distribution('visitor-provinces', geo.china_provinces, row => row.region_name || row.region_code || '中国 · 省级未知', '暂无中国省级访问记录。');
-    const statusMessages = { private: '内网或保留地址，无法定位', unknown: '地域未知', unavailable: '数据库不可用，地域未知', legacy: '历史记录，无地域信息' };
     const visitors = Array.isArray(geo.recent_visitors) ? geo.recent_visitors.slice(0, 20) : [];
-    $('#recent-visitors').replaceChildren(...visitors.map(visitor => {
-      const item = node('li');
-      const country = visitor.country_name || visitor.country_code;
-      const region = visitor.country_code === 'CN' ? visitor.region_name || visitor.region_code || '省级未知' : '';
-      const location = country ? [country, region].filter(Boolean).join(' · ') : statusMessages[visitor.status] || '地域未知';
-      const stamp = value => typeof value === 'number' && Number.isFinite(value) ? timeText(value * 1000) : '时间未知';
-      item.append(node('strong', `匿名访客 ${visitor.visitor_id || '标识未知'} · ${location}`), node('p', `${countText(visitor.page_views)} 次页面访问 · 最近 ${stamp(visitor.last_seen)}`), node('p', `首次 ${stamp(visitor.first_seen)}`));
-      return item;
-    }));
-    if (!visitors.length) $('#recent-visitors').append(node('li', '暂无页面访问记录。', 'muted'));
+    recentVisitors = visitors.map(visitor => {
+      const id = visitor.visitor_id || '标识未知';
+      const countryCode = visitor.country_code || 'unknown';
+      const country = visitor.country_name || visitor.country_code || visitorLocationStatus[visitor.status] || '地域未知';
+      const province = countryCode === 'CN' ? visitor.region_name || visitor.region_code || '省级未知' : '';
+      return {
+        id, countryCode, country, province, provinceKey: countryCode === 'CN' ? visitor.region_code || province : '',
+        pageViews: visitor.page_views, firstSeen: visitor.first_seen,
+        lastSeen: Number.isFinite(visitor.last_seen) ? visitor.last_seen : null,
+        searchText: [id, country, visitor.country_code, province, countryCode === 'CN' ? visitor.region_code : ''].join(' ').toLowerCase(),
+      };
+    });
+    const countries = new Map(recentVisitors.map(row => [row.countryCode, row.countryCode === 'unknown' ? '地域未知' : row.country]));
+    visitorOptions($('#visitor-country'), '全部国家 / 地区', countries);
+    updateVisitorProvinces();
+    renderVisitorTable();
   }
   async function loadOverview() {
     const data = await request('/overview');

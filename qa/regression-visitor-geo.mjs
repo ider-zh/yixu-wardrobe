@@ -105,7 +105,8 @@ try {
     assert.match(await evaluate('document.getElementById("visitor-provinces").textContent'), /上海市.*4 次访问/);
     assert.match(await evaluate('document.getElementById("visitor-provinces").textContent'), /省级未知/);
     const recent = await evaluate('document.getElementById("recent-visitors").textContent');
-    assert.match(recent, /中国 · 上海市/); assert.match(recent, /内网或保留地址/); assert.match(recent, /历史记录/); assert.match(recent, /2023/);
+    assert.deepEqual(await evaluate('[...document.querySelector("#recent-visitors tr").cells].slice(0, 4).map(cell => cell.textContent)'), ['fixture-shanghai', '中国', '上海市', '4']);
+    assert.match(recent, /内网或保留地址/); assert.match(recent, /历史记录/); assert.match(recent, /2023/);
     assert.ok(!recent.includes('Must not show non-China province'));
     assert.match(recent, /<script>window.geoUnsafe=true<\/script>/);
     assert.equal(await evaluate('!!document.querySelector(".visitor-geo script,.visitor-geo img") || !!window.geoUnsafe'), false);
@@ -132,10 +133,53 @@ try {
     assert.equal(await evaluate('document.getElementById("error").hidden'), true);
     console.log(`PASS ${viewport.width}px: /admin redirect, same-origin CSS/module and brand, country/province counts, anonymous visitors, seconds timestamps, private/legacy/unknown states, attribution, text-only rendering, refresh and old API compatibility`);
   }
+  geo = sampleGeo();
+  const sampleVisitors = geo.recent_visitors;
+  geo.recent_visitors = Array.from({ length: 22 }, (_, i) => ({
+    ...sampleVisitors[i % 4], visitor_id: 'fixture-' + String(i).padStart(2, '0'),
+    last_seen: 1700000060 - i,
+    ...(i % 8 === 4 ? { region_code: 'BJ', region_name: '北京市' } : {}),
+  }));
+  await refresh();
+  const visitors = () => evaluate('[...document.querySelectorAll("#recent-visitors tr td:first-child")].map(cell => cell.textContent)');
+  const field = (id, value, event = 'change') => evaluate(`(() => {
+    const control = document.getElementById(${JSON.stringify(id)});
+    control.value = ${JSON.stringify(value)};
+    control.dispatchEvent(new Event(${JSON.stringify(event)}, { bubbles: true }));
+  })()`);
+  const browserFetches = browserRequests.filter(request => ['Fetch', 'XHR'].includes(request.type)).length;
+  assert.equal((await visitors()).length, 10);
+  assert.match(await evaluate('document.getElementById("visitor-page-status").textContent'), /匹配 20 \/ 20.*第 1 \/ 2 页/);
+  assert.equal(await evaluate('document.getElementById("visitor-prev").disabled'), true);
+  await evaluate('document.getElementById("visitor-next").click()');
+  assert.equal((await visitors())[0], 'fixture-10');
+  assert.equal((await visitors()).at(-1), 'fixture-19', 'Display never exceeds the recent 20 visitor scope');
+  assert.equal(await evaluate('document.getElementById("visitor-next").disabled'), true);
+  await evaluate('document.getElementById("visitor-prev").click()');
+  assert.equal((await visitors())[0], 'fixture-00');
+  await field('visitor-sort', 'oldest');
+  assert.equal((await visitors())[0], 'fixture-19');
+  assert.equal(await evaluate('document.getElementById("visitor-time-heading").getAttribute("aria-sort")'), 'ascending');
+  await field('visitor-country', 'CN');
+  assert.deepEqual(await visitors(), ['fixture-16', 'fixture-12', 'fixture-08', 'fixture-04', 'fixture-00']);
+  await field('visitor-province', 'SH');
+  assert.deepEqual(await visitors(), ['fixture-16', 'fixture-08', 'fixture-00']);
+  await field('visitor-search', 'FIXTURE-08', 'input');
+  assert.deepEqual(await visitors(), ['fixture-08']);
+  await field('visitor-country', 'unknown');
+  assert.equal(await evaluate('document.getElementById("visitor-province").disabled'), true);
+  assert.equal(await evaluate('document.getElementById("visitor-province").value'), '');
+  assert.match((await visitors())[0], /没有符合筛选条件/);
+  await field('visitor-search', '历史记录', 'input');
+  assert.deepEqual(await visitors(), ['fixture-18', 'fixture-14', 'fixture-10', 'fixture-06', 'fixture-02']);
+  assert.equal(browserRequests.filter(request => ['Fetch', 'XHR'].includes(request.type)).length, browserFetches, 'Table controls operate on the authorized snapshot locally');
+  console.log('PASS recent visitor table: 20-record boundary, pagination, sorting, country and province filters, local search and empty matches');
   geo = sampleGeo(); await refresh();
   await evaluate('document.getElementById("logout").click()');
   await wait('document.getElementById("workspace").hidden && !document.getElementById("login-panel").hidden');
   assert.equal(await evaluate('document.getElementById("recent-visitors").textContent'), '');
+  assert.equal(await evaluate('document.getElementById("visitor-search").value'), '');
+  assert.equal(await evaluate('document.getElementById("visitor-country").options.length'), 1);
   assert.equal(await evaluate('document.getElementById("visitor-total").textContent'), '—');
   assert.deepEqual(exceptions, []);
   assert.ok(requested.includes('/admin/admin.css') && requested.includes('/admin/app.mjs'), 'Real CSS and module assets were requested from /admin/');

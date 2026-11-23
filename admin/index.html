@@ -56,7 +56,29 @@
             <section aria-labelledby="visitor-countries-title"><h3 id="visitor-countries-title">国家 / 地区分布</h3><ul id="visitor-countries" class="geo-list"></ul></section>
             <section aria-labelledby="visitor-provinces-title"><h3 id="visitor-provinces-title">中国省级分布</h3><ul id="visitor-provinces" class="geo-list"></ul></section>
           </div>
-          <section aria-labelledby="recent-visitors-title"><h3 id="recent-visitors-title">最近匿名访客</h3><p class="field-hint">展示最近 20 个浏览器标识及其最近一次访问的地域；不展示或保存原始 IP 地址。</p><ul id="recent-visitors" class="visitor-list"></ul></section>
+          <section aria-labelledby="recent-visitors-title">
+            <h3 id="recent-visitors-title">最近匿名访客</h3>
+            <p id="recent-visitors-help" class="field-hint">展示最近 20 个浏览器标识及其最近一次访问的地域。原始 IP 地址不展示、不保存。</p>
+            <div class="visitor-filters">
+              <div><label for="visitor-search">搜索访客</label><input id="visitor-search" type="search" placeholder="浏览器标识或地域" autocomplete="off"></div>
+              <div><label for="visitor-country">国家 / 地区</label><select id="visitor-country"><option value="">全部国家 / 地区</option></select></div>
+              <div><label for="visitor-province">中国省份</label><select id="visitor-province" disabled><option value="">全部省份</option></select></div>
+              <div><label for="visitor-sort">最近访问排序</label><select id="visitor-sort"><option value="newest">从新到旧</option><option value="oldest">从旧到新</option></select></div>
+            </div>
+            <div class="visitor-table-scroll" role="region" tabindex="0" aria-labelledby="recent-visitors-title">
+              <table class="visitor-table" aria-labelledby="recent-visitors-title" aria-describedby="recent-visitors-help">
+                <thead><tr><th scope="col">浏览器标识</th><th scope="col">国家 / 地区</th><th scope="col">中国省份</th><th scope="col">访问次数</th><th scope="col" id="visitor-time-heading" aria-sort="descending">最近访问</th><th scope="col">首次访问</th></tr></thead>
+                <tbody id="recent-visitors"></tbody>
+              </table>
+            </div>
+            <div class="visitor-table-footer">
+              <p id="visitor-page-status" role="status"></p>
+              <nav id="visitor-pagination" aria-label="最近访客分页" hidden>
+                <button id="visitor-prev" class="outline" type="button" data-visitor-page aria-controls="recent-visitors" disabled>上一页</button>
+                <button id="visitor-next" class="outline" type="button" data-visitor-page aria-controls="recent-visitors" disabled>下一页</button>
+              </nav>
+            </div>
+          </section>
           <p class="field-hint">IP 地域数据：<a href="https://db-ip.com" rel="noreferrer noopener">DB-IP.com</a>。使用本地离线数据库，不向第三方提交访客 IP。</p>
         </section>
         <div class="overview-details"><section aria-labelledby="popular-title"><h3 id="popular-title">热门造型</h3><ol id="popular-looks"></ol></section><section aria-labelledby="jobs-title"><h3 id="jobs-title">最近任务</h3><p class="muted">状态待确认的外部请求不会自动重放；这里不显示原始照片。</p><ul id="recent-jobs" class="job-list"></ul></section></div>

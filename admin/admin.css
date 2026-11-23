@@ -80,14 +80,24 @@ main { max-width: 1248px; margin: 0 auto; padding: 48px 24px 40px; }
 .visitor-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 560px; }
 .geo-distributions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; margin-bottom: 28px; }
 .geo-distributions > section { min-width: 0; }
-.geo-list, .visitor-list { list-style: none; padding: 0; margin-bottom: 0; }
+.geo-list { list-style: none; padding: 0; margin-bottom: 0; }
 .geo-list li { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line); }
 .geo-list li > span { min-width: 0; overflow-wrap: anywhere; }
 .geo-list .geo-count { flex-shrink: 0; color: var(--muted); font-size: var(--small-text-size); font-variant-numeric: tabular-nums; }
 .geo-list li.geo-empty { display: block; color: var(--muted); }
-.visitor-list li { padding: 14px 0; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
-.visitor-list strong { display: block; font-size: 14px; font-weight: 550; }
-.visitor-list p { margin: 5px 0 0; font-size: var(--small-text-size); color: var(--muted); }
+.visitor-filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 156px), 1fr)); gap: 12px; margin: 16px 0; }
+.visitor-filters label { font-size: var(--small-text-size); }
+.visitor-table-scroll { max-width: 100%; overflow-x: auto; border: 1px solid var(--line); }
+.visitor-table { width: 100%; min-width: 680px; border-collapse: collapse; font-size: 14px; }
+.visitor-table :is(th, td) { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+.visitor-table thead { background: var(--paper); }
+.visitor-table tbody tr:last-child td { border-bottom: 0; }
+.visitor-table td:first-child { max-width: 160px; overflow-wrap: anywhere; }
+.visitor-table :is(th, td):nth-child(n+4) { white-space: nowrap; }
+.visitor-table-footer { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-top: 12px; }
+.visitor-table-footer p { margin: 0; color: var(--muted); font-size: var(--small-text-size); }
+#visitor-pagination { display: flex; gap: 8px; }
+#visitor-pagination button:disabled { cursor: default; }
 #popular-looks { padding-left: 24px; }
 #popular-looks li { padding: 7px 0; border-bottom: 1px solid var(--line); }
 .job-list { list-style: none; padding: 0; margin-bottom: 0; }
