@@ -220,7 +220,14 @@ try{
  await evaluate(`new Promise(resolve=>{const canvas=document.createElement('canvas');canvas.width=300;canvas.height=400;canvas.getContext('2d').fillRect(0,0,300,400);canvas.toBlob(blob=>{const transfer=new DataTransfer();transfer.items.add(new File([blob],'theme-fixture.png',{type:'image/png'}));const input=document.getElementById('tryon-album');input.files=transfer.files;input.dispatchEvent(new Event('change',{bubbles:true}));window.retainedInput=input;window.retainedPreview=document.getElementById('tryon-local-preview');resolve();},'image/png')})`);await wait('!document.getElementById("tryon-local-preview").hidden');
  const blob=await evaluate('document.getElementById("tryon-local-preview").src');await choose('night-runway');assert.equal(await evaluate('window.retainedInput===document.getElementById("tryon-album")&&window.retainedPreview===document.getElementById("tryon-local-preview")'),true);assert.equal(await evaluate('document.getElementById("tryon-local-preview").src'),blob);assert.equal(await evaluate('document.querySelector("#tryon-reference-picker input:checked").value'),'3');
  await choose('editorial');assert.equal(await evaluate('document.getElementById("tryon-local-preview").src'),blob);
- await wait('!document.getElementById("tryon-submit").disabled');await evaluate('document.getElementById("tryon-submit").click()');await wait('document.getElementById("tryon-jobs").textContent.includes("排队")');await evaluate('window.retainedJob=document.getElementById("tryon-jobs").firstElementChild');await choose('studio');assert.equal(await evaluate('window.retainedJob===document.getElementById("tryon-jobs").firstElementChild'),true);assert.equal(posts,1);await capture('theme-tryon-queued');
+ await wait('!document.getElementById("tryon-submit").disabled');
+ await evaluate('document.getElementById("tryon-submit").click()');
+ const queuedJob='document.querySelector(\'[data-job-id="theme-queued-job"][data-job-status="queued"]\')';
+ await wait(`Boolean(${queuedJob})`);
+ await choose('studio');
+ assert.ok(await evaluate(`document.getElementById("tryon-dialog").open && Boolean(${queuedJob})`),'The same queued job remains visible after a theme change');
+ assert.equal(posts,1);
+ await capture('theme-tryon-queued');
  await readableText('#tryon-dialog','try-on dialog text');
  await evaluate('document.getElementById("tryon-close").click()');
  const visitor=client;
