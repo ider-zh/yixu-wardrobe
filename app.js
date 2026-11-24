@@ -288,7 +288,6 @@ function setView(view) {
   const current=versionOf(byId.get(state.active));const names=['完整九宫格',...current.shots.map(s=>s.title)];
   $('view-name').textContent=names[view]||'写真';const shot=current.shots[view-1];$('view-moment').textContent=state.version==='v2'?(shot?[shot.emotion,shot.pose,shot.framing].filter(Boolean).join(' · '):current.summary):'';
   const look=byId.get(state.active);image.alt=look.title+' · '+names[view];
-  window.WardrobeTryOn?.setContext?.({look_id:look.id,edition:state.version,shot_index:view});
 }
 function updateDetailActions() {
   const l=byId.get(state.active);if(!l)return;
@@ -328,6 +327,7 @@ function openDetail(id,preserveNavigation=false) {
   $('original-link').hidden=!versionOf(l).ready;$('download-link').hidden=!versionOf(l).ready;
   $('view-selector').innerHTML=[0,1,2,3,4,5,6,7,8,9].map(v=>'<button data-view="'+v+'" aria-label="'+esc(v?String(v).padStart(2,'0')+' · '+(versionOf(l).shots[v-1]?.title||'写真'+v):'完整九宫格')+'" aria-pressed="'+!v+'">'+(v?'<span class="shot-number">'+String(v).padStart(2,'0')+'</span><span class="shot-title">'+esc(versionOf(l).shots[v-1]?.title||'写真'+v)+'</span>':'九宫格')+'</button>').join('');
   $('view-selector').hidden=!versionOf(l).ready;setView(0);updateDetailActions();
+  window.WardrobeTryOn?.setContext?.({look_id:id,edition:state.version});
   window.WardrobeTryOn?.track?.('look_open',{look_id:id,edition:state.version});
   const list=detailList(),position=list.findIndex(x=>x.id===id);
   $('detail-position').textContent=(position+1)+' / '+list.length;

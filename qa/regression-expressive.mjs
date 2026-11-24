@@ -108,9 +108,10 @@ check('favorites preserve unknown IDs through toggles and cross-tab updates',()=
 check('catalog text is escaped as text in cards and filters',()=>{
   const look=a.byId.get(70),previous=look.title;look.title='<img src=x onerror=evil()> & "test"';a.resetFilters();a.state.limit=1000;a.renderGallery();assert.ok(!node('gallery').innerHTML.includes(look.title));assert.match(node('gallery').innerHTML,/&lt;img src=x onerror=evil\(\)&gt;/);look.title=previous;
 });
-check('try-on bridge carries exact expressive look and montage/panel context offline',()=>{
+check('try-on bridge carries the outfit independently of the gallery view',()=>{
   const received=[];context.window.WardrobeTryOn={setContext(value){received.push(JSON.parse(JSON.stringify(value)));},track(){}};
-  for(const look of baseline.looks){a.openDetail(look.id);for(let shot=0;shot<=9;shot++){a.setView(shot);assert.deepEqual(received.at(-1),{look_id:look.id,edition:'v2',shot_index:shot});}}
+  for(const look of baseline.looks){a.openDetail(look.id);for(let shot=0;shot<=9;shot++)a.setView(shot);assert.deepEqual(received.at(-1),{look_id:look.id,edition:'v2'});}
+  assert.equal(received.length,baseline.looks.length);
 });
 check('try-on and comparison modals block underlying detail keyboard navigation',()=>{
   a.resetFilters();a.openDetail(70);const before=a.state.active;node('tryon-dialog').open=true;

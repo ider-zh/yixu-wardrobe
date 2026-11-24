@@ -66,9 +66,8 @@ const server = http.createServer(async (req,res) => {
       if(uploadError){res.statusCode=uploadErrorStatus;res.end(JSON.stringify(uploadError));return;}
       assert.equal(accept,true,'Consent must precede reception of photo');
       assert.equal(req.headers['x-csrf-token'],'test-csrf');assert.match(req.headers.cookie||'',/visitor_fixture=/);
-      const job={id:nextJobId,status:'queued',look_id:100,edition:'v2',shot_index:4,queue_position:7,created_at:'2026-11-11T00:00:00Z',original_expires_at:'2026-11-11T01:00:00Z',image_url:null,download_url:null,error_code:null,error_message:null};
       const data=await new Request('http://fixture',{method:'POST',headers:{'content-type':req.headers['content-type']},body}).formData();
-      job.pose_mode=data.get('pose_mode')||'original';
+      const job={id:nextJobId,status:'queued',look_id:Number(data.get('look_id')),edition:data.get('edition'),shot_index:Number(data.get('shot_index')),pose_mode:data.get('pose_mode')||'original',queue_position:7,created_at:'2026-11-11T00:00:00Z',original_expires_at:'2026-11-11T01:00:00Z',image_url:null,download_url:null,error_code:null,error_message:null};
       jobs=[job,...jobs.filter(item=>item.id!==job.id&&item.status==='unknown')];res.statusCode=202;
       const finish=()=>res.end(JSON.stringify(job));
       if(holdUpload){holdUpload=false;heldUpload=finish;return;}
@@ -108,6 +107,8 @@ try {
     fs.writeFileSync(path.join(process.env.YIXU_SCREENSHOT_DIR,name+'.png'),Buffer.from(shot.data,'base64'),{mode:0o600});
   };
   const wait=async expression=>{for(let n=0;n<100;n++){if(await evaluate(expression))return;await new Promise(r=>setTimeout(r,30));}throw Error('DOM condition timed out: '+expression);};
+  const selectedReference=()=>evaluate('document.querySelector("#tryon-reference-picker input:checked")?.value');
+  const openReferenceOptions=()=>evaluate('document.querySelector("#tryon-reference-options summary").click()');
   const load=async()=>{await client('Page.navigate',{url:origin});await wait('document.readyState === "complete"');};
   await client('Page.addScriptToEvaluateOnNewDocument',{source:'Object.defineProperty(globalThis.crypto,"randomUUID",{value:undefined,configurable:true});'});
   await load();
@@ -129,24 +130,23 @@ try {
   await wait('document.getElementById("tryon-availability")?.textContent.includes("已连接")');
   await evaluate('document.getElementById("search").value="100";document.getElementById("search").dispatchEvent(new Event("input",{bubbles:true}));document.querySelector("[data-open=\\"100\\"]").click()');
   await evaluate('document.getElementById("detail-tryon").click()');
-  assert.equal(await evaluate('document.getElementById("tryon-panel")?.value'),'0','Montage 0 requires explicit panel selection, never silently use panel 1');
-  assert.equal(await evaluate('document.getElementById("tryon-panel").options.length'),10,'All nine panels plus explicit unselected montage state');
-  assert.equal(await evaluate('document.getElementById("tryon-panel").getClientRects().length'),0,'The legacy value bridge is not a visible text selector');
-  assert.equal(await evaluate('document.getElementById("tryon-panel").getAttribute("aria-hidden")'),'true');
+  assert.equal(await selectedReference(),'1','Opening from the montage selects the outfit reference automatically');
+  assert.equal(await evaluate('document.getElementById("tryon-reference-options").open'),false);
+  assert.equal(await evaluate('document.activeElement.id'),'tryon-photo-title','Upload flow starts in the photo library');
+  await openReferenceOptions();
   assert.equal(await evaluate('document.querySelectorAll("#tryon-reference-picker input[type=radio]").length'),9,'Nine actual image choices replace the text select');
-  assert.equal(await evaluate('document.querySelectorAll("#tryon-reference-picker input:checked").length'),0,'Montage never preselects a thumbnail');
+  assert.equal(await evaluate('document.querySelectorAll("#tryon-reference-picker input:checked").length'),1);
   await wait('[...document.querySelectorAll(".tryon-reference-thumbnail img")].every(image=>image.naturalWidth>0)');
   for(let index=0;index<9;index++){
     assert.deepEqual(await evaluate(`(()=>{const image=document.querySelectorAll('.tryon-reference-thumbnail img')[${index}];return [image.style.left,image.style.top];})()`),[-(index%3)*100+'%',-Math.floor(index/3)*100+'%'],'Each image choice shows its own actual panel');
   }
   const legacyShots=await evaluate('window.WARDROBE.looks.find(look=>look.id===100).versions.v2.shots');
-  assert.deepEqual(await evaluate('[...document.getElementById("tryon-panel").options].slice(1).map(option=>({value:option.value,label:option.textContent}))'),
-    legacyShots.map((shot,i)=>({value:String(i+1),label:String(i+1).padStart(2,'0')+' · '+shot.title+' · '+shot.framing})),
+  assert.deepEqual(await evaluate('[...document.querySelectorAll("#tryon-reference-picker input")].map(input=>({value:input.value,label:input.getAttribute("aria-label")}))'),
+    legacyShots.map((shot,i)=>({value:String(i+1),label:'参考 '+String(i+1).padStart(2,'0')+' · '+shot.title+' · '+shot.framing})),
     'Historical 100 keeps all nine actual titles, framing descriptions and panel indices');
-  assert.equal(await evaluate('document.getElementById("tryon-panel").getAttribute("aria-describedby")'),'tryon-reference-framing');
-  assert.match(await evaluate('document.getElementById("tryon-reference-framing").textContent'),/请选择.*确认覆盖的衣装/);
-  assert.doesNotMatch(await evaluate('document.getElementById("tryon-reference-framing").textContent'),/完整全身|默认.*全身/);
-  assert.match(await evaluate('document.getElementById("tryon-context").textContent'), /100.*生动/);
+  assert.equal(await evaluate('document.getElementById("tryon-reference-picker").getAttribute("aria-describedby")'),'tryon-reference-framing');
+  assert.equal(await evaluate('document.getElementById("tryon-reference-framing").textContent'),'画面景别 / '+legacyShots[0].framing);
+  assert.match(await evaluate('document.getElementById("tryon-context").textContent'), /LOOK 100 ·/);
   await evaluate('document.querySelector("[data-reference-shot=\\"9\\"]").click()');
   assert.equal(await evaluate('document.querySelector("#tryon-reference-picker input:checked").value'),'9');
   await evaluate('document.querySelector("[data-reference-shot=\\"9\\"]").focus()');
@@ -158,18 +158,17 @@ try {
   assert.equal(await evaluate('document.querySelector("#tryon-reference-picker input:checked").value'),'4','Keyboard Down follows the three-column image grid');
   await client('Input.dispatchKeyEvent',{type:'keyDown',key:'End',code:'End',windowsVirtualKeyCode:35});
   await client('Input.dispatchKeyEvent',{type:'keyUp',key:'End',code:'End',windowsVirtualKeyCode:35});
-  assert.match(await evaluate('document.getElementById("tryon-context").textContent'), /100.*生动.*09/);
+  assert.equal(await selectedReference(),'9');
   await evaluate('document.querySelector("[data-view=\\"4\\"]").click()');
-  assert.match(await evaluate('document.getElementById("tryon-context").textContent'), /100.*生动.*09/,'Open request stays frozen when the underlying panel changes');
+  assert.equal(await selectedReference(),'9','Open request stays frozen when the underlying panel changes');
   assert.equal(await evaluate('document.getElementById("tryon-reference-framing").textContent'),'画面景别 / '+legacyShots[8].framing,'Framing stays frozen with the selected reference');
   await evaluate('document.getElementById("tryon-close").click();document.getElementById("detail-tryon").click()');
-  assert.equal(await evaluate('document.getElementById("tryon-panel").value'),'4');
-  assert.equal(await evaluate('document.getElementById("tryon-reference-framing").textContent'),'画面景别 / '+legacyShots[3].framing);
-  assert.match(await evaluate('document.getElementById("tryon-context").textContent'), /100.*生动.*04/);
+  assert.equal(await selectedReference(),'1','Opening from an individual gallery picture uses the same outfit reference');
+  assert.equal(await evaluate('document.getElementById("tryon-reference-options").open'),false);
   const before=await evaluate('document.getElementById("detail-title").textContent');
   await evaluate('document.dispatchEvent(new KeyboardEvent("keydown",{key:"ArrowRight",bubbles:true}))');
   assert.equal(await evaluate('document.getElementById("detail-title").textContent'),before,'Try-on modal blocks underlying detail keyboard navigation');
-  console.log('PASS frozen look/edition/panel, all nine choices from montage 0, selected-panel handoff and modal keyboard guard');
+  console.log('PASS automatic outfit reference, nine optional choices, gallery independence and modal keyboard guard');
   const disclosure=await evaluate('document.getElementById("tryon-disclosure")?.textContent || ""');
   assert.match(disclosure,/第三方 AI/,'Disclose external processing');assert.match(disclosure,/后台评估/);
   assert.equal(await evaluate('document.querySelectorAll("#tryon-disclosure li").length'),1,'Single concise photo-purpose notice');
@@ -210,6 +209,7 @@ try {
     assert.ok(state.visible,label+' entire focused photograph is unobscured');
     assert.ok(state.top>=Math.max(0,state.dialogTop)&&state.bottom<=Math.min(state.viewport,state.dialogBottom),label+' entire focused photograph fits its scroll viewport');
   };
+  await openReferenceOptions();
   for(const viewport of viewports){await setViewport(viewport);await assertReferenceBounds('Historical framing '+viewport.width);}
   for(const viewport of viewports){
     await setViewport(viewport);
@@ -272,16 +272,15 @@ try {
     assert.ok(Math.abs(crop.width-3)<.01&&Math.abs(crop.height-3)<.01,'Reference keeps its intentional 3x3 crop');
   }
   await client('Emulation.clearDeviceMetricsOverride');
+  await evaluate('document.getElementById("tryon-close").click();document.getElementById("detail-tryon").click()');
   await choosePhoto('tryon-album');
   await wait('document.getElementById("tryon-local-preview")?.naturalWidth === 8 && !document.getElementById("tryon-local-preview").hidden');
   assert.match(await evaluate('document.getElementById("tryon-local-preview").src'),/^blob:/,'Preview stays local');
   assert.equal(requests.filter(r=>r.method==='POST'&&r.url==='/api/tryons').length,0,'Selecting photo never uploads');
   assert.equal(await evaluate('document.getElementById("tryon-submit").disabled'),true,'No submission without explicit disclosure agreement');
   await evaluate('document.getElementById("tryon-consent").click()');
-  assert.equal(await evaluate('document.getElementById("tryon-submit").disabled'),false);
-  await evaluate('document.getElementById("tryon-panel").value="0";document.getElementById("tryon-panel").dispatchEvent(new Event("change",{bubbles:true}))');
-  assert.equal(await evaluate('document.getElementById("tryon-submit").disabled'),true,'Montage 0 stays blocked even with photo and consent');
-  await evaluate('document.querySelector("[data-reference-shot=\\"4\\"]").click()');
+  assert.equal(await evaluate('document.getElementById("tryon-submit").disabled'),false,'Photo and consent are sufficient for submission');
+  assert.equal(await evaluate('document.getElementById("tryon-reference-options").open'),false,'Submission needs no interaction with outfit reference options');
   await evaluate('const mode=document.getElementById("tryon-pose-mode");mode.value="pose_grid";mode.dispatchEvent(new Event("change"))');
   assert.match(await evaluate('document.getElementById("tryon-pose-description").textContent'),/中央保留你的完整原图/);
   await evaluate('document.getElementById("tryon-pose-mode").value="original";document.getElementById("tryon-pose-mode").dispatchEvent(new Event("change"))');
@@ -291,13 +290,13 @@ try {
   assert.ok(heldUpload,'Upload receipt is deliberately held while checking the frozen image selection');
   assert.ok(await evaluate('[...document.querySelectorAll("#tryon-reference-picker input")].every(input=>input.disabled)'),'All image choices are disabled during upload');
   await evaluate('document.querySelector("[data-reference-shot=\\"5\\"]").click()');
-  assert.equal(await evaluate('document.getElementById("tryon-panel").value'),'4','Busy upload cannot change its reference');
+  assert.equal(await selectedReference(),'1','Busy upload cannot change its reference');
   heldUpload();heldUpload=null;
   await wait('document.getElementById("tryon-status").textContent.includes("已提交")');
   const upload=requests.filter(r=>r.url==='/api/tryons'&&r.method==='POST');assert.equal(upload.length,1,'Double click cannot duplicate upload');
   const multipart=await new Request(origin,{method:'POST',headers:{'content-type':upload[0].headers['content-type']},body:upload[0].body}).formData();
   assert.deepEqual([...multipart.keys()].sort(),['disclosure_version','edition','idempotency_key','look_id','photo','shot_index']);
-  assert.equal(multipart.get('look_id'),'100');assert.equal(multipart.get('edition'),'v2');assert.equal(multipart.get('shot_index'),'4');
+  assert.equal(multipart.get('look_id'),'100');assert.equal(multipart.get('edition'),'v2');assert.equal(multipart.get('shot_index'),'1');
   assert.equal(multipart.get('disclosure_version'),'test-v1');assert.match(multipart.get('idempotency_key'),/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/);
   assert.equal(multipart.get('photo').type,'image/png');assert.ok(multipart.get('photo').size>0);
   assert.equal(await evaluate('localStorage.length+sessionStorage.length'),0,'No credentials or base64 photos in Web Storage');
@@ -322,7 +321,7 @@ try {
   await load();
   await wait('document.getElementById("tryon-jobs")?.textContent.includes("前方 7")');
   await evaluate('document.getElementById("tryon-history").click()');
-  assert.match(await evaluate('document.getElementById("tryon-jobs").textContent'),/100.*生动.*04/,'Restored request keeps original context');
+  assert.match(await evaluate('document.getElementById("tryon-jobs").textContent'),/100.*生动.*01/,'Restored request keeps the automatic reference submitted with the job');
   assert.equal(await evaluate('document.getElementById("tryon-selection").hidden'),true,'History does not invent a new selection');
   assert.ok(!(await evaluate('document.getElementById("tryon-jobs").textContent')).includes('%'));
   jobs[0]={...jobs[0],status:'succeeded',image_url:'/api/tryons/fixture-job-1/image',download_url:'/api/tryons/fixture-job-1/download'};
@@ -401,7 +400,9 @@ try {
   await wait('!document.getElementById("tryon-refresh").disabled');
   assert.equal(jobs.length,0);assert.equal(requests.filter(r=>r.method==='DELETE').length,1);
   console.log('PASS durable queue restore, truthful states, real private preview/download bytes, delete and readback, no automatic generation replay');
-  await evaluate('document.getElementById("tryon-close").click();document.querySelector("[data-open]").click();document.querySelector("[data-view=\\"4\\"]").click();document.getElementById("detail-tryon").click()');
+  await evaluate('document.getElementById("tryon-close").click();document.querySelector("[data-open]").click();document.getElementById("detail-tryon").click()');
+  await openReferenceOptions();
+  await evaluate('document.querySelector("[data-reference-shot=\\"4\\"]").click()');
   await wait('!document.getElementById("tryon-refresh").disabled');
   const photoAndReference=`({
     preview:document.getElementById('tryon-local-preview').src,
@@ -449,7 +450,7 @@ try {
     assert.equal(await evaluate('document.getElementById("tryon-status").textContent'),submitNotice,'A late local photo write must preserve the submission error');
     assert.deepEqual(await evaluate('[...document.querySelectorAll("[data-job-id]")].map(card=>card.dataset.jobId).sort()'),existingHistory,'Errors never manufacture success');
     assert.match(await evaluate('document.getElementById("tryon-local-preview").src'),/^blob:/,'A rejected upload preserves the local photo for explicit retry');
-    assert.equal(await evaluate('document.getElementById("tryon-panel").value'),'4','A rejected upload preserves the reference');
+    assert.equal(await selectedReference(),'4','A rejected upload preserves the reference');
     const first=requests.filter(r=>r.url==='/api/tryons'&&r.method==='POST').at(-1);
     await evaluate('document.getElementById("tryon-submit").click()');
     await wait('!document.getElementById("tryon-submit").disabled');
@@ -557,7 +558,8 @@ try {
   await evaluate('document.querySelector("#gallery [data-look-card] img").dispatchEvent(new Event("error"))');
   await wait('document.querySelector("#gallery [data-look-card] img").getAttribute("src") === "/api/content/assets/fixture-102" && document.querySelector("#gallery [data-look-card] img").naturalWidth > 0');
   await evaluate(`document.querySelector('[data-open="102"]').click();document.querySelector('[data-view="7"]').click();document.getElementById('detail-tryon').click()`);
-  assert.match(await evaluate('document.getElementById("tryon-context").textContent'),/102.*生动.*07/,'Hydrated look and model use the live try-on index');
+  assert.match(await evaluate('document.getElementById("tryon-context").textContent'),/LOOK 102 · 动态穿搭 102/,'Hydrated look and model use the live catalog');
+  assert.equal(await selectedReference(),'1','Viewing panel seven does not change the outfit reference');
   await evaluate('document.getElementById("tryon-close").click();document.getElementById("detail-image").dispatchEvent(new Event("error"))');
   await wait('document.getElementById("detail-image").getAttribute("src") === "/api/content/assets/fixture-102" && document.getElementById("detail-image").naturalWidth > 0');
   const publicDownload=await evaluate('(async()=>{const r=await fetch(document.getElementById("download-link").href);return {status:r.status,type:r.headers.get("content-type"),disposition:r.headers.get("content-disposition"),bytes:(await r.arrayBuffer()).byteLength};})()');
@@ -577,15 +579,17 @@ try {
   const publishedShots=JSON.parse(fs.readFileSync(path.join(root,'content/batches/2026-11-12-01.json'),'utf8')).looks.find(look=>look.id===102).shots;
   const dynamicLook=catalogFixture.looks.find(look=>look.id===102);
   dynamicLook.versions.v2.shots=structuredClone(publishedShots);
+  dynamicLook.versions.v2.previewPanel=2;
   const uploadsBeforeFraming=requests.filter(r=>r.method==='POST'&&r.url==='/api/tryons').length;
   await load();await wait('window.WARDROBE.looks.some(look=>look.id===102)');
   await evaluate('location.hash="#look-102"');await wait('document.getElementById("detail-dialog").open');
   await evaluate('document.getElementById("detail-tryon").click()');
-  assert.equal(await evaluate('document.getElementById("tryon-panel").value'),'0','Actual 102 still requires an explicit choice');
+  assert.equal(await selectedReference(),'1','A full-body reference takes priority over a close-up cover');
+  await openReferenceOptions();
   await wait('[...document.querySelectorAll(".tryon-reference-thumbnail img")].every(image=>image.naturalWidth>0)');
   assert.ok(await evaluate('[...document.querySelectorAll(".tryon-reference-thumbnail img")].every(image=>image.getAttribute("src")==="/api/content/assets/fixture-102")'),'Dynamic look switches all nine thumbnails and follows project-source fallback');
-  assert.deepEqual(await evaluate('[...document.getElementById("tryon-panel").options].slice(1).map(option=>({value:option.value,label:option.textContent}))'),
-    publishedShots.map((shot,i)=>({value:String(i+1),label:String(i+1).padStart(2,'0')+' · '+shot.title+' · '+shot.framing})));
+  assert.deepEqual(await evaluate('[...document.querySelectorAll("#tryon-reference-picker input")].map(input=>({value:input.value,label:input.getAttribute("aria-label")}))'),
+    publishedShots.map((shot,i)=>({value:String(i+1),label:'参考 '+String(i+1).padStart(2,'0')+' · '+shot.title+' · '+shot.framing})));
   for(const [index,shot] of publishedShots.entries()){
     const panel=index+1;
     await evaluate(`document.querySelector('[data-reference-shot="${panel}"]').click()`);
@@ -599,14 +603,15 @@ try {
   for(const framing of [undefined,'','   ',longFraming]){
     await evaluate('document.getElementById("tryon-close").click()');
     const variant=structuredClone(dynamicLook);
+    if(framing==='')for(const shot of variant.versions.v2.shots)delete shot.framing;
     if(framing===undefined)delete variant.versions.v2.shots[0].framing;
     else variant.versions.v2.shots[0].framing=framing;
-    await evaluate(`window.WardrobeTryOn.setCatalog({looks:[${JSON.stringify(variant)}]});window.WardrobeTryOn.setContext({look_id:102,edition:'v2',shot_index:0});document.getElementById('detail-tryon').click()`);
-    assert.equal(await evaluate('document.getElementById("tryon-panel").value'),'0','Framing metadata never selects a panel');
-    assert.equal(await evaluate('document.getElementById("tryon-panel").options.length'),10);
+    await evaluate(`window.WardrobeTryOn.setCatalog({looks:[${JSON.stringify(variant)}]});window.WardrobeTryOn.setContext({look_id:102,edition:'v2'});document.getElementById('detail-tryon').click()`);
+    assert.equal(await selectedReference(),framing===''?'2':'3','Use the first full-body shot, falling back to the cover when framing is absent');
+    await openReferenceOptions();
     const expected=framing?.trim()||'';
-    assert.equal(await evaluate('document.getElementById("tryon-panel").options[1].textContent'),'01 · '+publishedShots[0].title+(expected?' · '+expected:''));
-    await evaluate('document.getElementById("tryon-panel").value="1";document.getElementById("tryon-panel").dispatchEvent(new Event("change",{bubbles:true}))');
+    assert.equal(await evaluate('document.querySelector("[data-reference-shot=\\"1\\"]").getAttribute("aria-label")'),'参考 01 · '+publishedShots[0].title+(expected?' · '+expected:''));
+    await evaluate('document.querySelector("[data-reference-shot=\\"1\\"]").click()');
     assert.equal(await evaluate('document.getElementById("tryon-reference-framing").textContent'),expected?'画面景别 / '+expected:'该画面未提供景别说明，请查看参考图确认覆盖的衣装。');
     assert.equal(await evaluate('document.getElementById("tryon-reference-framing").children.length'),0,'Framing is plain text');
     for(const viewport of viewports){
@@ -621,7 +626,7 @@ try {
   await evaluate('document.getElementById("tryon-close").click()');
   const safeVariant=structuredClone(dynamicLook);
   safeVariant.versions.v2.image_url='https://fixture-user:fixture-password@invalid.example/reference.webp';
-  await evaluate(`window.WardrobeTryOn.setCatalog({looks:[${JSON.stringify(safeVariant)}]});window.WardrobeTryOn.setContext({look_id:102,edition:'v2',shot_index:1});document.getElementById('detail-tryon').click()`);
+  await evaluate(`window.WardrobeTryOn.setCatalog({looks:[${JSON.stringify(safeVariant)}]});window.WardrobeTryOn.setContext({look_id:102,edition:'v2'});document.getElementById('detail-tryon').click()`);
   await wait('[...document.querySelectorAll(".tryon-reference-thumbnail img")].every(image=>image.naturalWidth>0)');
   assert.ok(await evaluate('[...document.querySelectorAll(".tryon-reference-thumbnail img")].every(image=>image.getAttribute("src")==="/api/content/assets/fixture-102")'),'Credential-bearing preferred URL is rejected in favor of registered project source');
   await evaluate('document.querySelector(".tryon-reference-thumbnail img").dispatchEvent(new Event("error"))');
@@ -633,12 +638,12 @@ try {
   assert.match(await evaluate('document.getElementById("tryon-reference-error").textContent'),/图片暂不可用.*不会替换/);
   await evaluate('document.getElementById("tryon-close").click()');
   const missingVariant=structuredClone(safeVariant);missingVariant.versions.v2.source_url='/api/content/assets/fixture-missing-reference';
-  await evaluate(`window.WardrobeTryOn.setCatalog({looks:[${JSON.stringify(missingVariant)}]});window.WardrobeTryOn.setContext({look_id:102,edition:'v2',shot_index:1});document.getElementById('detail-tryon').click()`);
+  await evaluate(`window.WardrobeTryOn.setCatalog({looks:[${JSON.stringify(missingVariant)}]});window.WardrobeTryOn.setContext({look_id:102,edition:'v2'});document.getElementById('detail-tryon').click()`);
   await wait('[...document.querySelectorAll("#tryon-reference-picker input")].every(input=>input.disabled)');
   assert.ok(await evaluate('[...document.querySelectorAll(".tryon-reference-thumbnail img")].every(image=>image.hidden)'),'Missing source pictures show an honest unavailable state');
   await evaluate('document.getElementById("tryon-close").click()');
   const unsafeVariant=structuredClone(safeVariant);unsafeVariant.versions.v2.source_url='/api/admin/private-reference';
-  await evaluate(`window.WardrobeTryOn.setCatalog({looks:[${JSON.stringify(unsafeVariant)}]});window.WardrobeTryOn.setContext({look_id:102,edition:'v2',shot_index:1});document.getElementById('detail-tryon').click()`);
+  await evaluate(`window.WardrobeTryOn.setCatalog({looks:[${JSON.stringify(unsafeVariant)}]});window.WardrobeTryOn.setContext({look_id:102,edition:'v2'});document.getElementById('detail-tryon').click()`);
   await wait('[...document.querySelectorAll("#tryon-reference-picker input")].every(input=>input.disabled)');
   assert.ok(!requests.some(request=>request.url==='/api/admin/private-reference'),'Malformed private fallback is never requested');
   assert.equal(requests.filter(r=>r.method==='POST'&&r.url==='/api/tryons').length,uploadsBeforeFraming);
@@ -687,7 +692,7 @@ try {
   await wait('document.querySelector("[data-job-retry=fixture-delivery-unknown]")');
   await evaluate('document.querySelector("[data-job-retry=fixture-delivery-unknown]").click()');
   assert.equal(await evaluate('document.activeElement.id'),'tryon-photo-title');
-  assert.equal(await evaluate('document.getElementById("tryon-panel").value'),'4');
+  assert.equal(await selectedReference(),'4','A history retry preserves the original clothing reference');
   assert.equal(await evaluate('document.getElementById("tryon-submit").disabled'),true,'Preparing a retry requires choosing a photo');
   assert.equal(await evaluate('document.getElementById("tryon-retry-notice").hidden'),false);
   assert.match(await evaluate('document.getElementById("tryon-retry-notice").textContent'),/可能已被接收.*新建/);

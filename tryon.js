@@ -17,7 +17,7 @@ function clearSession() {
   $('tryon-more').hidden=true;$('tryon-more-note').hidden=true;
   $('tryon-availability').textContent='需要重新连接';syncControls();
 }
-let photo = null, previewURL = null, previewGeneration = 0, busy = false, pendingKey = null, submittedJobId = null;
+let photo = null, previewURL = null, previewGeneration = 0, busy = false, pendingSubmission = null, submittedJobId = null;
 let retryingUnknown = false;
 let poseMode = 'original';
 let savedPhotoId = null, savedPhotos = [], photoRead = 0;
@@ -47,7 +47,7 @@ function syncControls() {
     : '根据原照片的姿态生成一张试穿图。';
   $('tryon-composer').setAttribute('aria-busy',String(busy));
   submit.disabled = busy || !session?.generation_available || !photo || Boolean(photoRejection) || !frozen?.shot_index || failedReferences.has(frozen.shot_index) || (!session.disclosure.accepted && !$('tryon-consent').checked);
-  for(const id of ['tryon-camera','tryon-album','tryon-panel','tryon-consent','tryon-remove-photo'])$(id).disabled=busy;
+  for(const id of ['tryon-camera','tryon-album','tryon-consent','tryon-remove-photo'])$(id).disabled=busy;
   for(const button of $('tryon-saved-photos').querySelectorAll('button')){
     button.disabled=busy;
     if(button.dataset.photoSelect)button.setAttribute('aria-pressed',String(button.dataset.photoSelect===savedPhotoId));
@@ -62,11 +62,11 @@ function syncControls() {
   $('tryon-photo-placeholder').hidden=Boolean(photo);
   $('tryon-remove-photo').hidden=!photo;
   $('tryon-photo-stage').dataset.selected=String(Boolean(photo));
-  $('tryon-readiness').textContent=busy?'正在上传照片，请稍候。':photoRejection?'请重新选择照片。':failedReferences.has(frozen?.shot_index)?'所选参考图片暂不可用，请重新打开试穿重试。':!photo?'从照片库选一张照片，或添加新照片。':!frozen?.shot_index?'照片已准备好，再点选一张参考写真。':!session?.generation_available?'连接试穿服务后可提交所选照片。':(!session.disclosure.accepted&&!$('tryon-consent').checked)?'照片和参考已就绪，请阅读并确认照片用途。':'照片与参考已就绪，可以开始试穿。';
+  $('tryon-readiness').textContent=busy?'正在上传照片，请稍候。':photoRejection?'请重新选择照片。':failedReferences.has(frozen?.shot_index)?'服装参考暂不可用，请重新打开试穿。':!photo?'从照片库选一张照片，或添加新照片。':!session?.generation_available?'连接试穿服务后可提交所选照片。':(!session.disclosure.accepted&&!$('tryon-consent').checked)?'照片已就绪，请阅读并确认照片用途。':'照片已就绪，可以开始试穿。';
   syncFlow();
 }
 function clearPhoto() {
-  previewGeneration++;photo=null;savedPhotoId=null;pendingKey=null;
+  previewGeneration++;photo=null;savedPhotoId=null;pendingSubmission=null;
   if(photoRejection&&$('tryon-status').textContent===photoRejection)$('tryon-status').textContent='';
   photoRejection='';
   if(previewURL)URL.revokeObjectURL(previewURL);
@@ -208,11 +208,16 @@ function track(event,context={}) {
 window.WardrobeTryOn = {track,setCatalog(catalog) {
   byId.clear();for(const look of catalog.looks||[])byId.set(look.id,look);
 },setContext(value) {
-  if(!byId.has(value?.look_id) || value.edition!=='v2' || !Number.isInteger(value.shot_index) || value.shot_index < 0 || value.shot_index > 9)return;
-  currentContext = {look_id:value.look_id, edition:value.edition, shot_index:value.shot_index};
+  currentContext=byId.has(value?.look_id)&&value.edition==='v2'?{look_id:value.look_id,edition:value.edition}:null;
 }};
 function shotFraming(shot) {
   return typeof shot?.framing==='string'?shot.framing.trim():'';
+}
+function defaultReference(version) {
+  const isFullBody=shot=>/全身|full[- ]body/i.test(shotFraming(shot));
+  const preview=version.previewPanel;
+  if(isFullBody(version.shots[preview-1]))return preview;
+  return version.shots.findIndex(isFullBody)+1||(version.shots[preview-1]?preview:1);
 }
 function renderContext() {
   dialog.dataset.mode=frozen?'compose':'dashboard';
@@ -222,20 +227,17 @@ function renderContext() {
   if(!frozen)return;
   const look=frozenLook, version=look.versions.v2, panel=frozen.shot_index;
   for(const input of $('tryon-reference-picker').querySelectorAll('input'))input.checked=Number(input.value)===panel;
-  $('tryon-context').textContent = 'LOOK '+String(look.id).padStart(3,'0')+' · '+(frozen.edition==='v1'?'造型':'生动')+' · '+look.title+' · '+(panel?'参考 '+String(panel).padStart(2,'0')+' / '+version.shots[panel-1].title:'请选择参考写真');
-  const framing=panel?shotFraming(version.shots[panel-1]):'';
-  $('tryon-reference-framing').textContent=panel?(framing?'画面景别 / '+framing:'该画面未提供景别说明，请查看参考图确认覆盖的衣装。'):'请选择一张参考写真，并查看画面确认覆盖的衣装。';
-  $('tryon-reference').hidden = !panel;
-  if(panel){
-    if(window.WardrobeImages)window.WardrobeImages.set($('tryon-reference-image'),version);
-    else $('tryon-reference-image').src=version.source_url||version.image;
-    $('tryon-reference-image').style.left=-((panel-1)%3)*100+'%';
-    $('tryon-reference-image').style.top=-Math.floor((panel-1)/3)*100+'%';
-  }
+  $('tryon-context').textContent='LOOK '+String(look.id).padStart(3,'0')+' · '+look.title;
+  const framing=shotFraming(version.shots[panel-1]);
+  $('tryon-reference-framing').textContent=framing?'画面景别 / '+framing:'该画面未提供景别说明，请查看参考图确认覆盖的衣装。';
+  if(window.WardrobeImages)window.WardrobeImages.set($('tryon-reference-image'),version);
+  else $('tryon-reference-image').src=version.source_url||version.image;
+  $('tryon-reference-image').style.left=-((panel-1)%3)*100+'%';
+  $('tryon-reference-image').style.top=-Math.floor((panel-1)/3)*100+'%';
 }
 function chooseReference(panel) {
-  if(!frozen||busy||!Number.isInteger(panel)||panel<0||panel>9)return;
-  pendingKey=null;frozen.shot_index=panel;$('tryon-panel').value=String(panel);renderContext();syncControls();
+  if(!frozen||busy||failedReferences.has(panel)||panel===frozen.shot_index)return;
+  frozen.shot_index=panel;renderContext();syncControls();
 }
 function revealReference(input) {
   input.closest('.tryon-reference-choice')?.scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'});
@@ -280,25 +282,16 @@ $('tryon-reference-picker').addEventListener('keydown',event=>{
 });
 function prepareContext(context=currentContext, retryUnknown=false, mode='original') {
   submittedJobId=null;
-  frozen=context&&byId.has(context.look_id)?{...context}:null;
-  frozenLook=frozen?byId.get(frozen.look_id):null;
+  frozenLook=byId.get(context?.look_id);
+  frozen=frozenLook?{...context,shot_index:context.shot_index??defaultReference(frozenLook.versions.v2)}:null;
   retryingUnknown=Boolean(frozen&&retryUnknown);
   poseMode=mode==='pose_grid'&&session?.pose_grid_available?'pose_grid':'original';
-  const select=$('tryon-panel');select.replaceChildren();
-  if(frozen){
-    const shots=frozenLook.versions.v2.shots;
-    ['请选择一张参考写真',...shots.map((shot,i)=>[String(i+1).padStart(2,'0'),shot.title,shotFraming(shot)].filter(Boolean).join(' · '))].forEach((label,i)=>{
-      const option=document.createElement('option');option.value=String(i);option.textContent=label;select.append(option);
-    });
-    select.value=String(frozen.shot_index);
-  }
+  $('tryon-reference-options').open=false;
   renderReferencePicker();renderContext();syncControls();
 }
-$('tryon-panel').addEventListener('change',()=>chooseReference(Number($('tryon-panel').value)));
 $('tryon-pose-mode').addEventListener('change',()=>{
   if(busy||!session?.pose_grid_available)return;
   poseMode=$('tryon-pose-mode').value==='pose_grid'?'pose_grid':'original';
-  pendingKey=null;
   syncControls();
 });
 async function api(url, options = {}) {
@@ -610,7 +603,11 @@ function photoValidationMessage(error) {
   if(error.status===413&&error.code==='upload_too_large')return '请压缩照片文件或换一张，保留头顶和鞋履。';
   return '';
 }
-$('detail-tryon').addEventListener('click', () => {if(!busy)prepareContext();open();if(frozen)track('tryon_open',frozen);});
+$('detail-tryon').addEventListener('click', () => {
+  if(!busy)prepareContext();
+  open();
+  if(frozen){$('tryon-photo-title').focus({preventScroll:true});track('tryon_open',frozen);}
+});
 function openDashboard() {
   if(!busy){frozen=null;retryingUnknown=false;renderContext();syncControls();}
   open();
@@ -630,7 +627,9 @@ $('tryon-submit').addEventListener('click',async()=>{
     const form=new FormData();form.append('photo',file,'portrait.'+photoTypes[file.type]);
     for(const [key,value] of Object.entries(context))form.append(key,String(value));
     if(session.pose_grid_available&&poseMode==='pose_grid')form.append('pose_mode',poseMode);
-    pendingKey ||= randomId();form.append('idempotency_key',pendingKey);form.append('disclosure_version',session.disclosure.version);
+    const submission=JSON.stringify([context.look_id,context.edition,context.shot_index,poseMode]);
+    if(pendingSubmission?.context!==submission)pendingSubmission={context:submission,key:randomId()};
+    form.append('idempotency_key',pendingSubmission.key);form.append('disclosure_version',session.disclosure.version);
     $('tryon-status').textContent='正在发送，请勿重复提交…';
     const job=await api('/api/tryons',{method:'POST',body:form});
     if(typeof job?.id!=='string'||!job.id||typeof job.status!=='string'||!job.status)throw new Error('暂未收到有效的试穿回执。');
