@@ -8327,6 +8327,261 @@
           "shot_index": 3
         }
       ]
+    },
+    {
+      "product_id": "cinnamon-suede-zip-jacket-107",
+      "name": "肉桂棕尖领绒面短夹克",
+      "category": "外套",
+      "subtitle": "短衣身、尖领和一条敞开的拉链。",
+      "description": "肉桂棕短夹克有平直下摆和带绒面的哑光观感。敞开的前拉链露出内搭高领，斜插袋顺着下半片的线条排开。领内、袖口完整结构和近观绒面为 AI 设计演绎。",
+      "color_name": "肉桂棕",
+      "color_hex": "#755037",
+      "design_material": "哑光细绒面观感",
+      "notes": [
+        "尖领与敞开的前拉链",
+        "短直衣身与低位斜插袋",
+        "细绒面随光线呈现深浅层次"
+      ],
+      "asset": {
+        "asset_id": "product-cinnamon-suede-zip-jacket-107-main-r1",
+        "file": "assets/products/look-107/cinnamon-suede-zip-jacket-107-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 140932,
+        "sha256": "3e617d1df61fbc95ec8338a2e88c88b47173532d7957d4a9f2daf3ae79b190a1",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "尖领与前拉链",
+          "caption": "斜向近景展示尖领落在肩前的形态，以及敞开的拉链齿在绒面边缘形成的细线。领内走线和近观纹理为 AI 设计演绎。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-cinnamon-suede-zip-jacket-107-collar-r1",
+            "file": "assets/products/look-107/cinnamon-suede-zip-jacket-107-collar-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 164178,
+            "sha256": "8c428bb6d6519846d1e6e665e3f2c0090981c1677c86b0f6b12efcb7a76c513e",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 107,
+          "piece_index": 1,
+          "reference_asset_id": "look-107-female-01-v2-r1",
+          "shot_index": 9
+        }
+      ]
+    },
+    {
+      "product_id": "ivory-rib-rollneck-107",
+      "name": "米白翻折高领细罗纹针织衫",
+      "category": "上装",
+      "subtitle": "一道翻折高领，罗纹细而均匀。",
+      "description": "暖米白色和细密竖罗纹在肉桂棕外层里露出一段亮色。翻折领形成一圈柔和的厚度，衣身保持利落。原写真被夹克和裤腰遮挡的肩袖、袖口与下摆为 AI 设计演绎。",
+      "color_name": "米白",
+      "color_hex": "#e3d5b8",
+      "design_material": "细罗纹针织观感",
+      "notes": [
+        "暖米白色贯穿衣身和领口",
+        "高领向外翻折",
+        "细竖罗纹在侧光下层次可见"
+      ],
+      "asset": {
+        "asset_id": "product-ivory-rib-rollneck-107-main-r1",
+        "file": "assets/products/look-107/ivory-rib-rollneck-107-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 90764,
+        "sha256": "ee66d91b0d87bef5e89db1fa1dd6d055985e14edcb4d579279dae4ae06f529e8",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "翻折领与细罗纹",
+          "caption": "斜向近景展示翻折处的厚度与纵向罗纹。领根、肩部接缝及近观纹理为 AI 设计演绎。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-ivory-rib-rollneck-107-rollneck-r1",
+            "file": "assets/products/look-107/ivory-rib-rollneck-107-rollneck-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 132524,
+            "sha256": "db452a2cf599136e0c52bcdc3926bff4e011e9c42435bd26fcd1cf38b3d2babd",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 107,
+          "piece_index": 2,
+          "reference_asset_id": "look-107-female-01-v2-r1",
+          "shot_index": 5
+        }
+      ]
+    },
+    {
+      "product_id": "olive-straight-corduroys-107",
+      "name": "深橄榄高腰直筒灯芯绒长裤",
+      "category": "下装",
+      "subtitle": "细密竖绒从高腰一路落到鞋面。",
+      "description": "深橄榄长裤以轻松的直筒线条垂到鞋面，光线顺着细绒变化。独立图中被外套和包袋遮挡的完整腰头、袋口轮廓与针脚为 AI 设计演绎。",
+      "color_name": "深橄榄",
+      "color_hex": "#4b4937",
+      "design_material": "细条灯芯绒观感，视觉设计描述",
+      "notes": [
+        "高腰与同色圆扣",
+        "细密竖绒顺着裤腿延伸",
+        "直筒长裤轻搭鞋面"
+      ],
+      "asset": {
+        "asset_id": "product-olive-straight-corduroys-107-main-r1",
+        "file": "assets/products/look-107/olive-straight-corduroys-107-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 77148,
+        "sha256": "4dde573bbbd04961077f80b3daaa541470175ee5c7008c12c7ba60eb5b4e4063",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "高腰扣与细条绒面",
+          "caption": "斜光下可辨同色圆扣、前襟及竖向细绒。原写真遮挡的完整袋口和近观针脚为 AI 设计演绎。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-olive-straight-corduroys-107-waist-r1",
+            "file": "assets/products/look-107/olive-straight-corduroys-107-waist-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 201896,
+            "sha256": "a8ac02bd1929f3d06f82eda8461688a74c0cd3fe9aec1ba3de2dd4a84d6104fa",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 107,
+          "piece_index": 3,
+          "reference_asset_id": "look-107-female-01-v2-r1",
+          "shot_index": 9
+        }
+      ]
+    },
+    {
+      "product_id": "black-penny-loafers-107",
+      "name": "黑色圆头低跟便士乐福鞋",
+      "category": "鞋履",
+      "subtitle": "圆鞋头与同色横带，低跟下是整洁的黑色轮廓。",
+      "description": "圆头乐福鞋以一条带开口的同色横带压住鞋面，围线勾出圆头，侧面落到低方跟。原写真被裤脚遮挡的鞋口与独立图中的近观车线为 AI 设计演绎。",
+      "color_name": "黑色",
+      "color_hex": "#232122",
+      "design_material": "低光泽黑色皮面观感，视觉设计描述",
+      "notes": [
+        "黑色横带留一处细开口",
+        "圆鞋头与同色围线",
+        "低方跟和薄黑底边"
+      ],
+      "asset": {
+        "asset_id": "product-black-penny-loafers-107-main-r1",
+        "file": "assets/products/look-107/black-penny-loafers-107-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 51538,
+        "sha256": "01122a21d323a43138b9a435b5299dc9df7ee76b0964f6667f4286e19d78a1e7",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "便士横带与圆头围线",
+          "caption": "前掌近景呈现横带上的开口，以及绕过圆头的黑色围线。近观皮纹与针脚为 AI 设计演绎。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-black-penny-loafers-107-vamp-r1",
+            "file": "assets/products/look-107/black-penny-loafers-107-vamp-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 138514,
+            "sha256": "38b5b7060fb980ee9b9bc9ce7460d4cdfdf7d7050a048dc81b963436d5386b2e",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 107,
+          "piece_index": 4,
+          "reference_asset_id": "look-107-female-01-v2-r1",
+          "shot_index": 4
+        }
+      ]
+    },
+    {
+      "product_id": "burgundy-flap-crossbody-107",
+      "name": "暗酒红圆角翻盖纹理斜挎包",
+      "category": "包袋",
+      "subtitle": "一根同色长肩带，搭配小巧的圆角包身。",
+      "description": "暗酒红包身呈圆角矩形，弧形翻盖由一枚同色短袢点缀。单根扁平肩带斜过上身，包落在胯侧。写真中未完整显示的肩带接合及近观纹理为 AI 设计演绎。",
+      "color_name": "暗酒红",
+      "color_hex": "#6b3441",
+      "design_material": "雾面细颗粒纹理感，视觉设计描述",
+      "notes": [
+        "短袢与小铆点位于弧形翻盖中部",
+        "同色长肩带与圆角小包身相接",
+        "写真未完整呈现的接缝与近观纹理为设计演绎"
+      ],
+      "asset": {
+        "asset_id": "product-burgundy-flap-crossbody-107-main-r1",
+        "file": "assets/products/look-107/burgundy-flap-crossbody-107-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 103070,
+        "sha256": "ea076a62e0084bf63af85da5e4b87e26268a833c0a9d3456f5c50caa9cf6aa52",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "弧形翻盖与同色短袢",
+          "caption": "侧光下可见翻盖的弧形包边、短袢和小铆点。写真无法辨认的针脚、铆点表面和近观颗粒为 AI 设计演绎。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-burgundy-flap-crossbody-107-flap-r1",
+            "file": "assets/products/look-107/burgundy-flap-crossbody-107-flap-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 276694,
+            "sha256": "1f56f69b37da336da2b6626ea55b72d3f4e2a38767946d73457390c1200039b9",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 107,
+          "piece_index": 5,
+          "reference_asset_id": "look-107-female-01-v2-r1",
+          "shot_index": 9
+        }
+      ]
     }
   ]
 }

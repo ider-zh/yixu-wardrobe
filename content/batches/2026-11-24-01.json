@@ -1,0 +1,174 @@
+{
+  "schema_version": 1,
+  "batch_id": "2026-11-24-01",
+  "publish_date": "2026-11-24",
+  "timezone": "Asia/Shanghai",
+  "title": "杭州西溪 · 晴芦慢走",
+  "region": {
+    "country": "CN",
+    "city": "杭州"
+  },
+  "research": {
+    "trend_sources": [
+      {
+        "url": "https://www.womanandhome.com/life/royal-news/zara-tindall-chocolate-suede-trench-boots/",
+        "published_at": "2026-11-18",
+        "summary": "Woman & Home 在切尔滕纳姆公开活动的搭配报道中记录了棕色绒面外层与高领叠穿、酒红鞋履点色。本套借鉴绒面和高领的搭配，把酒红移到包袋。"
+      },
+      {
+        "url": "https://www.marieclaire.com/fashion/celebrity-style/dakota-johnson-leopard-print-bag-oversized-scarf-winter-2026/",
+        "published_at": "2026-11-21",
+        "summary": "Marie Claire 记录了 11 月 19 日的街拍搭配，棕色外层、深色下装和黑色乐福鞋叠成日常秋冬造型。本套借鉴这一配色关系，鞋面选简洁的便士横带。"
+      },
+      {
+        "url": "https://eng.hangzhou.gov.cn/col/col811217/art/2026/art_203b8c507e7941918e7ae0d2de550989.html",
+        "published_at": "2026-11-06",
+        "summary": "杭州市政府英文门户介绍西溪听芦活动持续到 12 月 13 日，岛上设有赏芦木栈道和平台。写真采用以西溪芦洲为灵感的虚构栈道。"
+      }
+    ],
+    "weather": {
+      "url": "https://www.weather.com.cn/textFC/hd.shtml",
+      "forecast_date": "2026-11-24",
+      "summary": "中国天气网华东文字预报 2026-11-24 07:30 发布。杭州白天晴，最高 14℃，东北风小于 3 级；夜间晴，最低 5℃，西南风小于 3 级。",
+      "styling_reason": "策划推断。绒面夹克叠高领针织，搭长裤与低跟鞋，适合白天晴朗时在干燥栈道短时步行。清晨或傍晚在水边久留，可再添一层保暖衣物。",
+      "checked_at": "2026-11-24T14:01:28+08:00"
+    },
+    "checked_at": "2026-11-24T14:01:28+08:00"
+  },
+  "looks": [
+    {
+      "id": 107,
+      "model_id": "female-01",
+      "model_reference_sha256": "dc0a221ff81250415bcfa3b320bc916dc02e2873f030e707083928505ca75066",
+      "title": "西溪·晴芦慢走",
+      "category": "冬日叠穿",
+      "season": "冬季",
+      "description": "肉桂棕绒面短夹克敞开，露出米白翻折高领和深橄榄灯芯绒长裤。黑色便士乐福鞋踏过芦苇边的木栈道，身侧的暗酒红小包压住一抹暖色。",
+      "pieces": [
+        {
+          "role": "外层",
+          "name": "肉桂棕尖领绒面短夹克，前拉链敞穿"
+        },
+        {
+          "role": "上装",
+          "name": "米白翻折高领细罗纹针织衫"
+        },
+        {
+          "role": "下装",
+          "name": "深橄榄高腰直筒灯芯绒长裤"
+        },
+        {
+          "role": "鞋履",
+          "name": "黑色圆头低跟便士乐福鞋"
+        },
+        {
+          "role": "包袋",
+          "name": "暗酒红圆角翻盖纹理斜挎包"
+        }
+      ],
+      "palette": [
+        "#755037",
+        "#e3d5b8",
+        "#4b4937",
+        "#232122",
+        "#6b3441"
+      ],
+      "details": [
+        "短夹克敞开，米白高领提亮脸部附近",
+        "灯芯绒细条顺着长裤垂落，裤脚轻搭鞋面",
+        "暗酒红包身与肩带在肉桂棕和橄榄绿之间提色"
+      ],
+      "tags": [
+        "绒面夹克",
+        "灯芯绒",
+        "便士乐福鞋",
+        "芦苇栈道",
+        "杭州西溪"
+      ],
+      "mood": "原本只是并肩慢走，听见芦苇一阵响，两人留神去听，坐下时笑作一团，起身继续往前。",
+      "scene": "以杭州西溪湿地为灵感的虚构木栈道。水面、淡色芦穗和木凳旁有午后斜光，微风吹动发丝。",
+      "edition": "v2",
+      "shots": [
+        {
+          "index": 1,
+          "title": "沿着栈道走来",
+          "emotion": "直视观者，明朗露齿笑",
+          "pose": "轻握斜挎带，沿栈道向镜头走近",
+          "framing": "正面全身，展示夹克、长裤、包袋与鞋履"
+        },
+        {
+          "index": 2,
+          "title": "听见一声响",
+          "emotion": "睁眼扬眉，圆唇惊讶",
+          "pose": "面向观者抬起一只手，示意停一下",
+          "framing": "胸上近景，见高领与翻领"
+        },
+        {
+          "index": 3,
+          "title": "风在芦穗里",
+          "emotion": "侧视芦穗，放松而专注",
+          "pose": "前臂轻靠木栏，向水面探看",
+          "framing": "侧面髋上中景"
+        },
+        {
+          "index": 4,
+          "title": "坐下就笑开了",
+          "emotion": "仰头张口大笑，眼睛笑弯",
+          "pose": "坐在木凳上，一手撑凳边，一手落在腿上",
+          "framing": "坐姿全身，双鞋完整"
+        },
+        {
+          "index": 5,
+          "title": "等一下，再听听",
+          "emotion": "轻皱眉，抿唇看向观者",
+          "pose": "微微歪头，单手拢在耳边",
+          "framing": "胸上近景，见高领的纵向罗纹"
+        },
+        {
+          "index": 6,
+          "title": "那边还有一片",
+          "emotion": "眨单眼，嘴角微扬",
+          "pose": "半转朝向观者，拇指向肩后指芦洲",
+          "framing": "大腿以上中景，包盖、肩带与裤腰可见"
+        },
+        {
+          "index": 7,
+          "title": "回头喊你跟上",
+          "emotion": "越肩回望，露齿笑",
+          "pose": "沿栈道横向跨步，前臂自然摆动",
+          "framing": "侧面全身，双鞋与裤脚完整"
+        },
+        {
+          "index": 8,
+          "title": "风把头发吹过来",
+          "emotion": "对视，闭口轻笑",
+          "pose": "抬手把吹散的头发别回耳边",
+          "framing": "脸部与高领近景"
+        },
+        {
+          "index": 9,
+          "title": "在栏边打招呼",
+          "emotion": "面向观者露齿笑",
+          "pose": "停在木栏前，一手轻倚栏杆，一手挥手",
+          "framing": "全身，双鞋完整，清楚展示整套配色"
+        }
+      ],
+      "asset": {
+        "asset_id": "look-107-female-01-v2-r1",
+        "file": "assets/looks/2026-11-24/look-107-female-01-v2-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 270174,
+        "sha256": "0eb305ac4812bf8c574d1f5197e88ed1ffc7b827d400a2b2a752c2e27b8ed25b",
+        "visibility": "public",
+        "layout": {
+          "rows": 3,
+          "columns": 3,
+          "preview_panel": 9
+        }
+      }
+    }
+  ],
+  "cover_look_id": 107
+}
