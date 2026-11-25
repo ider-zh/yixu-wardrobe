@@ -8786,6 +8786,159 @@
           "shot_index": 6
         }
       ]
+    },
+    {
+      "product_id": "rust-crew-neck-knit-109",
+      "name": "锈棕圆领细针织衫",
+      "category": "上装",
+      "subtitle": "松量落在肩袖，同色细罗纹收住边缘。",
+      "description": "暖锈棕的细针织衫以松肩和直下摆展开，窄圆领、长袖袖口与下摆用同色罗纹收边，配炭灰西裤时仍保留衣身的自然垂坠。写真难以辨认的后领内侧与细密织纹为 AI 设计演绎。",
+      "color_name": "锈棕色",
+      "color_hex": "#87472d",
+      "design_material": "低光泽的细针织观感",
+      "notes": [
+        "窄圆领细罗纹",
+        "自然落肩与微收袖口",
+        "同色直身罗纹下摆"
+      ],
+      "asset": {
+        "asset_id": "product-rust-crew-neck-knit-109-main-r1",
+        "file": "assets/products/look-109/rust-crew-neck-knit-109-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 214672,
+        "sha256": "dba1eced0ce81a6a829c17823b0b0fcad89e3bd64f0ef62851fde33eba8133bf",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "圆领罗纹与衣身细织面",
+          "caption": "斜侧柔光照出窄领边的立体罗纹与衣身的细密纹理。写真无法确认的近观织纹及后领内侧为 AI 设计演绎。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-rust-crew-neck-knit-109-neckline-r1",
+            "file": "assets/products/look-109/rust-crew-neck-knit-109-neckline-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 281612,
+            "sha256": "0a6be47cec4dab390daea6f12da94192a9d6e24eb0babb1ae800a9f4b1dd2cd1",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 109,
+          "piece_index": 1,
+          "reference_asset_id": "look-109-male-01-v2-r1",
+          "shot_index": 2
+        }
+      ]
+    },
+    {
+      "product_id": "charcoal-single-pleat-trousers-109",
+      "name": "炭灰单褶宽直筒西裤",
+      "category": "下装",
+      "subtitle": "前褶顺着裤腿垂落，裤脚轻搭鞋面。",
+      "description": "炭灰西裤从腰下单褶向下铺开，两条长裤线连到平口裤脚。直筒保留腿部余量，迈步时裤脚随重心轻摆。原写真中腰头上缘和闭合部位被针织衣摆遮住，主图中的腰头与闭合轮廓为 AI 设计推演。",
+      "color_name": "炭灰",
+      "color_hex": "#37312f",
+      "design_material": "细织、哑光、挺垂的西装面料观感",
+      "notes": [
+        "腰下单褶展开，前裤线纵向延伸",
+        "宽直裤腿下接平口裤脚",
+        "主图中的完整腰头为 AI 设计推演"
+      ],
+      "asset": {
+        "asset_id": "product-charcoal-single-pleat-trousers-109-main-r1",
+        "file": "assets/products/look-109/charcoal-single-pleat-trousers-109-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 70208,
+        "sha256": "10e471cedede6aa0f826c62d89bbab4120f0b47825d5a5759a05815cc5a78f8e",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "裤线与平口裤脚",
+          "caption": "斜向柔光显出前裤线如何一直收至平口裤脚。写真难以辨认的近观织纹与针脚为 AI 设计演绎。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-charcoal-single-pleat-trousers-109-crease-r1",
+            "file": "assets/products/look-109/charcoal-single-pleat-trousers-109-crease-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 185466,
+            "sha256": "169a068e9def86c785e1925949e57cc847dde42376da7d8ac2b526062e92009c",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 109,
+          "piece_index": 2,
+          "reference_asset_id": "look-109-male-01-v2-r1",
+          "shot_index": 1
+        }
+      ]
+    },
+    {
+      "product_id": "black-penny-loafers-109",
+      "name": "黑色便士乐福鞋",
+      "category": "鞋履",
+      "subtitle": "一条黑色横带，压住圆弧鞋头的柔光。",
+      "description": "黑色鞋面以细围边勾出圆弧鞋头，横带中央留出一道简洁开槽。低方跟和薄黑底接住炭灰西裤的裤脚。主图中写真无法辨清的鞋口形态、开槽比例和近观针迹为 AI 设计演绎。",
+      "color_name": "墨黑",
+      "color_hex": "#252322",
+      "design_material": "带柔和反光的黑色皮面观感",
+      "notes": [
+        "黑色开槽横带",
+        "圆弧鞋头和同色围边",
+        "低方跟与薄黑底"
+      ],
+      "asset": {
+        "asset_id": "product-black-penny-loafers-109-main-r1",
+        "file": "assets/products/look-109/black-penny-loafers-109-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1120,
+        "height": 1400,
+        "bytes": 67278,
+        "sha256": "f2285c16f5aa1d38b3161591518ff660479dd672525ab88036f86895605dd4d0",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "开槽横带和圆弧鞋头",
+          "caption": "从斜前方近看，侧光勾勒出黑色横带、鞋头围边和表面弧度。写真无法分辨的开槽边缘、近观针脚和表面纹理为 AI 设计演绎。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-black-penny-loafers-109-saddle-r1",
+            "file": "assets/products/look-109/black-penny-loafers-109-saddle-r1.webp",
+            "mime": "image/webp",
+            "width": 1120,
+            "height": 1400,
+            "bytes": 117594,
+            "sha256": "18b194ab63a8496d1d8011beec6c034da9d9ddbce66122d2aa85e5a08d13b4d7",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 109,
+          "piece_index": 3,
+          "reference_asset_id": "look-109-male-01-v2-r1",
+          "shot_index": 4
+        }
+      ]
     }
   ]
 }

@@ -27,6 +27,8 @@ node scripts/build.mjs
 
 Node 构建和 Python API 都生成 `catalog.home`：`featured_look_id`、`recent_look_ids`、`latest_batch_id`，以及完整的 `latestOrder`。首页和默认列表共用这套顺序，`displayOrder` 保留风格漫游顺序。历史基线没有发布日期时使用 `null`，排在有发布记录的内容之后，不根据图片修改时间推断上新。
 
+批次穿搭可设置 `model_only: true`，通过模特页 `#/models/<model_id>` 及 `/api/content/models/<model_id>/looks` 浏览。首页、全站穿搭和批次索引排除这些套装，关联全为这类套装的单品从全站单品列表隐去。公开内容快照与 API 仍提供资源，以便从模特页打开穿搭、单品详情及稳定链接。混合批次优先使用可在首页展示的指定封面，指定封面仅限模特页时使用批次内第一套可在首页展示的穿搭。
+
 前端从构建快照立即呈现内容，API 与快照均有 `revision` 时只接受相同内容版本；不同版本显示同步状态并保留快照，避免旧进程的 100 套目录覆盖新构建的 101 套。同一内容版本仍可更新经过验证的 CDN 地址。完成交付后刷新页面取得相应版本的快照。
 
 构建先在同一文件系统暂存完整输出，再切换专用 `public/`，写入失败时保留旧输出。`node scripts/build.mjs --output 空的候选目录` 只生成候选，不触碰当前网站；显式目标非空时拒绝写入。交付命令和可选的本地提交观察器见 [部署说明](deploy/README.md)。普通 CI 不部署站点。

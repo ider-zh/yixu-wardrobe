@@ -12,7 +12,7 @@ from backend.app import create_app
 from backend.content import ContentService, publication_projection
 from tests.backend.conftest import Clock, Detector, Provider
 from tests.backend.test_content import content_fixture as shared_content_fixture
-from tests.backend.test_content import write_json
+from tests.backend.test_content import metadata, write_json
 
 content_fixture = shared_content_fixture
 
@@ -133,6 +133,88 @@ def test_later_batches_multilook_cover_and_node_python_parity(content_fixture):
         assert client.get("/api/content/looks?model=missing").json()["total"] == 0
         assert client.get("/api/content/home").json() == home
         assert client.get("/api/content/looks?order=unknown").status_code == 422
+
+
+def test_model_only_looks_and_associated_products_use_scoped_indexes(content_fixture):
+    settings, original, _ = content_fixture
+    mixed = add_batch(settings, original, "mixed", [103, 102], cover=103, publish_date="2026-11-13")
+    mixed["looks"][0]["model_only"] = True
+    write_json(settings.content_root / "batches/2026-11-13-mixed.json", mixed)
+    exclusive = add_batch(settings, original, "model", [104], publish_date="2026-11-14")
+    exclusive["looks"][0]["model_only"] = True
+    write_json(settings.content_root / "batches/2026-11-14-model.json", exclusive)
+
+    def product(key, ids):
+        return {
+            "product_id": key,
+            "name": key,
+            "category": key,
+            "subtitle": "Test design",
+            "description": "Test description",
+            "color_name": "Gray",
+            "color_hex": "#aaaaaa",
+            "design_material": "Woven appearance",
+            "notes": ["Test note"],
+            "asset": metadata(
+                settings.catalog_image_root, f"assets/products/{key}.webp", key, (80, 100), False
+            ),
+            "appearances": [
+                {
+                    "look_id": id_,
+                    "piece_index": 1,
+                    "reference_asset_id": f"look-{id_}-v2-r1",
+                    "shot_index": 1,
+                }
+                for id_ in ids
+            ],
+        }
+
+    write_json(
+        settings.content_root / "products.json",
+        {
+            "schema_version": 1,
+            "products": [product("model-exclusive", [103]), product("shared", [104, 101])],
+        },
+    )
+    static = node_catalog(settings)
+    app = create_app(settings, provider=Provider(), detector=Detector(), clock=Clock())
+    with TestClient(app, base_url="https://localhost") as client:
+        catalog = client.get("/api/content/catalog").json()
+        assert static["revision"] == catalog["revision"]
+        assert (
+            static["home"]
+            == catalog["home"]
+            == {
+                "featured_look_id": 102,
+                "recent_look_ids": [101, 1, 2, 3, 4, 5],
+                "latest_batch_id": "2026-11-13-mixed",
+            }
+        )
+        assert [look["id"] for look in static["looks"] if look.get("model_only")] == [103, 104]
+        for query in ("", "?order=curated", "?model=female-02"):
+            items = client.get(f"/api/content/looks{query}").json()["items"]
+            assert {102, 101} <= {item["id"] for item in items}
+            assert {103, 104}.isdisjoint(item["id"] for item in items)
+        assert client.get("/api/content/looks/103").json()["model_only"] is True
+        model = client.get("/api/content/models/female-02/looks").json()
+        assert [item["id"] for item in model["items"]] == [104, 102, 103, 101]
+        assert client.get("/api/content/models/unknown/looks").status_code == 404
+        batches = client.get("/api/content/batches").json()["items"]
+        assert [batch["look_ids"] for batch in batches] == [[102], [101]]
+        assert batches[0]["cover_look_id"] == 102
+        products = client.get("/api/content/products").json()["items"]
+        assert [item["product_id"] for item in products] == ["shared"]
+        assert [a["look_id"] for a in products[0]["appearances"]] == [101]
+        assert client.get("/api/content/products?category=model-exclusive").json()["total"] == 0
+        assert client.get("/api/content/products?look_id=103").json()["total"] == 1
+        assert (
+            client.get("/api/content/products/model-exclusive").json()["product_id"]
+            == "model-exclusive"
+        )
+        assert (
+            client.get("/api/content/products/shared").json()["appearances"]
+            == products[0]["appearances"]
+        )
 
 
 @pytest.mark.parametrize(

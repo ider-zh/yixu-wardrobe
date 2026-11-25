@@ -25,10 +25,14 @@ export function publicationProjection(looks, batches, legacyOrder) {
   const publishedIds = orderedBatches.flatMap(batch => [...batch.look_ids].sort((a, b) => a - b));
   const publishedSet = new Set(publishedIds);
   const latestOrder = [...publishedIds, ...looks.filter(look => !publishedSet.has(look.id)).map(look => look.id).sort((a, b) => a - b)];
-  const featured = orderedBatches[0]?.cover_look_id ?? legacyOrder[0] ?? latestOrder[0] ?? null;
+  const indexed = new Set(looks.filter(look => !look.model_only).map(look => look.id));
+  const latestBatch = orderedBatches.find(batch => batch.look_ids.some(id => indexed.has(id)));
+  const featured = latestBatch
+    ? (indexed.has(latestBatch.cover_look_id) ? latestBatch.cover_look_id : latestBatch.look_ids.find(id => indexed.has(id)))
+    : legacyOrder.find(id => indexed.has(id)) ?? latestOrder.find(id => indexed.has(id)) ?? null;
   return {
     orderedBatches, latestOrder,
-    home: {featured_look_id: featured, recent_look_ids: latestOrder.filter(id => id !== featured).slice(0, 6), latest_batch_id: orderedBatches[0]?.batch_id ?? null},
+    home: {featured_look_id: featured, recent_look_ids: latestOrder.filter(id => indexed.has(id) && id !== featured).slice(0, 6), latest_batch_id: latestBatch?.batch_id ?? null},
   };
 }
 
@@ -147,6 +151,7 @@ export function loadContent(root) {
     if (batch) {
       fail(model && model.enabled !== false && input.model_reference_sha256 === model.reference.sha256, 'Missing, disabled or stale model reference');
       fail(input.edition === 'v2', 'New outfits must be expressive only');
+      fail(!Object.hasOwn(input, 'model_only') || typeof input.model_only === 'boolean', 'Model-only indexing requires a boolean');
       fail(text(input.mood) && text(input.scene) && Array.isArray(input.tags) && input.tags.length > 0 && input.tags.every(text), 'Expressive mood, scene and tags required');
     }
     let version = batch ? {
@@ -174,6 +179,7 @@ export function loadContent(root) {
       if (input[key] !== undefined) out[key] = structuredClone(input[key]);
     }
     Object.assign(out, {
+      ...(batch && input.model_only ? {model_only: true} : {}),
       model_id: revised?.model_id ?? input.model_id ?? null,
       model_reference_sha256: revised?.model_reference_sha256 ?? input.model_reference_sha256 ?? null,
       batch_id: batch?.batch_id ?? input.batch_id ?? null,

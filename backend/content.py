@@ -188,6 +188,11 @@ class BatchLook(Strict):
     id: int = Field(strict=True, ge=1, le=2_147_483_647)
     model_id: str
     model_reference_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    model_only: bool = Field(
+        default=False,
+        strict=True,
+        description="Show this look and products exclusive to it through model pages.",
+    )
     title: str = Field(min_length=1, max_length=200)
     category: str = Field(min_length=1, max_length=200)
     season: str = Field(min_length=1, max_length=100)
@@ -301,6 +306,14 @@ class Batch(Strict):
         return value.astimezone(UTC).isoformat(timespec="milliseconds").replace("+00:00", "Z")
 
 
+def indexed_batches(batches, indexed_ids):
+    for batch in batches:
+        ids = [key for key in batch["look_ids"] if key in indexed_ids]
+        if ids:
+            cover = batch["cover_look_id"]
+            yield {**batch, "look_ids": ids, "cover_look_id": cover if cover in ids else ids[0]}
+
+
 def publication_projection(looks, batches, legacy_order):
     """Deterministic feed selection; source file mtimes never affect publication."""
     ordered_batches = sorted(
@@ -309,15 +322,19 @@ def publication_projection(looks, batches, legacy_order):
     published_ids = [key for batch in ordered_batches for key in sorted(batch["look_ids"])]
     legacy_ids = sorted(look["id"] for look in looks if look["id"] not in published_ids)
     latest_order = published_ids + legacy_ids
+    indexed_ids = {look["id"] for look in looks if not look.get("model_only")}
+    latest_batch = next(indexed_batches(ordered_batches, indexed_ids), None)
     featured = (
-        ordered_batches[0]["cover_look_id"]
-        if ordered_batches
-        else next(iter(legacy_order), next(iter(latest_order), None))
+        latest_batch["cover_look_id"]
+        if latest_batch
+        else next((key for key in [*legacy_order, *latest_order] if key in indexed_ids), None)
     )
     home = {
         "featured_look_id": featured,
-        "recent_look_ids": [key for key in latest_order if key != featured][:6],
-        "latest_batch_id": ordered_batches[0]["batch_id"] if ordered_batches else None,
+        "recent_look_ids": [key for key in latest_order if key in indexed_ids and key != featured][
+            :6
+        ],
+        "latest_batch_id": latest_batch["batch_id"] if latest_batch else None,
     }
     return ordered_batches, latest_order, home
 
@@ -636,6 +653,8 @@ class ContentService:
                     raise ValueError("Invalid look/model identity")
                 asset = register(item.asset.model_dump(exclude_none=True), grid=True)
                 look = item.model_dump(mode="json", exclude={"edition", "asset", "shots"})
+                if not item.model_only:
+                    look.pop("model_only")
                 look.update(
                     image=asset["file"],
                     ready=True,
@@ -858,6 +877,16 @@ class ContentService:
     def router(self):
         router = APIRouter(prefix="/api/content")
 
+        def looks_page(snapshot, items, offset, limit):
+            return {
+                "items": items[offset : offset + limit],
+                "total": len(items),
+                "offset": offset,
+                "limit": limit,
+                "has_more": offset + limit < len(items),
+                "revision": snapshot["revision"],
+            }
+
         @router.get("/catalog")
         def catalog():
             return self.catalog()
@@ -891,19 +920,13 @@ class ContentService:
             items = [
                 look
                 for look in items
-                if (not model or look.get("model_id") == model)
+                if not look.get("model_only")
+                and (not model or look.get("model_id") == model)
                 and (not category or look["category"] == category)
                 and (not region or region in (look.get("region") or {}).values())
                 and (not q or q.casefold() in json.dumps(look, ensure_ascii=False).casefold())
             ]
-            return {
-                "items": items[offset : offset + limit],
-                "total": len(items),
-                "offset": offset,
-                "limit": limit,
-                "has_more": offset + limit < len(items),
-                "revision": snapshot["revision"],
-            }
+            return looks_page(snapshot, items, offset, limit)
 
         @router.get("/looks/{look_id}")
         def look(look_id: int):
@@ -916,32 +939,56 @@ class ContentService:
         def models():
             return {"items": self.catalog()["models"]}
 
+        @router.get("/models/{model_id}/looks")
+        def model_looks(
+            model_id: str, offset: int = Query(0, ge=0), limit: int = Query(24, ge=1, le=200)
+        ):
+            snapshot = self.catalog()
+            if not any(model["model_id"] == model_id for model in snapshot["models"]):
+                raise HTTPException(404, "not_found:Model not found")
+            owned = {
+                look["id"]: look for look in snapshot["looks"] if look.get("model_id") == model_id
+            }
+            items = [owned[key] for key in snapshot["latestOrder"] if key in owned]
+            return looks_page(snapshot, items, offset, limit)
+
         @router.get("/products")
         def products(category: str | None = None, look_id: int | None = None):
             snapshot = self.catalog()
-            items = [
-                product
-                for product in snapshot.get("products", [])
-                if (not category or product["category"] == category)
-                and (
-                    look_id is None or any(a["look_id"] == look_id for a in product["appearances"])
-                )
-            ]
+            indexed = {look["id"] for look in snapshot["looks"] if not look.get("model_only")}
+            items = []
+            for product in snapshot.get("products", []):
+                if category and product["category"] != category:
+                    continue
+                appearances = [
+                    a
+                    for a in product["appearances"]
+                    if a["look_id"] in indexed or a["look_id"] == look_id
+                ]
+                if appearances and (
+                    look_id is None or any(a["look_id"] == look_id for a in appearances)
+                ):
+                    items.append({**product, "appearances": appearances})
             return {"items": items, "total": len(items), "revision": snapshot["revision"]}
 
         @router.get("/products/{product_id}")
         def product(product_id: str):
+            snapshot = self.catalog()
             item = next(
-                (p for p in self.catalog().get("products", []) if p["product_id"] == product_id),
+                (p for p in snapshot.get("products", []) if p["product_id"] == product_id),
                 None,
             )
             if item is None:
                 raise HTTPException(404, "not_found:Product not found")
-            return item
+            indexed = {look["id"] for look in snapshot["looks"] if not look.get("model_only")}
+            appearances = [a for a in item["appearances"] if a["look_id"] in indexed]
+            return {**item, "appearances": appearances or item["appearances"]}
 
         @router.get("/batches")
         def batches():
-            return {"items": self.catalog()["batches"]}
+            snapshot = self.catalog()
+            indexed = {look["id"] for look in snapshot["looks"] if not look.get("model_only")}
+            return {"items": list(indexed_batches(snapshot["batches"], indexed))}
 
         def response(asset_id, attachment=False):
             data, record = self.asset(asset_id)

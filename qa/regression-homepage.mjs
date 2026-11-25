@@ -17,6 +17,8 @@ const output=path.join(workspace,'site');
 const built=spawnSync(process.execPath,['scripts/build.mjs','--output',output],{cwd:root,encoding:'utf8'});
 assert.equal(built.status,0,built.stderr||built.stdout);
 const catalog=loadContent(root).catalog;
+const indexedIds=new Set(catalog.looks.filter(look=>!look.model_only).map(look=>look.id));
+const indexedOrder=catalog.latestOrder.filter(id=>indexedIds.has(id));
 const featured=catalog.looks.find(look=>look.id===catalog.home.featured_look_id);
 assert.ok(featured,'Publication projection supplies a real hero');
 let apiCatalog=structuredClone(catalog);
@@ -103,7 +105,7 @@ try{
   await evaluate('document.getElementById("close-detail").click()');await wait('!document.getElementById("detail-dialog").open');
   if(process.env.YIXU_SCREENSHOT_DIR){fs.mkdirSync(process.env.YIXU_SCREENSHOT_DIR,{recursive:true,mode:0o700});const image=await client('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(process.env.YIXU_SCREENSHOT_DIR,`home-${viewport.width}.png`),Buffer.from(image.data,'base64'),{mode:0o600});}
   await evaluate('document.querySelector("[data-page=looks]").click()');await wait('!document.getElementById("collection").hidden');
-  const archiveIds=await evaluate('[...document.querySelectorAll("#gallery [data-look-card]")].map(card=>Number(card.dataset.lookCard))');assert.deepEqual(archiveIds,catalog.latestOrder.slice(0,24));
+  const archiveIds=await evaluate('[...document.querySelectorAll("#gallery [data-look-card]")].map(card=>Number(card.dataset.lookCard))');assert.deepEqual(archiveIds,indexedOrder.slice(0,24));
   if(viewport.width<801){await evaluate('document.getElementById("open-filters").click()');assert.equal(await evaluate('document.getElementById("filter-dialog").open'),true);assert.equal(await evaluate('document.activeElement.closest("#filter-dialog")!==null'),true,'Native drawer receives focus');}
   const category=featured.category;
   await evaluate(`document.querySelector('[data-category='+CSS.escape(${JSON.stringify(category)})+']').click()`);
@@ -129,7 +131,7 @@ try{
  await route('#/looks?q='+encodeURIComponent('丝绒'));
  await evaluate(`document.getElementById("open-compare").click();document.querySelector('[data-compare-detail="70"]').click()`);
  await wait('document.getElementById("detail-dialog").open');
- const globalNext=catalog.latestOrder[catalog.latestOrder.indexOf(70)+1];
+ const globalNext=indexedOrder[indexedOrder.indexOf(70)+1];
  await evaluate('document.getElementById("next-look").click()');assert.equal(await evaluate('location.hash'),'#look-'+globalNext);
  await evaluate('document.getElementById("previous-look").click()');assert.equal(await evaluate('location.hash'),'#look-70','Comparison navigation remains frozen when a neighbor happens to match the active filter');
  await evaluate('document.getElementById("close-detail").click();document.getElementById("clear-compare").click()');
@@ -138,8 +140,20 @@ try{
  const actualModels=new Set(catalog.looks.map(look=>look.model_id).filter(Boolean));
  const modelLinks=await evaluate('[...document.querySelectorAll(".model-looks-link")].map(link=>link.getAttribute("href"))');
  assert.equal(modelLinks.length,[...actualModels].filter(id=>catalog.models.some(model=>model.model_id===id)).length);
- for(const link of modelLinks){const id=new URLSearchParams(link.split('?')[1]).get('model');assert.ok(actualModels.has(id));}
- if(modelLinks.length){await evaluate('document.querySelector(".model-looks-link").click()');await wait('!document.getElementById("collection").hidden');assert.equal(await evaluate('document.getElementById("model-filter").value'),new URLSearchParams(modelLinks[0].split('?')[1]).get('model'));}
+ for(const link of modelLinks){
+  const modelFilter=new URLSearchParams(link.split('?')[1]).get('model');
+  const id=modelFilter||link.split('/').at(-1);
+  assert.ok(actualModels.has(id));
+  await route(link);
+  if(modelFilter){
+   await wait('!document.getElementById("collection").hidden');
+   assert.equal(await evaluate('document.getElementById("model-filter").value'),id);
+   continue;
+  }
+  await wait('!document.getElementById("model-profile").hidden');
+  const owned=catalog.latestOrder.filter(key=>catalog.looks.find(look=>look.id===key).model_id===id);
+  assert.deepEqual(await evaluate('[...document.querySelectorAll("#model-looks-gallery [data-look-card]")].map(card=>Number(card.dataset.lookCard))'),owned);
+ }
  await route('#/home');await evaluate('localStorage.setItem("wardrobe99:favorites:v1","[9999]")');await navigate();await evaluate('document.getElementById("hero-favorite").click()');
  assert.deepEqual(await evaluate('JSON.parse(localStorage.getItem("wardrobe99:favorites:v1"))'),[9999,featured.id]);
  await route('#/favorites');assert.deepEqual(await evaluate('[...document.querySelectorAll("#gallery [data-look-card]")].map(card=>Number(card.dataset.lookCard))'),[featured.id]);
@@ -229,7 +243,59 @@ try{
  apiCatalog=structuredClone(catalog);apiCatalog.revision='stale-test-revision';apiCatalog.looks=apiCatalog.looks.filter(look=>look.id!==featured.id);apiCatalog.home={featured_look_id:apiCatalog.looks[0].id,recent_look_ids:[],latest_batch_id:null};
  await navigate();await wait('document.getElementById("catalog-status").textContent.includes("同步中")');assert.equal(await evaluate('document.getElementById("hero-title").textContent'),featured.title);assert.equal(await evaluate('window.WARDROBE.revision'),catalog.revision);
  apiCatalog=structuredClone(catalog);await navigate();await wait('document.getElementById("hero-image-0").naturalWidth>0');assert.equal(await evaluate('document.getElementById("catalog-status").textContent'),'');
- await navigate(pathToFileURL(path.join(output,'index.html')).href);await wait('document.getElementById("hero-image-0").naturalWidth>0');assert.equal(await evaluate('document.getElementById("hero-title").textContent'),featured.title);await route('#/looks');assert.equal(await evaluate('document.querySelector("#gallery [data-look-card]").dataset.lookCard'),String(catalog.latestOrder[0]));await noOverflow('Offline archive');
+ for(const look of catalog.looks.filter(item=>item.model_only)){
+  const profile='#/models/'+look.model_id,detail='#look-'+look.id;
+  const linked=catalog.products.filter(p=>p.appearances.some(a=>a.look_id===look.id));
+  const exclusive=linked.filter(p=>p.appearances.every(a=>!indexedIds.has(a.look_id)));
+  const tiers=[{width:390,height:844},{width:1440,height:900}];
+  for(const viewport of tiers){
+   await client('Emulation.setDeviceMetricsOverride',{...viewport,deviceScaleFactor:1,mobile:viewport.width<600});
+   await route('#/models');
+   await evaluate('document.querySelector('+JSON.stringify('a.model-looks-link[href="'+profile+'"]')+').click()');
+   await wait('location.hash==='+JSON.stringify(profile)+' && !document.getElementById("model-profile").hidden');
+   await noOverflow('Model profile '+viewport.width);
+   await evaluate('document.querySelector('+JSON.stringify('#model-looks-gallery [data-open="'+look.id+'"]')+').click()');
+   await wait('document.getElementById("detail-dialog").open');
+   assert.equal(await evaluate('location.hash'),detail);
+   assert.equal(await evaluate('document.getElementById("detail-title").textContent'),look.title);
+   assert.equal(await evaluate('document.getElementById("detail-compare").hidden'),true);
+   await wait('document.getElementById("detail-image").naturalWidth>0');
+   assert.deepEqual(await evaluate('[...document.querySelectorAll("#detail-product-gallery [data-product-card]")].map(card=>card.dataset.productCard)'),linked.map(p=>p.product_id));
+   if(viewport.width===390){
+    await evaluate('document.getElementById("detail-favorite").click()');
+    assert.ok((await evaluate('JSON.parse(localStorage.getItem("wardrobe99:favorites:v1"))')).includes(look.id));
+   }
+   if(exclusive.length){
+    const product=exclusive[0],productRoute='#/product/'+product.product_id;
+    await evaluate('document.querySelector('+JSON.stringify('#detail-product-gallery a[href="'+productRoute+'"]')+').click()');
+    await wait('!document.getElementById("product-page").hidden');
+    await wait('document.querySelector(".product-main-image img").naturalWidth>0');
+    assert.equal(await evaluate('document.querySelector(".product-breadcrumb a").getAttribute("href")'),profile);
+    await noOverflow('Model-only product '+viewport.width);
+    if(viewport.width===390){
+     await evaluate('document.querySelector("#product-page [data-product-favorite]").click()');
+     assert.ok((await evaluate('JSON.parse(localStorage.getItem("yixu:product-favorites:v1"))')).includes(product.product_id));
+    }
+    await evaluate('history.back()');await wait('document.getElementById("detail-dialog").open');
+   }
+   await evaluate('document.getElementById("close-detail").click()');
+   await wait('location.hash==='+JSON.stringify(profile)+' && !document.getElementById("model-profile").hidden');
+  }
+  await route('#/home');
+  assert.equal(await evaluate('Number(document.getElementById("hero-detail").dataset.open)'),featured.id);
+  assert.equal(await evaluate('!!document.querySelector('+JSON.stringify('#recent-gallery [data-look-card="'+look.id+'"]')+')'),false);
+  for(const hash of ['#/looks','#/looks?sort=curated','#/looks?model='+look.model_id,'#/looks?q='+look.id,'#/favorites']){
+   await route(hash);
+   assert.equal(await evaluate('!!document.querySelector('+JSON.stringify('#gallery [data-look-card="'+look.id+'"]')+')'),false);
+  }
+  for(const hash of ['#/products','#/products?saved=1',...exclusive.map(p=>'#/products?category='+encodeURIComponent(p.category))]){
+   await route(hash);
+   const cards=await evaluate('[...document.querySelectorAll("#product-gallery [data-product-card]")].map(card=>card.dataset.productCard)');
+   assert.ok(exclusive.every(p=>!cards.includes(p.product_id)));
+  }
+ }
+ if(catalog.looks.some(look=>look.model_only))console.log('PASS model page discovery on desktop and mobile, with current global indexes preserved');
+ await navigate(pathToFileURL(path.join(output,'index.html')).href);await wait('document.getElementById("hero-image-0").naturalWidth>0');assert.equal(await evaluate('document.getElementById("hero-title").textContent'),featured.title);await route('#/looks');assert.equal(await evaluate('document.querySelector("#gallery [data-look-card]").dataset.lookCard'),String(indexedOrder[0]));await noOverflow('Offline archive');
  const offlineSource='#/looks?q=1',offlineTag='针织'; // Frozen historical fixture survives future daily hero changes.
  await route(offlineSource);await evaluate(`document.querySelector('#gallery [data-open="1"]').click()`);await wait('document.getElementById("detail-dialog").open');
  const offlineLink=await evaluate(`document.querySelector('#detail-tags a[href="${'#/looks?'+new URLSearchParams({q:offlineTag})}"]').getAttribute('href')`);
@@ -238,7 +304,7 @@ try{
  assert.ok(await evaluate('document.querySelectorAll("#gallery [data-look-card]").length>1'),'Offline exploration uses its snapshot, without the API');
  await evaluate('history.back()');await wait('document.getElementById("detail-dialog").open');await evaluate('document.getElementById("close-detail").click()');await wait(`location.hash===${JSON.stringify(offlineSource)}`);
  // Product samples work from the actual offline snapshot as well as API hydration.
- const sampleProducts=catalog.products||[];
+ const sampleProducts=(catalog.products||[]).filter(product=>product.appearances.some(a=>indexedIds.has(a.look_id)));
  assert.ok(sampleProducts.length>=3,'Published product samples remain available as the catalog grows');
  // Complete outfit samples prove the same product contract across styles;
  // their piece counts are fixtures, not limits on future catalog growth.
@@ -319,7 +385,7 @@ try{
  const galleryFixtureUrl=pathToFileURL(path.join(output,'index.html')).href;
  for(const viewport of [{width:390,height:844},{width:1440,height:1000}]){
   await client('Emulation.setDeviceMetricsOverride',{...viewport,deviceScaleFactor:1,mobile:viewport.width<600});
-  for(const [productIndex,product] of sampleProducts.entries()){
+  for(const [productIndex,product] of catalog.products.entries()){
    // A fresh document prevents this accelerated sweep from exhausting the
    // browser's same-document navigation budget as the product catalog grows.
    if(productIndex%12===0){
@@ -354,8 +420,10 @@ try{
    await evaluate('(()=>{const image=document.querySelector(".product-main-image img");image.src="data:image/webp;base64,aW52YWxpZA==";image.dispatchEvent(new Event("error"));})()');
    await wait('document.querySelector(".product-main-image img").naturalWidth>0');
    assert.equal(await evaluate('document.querySelector(".product-main-image img").getAttribute("src")'),images.at(-1).asset.source_url);
-   for(let index=0;index<product.appearances.length;index++){
-    const appearance=product.appearances[index],look=catalog.looks.find(look=>look.id===appearance.look_id),version=look.versions.v2;
+   const indexedAppearances=product.appearances.filter(appearance=>indexedIds.has(appearance.look_id));
+   const appearances=indexedAppearances.length?indexedAppearances:product.appearances;
+   for(const [index,appearance] of appearances.entries()){
+    const look=catalog.looks.find(look=>look.id===appearance.look_id),version=look.versions.v2;
     assert.equal(appearance.reference_asset_id,version.asset.asset_id,'Appearance uses the exact published photo revision');
     const source=await evaluate(`(()=>{const card=document.querySelectorAll('#product-worn-section .product-worn')[${index}],photo=card.querySelector('.photo-window'),image=photo.querySelector('img');return {href:card.getAttribute('href'),look:card.dataset.productLook,caption:card.querySelector('.product-worn-source').textContent,src:image.getAttribute('src'),alt:image.alt,x:photo.style.getPropertyValue('--panel-x'),y:photo.style.getPropertyValue('--panel-y')};})()`);
     assert.equal(source.href,'#look-'+look.id);assert.equal(source.look,String(look.id));
