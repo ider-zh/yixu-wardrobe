@@ -27,6 +27,8 @@ USER = "yixu-dev"
 UNIT = "yixu-dev-api.service"
 WORKER_UNIT = "yixu-dev-worker.service"
 DOMAIN = "dev-yixu.8882088.xyz"
+ORIGIN = "http://127.0.0.1:18866"
+PUBLIC_ORIGIN = "https://" + DOMAIN
 REPO = "https://github.com/ider-zh/yixu-wardrobe.git"
 NODE = "/opt/yixu-dev-node/bin/node"
 DOWNLOAD_PROXY = None
@@ -109,34 +111,6 @@ def run(args, *, cwd=None):
 
 
 def get(url, host=None):
-    parsed = urllib.parse.urlsplit(url)
-    if parsed.scheme == "https" and parsed.hostname == DOMAIN:
-        # Like curl --resolve: connect to the owned listener, but verify the
-        # real domain and CA chain. No proxy hairpin or disabled TLS checks.
-        response = subprocess.run(
-            [
-                "/usr/bin/curl",
-                "--fail",
-                "--silent",
-                "--show-error",
-                "--noproxy",
-                "*",
-                "--resolve",
-                DOMAIN + ":443:127.0.0.1",
-                "--max-time",
-                "20",
-                "--header",
-                "Cache-Control: no-cache",
-                url,
-            ],
-            capture_output=True,
-            env={"PATH": "/usr/bin:/bin"},
-            timeout=25,
-            check=False,
-        )
-        if response.returncode:
-            raise OSError("Owned development HTTPS validation failed")
-        return response.stdout
     headers = {"User-Agent": "yixu-dev-deployment", "Cache-Control": "no-cache"}
     if host:
         headers["Host"] = host
@@ -244,11 +218,12 @@ def shell_resources(release):
 
 def verify(release, origin):
     catalog = snapshot(release)
-    health = json.loads(get("http://127.0.0.1:8766/api/health", DOMAIN))
+    origin = origin.rstrip("/")
+    health = json.loads(get(origin + "/api/health", DOMAIN))
     if health.get("ok") is not True:
         raise RuntimeError("Development API is unhealthy")
     if GENERATION_ENABLED:
-        bootstrap = json.loads(get("http://127.0.0.1:8766/api/bootstrap", DOMAIN))
+        bootstrap = json.loads(get(origin + "/api/bootstrap", DOMAIN))
         if (
             health.get("provider_configured") is not True
             or health.get("detector_ready") is not True
@@ -257,19 +232,19 @@ def verify(release, origin):
             raise RuntimeError("Authorized development generation is not fully configured")
     elif health.get("provider_configured") is not False:
         raise RuntimeError("Development generation requires explicit operator authorization")
-    actual = json.loads(get("http://127.0.0.1:8766/api/content/catalog", DOMAIN))
+    actual = json.loads(get(origin + "/api/content/catalog", DOMAIN))
     if actual.get("revision") != catalog["revision"] or actual.get("home") != catalog["home"]:
         raise RuntimeError("API and development snapshot differ")
     # Never select /api/admin from an unauthenticated cookie; its protection is a gate.
     try:
-        get("http://127.0.0.1:8766/api/admin/overview", DOMAIN)
+        get(origin + "/api/admin/overview", DOMAIN)
         raise RuntimeError("Development administrator endpoint lacks authentication")
     except urllib.error.HTTPError as error:
         if error.code != 401:
             raise
     checks = shell_resources(release)
     for local, remote in checks:
-        data = get(origin.rstrip("/") + remote, DOMAIN)
+        data = get(origin + remote, DOMAIN)
         if hashlib.sha256(data).digest() != hashlib.sha256((release / local).read_bytes()).digest():
             raise RuntimeError("Development static file is stale: " + remote)
     featured = next(
@@ -281,7 +256,7 @@ def verify(release, origin):
         r"/api/content/assets/[A-Za-z0-9_-]{1,160}", source
     ):
         raise RuntimeError("Development featured source URL is outside the owned API")
-    image = get("http://127.0.0.1:8766" + source, DOMAIN)
+    image = get(origin + source, DOMAIN)
     if len(image) != asset["bytes"] or hashlib.sha256(image).hexdigest() != asset["sha256"]:
         raise RuntimeError("Development featured resource differs")
     return {
@@ -488,6 +463,8 @@ def deliver(origin, retry=False):
         deadline = time.monotonic() + 60
         while True:
             try:
+                if origin != ORIGIN:
+                    verify(release, ORIGIN)
                 result = verify(release, origin)
                 break
             except (OSError, ValueError, RuntimeError):
@@ -544,7 +521,7 @@ def deliver(origin, retry=False):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--origin", default="https://" + DOMAIN, choices=["https://" + DOMAIN, "http://127.0.0.1"]
+        "--origin", default=PUBLIC_ORIGIN, choices=[PUBLIC_ORIGIN, ORIGIN]
     )
     parser.add_argument(
         "--retry",

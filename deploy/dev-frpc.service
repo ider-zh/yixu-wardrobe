@@ -1,0 +1,21 @@
+[Unit]
+Description=Yixu development FRP client
+Wants=network-online.target yixu-dev-origin.service
+After=network-online.target yixu-dev-origin.service
+
+[Service]
+DynamicUser=true
+SupplementaryGroups=yixu-dev-tunnel
+LoadCredential=frpc.toml:/etc/yixu-dev-frp/frpc.toml
+LoadCredential=ca.crt:/etc/yixu-dev-frp/ca.crt
+LoadCredential=frpc.crt:/etc/yixu-dev-frp/frpc.crt
+LoadCredential=frpc.key:/etc/yixu-dev-frp/frpc.key
+ExecStart=/usr/local/libexec/yixu-dev-frpc -c %d/frpc.toml
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

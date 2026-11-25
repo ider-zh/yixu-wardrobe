@@ -1,0 +1,20 @@
+[Unit]
+Description=Yixu development FRP server
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+DynamicUser=true
+LoadCredential=frps.toml:/etc/yixu-dev-frp/frps.toml
+LoadCredential=ca.crt:/etc/yixu-dev-frp/ca.crt
+LoadCredential=frps.crt:/etc/yixu-dev-frp/frps.crt
+LoadCredential=frps.key:/etc/yixu-dev-frp/frps.key
+ExecStart=/usr/local/libexec/yixu-dev-frps -c %d/frps.toml
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

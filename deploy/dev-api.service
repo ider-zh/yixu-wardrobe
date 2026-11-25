@@ -13,7 +13,7 @@ EnvironmentFile=/etc/yixu-wardrobe-dev/runtime.env
 Environment=PYTHONDONTWRITEBYTECODE=1
 Environment=OMP_NUM_THREADS=1
 Environment=OPENBLAS_NUM_THREADS=1
-ExecStart=/srv/yixu-wardrobe-dev/current/.venv/bin/python -m uvicorn backend.app:create_app --factory --host 127.0.0.1 --port 8766 --no-access-log --proxy-headers --forwarded-allow-ips 127.0.0.1
+ExecStart=/srv/yixu-wardrobe-dev/current/.venv/bin/python -m uvicorn backend.app:create_app --factory --host 127.0.0.1 --port 18867 --no-access-log --proxy-headers --forwarded-allow-ips 127.0.0.1
 Restart=on-failure
 RestartSec=3
 UMask=0077

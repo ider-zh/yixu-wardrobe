@@ -1,0 +1,22 @@
+[Unit]
+Description=Yixu development website origin
+After=network.target
+
+[Service]
+User=www-data
+Group=yixu-dev-tunnel
+RuntimeDirectory=yixu-dev-origin
+RuntimeDirectoryMode=0750
+ExecStartPre=/usr/sbin/nginx -t -c /etc/yixu-wardrobe-dev-origin/nginx.conf
+ExecStart=/usr/sbin/nginx -c /etc/yixu-wardrobe-dev-origin/nginx.conf -g "daemon off;"
+ExecReload=/bin/kill -HUP $MAINPID
+KillSignal=SIGQUIT
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

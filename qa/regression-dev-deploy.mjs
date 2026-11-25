@@ -7,12 +7,17 @@ const root=fileURLToPath(new URL('../',import.meta.url));
 const read=name=>fs.readFileSync(new URL('../'+name,import.meta.url),'utf8');
 const source=read('deploy/dev-release.py');
 const site=read('deploy/dev-site.conf');
+const edge=read('deploy/dev-edge.conf');
 assert.match(source,/runuser.*USER/);
 assert.match(source,/actions\/workflows\/check\.yml\/runs/);
 assert.match(source,/latest\.get\(["']conclusion["']\) == ["']success["']/);
 assert.match(site,/server_name dev-yixu\.8882088\.xyz;/);
 assert.match(site,/location \^~ \/admin\//);
-assert.match(site,/proxy_pass http:\/\/127\.0\.0\.1:8766;/);
+assert.match(site,/proxy_pass http:\/\/127\.0\.0\.1:18867;/);
+assert.match(edge,/ssl_certificate .*dev-yixu/);
+assert.match(edge,/proxy_pass http:\/\/127\.0\.0\.1:18866;/);
+assert.match(edge,/X-Forwarded-For \$remote_addr/);
+assert.match(site,/set_real_ip_from unix:/);
 assert.match(site,/X-Forwarded-For \$remote_addr/);
 assert.doesNotMatch(site,/admin-dev\.|admin\.8882088|proxy_pass.*:8765/);
 assert.match(read('deploy/dev-api.service'),/User=yixu-dev/);
@@ -39,23 +44,29 @@ with tempfile.TemporaryDirectory() as temporary:
  sentinel=state/'state.sqlite3';sentinel.write_bytes(b'private visitor state must survive rollback')
  calls=[];m.stop_worker=lambda:calls.append('stop-worker');m.restart=lambda:calls.append('restart');m.ci_succeeded=lambda _:False
  m.build=lambda _:(_ for _ in ()).throw(AssertionError('CI must gate build'))
- m.deliver('http://127.0.0.1');assert (root/'current').resolve()==old_release;assert not calls
+ m.deliver(m.ORIGIN);assert (root/'current').resolve()==old_release;assert not calls
  m.ci_succeeded=lambda _:True
  def build(_):
   candidate=root/'releases'/sha;candidate.mkdir(exist_ok=True);return candidate
  m.build=build;m.verify=lambda *_:(_ for _ in ()).throw(RuntimeError('stale admin asset'))
- try:m.deliver('http://127.0.0.1')
+ try:m.deliver(m.ORIGIN)
  except RuntimeError:pass
  else:raise AssertionError('failed verification must fail delivery')
  assert (root/'current').resolve()==old_release;assert calls==['stop-worker','restart','stop-worker','restart']
  failure=json.loads((state/'deployment.json').read_text());assert failure['status']=='failed';assert failure['previous_release_restored'];assert failure['private_database_rolled_back'] is False
  assert sentinel.read_bytes()==b'private visitor state must survive rollback'
  m.build=lambda _:(_ for _ in ()).throw(AssertionError('unchanged failed SHA must not loop'))
- m.deliver('http://127.0.0.1')
- m.build=build;m.recheck_candidate=build;m.verify=lambda *_:{'revision':'catalog-version','featured_look_id':103,'source_sha256':'c'*64,'source_bytes':99,'source_verified':True,'static_verified':True}
- m.deliver('http://127.0.0.1',retry=True)
+ m.deliver(m.ORIGIN)
+ m.build=build;m.recheck_candidate=build
+ verified_origins=[]
+ def verify_candidate(_,origin):
+  verified_origins.append(origin)
+  return {'revision':'catalog-version','featured_look_id':103,'source_sha256':'c'*64,'source_bytes':99,'source_verified':True,'static_verified':True}
+ m.verify=verify_candidate
+ m.deliver(m.PUBLIC_ORIGIN,retry=True)
+ assert verified_origins==[m.ORIGIN,m.PUBLIC_ORIGIN]
  assert (root/'current').resolve()==root/'releases'/sha
- receipt=json.loads((state/'deployment.json').read_text());assert receipt['status']=='verified';assert receipt['git_head']==sha
+ receipt=json.loads((state/'deployment.json').read_text());assert receipt['status']=='verified';assert receipt['git_head']==sha;assert receipt['origin']==m.PUBLIC_ORIGIN
  try:m.switch_current(pathlib.Path('/srv/yixu-wardrobe/current'))
  except ValueError:pass
  else:raise AssertionError('production paths must never be selected')
@@ -70,17 +81,19 @@ with tempfile.TemporaryDirectory() as temporary:
  for name in ['index.html','app.mjs','admin.css']:
   data=('admin file '+name).encode();(release/'admin'/name).write_bytes(data);routes['/admin/'+name]=data
  def get(url,host=None):
-  path=m.urllib.parse.urlsplit(url).path
+  target=m.urllib.parse.urlsplit(url)
+  assert target.port==18866 and host==m.DOMAIN
+  path=target.path
   if path=='/api/admin/overview':raise urllib.error.HTTPError(url,401,'login required',None,None)
   return routes[path]
  m.get=get;m.verify=real_verify
- assert m.verify(release,'http://127.0.0.1')['static_files_verified']==14
+ assert m.verify(release,m.ORIGIN)['static_files_verified']==14
  manifest={'schema_version':1,'public':['index.html','app.js','style.css','expressive.css','tryon.js','tryon.css','product-themes.js','product-page.js','product-themes.css','favicon.svg','site-theme.js','site-theme.css'],'admin':['index.html','app.mjs','admin.css']}
  (release/'site-resources.json').write_text(json.dumps(manifest))
  for name in ('site-theme.js','site-theme.css'):
   data=('new theme asset '+name).encode();(release/'public'/name).write_bytes(data);routes['/'+name]=data
  for name in manifest['public']:(release/name).write_bytes((release/'public'/name).read_bytes())
- assert m.verify(release,'http://127.0.0.1')['static_files_verified']==16
+ assert m.verify(release,m.ORIGIN)['static_files_verified']==16
  outside=state/'outside-private.js';outside.write_bytes(b'not a web asset');outside.chmod(0o600)
  source=release/'site-theme.js';original_source=source.read_bytes();source.unlink();source.symlink_to(outside)
  try:m.shell_resources(release)
@@ -88,7 +101,7 @@ with tempfile.TemporaryDirectory() as temporary:
  else:raise AssertionError('a declared source resource must not link to private server data')
  source.unlink();source.write_bytes(original_source)
  old_theme=routes['/site-theme.js'];routes['/site-theme.js']=b'stale theme'
- try:m.verify(release,'http://127.0.0.1')
+ try:m.verify(release,m.ORIGIN)
  except RuntimeError as error:assert 'stale' in str(error)
  else:raise AssertionError('new shared theme resources must be part of publication proof')
  routes['/site-theme.js']=old_theme
@@ -100,15 +113,15 @@ with tempfile.TemporaryDirectory() as temporary:
  m.GENERATION_ENABLED=True
  routes['/api/health']=json.dumps({'ok':True,'provider_configured':True,'detector_ready':True}).encode()
  routes['/api/bootstrap']=json.dumps({'generation_available':True}).encode()
- assert m.verify(release,'http://127.0.0.1')['generation_enabled'] is True
+ assert m.verify(release,m.ORIGIN)['generation_enabled'] is True
  routes['/api/bootstrap']=json.dumps({'generation_available':False}).encode()
- try:m.verify(release,'http://127.0.0.1')
+ try:m.verify(release,m.ORIGIN)
  except RuntimeError as error:assert 'not fully configured' in str(error)
  else:raise AssertionError('authorized generation must be functionally available')
  m.GENERATION_ENABLED=False
  routes['/api/health']=json.dumps({'ok':True,'provider_configured':False}).encode()
  routes['/admin/app.mjs']=b'stale admin source'
- try:m.verify(release,'http://127.0.0.1')
+ try:m.verify(release,m.ORIGIN)
  except RuntimeError as error:assert 'stale' in str(error)
  else:raise AssertionError('stale administrator code must fail delivery')
  # Real filesystem check: fix private build staging modes only below web roots.
@@ -155,4 +168,4 @@ print('PASS dev deployment CI gate, isolated activation, auth/static integrity, 
 const result=spawnSync('python3',['-c',python,root+'deploy/dev-release.py'],{encoding:'utf8',timeout:10000});
 assert.equal(result.status,0,result.stderr||result.stdout);
 console.log(result.stdout.trim());
-console.log('PASS isolated dev service, same-origin administrator, TLS template and timer contract');
+console.log('PASS isolated dev service, same-origin administrator, split origin and HTTPS edge, and timer contract');
