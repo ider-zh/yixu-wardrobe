@@ -21,6 +21,27 @@
         "three-quarter-back",
         "back"
       ]
+    },
+    {
+      "model_id": "male-01",
+      "name": "01 号男模特",
+      "reference": {
+        "asset_id": "model-male-01-reference-r1",
+        "file": "assets/model-bases/male-01.webp",
+        "mime": "image/webp",
+        "width": 1536,
+        "height": 1024,
+        "bytes": 88362,
+        "sha256": "a3aa1c54981d036fd6a81f9456911bbdb6f4fb075359517d2223746be9cd9208",
+        "visibility": "public"
+      },
+      "views": [
+        "front",
+        "three-quarter-front",
+        "side",
+        "three-quarter-back",
+        "back"
+      ]
     }
   ]
 }

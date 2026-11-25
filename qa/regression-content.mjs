@@ -76,6 +76,13 @@ try {
   assert.equal(after.catalog.looks.find(look=>look.id===1).versions.v2.image,before.catalog.looks[0].versions.v2.image);
   assert.equal(loadContent(fixture).catalog.revision,after.catalog.revision,'Same source is deterministic');
   console.log('PASS new daily expressive-only outfit, second model, stable legacy IDs and source URL without CDN');
+  batch.looks[0].model_only=true;
+  write(batchPath,batch);
+  const scoped=loadContent(fixture).catalog;
+  assert.equal(scoped.looks.find(look=>look.id===nextId).model_only,true);
+  assert.deepEqual(scoped.home,before.catalog.home,'A newer model-only batch leaves public home unchanged');
+  delete batch.looks[0].model_only;
+  write(batchPath,batch);
   const built=spawnSync(process.execPath,['scripts/build.mjs'],{cwd:fixture,encoding:'utf8',timeout:30000});
   assert.equal(built.status,0,built.stderr);
   assert.equal(JSON.parse(built.stdout).outfits,before.catalog.looks.length+1);
@@ -86,6 +93,7 @@ try {
   for(const [label,mutate] of [
     ['duplicate old ID',b=>{b.looks[0].id=1;}],
     ['missing model',b=>{b.looks[0].model_id='absent';}],
+    ['invalid model-only flag',b=>{b.looks[0].model_only='true';}],
     ['stale base hash',b=>{b.looks[0].model_reference_sha256='0'.repeat(64);}],
     ['changed bytes',b=>{b.looks[0].asset.sha256='0'.repeat(64);}],
     ['private public grid',b=>{b.looks[0].asset.visibility='private';}],

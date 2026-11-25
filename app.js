@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-let data = {}, looks = [], categories = [], models = [];
+let data = {}, looks = [], indexedLooks = [], categories = [], models = [];
 const byId = new Map();
 const $ = id => document.getElementById(id);
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -13,15 +13,18 @@ const productStorageKey='yixu:product-favorites:v1';
 let productSaved=[];
 try{const value=JSON.parse(localStorage.getItem(productStorageKey)||'[]');if(Array.isArray(value))productSaved=value.filter(id=>typeof id==='string'&&/^[A-Za-z0-9_-]+$/.test(id));}catch{}
 const productFavorites=new Set(productSaved);
-const state = {category:'', season:'', query:'', model:'', region:'', latestOnly:false, favoritesOnly:false, sort:'latest', page:'home', limit:24, active:null, view:0, version:'v2'};
+const state = {category:'', season:'', query:'', model:'', region:'', latestOnly:false, favoritesOnly:false, sort:'latest', page:'home', profileModel:'', limit:24, active:null, view:0, version:'v2'};
 let filtered = [], toastTimer, detailReturnRoute = '#/home', routing = false, detailNavigation = null, focusArchive = false, routeDetailCloses = 0;
 const snapshotRevision = window.WARDROBE?.revision;
-function latestLooks() {
+function latestLooks(selection=indexedLooks) {
   const rank = new Map((data.latestOrder || []).map((id,index)=>[id,index]));
-  return [...looks].sort((a,b)=> rank.has(a.id)&&rank.has(b.id) ? rank.get(a.id)-rank.get(b.id) : rank.has(a.id) ? -1 : rank.has(b.id) ? 1 : String(b.published_at||b.publish_date||'').localeCompare(String(a.published_at||a.publish_date||''))||b.id-a.id);
+  return [...selection].sort((a,b)=> rank.has(a.id)&&rank.has(b.id) ? rank.get(a.id)-rank.get(b.id) : rank.has(a.id) ? -1 : rank.has(b.id) ? 1 : String(b.published_at||b.publish_date||'').localeCompare(String(a.published_at||a.publish_date||''))||b.id-a.id);
 }
 function publication(look) { return look.publish_date || (look.published_at ? look.published_at.slice(0,10) : '历史档案'); }
-function featuredLook() { return byId.get(data.home?.featured_look_id) || latestLooks()[0]; }
+function featuredLook() {
+  const featured=byId.get(data.home?.featured_look_id);
+  return featured&&!featured.model_only?featured:latestLooks()[0];
+}
 const heart = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 5.6c-2.2-2.5-5.9-1.8-8.5 1-2.6-2.8-6.3-3.5-8.5-1-3.2 3.5.3 8 8.5 13.5 8.2-5.5 11.7-10 8.5-13.5Z"/></svg>';
 const comparison = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3H3v18h6M15 3h6v18h-6M12 2v20"/></svg>';
 // The server provides only registered public assets. Never accept a private API
@@ -61,6 +64,8 @@ function latestBatch() {
   return data.home?.latest_batch_id || latestLooks().find(l=>l.batch_id)?.batch_id || '';
 }
 function modelName(id) { return models.find(model=>model.id===id)?.name || id; }
+function modelRoute(id) { return '#/models/'+encodeURIComponent(id); }
+function modelLooks(id) { return latestLooks(looks.filter(look=>look.model_id===id)); }
 function validProductPresentation(product){
  const slug=value=>typeof value==='string'&&value.trim()===value&&/^[a-z][a-z0-9-]{0,63}$/.test(value);
  const object=value=>value&&typeof value==='object'&&!Array.isArray(value);
@@ -75,6 +80,8 @@ function adoptCatalog(candidate) {
   for(const look of candidate.looks){
     const v=look?.versions?.v2;
     if(!Number.isSafeInteger(look?.id)||look.id<1||seen.has(look.id)||!v||v.ready===false||typeof look.title!=='string'||!Array.isArray(v.shots)||v.shots.length!==9||!v.shots.every(shot=>shot&&typeof shot.title==='string')||(v.moods!==undefined&&!Array.isArray(v.moods))||(look.region!=null&&typeof look.region!=='string'&&typeof look.region?.city!=='string')||['published_at','publish_date','batch_id','model_id'].some(key=>look[key]!=null&&typeof look[key]!=='string')||['palette','tags','details','pieces'].some(key=>look[key]!==undefined&&!Array.isArray(look[key]))||!publicSource(v.source_url||v.image))return false;
+    if(look.model_only!==undefined&&typeof look.model_only!=='boolean')return false;
+    if(look.model_only&&!candidate.models?.some(model=>(model.model_id||model.id)===look.model_id))return false;
     seen.add(look.id);next.push({...look,region:typeof look.region==='string'?look.region:(look.region?.city||''),pieces:Array.isArray(look.pieces)?look.pieces:[],details:Array.isArray(look.details)?look.details:[],versions:{v2:{...v,ready:true}}});
   }
   const offeredProducts=candidate.products??[];
@@ -85,22 +92,23 @@ function adoptCatalog(candidate) {
   const productAsset=a=>({...a,source_url:a.source_url||a.file,image_url:a.image_url||a.source_url||a.file});
   data={...candidate,products:offeredProducts.map(p=>({...p,presentation:{theme:'editorial',...p.presentation},copy:p.copy||{},asset:productAsset(p.asset),gallery:(p.gallery||[]).map(image=>({...image,asset:productAsset(image.asset)}))})),looks:next};looks=next;byId.clear();looks.forEach(l=>byId.set(l.id,l));
   models=Array.isArray(data.models)?data.models.map(model=>({...model,id:model.model_id||model.id})):[];
-  categories=[...new Set([...(data.categoryOrder||[]),...looks.map(l=>l.category)])].filter(c=>looks.some(l=>l.category===c));
+  indexedLooks=looks.filter(l=>!l.model_only);
+  categories=[...new Set([...(data.categoryOrder||[]),...indexedLooks.map(l=>l.category)])].filter(c=>indexedLooks.some(l=>l.category===c));
   window.WARDROBE=data;window.WardrobeTryOn?.setCatalog?.(data);
   if(state.category&&!categories.includes(state.category))state.category='';
-  if(state.model&&!looks.some(l=>l.model_id===state.model))state.model='';
-  if(state.region&&!looks.some(l=>l.region===state.region))state.region='';
+  if(state.model&&!indexedLooks.some(l=>l.model_id===state.model))state.model='';
+  if(state.region&&!indexedLooks.some(l=>l.region===state.region))state.region='';
   if(state.latestOnly&&!latestBatch())state.latestOnly=false;
-  for(const id of compare)if(!byId.has(id))compare.delete(id);
-  buildCategories();buildContentFilters();updateEditionUI();renderModels();refreshFilters();renderCompareTray();
+  for(const id of compare)if(!byId.has(id)||byId.get(id).model_only)compare.delete(id);
+  buildCategories();buildContentFilters();updateCounts();updateEditionUI();renderModels();refreshFilters();renderCompareTray();
   if($('detail-dialog').open){if(byId.has(state.active)){const view=state.view;openDetail(state.active,true);setView(view);}else{$('detail-dialog').close();state.active=null;}}
   if($('compare-dialog').open){if(compare.size>=2)openComparison();else $('compare-dialog').close();}
   routeFromURL(false);
   return true;
 }
 function buildContentFilters(){
-  $('model-filter').innerHTML='<option value="">全部模特</option>'+[...new Set(looks.map(l=>l.model_id).filter(Boolean))].map(id=>'<option value="'+esc(id)+'">'+esc(modelName(id))+'</option>').join('');
-  $('region-filter').innerHTML='<option value="">全部地区</option>'+[...new Set(looks.map(l=>l.region).filter(Boolean))].sort().map(region=>'<option value="'+esc(region)+'">'+esc(region)+'</option>').join('');
+  $('model-filter').innerHTML='<option value="">全部模特</option>'+[...new Set(indexedLooks.map(l=>l.model_id).filter(Boolean))].map(id=>'<option value="'+esc(id)+'">'+esc(modelName(id))+'</option>').join('');
+  $('region-filter').innerHTML='<option value="">全部地区</option>'+[...new Set(indexedLooks.map(l=>l.region).filter(Boolean))].sort().map(region=>'<option value="'+esc(region)+'">'+esc(region)+'</option>').join('');
   $('latest-only').disabled=!latestBatch();
 }
 async function hydrateCatalog(){
@@ -138,8 +146,8 @@ function updateHeroCover(look, theme) {
 }
 function updateEditionUI(){
  renderHomeProducts();
- $('completion-note').textContent=looks.length+' 套生动穿搭';
- $('hero-total').textContent=looks.length+' 套穿搭，持续更新';
+ $('completion-note').textContent=indexedLooks.length+' 套生动穿搭';
+ $('hero-total').textContent=indexedLooks.length+' 套穿搭，持续更新';
  const look=featuredLook();
  $('latest-feature').hidden=!look;
  if(!look){$('recent-gallery').innerHTML='';$('recent-gallery').parentElement.hidden=true;return;}
@@ -157,19 +165,28 @@ function updateEditionUI(){
  setImage($('hero-image-0'),v);
  updateHeroCover(look,window.YixuSiteTheme?.resolve());
  const recentIds=Array.isArray(data.home?.recent_look_ids)?data.home.recent_look_ids:null;
- const recent=(recentIds?recentIds.map(id=>byId.get(id)).filter(Boolean):latestLooks()).filter(l=>l.id!==look.id).slice(0,6);
+ const recent=(recentIds?recentIds.map(id=>byId.get(id)):latestLooks()).filter(l=>l&&!l.model_only&&l.id!==look.id).slice(0,6);
  $('recent-gallery').innerHTML=recent.map(renderCard).join('');
  $('recent-note').textContent=recent.some(l=>!l.published_at&&!l.publish_date)?'最新一期之后，接着翻阅历史档案。':'';
  $('recent-gallery').parentElement.hidden=!recent.length;
 }
 function renderModels(){
  $('model-gallery').innerHTML=models.map(model=>{
-   const owned=latestLooks().filter(look=>look.model_id===model.id),cover=owned[0];
+   const owned=modelLooks(model.id),cover=owned[0];
    if(!cover)return '';
-   const href='#/looks?model='+encodeURIComponent(model.id);
-   return '<article class="model-card"><a href="'+href+'" aria-label="查看 '+esc(model.name)+' 的穿搭">'+photo(cover,model.name+' · '+cover.title)+'</a><p class="eyebrow">'+esc(model.id)+'</p><h2>'+esc(model.name)+'</h2><p>'+owned.length+' 套已发布穿搭</p><a class="model-looks-link" href="'+href+'">查看她的穿搭 ↗</a></article>';
+   const href=owned.some(look=>look.model_only)?modelRoute(model.id):'#/looks?model='+encodeURIComponent(model.id);
+   return '<article class="model-card"><a href="'+href+'" aria-label="查看 '+esc(model.name)+' 的穿搭">'+photo(cover,model.name+' · '+cover.title)+'</a><p class="eyebrow">'+esc(model.id)+'</p><h2>'+esc(model.name)+'</h2><p>'+owned.length+' 套已发布穿搭</p><a class="model-looks-link" href="'+href+'">查看穿搭 ↗</a></article>';
  }).join('');
  $('models-empty').hidden=!!$('model-gallery').children.length;
+}
+function renderModelProfile(id) {
+  const model=models.find(item=>item.id===id),owned=model?modelLooks(id):[];
+  $('model-directory').hidden=!!owned.length;
+  $('model-profile').hidden=!owned.length;
+  $('model-looks-gallery').innerHTML=owned.map(renderCard).join('');
+  if(!owned.length)return;
+  $('model-profile-id').textContent=model.id;
+  $('model-profile-title').textContent=model.name+'的穿搭';
 }
 function saveFavorites() {
   try { localStorage.setItem(storageKey,JSON.stringify([...favorites])); }
@@ -178,11 +195,13 @@ function saveFavorites() {
 function toggleFavorite(id) {
   if (favorites.has(id)) favorites.delete(id); else favorites.add(id);
   saveFavorites(); updateCounts();
-  if (state.favoritesOnly || state.sort === 'favorites') renderGallery(); else syncCardButtons(id);
+  if (state.favoritesOnly || state.sort === 'favorites') renderGallery();
+  syncCardButtons(id);
   if (state.active === id) updateDetailActions();
   updateEditionUI();
 }
 function toggleCompare(id) {
+  if(byId.get(id)?.model_only)return;
   if (compare.has(id)) compare.delete(id);
   else if (compare.size < 3) compare.add(id);
   else { notify('最多同时对比 3 套，请先移除一套'); return; }
@@ -190,8 +209,9 @@ function toggleCompare(id) {
   if (state.active === id) updateDetailActions();
 }
 function updateCounts() {
-  $('fav-top-count').textContent = favorites.size;
-  $('favorites-count').textContent = favorites.size;
+  const count=[...favorites].filter(id=>!byId.get(id)?.model_only).length;
+  $('fav-top-count').textContent = count;
+  $('favorites-count').textContent = count;
 }
 function syncCardButtons(id) {
   document.querySelectorAll('[data-favorite="'+id+'"]').forEach(button => {
@@ -206,7 +226,7 @@ function syncCardButtons(id) {
   });
 }
 function buildCategories() {
-  const entries = [{name:'',label:'全部造型',count:looks.length},...categories.map(name => ({name,label:name,count:looks.filter(l=>l.category===name).length}))];
+  const entries = [{name:'',label:'全部造型',count:indexedLooks.length},...categories.map(name => ({name,label:name,count:indexedLooks.filter(l=>l.category===name).length}))];
   $('category-list').innerHTML = entries.map(c=>'<button class="category-button'+(!c.name?' active':'')+'" data-category="'+esc(c.name)+'" aria-pressed="'+!c.name+'"><span>'+esc(c.label)+'</span><span class="cat-count">'+String(c.count).padStart(2,'0')+'</span></button>').join('');
 
 }
@@ -218,7 +238,7 @@ function matchesSearch(look,query) {
 }
 function matchLooks() {
   const latest=state.latestOnly?latestBatch():'',latestRank=new Map(latestLooks().map((look,index)=>[look.id,index]));
-  filtered = looks.filter(l => {
+  filtered = indexedLooks.filter(l => {
     if (state.category && l.category !== state.category) return false;
     if (state.season && l.season !== state.season) return false;
     if (state.model && l.model_id !== state.model) return false;
@@ -250,7 +270,8 @@ function renderActiveFilters() {
 }
 function renderCard(l,index) {
   const liked=favorites.has(l.id), picked=compare.has(l.id);
-  return '<article class="look-card" style="animation-delay:'+Math.min(index,8)*25+'ms" data-look-card="'+l.id+'"><div class="image-zone"><button class="look-photo-button" data-open="'+l.id+'" aria-label="查看 '+esc(l.title)+' 的九宫格写真和搭配设计">'+(versionOf(l).ready?photo(l):'<div class="card-pending"><span>'+number(l.id)+'</span><small>写真准备中</small></div>')+'<span class="card-number">'+number(l.id)+'</span>'+'<span class="open-caption">查看写真与设计 <span>↗</span></span></button><div class="card-actions"><button class="icon-button favorite'+(liked?' selected':'')+'" data-favorite="'+l.id+'" aria-pressed="'+liked+'" aria-label="'+(liked?'取消收藏':'收藏')+' '+esc(l.title)+'">'+heart+'</button><button class="icon-button compare'+(picked?' selected':'')+'" data-compare="'+l.id+'" aria-pressed="'+picked+'" aria-label="'+(picked?'移出对比':'加入对比')+' '+esc(l.title)+'">'+comparison+'</button></div></div><div class="card-meta"><div class="card-topline"><span>'+esc(l.category)+' / '+esc(l.season)+' · '+l.pieces.length+' 件搭配</span><div class="palette" aria-label="造型配色">'+palette(l)+'</div></div><button class="card-title" data-open="'+l.id+'">'+esc(l.title)+'</button><p class="card-publication">'+esc(publication(l))+'</p><p class="card-tags">'+(state.version==='v2'?(versionOf(l).moods||l.tags||[]):(l.tags||[])).slice(0,4).map(esc).join(' · ')+'</p></div></article>';
+  const compareAction=l.model_only?'':'<button class="icon-button compare'+(picked?' selected':'')+'" data-compare="'+l.id+'" aria-pressed="'+picked+'" aria-label="'+(picked?'移出对比':'加入对比')+' '+esc(l.title)+'">'+comparison+'</button>';
+  return '<article class="look-card" style="animation-delay:'+Math.min(index,8)*25+'ms" data-look-card="'+l.id+'"><div class="image-zone"><button class="look-photo-button" data-open="'+l.id+'" aria-label="查看 '+esc(l.title)+' 的九宫格写真和搭配设计">'+(versionOf(l).ready?photo(l):'<div class="card-pending"><span>'+number(l.id)+'</span><small>写真准备中</small></div>')+'<span class="card-number">'+number(l.id)+'</span>'+'<span class="open-caption">查看写真与设计 <span>↗</span></span></button><div class="card-actions"><button class="icon-button favorite'+(liked?' selected':'')+'" data-favorite="'+l.id+'" aria-pressed="'+liked+'" aria-label="'+(liked?'取消收藏':'收藏')+' '+esc(l.title)+'">'+heart+'</button>'+compareAction+'</div></div><div class="card-meta"><div class="card-topline"><span>'+esc(l.category)+' / '+esc(l.season)+' · '+l.pieces.length+' 件搭配</span><div class="palette" aria-label="造型配色">'+palette(l)+'</div></div><button class="card-title" data-open="'+l.id+'">'+esc(l.title)+'</button><p class="card-publication">'+esc(publication(l))+'</p><p class="card-tags">'+(state.version==='v2'?(versionOf(l).moods||l.tags||[]):(l.tags||[])).slice(0,4).map(esc).join(' · ')+'</p></div></article>';
 }
 function renderGallery() {
   matchLooks();
@@ -267,6 +288,7 @@ function delegatedActions(event) {
 }
 $('gallery').addEventListener('click',delegatedActions);
 $('home-page').addEventListener('click',delegatedActions);
+$('model-looks-gallery').addEventListener('click',delegatedActions);
 $('category-list').addEventListener('click',event=>{const button=event.target.closest('[data-category]');if(button){state.category=button.dataset.category;refreshFilters();}});
 $('model-filter').addEventListener('change',e=>{state.model=e.target.value;refreshFilters();});
 $('region-filter').addEventListener('change',e=>{state.region=e.target.value;refreshFilters();});
@@ -294,6 +316,7 @@ function updateDetailActions() {
   const f=favorites.has(l.id),c=compare.has(l.id);
   $('detail-favorite').textContent=f?'♥ 已收藏':'♡ 收藏这套';
   $('detail-favorite').setAttribute('aria-pressed',String(f));
+  $('detail-compare').hidden=!!l.model_only;
   $('detail-compare').textContent=c?'− 移出对比':'+ 加入对比';
   $('detail-compare').setAttribute('aria-pressed',String(c));
 }
@@ -301,9 +324,14 @@ function openDetail(id,preserveNavigation=false) {
   const l=byId.get(id);if(!l)return;
   const detailRoute=/^#look-/.test(location.hash),restored=!$('detail-dialog').open&&detailRoute?history.state?.wardrobeDetail:null;
   if(restored&&typeof restored.returnRoute==='string'&&/^#\/(home|looks|models|favorites|products|product)(?:[/?]|$)/.test(restored.returnRoute))detailReturnRoute=restored.returnRoute;
-  else if(!$('detail-dialog').open)detailReturnRoute=detailRoute?'#/home':location.hash||'#/home';
+  else if(!$('detail-dialog').open)detailReturnRoute=detailRoute?(l.model_only?modelRoute(l.model_id):'#/home'):location.hash||'#/home';
   if(restored&&Array.isArray(restored.navigation)&&restored.navigation.includes(id))detailNavigation=restored.navigation.filter(key=>byId.has(key));
-  else if(!preserveNavigation||!detailNavigation)detailNavigation=((state.page==='looks'||state.page==='favorites')&&filtered.some(look=>look.id===id)?filtered:latestLooks()).map(look=>look.id);
+  else if(!preserveNavigation||!detailNavigation?.includes(id)){
+    const profile=l.model_only?l.model_id:state.profileModel;
+    const selection=profile&&l.model_id===profile?modelLooks(profile)
+      :(['looks','favorites'].includes(state.page)&&filtered.some(look=>look.id===id)?filtered:latestLooks());
+    detailNavigation=selection.map(look=>look.id);
+  }
   const entry={...history.state,wardrobeDetail:{returnRoute:detailReturnRoute,navigation:detailNavigation}};
   if(location.hash!=='#look-'+id)history.pushState(entry,'','#look-'+id);
   else history.replaceState(entry,'',location.hash);
@@ -313,12 +341,12 @@ function openDetail(id,preserveNavigation=false) {
   $('detail-palette').innerHTML=palette(l);
   $('detail-description').textContent=l.description;
   $('detail-tags').innerHTML=(l.tags||[]).map(tag=>{
-    if(typeof tag!=='string'||!tag.trim()||!looks.some(other=>other.id!==id&&matchesSearch(other,tag)))return '<span>'+esc(tag)+'</span>';
+    if(typeof tag!=='string'||!tag.trim()||!indexedLooks.some(other=>other.id!==id&&matchesSearch(other,tag)))return '<span>'+esc(tag)+'</span>';
     const href='#/looks?'+new URLSearchParams({q:tag});
     return '<a href="'+esc(href)+'" data-explore-tag aria-label="搜索标签 '+esc(tag)+'">'+esc(tag)+' <span aria-hidden="true">↗</span></a>';
   }).join('')+(versionOf(l).moods||[]).map(mood=>'<span>'+esc(mood)+'</span>').join('');
   $('detail-pieces').innerHTML=l.pieces.map((p,i)=>'<li><span class="piece-number">'+String(i+1).padStart(2,'0')+'</span><span class="piece-role">'+esc(p.role)+'</span><span>'+esc(p.name)+'</span></li>').join('');
-  const linkedProducts=productsForLook(id);$('detail-products').hidden=!linkedProducts.length;$('detail-product-gallery').innerHTML=linkedProducts.map(productCard).join('');
+  renderLookProducts(id);
   $('detail-design').innerHTML=l.details.map(d=>'<li>'+esc(d)+'</li>').join('');
   $('detail-scene').textContent='写真场景 / '+l.scene;
   $('detail-image').hidden=!versionOf(l).ready;$('detail-photo-frame').classList.toggle('pending',!versionOf(l).ready);
@@ -370,7 +398,7 @@ document.addEventListener('keydown',e=>{
   if(e.key==='/'&&!editable&&!document.querySelector('dialog[open]')){e.preventDefault();if(!['looks','favorites'].includes(state.page)){history.pushState(null,'','#/looks');routeFromURL(false);}$('search').focus();$('search').scrollIntoView({block:'center',behavior:'smooth'});}
   if($('detail-dialog').open&&!$('tryon-dialog')?.open&&!$('compare-dialog').open&&!editable&&!e.target.closest('#view-selector, #detail-tags a')){if(e.key==='ArrowRight'){e.preventDefault();navigateLook(1);}if(e.key==='ArrowLeft'){e.preventDefault();navigateLook(-1);}}
 });
-window.addEventListener('storage',e=>{if(e.key===productStorageKey){try{const values=JSON.parse(e.newValue||'[]');if(!Array.isArray(values))return;productFavorites.clear();values.filter(id=>typeof id==='string'&&/^[A-Za-z0-9_-]+$/.test(id)).forEach(id=>productFavorites.add(id));renderHomeProducts();if(state.page==='products')renderProducts();if(state.page==='product'){const id=/^#\/product\/([A-Za-z0-9_-]+)(?:\?(.*))?$/.exec(location.hash)?.[1];if(id)renderProduct(id);}if(state.active)$('detail-product-gallery').innerHTML=productsForLook(state.active).map(productCard).join('');}catch{}return;}if(e.key!==storageKey)return;try{const values=JSON.parse(e.newValue||'[]');if(!Array.isArray(values))return;favorites.clear();values.filter(id=>Number.isSafeInteger(id)&&id>0).forEach(id=>favorites.add(id));updateCounts();renderGallery();updateEditionUI();if(state.active)updateDetailActions();}catch{}});
+window.addEventListener('storage',e=>{if(e.key===productStorageKey){try{const values=JSON.parse(e.newValue||'[]');if(!Array.isArray(values))return;productFavorites.clear();values.filter(id=>typeof id==='string'&&/^[A-Za-z0-9_-]+$/.test(id)).forEach(id=>productFavorites.add(id));renderHomeProducts();if(state.page==='products')renderProducts();if(state.page==='product'){const id=/^#\/product\/([A-Za-z0-9_-]+)(?:\?(.*))?$/.exec(location.hash)?.[1];if(id)renderProduct(id);}if(state.active)renderLookProducts(state.active);}catch{}return;}if(e.key!==storageKey)return;try{const values=JSON.parse(e.newValue||'[]');if(!Array.isArray(values))return;favorites.clear();values.filter(id=>Number.isSafeInteger(id)&&id>0).forEach(id=>favorites.add(id));updateCounts();renderGallery();updateEditionUI();if(state.profileModel)renderModelProfile(state.profileModel);if(state.active)updateDetailActions();}catch{}});
 function archiveRoute(){
  const params=new URLSearchParams();
  for(const [key,value] of [['category',state.category],['season',state.season],['q',state.query],['model',state.model],['region',state.region],['latest',state.latestOnly?'1':''],['saved',state.favoritesOnly&&state.page!=='favorites'?'1':''],['sort',state.sort==='latest'?'':state.sort]])if(value)params.set(key,value);
@@ -381,14 +409,16 @@ function routeFromURL(scroll=true){
  const detail=/^#look-(\d+)$/.exec(location.hash);
  if(detail){const id=Number(detail[1]);if(byId.has(id)){openDetail(id,$('detail-dialog').open);return;}notify('这套穿搭暂未发布');}
  const productRoute=/^#\/product\/([A-Za-z0-9_-]+)(?:\?(.*))?$/.exec(location.hash);
- const route=/^#\/(home|looks|models|favorites|products)(?:\?(.*))?$/.exec(location.hash),page=productRoute?'product':route?.[1]||'home';
+ const profile=/^#\/models\/([A-Za-z0-9_-]+)$/.exec(location.hash);
+ const route=/^#\/(home|looks|models|favorites|products)(?:\?(.*))?$/.exec(location.hash),page=productRoute?'product':profile?'models':route?.[1]||'home';
  routing=true;
- state.page=page;
+ state.page=page;state.profileModel=profile?.[1]||'';
  // Native dialog close events are queued. A route-driven close must not later
  // overwrite a detail URL restored by Back before that close event arrives.
  if($('detail-dialog').open){routeDetailCloses++;$('detail-dialog').close();}state.active=null;detailNavigation=null;
  $('home-page').hidden=page!=='home';$('models-page').hidden=page!=='models';$('collection').hidden=!['looks','favorites'].includes(page);$('closing-note').hidden=page!=='home';
  $('products-page').hidden=page!=='products';$('product-page').hidden=page!=='product';
+ if(page==='models')renderModelProfile(state.profileModel);
  if(page==='products')renderProducts();if(page==='product')renderProduct(productRoute[1]);
  $('collection-title').innerHTML=(page==='favorites'?'我的收藏':'全部穿搭')+'<span class="heading-period">.</span>';
  document.querySelectorAll('[data-page]').forEach(link=>{if(link.dataset.page===page||(page==='product'&&link.dataset.page==='products'))link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');});
@@ -413,25 +443,32 @@ $('open-filters').addEventListener('click',()=>{$('filter-dialog').showModal();}
 $('close-filters').addEventListener('click',()=>$('filter-dialog').close());
 $('apply-filters').addEventListener('click',()=>$('filter-dialog').close());
 function productsForLook(id){return (data.products||[]).filter(p=>p.appearances.some(a=>a.look_id===id));}
-function productCard(product){
- const liked=productFavorites.has(product.product_id),href='#/product/'+product.product_id;
+function publicAppearances(product){return product.appearances.filter(a=>!byId.get(a.look_id)?.model_only);}
+function renderLookProducts(id){
+ const linked=productsForLook(id),fromModel=byId.get(id)?.model_only;
+ $('detail-products').hidden=!linked.length;
+ $('detail-product-gallery').innerHTML=linked.map(product=>productCard(product,fromModel?id:null)).join('');
+}
+function productCard(product,lookId=null){
+ const liked=productFavorites.has(product.product_id);
+ const href='#/product/'+product.product_id+(lookId&&publicAppearances(product).length?'?look='+lookId:'');
  return `<article class="product-card" data-product-card="${esc(product.product_id)}"><a class="product-card-photo" href="${href}" aria-label="查看 ${esc(product.name)}"><img ${imageAttributes(product.asset)} alt="${esc(product.name)} · AI设计单品" loading="lazy" decoding="async"></a><div class="product-card-meta"><p>${esc(product.category)} <span>DESIGN OBJECT</span></p><h3><a href="${href}">${esc(product.name)}</a></h3><span class="product-color"><i style="background:${product.color_hex}"></i>${esc(product.color_name)}</span><button class="product-save" data-product-favorite="${esc(product.product_id)}" aria-pressed="${liked}" aria-label="${liked?'取消收藏':'收藏单品'} ${esc(product.name)}">${liked?'♥ 已收藏':'♡ 收藏单品'}</button></div></article>`;
 }
 function renderHomeProducts(){
  const selected=productsForLook(featuredLook()?.id);$('home-products').hidden=!selected.length;
- $('home-product-gallery').innerHTML=selected.slice(0,3).map(productCard).join('');
+ $('home-product-gallery').innerHTML=selected.slice(0,3).map(p=>productCard(p)).join('');
 }
 function renderProducts(){
  const params=new URLSearchParams(location.hash.split('?')[1]),category=params.get('category')||'',saved=params.get('saved')==='1';
- const products=data.products||[],categories=[...new Set(products.map(p=>p.category))];
+ const products=(data.products||[]).filter(p=>publicAppearances(p).length),categories=[...new Set(products.map(p=>p.category))];
  const choices=[['全部单品','#/products',!category&&!saved],...categories.map(c=>[c,'#/products?'+new URLSearchParams({category:c}),category===c&&!saved]),['我的单品收藏','#/products?saved=1',saved]];
  $('product-filters').innerHTML=choices.map(([title,href,active])=>`<a href="${esc(href)}" ${active?'aria-current="page"':''}>${esc(title)}</a>`).join('');
  const selected=products.filter(p=>(!category||p.category===category)&&(!saved||productFavorites.has(p.product_id)));
- $('product-gallery').innerHTML=selected.map(productCard).join('');$('product-empty').hidden=!!selected.length;
+ $('product-gallery').innerHTML=selected.map(p=>productCard(p)).join('');$('product-empty').hidden=!!selected.length;
 }
 const productPage=window.YixuProductPage.create({
  isLiked:id=>productFavorites.has(id),
- root:$('product-page'),dialog:$('product-image-dialog'),media:{attributes:imageAttributes,set:setImage},renderCard:productCard,
+ root:$('product-page'),dialog:$('product-image-dialog'),media:{attributes:imageAttributes,set:setImage},
  renderWorn(a){
   const look=byId.get(a.look_id),version={...versionOf(look),previewPanel:a.shot_index};
   const shown={...look,versions:{v2:version}};
@@ -440,9 +477,14 @@ const productPage=window.YixuProductPage.create({
 });
 function renderProduct(id){
  const product=(data.products||[]).find(p=>p.product_id===id);
- const appearances=(product?.appearances||[]).filter(a=>byId.has(a.look_id));
+ const requested=Number(new URLSearchParams(location.hash.split('?')[1]).get('look'));
+ const fromModel=product?.appearances.some(a=>a.look_id===requested&&byId.get(a.look_id)?.model_only);
+ const indexed=product?publicAppearances(product):[];
+ const appearances=fromModel?product.appearances.filter(a=>a.look_id===requested):indexed.length?indexed:product?.appearances||[];
  const related=[...new Map(appearances.flatMap(a=>productsForLook(a.look_id)).filter(p=>p.product_id!==id).map(p=>[p.product_id,p])).values()];
- productPage.render({product,number:String((data.products||[]).indexOf(product)+1).padStart(3,'0'),liked:productFavorites.has(id),appearances,related});
+ const modelContext=appearances.map(a=>byId.get(a.look_id)).find(l=>l?.model_only);
+ productPage.render({product,number:String((data.products||[]).indexOf(product)+1).padStart(3,'0'),liked:productFavorites.has(id),appearances,related,
+   renderCard:p=>productCard(p,modelContext?.id),modelLink:modelContext?{href:modelRoute(modelContext.model_id),name:modelName(modelContext.model_id)}:null});
 }
 document.addEventListener('click',event=>{
  const worn=event.target.closest('[data-product-look]');

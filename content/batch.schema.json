@@ -91,6 +91,12 @@
           "title": "Model Reference Sha256",
           "type": "string"
         },
+        "model_only": {
+          "default": false,
+          "description": "Show this look and products exclusive to it through model pages.",
+          "title": "Model Only",
+          "type": "boolean"
+        },
         "title": {
           "maxLength": 200,
           "minLength": 1,

@@ -171,7 +171,7 @@ cwebp -q 85 -m 6 -metadata none input.png -o output.webp
 ```text
 content/models.json
 content/batches/YYYY-MM-DD-01.json
-assets/looks/YYYY-MM-DD/look-ID-female-01-v2-r1.webp
+assets/looks/YYYY-MM-DD/look-ID-MODEL-v2-r1.webp
 content/products.json
 assets/products/look-ID/*.webp
 ```
@@ -246,6 +246,8 @@ assets/products/look-ID/*.webp
 按项目实际约定分配穿搭编号，不覆盖历史 1—100，不使用当前列表长度推断可重用编号。并行生产时须先协调编号或使用已实现的分配器；重试保留原批次与资源编号。修改图片使用新资源修订及新哈希，不静默覆盖已发布版本。提交前清理全部占位值，补全实际所有单品和来源。
 
 首页以最新发布批次为主视觉，不能通过修改旧文件的时间或抬高旧编号制造上新。可选 `published_at` 使用带时区的实际发布时间，换算为上海时间后的日期必须等于 `publish_date`；可选 `cover_look_id` 必须指向本批次的一套穿搭，默认使用本批次第一套。未填写发布时间的已有批次按上海时区发布日期零点排序，历史基线保持无日期。批次发布后修改图片使用新资源修订，不更改原发布时间。首页最近更新从统一发布顺序取六套并排除首屏套装。
+
+任务明确要求仅从模特页浏览时，在对应批次穿搭写入 `model_only: true`。验收时从模特页打开穿搭及关联单品，并核对稳定详情链接。首页主推、最近更新、全部穿搭及其筛选、搜索、风格漫游、收藏和公开批次索引排除这类穿搭。仅关联这类穿搭的单品从全站单品列表、分类和收藏中隐去。纯模特页批次沿用最近一个可在首页展示的批次主推，混合批次使用可在首页展示的指定封面或第一套符合条件的穿搭。
 
 ## 8. 验证 提交 与服务端接棒
 

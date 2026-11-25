@@ -1,0 +1,164 @@
+{
+  "schema_version": 1,
+  "batch_id": "2026-11-26-01",
+  "publish_date": "2026-11-26",
+  "timezone": "Asia/Shanghai",
+  "title": "上海西岸 · 锈棕观版画",
+  "region": {
+    "country": "CN",
+    "city": "上海"
+  },
+  "research": {
+    "trend_sources": [
+      {
+        "url": "https://www.whowhatwear.com/fashion/shopping/menswear-style-holiday-gift-guide",
+        "published_at": "2026-11-19",
+        "summary": "Who What Wear 的男装选品中分别展示了圆领针织、宽松前褶裤和便士乐福鞋。本套把这三种轮廓组合成室内观展穿搭。"
+      },
+      {
+        "url": "https://www.wallpaper.com/fashion-beauty/mens-aw-2026-winter-fashion-inspiration",
+        "published_at": "2026-11-02",
+        "summary": "Wallpaper* 的十一月原创男装摄影展示了针织与宽松剪裁的搭配。本套用锈棕和炭灰保留柔和上装与直线裤装的对比。"
+      },
+      {
+        "url": "https://www.shanghai.gov.cn/nw17239/20261113/e80e326ba6da46429e070dbc1c575b74.html",
+        "published_at": "2026-11-13",
+        "summary": "上海市政府网站刊载徐汇对西岸艺术与设计周的报道。以近期的滨江观展场景为灵感，写真设在一间虚构的版画展厅。"
+      }
+    ],
+    "weather": {
+      "url": "https://www.weather.com.cn/textFC/shanghai.shtml",
+      "forecast_date": "2026-11-26",
+      "summary": "中国天气网 11 月 25 日 18:00 发布的上海分区预报显示，26 日徐汇昼夜均晴，最高 19℃、最低 10℃，日间西南风、夜间西风，均小于 3 级。",
+      "styling_reason": "策划推断。针织衫、长裤和低跟乐福鞋适合日间室内观展及短程步行，早晚长时间在室外可加外套。",
+      "checked_at": "2026-11-25T23:46:00+08:00"
+    },
+    "checked_at": "2026-11-25T23:46:00+08:00"
+  },
+  "looks": [
+    {
+      "id": 109,
+      "model_id": "male-01",
+      "model_reference_sha256": "a3aa1c54981d036fd6a81f9456911bbdb6f4fb075359517d2223746be9cd9208",
+      "model_only": true,
+      "title": "西岸·锈棕观版画",
+      "category": "都市层次",
+      "season": "冬季",
+      "description": "锈棕圆领针织松松垂在炭灰宽西裤的裤腰上，裤前压线一直落到黑色便士乐福鞋。版画展厅里的木凳和午后窗光映出针织的暖色。",
+      "pieces": [
+        {
+          "role": "上装",
+          "name": "锈棕圆领细针织衫"
+        },
+        {
+          "role": "下装",
+          "name": "炭灰单褶宽直筒西裤"
+        },
+        {
+          "role": "鞋履",
+          "name": "黑色便士乐福鞋"
+        }
+      ],
+      "palette": [
+        "#87472d",
+        "#484444",
+        "#211e1d"
+      ],
+      "details": [
+        "圆领、袖口与衣摆用同色细罗纹收边",
+        "炭灰西裤以前褶和直线裤脚留出松量",
+        "黑色低跟便士乐福鞋收住全身配色"
+      ],
+      "tags": [
+        "锈棕",
+        "圆领针织",
+        "宽直筒西裤",
+        "便士乐福鞋",
+        "上海观展"
+      ],
+      "mood": "在窗边相认，边走边看，笑过之后凑近画框，再伸手邀请同伴一起看。",
+      "scene": "以上海徐汇滨江观展为灵感的虚构版画展厅。浅灰米色墙面、木长凳、无字装裱的墨色画作，午后窗光落在地面。",
+      "edition": "v2",
+      "shots": [
+        {
+          "index": 1,
+          "title": "隔着展厅招手",
+          "emotion": "直视观者，明朗露齿笑",
+          "pose": "站定后抬掌招手，另一手自然垂下",
+          "framing": "正面全身，双鞋完整"
+        },
+        {
+          "index": 2,
+          "title": "原来这幅在这里",
+          "emotion": "圆唇扬眉，惊喜睁眼",
+          "pose": "掌心朝上示意身后的画框，目光看向观者",
+          "framing": "腰上近景，脸与手势同框"
+        },
+        {
+          "index": 3,
+          "title": "向前走，再回头",
+          "emotion": "闭唇带笑，回望观者",
+          "pose": "阔步跨过窗边光斑，转头回看",
+          "framing": "侧面动态全身，双鞋完整"
+        },
+        {
+          "index": 4,
+          "title": "坐下就笑出声",
+          "emotion": "仰头张口大笑",
+          "pose": "坐在木长凳上，双手自然落在大腿上",
+          "framing": "正面坐姿全身，双鞋完整"
+        },
+        {
+          "index": 5,
+          "title": "凑近看一眼墨迹",
+          "emotion": "唇线放松，专注望向版画",
+          "pose": "双手轻拢在身后，向画框前倾",
+          "framing": "侧面中景，膝上取景"
+        },
+        {
+          "index": 6,
+          "title": "眨眼想到一个答案",
+          "emotion": "俏皮眨单眼，单侧嘴角扬起",
+          "pose": "歪头伸起一根手指，朝观者示意",
+          "framing": "胸上近景，脸与手势同框"
+        },
+        {
+          "index": 7,
+          "title": "在木台旁等你",
+          "emotion": "望向观者，舒展露齿笑",
+          "pose": "一手撑住木台，另一手插袋，双腿交错",
+          "framing": "斜侧全身，低处见鞋"
+        },
+        {
+          "index": 8,
+          "title": "把眼镜推稳",
+          "emotion": "垂眼抿嘴，带一点腼腆的笑",
+          "pose": "用指尖扶住镜框上沿",
+          "framing": "面部近景，带到领口和袖口"
+        },
+        {
+          "index": 9,
+          "title": "你也来看看",
+          "emotion": "目光直接，放松浅笑",
+          "pose": "向观者俯身伸手，手掌朝上邀请",
+          "framing": "腰上中景，手在前景"
+        }
+      ],
+      "asset": {
+        "asset_id": "look-109-male-01-v2-r1",
+        "file": "assets/looks/2026-11-26/look-109-male-01-v2-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 183456,
+        "sha256": "15aceb2ccc071d1c0b1459ca32e7e11095f07cf1d636aefde9671d3d42d75b7c",
+        "visibility": "public",
+        "layout": {
+          "rows": 3,
+          "columns": 3,
+          "preview_panel": 1
+        }
+      }
+    }
+  ]
+}
