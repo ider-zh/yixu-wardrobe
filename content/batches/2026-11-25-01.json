@@ -1,0 +1,170 @@
+{
+  "schema_version": 1,
+  "batch_id": "2026-11-25-01",
+  "publish_date": "2026-11-25",
+  "timezone": "Asia/Shanghai",
+  "title": "成都茶院 · 蓝衫盖碗",
+  "region": {
+    "country": "CN",
+    "city": "成都"
+  },
+  "research": {
+    "trend_sources": [
+      {
+        "url": "https://www.womanandhome.com/fashion/fashion-news/dannii-minogue-m-and-s-checked-midi-skirt/",
+        "published_at": "2026-11-23",
+        "summary": "Woman & Home 记录了圆领针织搭格纹 A 字中长裙的实例。本套用钴蓝针织和米灰窗格延续这个搭配关系。"
+      },
+      {
+        "url": "https://www.marieclaire.co.uk/fashion/sweater-skirt-party-outfit-ideas",
+        "published_at": "2026-11-22",
+        "summary": "Marie Claire UK 自行搭配了三组针织配裙造型，涉及中长裙和醒目色彩。本套借鉴简洁上装和有图案的裙摆之间的对比。"
+      },
+      {
+        "url": "https://sc.people.com.cn/n2/2026/1124/c345167-41759293.html",
+        "published_at": "2026-11-24",
+        "summary": "人民网四川频道刊发红星新闻向成都市城管委核实的消息，成都 68 个点位在初冬适度保留落叶景观。写真中的银杏与茶席构成以成都为灵感的虚构茶院。"
+      }
+    ],
+    "weather": {
+      "url": "https://www.weather.com.cn/sichuan/chengdu/index.shtml",
+      "forecast_date": "2026-11-25",
+      "summary": "中国天气网成都城区城市预报 2026-11-25 07:30 发布，最高 15℃、最低 9℃。11 月 24 日 18:00 的西南文字预报预计 25 日昼夜多云、无持续风向且小于 3 级。",
+      "styling_reason": "策划推断。厚针织、中长裙和低跟短靴适合有遮蔽的日间茶席及短程步行。早晚或长时间在户外可另加外层。",
+      "checked_at": "2026-11-25T11:04:00+08:00"
+    },
+    "checked_at": "2026-11-25T11:04:00+08:00"
+  },
+  "looks": [
+    {
+      "id": 108,
+      "model_id": "female-01",
+      "model_reference_sha256": "dc0a221ff81250415bcfa3b320bc916dc02e2873f030e707083928505ca75066",
+      "title": "成都·蓝衫盖碗",
+      "category": "复古学院",
+      "season": "冬季",
+      "description": "钴蓝圆领针织压住米灰窗格裙的裙腰，骨白短靴接住落到小腿的裙摆。焦糖色小包拎过木门，坐下时搁在盖碗茶旁。",
+      "pieces": [
+        {
+          "role": "上装",
+          "name": "钴蓝圆领罗纹收边厚针织衫"
+        },
+        {
+          "role": "下装",
+          "name": "米灰窗格纹 A 字中长裙"
+        },
+        {
+          "role": "鞋履",
+          "name": "骨白杏仁头低方跟短靴"
+        },
+        {
+          "role": "包袋",
+          "name": "焦糖色弧柄翻盖小提包"
+        }
+      ],
+      "palette": [
+        "#3156a0",
+        "#c5bba9",
+        "#5d5850",
+        "#e3d4bc",
+        "#a37b50"
+      ],
+      "details": [
+        "纯色钴蓝针织与米灰细窗格形成色彩对比",
+        "及小腿裙摆与骨白低跟短靴衔接",
+        "焦糖色小提包以短弧柄和翻盖收线"
+      ],
+      "tags": [
+        "钴蓝",
+        "窗格纹",
+        "中长裙",
+        "短靴",
+        "成都茶院"
+      ],
+      "mood": "相约喝茶，从门前相认、坐下笑开，到揭盖闻香，最后在竹椅旁道别。",
+      "scene": "受成都银杏时节启发的虚构茶院。竹椅、旧木柱、青瓷盖碗和灰色石板承接多云天的柔光。",
+      "edition": "v2",
+      "shots": [
+        {
+          "index": 1,
+          "title": "门里就见到了",
+          "emotion": "直视观者，露齿笑",
+          "pose": "停在门边，一手提包，空手轻靠门框",
+          "framing": "正面全身，头部和双靴完整"
+        },
+        {
+          "index": 2,
+          "title": "你来得正好",
+          "emotion": "睁眼扬眉，圆唇惊喜",
+          "pose": "抬手向观者示意座位",
+          "framing": "胸上近景，见圆领和手势"
+        },
+        {
+          "index": 3,
+          "title": "一坐下就笑了",
+          "emotion": "仰头张口大笑",
+          "pose": "坐进竹椅，一手放腿上，一手搭椅扶手",
+          "framing": "坐姿全身，双靴完整"
+        },
+        {
+          "index": 4,
+          "title": "掀开一线茶香",
+          "emotion": "放松唇角，低头专注",
+          "pose": "用指尖提起青瓷碗盖，身侧是茶桌",
+          "framing": "侧面中景，见盖碗和袖口"
+        },
+        {
+          "index": 5,
+          "title": "还要等它凉一点",
+          "emotion": "轻皱眉、抿唇，斜望观者",
+          "pose": "把手掌悬在盖碗上方，试探温度",
+          "framing": "胸上中近景"
+        },
+        {
+          "index": 6,
+          "title": "坐这边更亮",
+          "emotion": "回头露齿笑",
+          "pose": "沿竹椅侧边迈步，空手向座位示意",
+          "framing": "动态全身，双靴完整，裙摆微摆"
+        },
+        {
+          "index": 7,
+          "title": "这壶正合适",
+          "emotion": "眨单眼，含着一点俏皮笑意",
+          "pose": "在茶桌旁轻指青瓷盖碗，焦糖小包置于桌上",
+          "framing": "腰上中景"
+        },
+        {
+          "index": 8,
+          "title": "先捧一会儿",
+          "emotion": "温和闭口笑，直视观者",
+          "pose": "双手轻捧青瓷碗，杯口低于面部",
+          "framing": "头肩近景，见针织罗纹圆领"
+        },
+        {
+          "index": 9,
+          "title": "下次还坐这里",
+          "emotion": "面对观者展颜",
+          "pose": "立于竹椅边，一手挥别，一手拎包",
+          "framing": "全身，双靴与裙摆完整"
+        }
+      ],
+      "asset": {
+        "asset_id": "look-108-female-01-v2-r1",
+        "file": "assets/looks/2026-11-25/look-108-female-01-v2-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 216632,
+        "sha256": "64e56a378bd5b29b0509d377999b361c43028bb94d37a090d358dd3bda239439",
+        "visibility": "public",
+        "layout": {
+          "rows": 3,
+          "columns": 3,
+          "preview_panel": 1
+        }
+      }
+    }
+  ],
+  "cover_look_id": 108
+}

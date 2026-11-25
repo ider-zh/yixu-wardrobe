@@ -8582,6 +8582,210 @@
           "shot_index": 9
         }
       ]
+    },
+    {
+      "product_id": "cobalt-crewneck-knit-108",
+      "name": "钴蓝圆领罗纹收边厚针织衫",
+      "category": "上装",
+      "subtitle": "一圈钴蓝圆领，衬出细密而平整的衣身。",
+      "description": "钴蓝针织衣身略宽松，圆领、袖口和及胯下摆都用同色罗纹收边。下摆收拢时，厚针织在裙腰上方形成柔和褶量。平铺图中的领内走线、肩袖接缝及近观针脚为 AI 设计演绎。",
+      "color_name": "钴蓝",
+      "color_hex": "#17489e",
+      "design_material": "平整厚针织与罗纹收边的视觉观感",
+      "notes": [
+        "同色罗纹收住圆领、袖口和下摆",
+        "平整细密的纯色衣身",
+        "略宽松的长袖收在平直袖口"
+      ],
+      "asset": {
+        "asset_id": "product-cobalt-crewneck-knit-108-main-r1",
+        "file": "assets/products/look-108/cobalt-crewneck-knit-108-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 292156,
+        "sha256": "665b58ce5a9f681da7eb66c03971ee29829496e3104b5111fb4997c193091ce5",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "圆领与肩线的罗纹近景",
+          "caption": "斜向近景呈现同色罗纹沿圆领的弧度，以及领边接到平整衣身后的肌理变化。肩袖转折、领内走线和近观针脚为 AI 设计演绎。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-cobalt-crewneck-knit-108-collar-r1",
+            "file": "assets/products/look-108/cobalt-crewneck-knit-108-collar-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 308660,
+            "sha256": "a97df17969c9f5205c45850748fb2b0feae469831e7e35b1330531c189ae3bc9",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 108,
+          "piece_index": 1,
+          "reference_asset_id": "look-108-female-01-v2-r1",
+          "shot_index": 2
+        }
+      ]
+    },
+    {
+      "product_id": "ivory-windowpane-midi-skirt-108",
+      "name": "米灰窗格纹 A 字中长裙",
+      "category": "下装",
+      "subtitle": "细灰线织出方格，裙摆随步伐轻轻展开。",
+      "description": "米灰底上交错的细灰线，从腰际一路排到小腿中段的裙摆。裙身向下微展，走动时格线沿着软折起伏。独立陈列图中被针织衫遮挡的完整腰头和近观织纹为 AI 设计演绎。",
+      "color_name": "米灰",
+      "color_hex": "#c5bba9",
+      "design_material": "细灰窗格与低光泽柔绒织物观感，视觉设计描述",
+      "notes": [
+        "细灰窗格纹",
+        "高腰与轻展 A 字轮廓",
+        "裙摆落至小腿中段"
+      ],
+      "asset": {
+        "asset_id": "product-ivory-windowpane-midi-skirt-108-main-r1",
+        "file": "assets/products/look-108/ivory-windowpane-midi-skirt-108-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 117860,
+        "sha256": "6dc708d2264e792facb6f24b1e5a09128faa63fa8279795f025cf04beca2f771",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "随下摆起伏的窗格",
+          "caption": "光线掠过下摆，细灰线在软折处随布面弯曲。近观织纹和收边针脚为 AI 设计演绎。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-ivory-windowpane-midi-skirt-108-hem-r1",
+            "file": "assets/products/look-108/ivory-windowpane-midi-skirt-108-hem-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 237756,
+            "sha256": "4ccf1ef59814f8f34106263f4220855e5cb401c753e65dfb9997807adf685001",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 108,
+          "piece_index": 2,
+          "reference_asset_id": "look-108-female-01-v2-r1",
+          "shot_index": 1
+        }
+      ]
+    },
+    {
+      "product_id": "bone-almond-ankle-boots-108",
+      "name": "骨白杏仁头低方跟短靴",
+      "category": "鞋履",
+      "subtitle": "柔和的杏仁头，配一段薄深色底边。",
+      "description": "骨白靴面从短筒延伸到杏仁形鞋头，脚踝处有轻微自然折痕。同色低方跟跟随裙摆留下清楚的轮廓，薄深棕底边压住浅色。静置时的筒口、细颗粒和跟沿接合为 AI 设计演绎。",
+      "color_name": "骨白",
+      "color_hex": "#e3d4bc",
+      "design_material": "柔哑光皮面观感",
+      "notes": [
+        "平缓圆润的杏仁形鞋头",
+        "低方跟和深棕薄底边",
+        "短鞋筒在脚踝处略有折痕"
+      ],
+      "asset": {
+        "asset_id": "product-bone-almond-ankle-boots-108-main-r1",
+        "file": "assets/products/look-108/bone-almond-ankle-boots-108-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 31278,
+        "sha256": "020434b4bf63bf07376b1ad5a7da9dc987cfc5af1c39e4605507b7dbac8d7586",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "侧面的低方跟与薄底边",
+          "caption": "侧光下可见踝部折痕、同色方跟和一圈深棕薄底边。写真无法分辨的近观纹理及接合细节为 AI 设计演绎。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-bone-almond-ankle-boots-108-heel-r1",
+            "file": "assets/products/look-108/bone-almond-ankle-boots-108-heel-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 65958,
+            "sha256": "cbe9ee555cc5930e2672e52e1308b9f19ca58a9e1fdc16cde910d700768ad555",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 108,
+          "piece_index": 3,
+          "reference_asset_id": "look-108-female-01-v2-r1",
+          "shot_index": 6
+        }
+      ]
+    },
+    {
+      "product_id": "caramel-flap-top-handle-108",
+      "name": "焦糖色弧柄翻盖小提包",
+      "category": "包袋",
+      "subtitle": "一根细弧柄，提起小巧的圆角包身。",
+      "description": "焦糖色小包以同色细弧柄和圆角翻盖为轮廓，正面只有一枚暖金色小圆钉。轻提时，低饱和的焦糖色呼应窗格裙的暖灰底。提柄连接和近观纹理中写真无法辨认的部分为 AI 设计演绎。",
+      "color_name": "焦糖色",
+      "color_hex": "#a37b50",
+      "design_material": "低光泽的细纹皮面观感",
+      "notes": [
+        "单条同色细弧柄",
+        "宽翻盖以圆角和同色细包边收尾",
+        "翻盖下缘中央的一枚暖金色圆钉"
+      ],
+      "asset": {
+        "asset_id": "product-caramel-flap-top-handle-108-main-r1",
+        "file": "assets/products/look-108/caramel-flap-top-handle-108-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 89884,
+        "sha256": "583fe0355e26e9172a597f13e24440893430154a272fb0819b4e2f5e87049dd5",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "圆角翻盖与小圆钉",
+          "caption": "侧光沿弧形包边落下，显出小圆钉的低光泽。写真无法辨认的近观纹理、针脚和圆钉表面为 AI 设计演绎。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-caramel-flap-top-handle-108-flap-r1",
+            "file": "assets/products/look-108/caramel-flap-top-handle-108-flap-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 181082,
+            "sha256": "c2dfc889cde6250f11f22489ec3a59938adb10a164ee7d74c0899cd128f6beef",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 108,
+          "piece_index": 4,
+          "reference_asset_id": "look-108-female-01-v2-r1",
+          "shot_index": 6
+        }
+      ]
     }
   ]
 }
