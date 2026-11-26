@@ -1,5 +1,5 @@
 {
   "schema_version": 1,
-  "public": ["index.html", "app.js", "site-theme.js", "site-theme.css", "product-themes.js", "product-page.js", "style.css", "expressive.css", "product-themes.css", "tryon-storage.js", "tryon.js", "tryon.css", "favicon.svg"],
+  "public": ["index.html", "app.js", "wardrobe-scenes.js", "site-theme.js", "site-theme.css", "product-themes.js", "product-page.js", "style.css", "expressive.css", "product-themes.css", "tryon-storage.js", "tryon.js", "tryon.css", "favicon.svg"],
   "admin": ["index.html", "app.mjs", "admin.css"]
 }

@@ -18,7 +18,31 @@ for (const look of baseline.looks) {
   assert.ok(!baselineImages.has(hash), `Duplicate baseline photo for look ${look.id}`);
   baselineImages.add(hash);
 }
-readSiteResources(root);
+const siteResources = readSiteResources(root);
+const sceneContext = {window: {}};
+vm.runInNewContext(read('wardrobe-scenes.js'), sceneContext, {filename: 'wardrobe-scenes.js'});
+const scenes = sceneContext.window.WARDROBE_SCENES;
+assert.ok(Array.isArray(scenes) && scenes.length > 0, 'Expected a list of outfit scenes');
+const sceneIds = new Set();
+const eligibleLooks = new Set(content.catalog.looks
+  .filter(look => !look.model_only && look.versions.v2.ready)
+  .map(look => look.id));
+for (const {id, title, description, entries} of scenes) {
+  assert.ok(typeof id === 'string' && /^[a-z]+(?:-[a-z]+)*$/.test(id), 'Invalid outfit scene ID');
+  assert.ok(!sceneIds.has(id), `Duplicate outfit scene: ${id}`);
+  sceneIds.add(id);
+  assert.ok(typeof title === 'string' && title.trim(), `Missing outfit scene title: ${id}`);
+  assert.ok(typeof description === 'string' && description.trim(), `Missing outfit scene description: ${id}`);
+  assert.ok(Array.isArray(entries) && entries.length >= 4 && entries.length <= 6, `Expected 4–6 looks in scene: ${id}`);
+  const lookIds = new Set();
+  for (const {lookId, tip} of entries) {
+    assert.ok(eligibleLooks.has(lookId), `Outfit scene ${id} references unavailable look ${lookId}`);
+    assert.ok(!lookIds.has(lookId), `Outfit scene ${id} repeats look ${lookId}`);
+    assert.ok(typeof tip === 'string' && tip.trim(), `Missing outfit scene tip for ${id}/${lookId}`);
+    lookIds.add(lookId);
+  }
+}
+assert.ok(siteResources.public.includes('wardrobe-scenes.js'), 'Outfit scenes must be included in the offline build');
 const html = read('index.html');
 const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]);
 assert.equal(ids.length, new Set(ids).size);

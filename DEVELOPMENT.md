@@ -29,6 +29,8 @@ node scripts/build.mjs
 
 制作穿搭先读[外部 agent SOP](docs/external-agent-sop.md)，使用 `node scripts/resolve-model.mjs "<模特编号或名称>"` 解析登记参考与角色规范。单品制作见[单品 SOP](docs/product-agent-sop.md)。批次、写真修订、单品和模特清单的维护入口见[内容架构](docs/content-publishing-plan.md)。
 
+场景专题在 [wardrobe-scenes.js](wardrobe-scenes.js) 维护。每个专题按展示顺序引用 4–6 套可全站索引且写真就绪的穿搭，并为每套写一条具体搭法。运行 `node scripts/check.mjs` 校验穿搭编号与静态资源清单。
+
 在 `dev` 分支迭代。开发环境在 CI 通过后通过独立服务构建、导入并核验 `https://dev-yixu.8882088.xyz/` 及同源 `/admin/`。开发站流程见[开发站部署](deploy/dev-README.md)，正式交付另循[部署说明](deploy/README.md)。源码推送、CI、站点内容/图片验收和 CDN 同步各有独立结果。
 
 ## 单品主题与内容合同

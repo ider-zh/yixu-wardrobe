@@ -231,3 +231,108 @@ body{--accent:#69734f;--paper:#f3f0e7}
  .product-image-controls{align-self:flex-end}
 }
 @media(prefers-reduced-motion:reduce){.product-main-image img,.product-detail-image img,.product-view-image img,.product-card-photo img{transition:none}}
+
+/* Scene edits share the archive cards and the active theme's palette. */
+.scene-navigation {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  column-gap: 20px;
+  row-gap: 8px;
+  margin-bottom: 18px;
+  font-size: .9375rem;
+}
+
+.scene-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.scene-links a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 8px 18px;
+  border: 1px solid var(--line);
+  background: var(--paper-light);
+  color: var(--ink);
+  text-align: center;
+  line-height: 1.4;
+}
+
+.scene-links a:hover {
+  border-color: var(--ink);
+}
+
+.scene-links a[aria-current="page"] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.scene-summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.scene-summary p {
+  margin: 0;
+  font-size: .9375rem;
+  line-height: 1.7;
+}
+
+.scene-summary-actions {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  font-size: var(--small-text-size);
+}
+
+.scene-summary-actions span {
+  color: var(--muted);
+}
+
+.scene-summary-actions a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.scene-tip {
+  margin: 8px 0 0;
+  padding-left: 10px;
+  border-left: 2px solid var(--accent);
+  font-size: .875rem;
+  line-height: 1.65;
+  color: var(--ink);
+}
+
+@media (max-width: 520px) {
+  .scene-navigation {
+    align-items: stretch;
+    flex-direction: column;
+    margin-bottom: 14px;
+  }
+
+  .scene-links {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .scene-links a {
+    padding-inline: 6px;
+  }
+
+  .scene-summary {
+    padding-bottom: 3px;
+  }
+}
