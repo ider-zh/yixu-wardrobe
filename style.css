@@ -313,3 +313,42 @@ dialog{padding:0;border:0;background:var(--paper-light);color:var(--ink);max-wid
     grid-row: 2;
   }
 }
+
+.wardrobe-list-entry-link,
+.recent-page-tools {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+}
+
+.recent-page-tools {
+  justify-content: space-between;
+  max-width: 58rem;
+}
+
+.recent-page-tools p {
+  margin: 0;
+}
+
+.recent-records {
+  max-width: 58rem;
+  padding: 0;
+  list-style: none;
+}
+
+.recent-entry {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--line);
+  overflow-wrap: anywhere;
+}
+
+.recent-entry strong {
+  text-decoration: underline;
+  text-underline-offset: .2em;
+}
