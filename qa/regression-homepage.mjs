@@ -647,8 +647,15 @@ try{
  await navigate(origin+'/#/favorites');
  const listFavoriteKeys=['wardrobe99:favorites:v1','yixu:product-favorites:v1'];
  const favoriteValues=await evaluate(`${JSON.stringify(listFavoriteKeys)}.map(key=>localStorage.getItem(key))`);
+ await evaluate(`localStorage.setItem(window.WardrobeLists.storageKey,JSON.stringify([{id:'legacy',name:'旧清单',entries:[{type:'look',id:9999}]}]));`);
  await evaluate('document.querySelector("#wardrobe-list-entry-link a").click()');
  await wait('!document.getElementById("wardrobe-list-page").hidden');
+ await wait('document.querySelector(".wardrobe-list-entry")?.textContent.includes("当前目录暂无")');
+ assert.equal(await evaluate('localStorage.getItem(window.WardrobeLists.storageKey)'),null,'Completed migration removes only the old list record');
+ await evaluate('document.querySelector("[data-list-remove]").click()');
+ await wait('document.querySelectorAll(".wardrobe-list-entry").length===0');
+ await evaluate('window.confirm=()=>true;document.querySelector("[data-list-delete]").click()');
+ await wait('document.querySelectorAll(".wardrobe-list-group").length===0');
  await evaluate('document.getElementById("wardrobe-list-name").value="周末计划";document.getElementById("wardrobe-list-create").requestSubmit()');
  await wait('document.querySelector(".wardrobe-list-heading h2")?.textContent==="周末计划"');
  await route('#/looks?scene=weekend-walk');
@@ -656,7 +663,7 @@ try{
  await wait('document.getElementById("detail-dialog").open');
  await evaluate('document.getElementById("detail-list-add").scrollIntoView({block:"center",behavior:"instant"})');
  await activate('#detail-list-add',true);
- await wait('document.getElementById("wardrobe-list-picker").open');
+ await wait('document.getElementById("wardrobe-list-picker").open&&!!document.querySelector("[data-list-choice]")');
  await client('Input.dispatchKeyEvent',{type:'keyDown',key:'ArrowRight',code:'ArrowRight',windowsVirtualKeyCode:39});
  await client('Input.dispatchKeyEvent',{type:'keyUp',key:'ArrowRight',code:'ArrowRight',windowsVirtualKeyCode:39});
  assert.equal(await evaluate('location.hash'),'#look-38','Picker cannot navigate the underlying outfit');
@@ -674,7 +681,7 @@ try{
  try{
   await navigate(origin+'/?list-catalog=delayed'+bootsHash);
   await evaluate('window.listOpener=document.querySelector("[data-product-list]");window.listOpener.click()');
-  await wait('document.getElementById("wardrobe-list-picker").open');
+  await wait('document.getElementById("wardrobe-list-picker").open&&!!document.querySelector("[data-list-choice]")');
   await evaluate('document.querySelector("[data-list-choice]").click()');
   await wait('document.querySelector("[data-list-choice]").getAttribute("aria-disabled")==="true"');
   listCatalogGate.resolve();
@@ -689,6 +696,7 @@ try{
  }
  await route('#/lists');
  const mixedLinks='Array.from(document.querySelectorAll(".wardrobe-list-entry a"),link=>link.getAttribute("href"))';
+ await wait('document.querySelectorAll(".wardrobe-list-entry").length===2');
  assert.deepEqual(await evaluate(mixedLinks),['#look-38',bootsHash]);
  await client('Page.reload');await wait('document.getElementById("wardrobe-list-page")?.hidden===false&&document.querySelectorAll(".wardrobe-list-entry").length===2');
  assert.deepEqual(await evaluate(mixedLinks),['#look-38',bootsHash]);
@@ -705,10 +713,25 @@ try{
  await evaluate('window.confirm=()=>true;document.querySelector("[data-list-delete]").click()');
  await wait('document.querySelectorAll(".wardrobe-list-group").length===0');
  assert.deepEqual(await evaluate(`${JSON.stringify(listFavoriteKeys)}.map(key=>localStorage.getItem(key))`),favoriteValues);
- await evaluate(`localStorage.setItem(window.WardrobeLists.storageKey,'{broken');window.dispatchEvent(new StorageEvent('storage',{key:window.WardrobeLists.storageKey}));`);
- assert.match(await evaluate('document.getElementById("wardrobe-list-status").textContent'),/无法识别/);
+ const concurrentNames=await evaluate(`(async()=>{const lists=window.WardrobeLists;
+  const ids=await Promise.all([lists.create('甲'),lists.create('乙')]);
+  const names=(await lists.load()).map(list=>list.name);
+  await Promise.all(ids.map(id=>lists.removeList(id)));return names;
+ })()`);
+ assert.deepEqual(new Set(concurrentNames),new Set(['甲','乙']));
+ await evaluate(`new Promise(resolve=>{
+  const request=indexedDB.open('yixu:wardrobe-lists',1);
+  request.onsuccess=()=>{
+   const database=request.result, transaction=database.transaction('lists','readwrite');
+   transaction.objectStore('lists').put('{broken',window.WardrobeLists.storageKey);
+   transaction.oncomplete=()=>{database.close();resolve();};
+  };
+ })`);
+ await route('#/favorites');
+ await route('#/lists');
+ await wait('document.getElementById("wardrobe-list-status").textContent.includes("无法识别")');
  assert.equal(await evaluate('document.getElementById("wardrobe-list-panels").textContent'),'');
- assert.equal(await evaluate('localStorage.getItem(window.WardrobeLists.storageKey)'),'{broken');
+ assert.equal(await evaluate('window.WardrobeLists.create("不覆盖").then(()=>false,error=>error.message.includes("无法识别"))'),true);
  await navigate(pathToFileURL(path.join(output,'index.html')).href+'#/lists');
  await evaluate('document.getElementById("wardrobe-list-name").value="离线清单";document.getElementById("wardrobe-list-create").requestSubmit()');
  await wait('Array.from(document.querySelectorAll(".wardrobe-list-heading h2")).some(title=>title.textContent==="离线清单")');

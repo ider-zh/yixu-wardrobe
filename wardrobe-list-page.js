@@ -23,6 +23,7 @@
     let opener = null;
     let lists = [];
     let readFailed = false;
+    let renderGeneration = 0;
     const pending = new WeakMap();
 
     function entryMarkup(listId, entry) {
@@ -85,18 +86,24 @@
       if (activeId) (byId(activeId) || nameInput(pickerForm)).focus();
     }
 
-    function render() {
+    async function refresh(beforeUpdate) {
+      const generation = ++renderGeneration;
+      let nextLists;
       try {
-        lists = store.load();
+        nextLists = await store.load();
       } catch (error) {
+        if (generation !== renderGeneration) return false;
         readFailed = true;
         lists = [];
         panels.replaceChildren();
         choices.replaceChildren();
         showError(status, error);
         showError(pickerStatus, error);
-        return;
+        return false;
       }
+      if (generation !== renderGeneration) return false;
+      const keepFocus = beforeUpdate?.();
+      lists = nextLists;
       if (readFailed) {
         status.textContent = '';
         pickerStatus.textContent = '';
@@ -112,6 +119,11 @@
         next.focus({preventScroll:true});
       }
       renderChoices();
+      return !!keepFocus;
+    }
+
+    function render() {
+      return refresh();
     }
 
     function showError(region, error) {
@@ -127,11 +139,12 @@
       if (actions.has(key)) return;
       actions.add(key);
       const active = document.activeElement;
-      const inScope = () => scope === page ? !page.hidden && !picker.open : picker.open && selected === scope;
+      const hash = window.location.hash;
+      const inScope = () => window.location.hash === hash
+        && (scope === page ? !page.hidden && !picker.open : picker.open && selected === scope);
       try {
         const result = await action();
-        const keepFocus = document.activeElement === active || (active?.id && document.activeElement?.id === active.id);
-        render();
+        const keepFocus = await refresh(() => document.activeElement === active || (active?.id && document.activeElement?.id === active.id));
         if (!readFailed && inScope()) complete(result, keepFocus);
       } catch (error) {
         if (inScope()) showError(region, error);
@@ -222,19 +235,27 @@
       if (target && !target.closest('[hidden]')) target.focus({preventScroll:true});
       opener = null;
     });
-    window.addEventListener('storage', event => {
-      if (event.key === store.storageKey || event.key === null) render();
+    store.subscribe(render);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && (!page.hidden || picker.open)) render();
     });
 
     function choose(type, id, trigger=document.activeElement) {
       if (!resolveEntry(type, id)) return;
       if (!picker.open) opener = trigger;
-      selected = {type, id};
+      const choice = {type, id};
+      selected = choice;
       pickerStatus.textContent = '';
-      nameInput(pickerForm).value = '';
-      render();
+      choices.replaceChildren();
+      const input = nameInput(pickerForm);
+      input.value = '';
       if (!picker.open) picker.showModal();
-      (choices.querySelector('[data-list-choice]:not([aria-disabled])') || nameInput(pickerForm)).focus();
+      input.focus();
+      render().then(() => {
+        if (picker.open && selected === choice && document.activeElement === input && !input.value && !readFailed) {
+          choices.querySelector('[data-list-choice]:not([aria-disabled])')?.focus();
+        }
+      });
     }
 
     return {render, choose};

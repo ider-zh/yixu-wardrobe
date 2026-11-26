@@ -2,7 +2,10 @@
   'use strict';
 
   const storageKey = 'yixu:wardrobe-lists:v1';
-  const lockStore = 'locks';
+  const databaseName = 'yixu:wardrobe-lists';
+  const storeName = 'lists';
+  let updates = null;
+  try { updates = new window.BroadcastChannel(storageKey); } catch {}
   const token = /^[A-Za-z0-9_-]+$/;
 
   function isEntry(type, id) {
@@ -10,17 +13,8 @@
       || (type === 'product' && typeof id === 'string' && token.test(id));
   }
 
-  function load() {
-    let raw;
+  function parseLists(lists) {
     try {
-      raw = window.localStorage.getItem(storageKey);
-    } catch {
-      throw new Error('无法读取此浏览器中的搭配清单。');
-    }
-    if (raw === null) return [];
-
-    try {
-      const lists = JSON.parse(raw);
       if (!Array.isArray(lists)) throw new Error();
       const ids = new Set();
       return lists.map(list => {
@@ -46,33 +40,44 @@
     }
   }
 
-  function writeLists(lists) {
+  function readLegacy() {
+    let raw;
     try {
-      window.localStorage.setItem(storageKey, JSON.stringify(lists));
+      raw = window.localStorage.getItem(storageKey);
     } catch {
-      throw new Error('无法在此浏览器中保存搭配清单。');
+      throw new Error('无法读取此浏览器中的旧搭配清单。');
     }
+    if (raw === null) return {raw, lists:[]};
+
+    let lists;
+    try { lists = JSON.parse(raw); }
+    catch { throw new Error('此浏览器中的搭配清单数据无法识别。'); }
+    return {raw, lists:parseLists(lists)};
   }
 
-  function lockError() {
-    return new Error('无法在此浏览器中安全保存搭配清单。');
+  function clearLegacy(legacy) {
+    if (legacy?.raw == null) return;
+    try {
+      if (window.localStorage.getItem(storageKey) === legacy.raw) window.localStorage.removeItem(storageKey);
+    } catch {}
   }
 
-  function openLockDatabase() {
+  function storageError(writing) {
+    return new Error(writing ? '无法在此浏览器中保存搭配清单。' : '无法读取此浏览器中的搭配清单。');
+  }
+
+  function openDatabase(writing) {
     return new Promise((resolve, reject) => {
-      const indexedDB = window.indexedDB;
-      if (!indexedDB) {
-        reject(lockError());
-        return;
-      }
-      const request = indexedDB.open('yixu:wardrobe-list-locks', 1);
+      let request;
+      try { request = window.indexedDB.open(databaseName, 1); }
+      catch { reject(storageError(writing)); return; }
       let blocked = false;
-      request.onupgradeneeded = () => request.result.createObjectStore(lockStore);
+      request.onupgradeneeded = () => request.result.createObjectStore(storeName);
       request.onblocked = () => {
         blocked = true;
-        reject(lockError());
+        reject(storageError(writing));
       };
-      request.onerror = () => reject(lockError());
+      request.onerror = () => reject(storageError(writing));
       request.onsuccess = () => {
         if (blocked) request.result.close();
         else resolve(request.result);
@@ -80,24 +85,47 @@
     });
   }
 
-  async function withDatabaseLock(action) {
-    let database;
-    try { database = await openLockDatabase(); } catch { throw lockError(); }
+  async function transact(operation, writing) {
+    const database = await openDatabase(writing);
     try {
       return await new Promise((resolve, reject) => {
-        let transaction, request;
+        let transaction, store, request;
         try {
-          transaction = database.transaction(lockStore, 'readwrite');
-          request = transaction.objectStore(lockStore).get(storageKey);
+          // Read and update the same record in one exclusive transaction across tabs.
+          transaction = database.transaction(storeName, 'readwrite');
+          store = transaction.objectStore(storeName);
+          request = store.get(storageKey);
         } catch {
-          reject(lockError());
+          reject(storageError(writing));
           return;
         }
-        transaction.onabort = () => reject(lockError());
-        // The readwrite transaction is exclusive across tabs. Its callback
-        // changes localStorage synchronously without storing list data in IndexedDB.
+
+        let result;
+        let legacy;
+        let validationError;
+        transaction.onabort = () => reject(validationError || storageError(writing));
+        transaction.oncomplete = () => {
+          clearLegacy(legacy);
+          if (writing) {
+            try { updates?.postMessage(null); } catch {}
+          }
+          resolve(result);
+        };
         request.onsuccess = () => {
-          try { resolve(action()); } catch (error) { reject(error); }
+          let lists;
+          try {
+            if (request.result === undefined) legacy = readLegacy();
+            lists = legacy ? legacy.lists : parseLists(request.result);
+            result = operation(lists);
+          } catch (error) {
+            validationError = error;
+            transaction.abort();
+            return;
+          }
+          if (legacy || writing) {
+            try { store.put(lists, storageKey); }
+            catch { transaction.abort(); }
+          }
         };
       });
     } finally {
@@ -105,21 +133,17 @@
     }
   }
 
-  async function update(action) {
-    const readAndUpdate = () => action(load());
-    const locks = window.navigator?.locks;
-    if (typeof locks?.request !== 'function') return withDatabaseLock(readAndUpdate);
+  function load() {
+    return transact(lists => lists, false);
+  }
 
-    let acquired = false;
-    try {
-      return await locks.request(storageKey, () => {
-        acquired = true;
-        return readAndUpdate();
-      });
-    } catch (error) {
-      if (acquired) throw error;
-      throw lockError();
-    }
+  function update(action) {
+    return transact(action, true);
+  }
+
+  function subscribe(listener) {
+    updates?.addEventListener('message', listener);
+    return () => updates?.removeEventListener('message', listener);
   }
 
   function listName(name) {
@@ -141,7 +165,6 @@
       let id = base;
       for (let suffix = 1; lists.some(list => list.id === id); suffix++) id = `${base}-${suffix}`;
       lists.push({id, name:trimmedName, entries:[]});
-      writeLists(lists);
       return id;
     });
   }
@@ -150,14 +173,13 @@
     const trimmedName = listName(name);
     return update(lists => {
       findList(lists, listId).name = trimmedName;
-      writeLists(lists);
     });
   }
 
   async function removeList(listId) {
     return update(lists => {
       const list = findList(lists, listId);
-      writeLists(lists.filter(item => item !== list));
+      lists.splice(lists.indexOf(list), 1);
     });
   }
 
@@ -167,7 +189,6 @@
       const {entries} = findList(lists, listId);
       if (entries.some(item => item.type === type && item.id === id)) return;
       entries.push({type, id});
-      writeLists(lists);
     });
   }
 
@@ -178,9 +199,8 @@
       const entries = list.entries.filter(item => item.type !== type || item.id !== id);
       if (entries.length === list.entries.length) return;
       list.entries = entries;
-      writeLists(lists);
     });
   }
 
-  window.WardrobeLists = {storageKey, load, create, rename, removeList, add, remove};
+  window.WardrobeLists = {storageKey, load, create, rename, removeList, add, remove, subscribe};
 })();
