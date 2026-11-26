@@ -79,6 +79,15 @@ def create_app(
     from .settings import RuntimeFile
 
     settings = settings or Settings.from_env()
+    photo_limits = {
+        key: value
+        for key, value in (
+            ("max_upload_bytes", settings.max_upload_bytes),
+            ("max_pixels", settings.max_pixels),
+            ("max_image_dimension", settings.max_image_dimension),
+        )
+        if type(value) is int and 0 < value <= 2**53 - 1
+    }
     provider = provider if provider is not None else OpenAIProvider()
     detector = detector if detector is not None else YuNetDetector(settings)
     runtime_file = RuntimeFile(settings.data_dir)
@@ -210,6 +219,7 @@ def create_app(
                 else "provider_or_detector_or_catalog_unavailable",
                 "disclosure": {**DISCLOSURE, "accepted": visitor["accepted"] == DISCLOSURE_VERSION},
                 "pose_grid_available": True,
+                "photo_limits": photo_limits,
                 "original_retention_seconds": 3600,
                 "result_max_count": 1000,
             }

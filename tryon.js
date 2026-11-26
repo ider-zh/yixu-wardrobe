@@ -68,6 +68,7 @@ function syncControls() {
 function clearPhoto() {
   previewGeneration++;photo=null;savedPhotoId=null;pendingSubmission=null;
   if(photoRejection&&$('tryon-status').textContent===photoRejection)$('tryon-status').textContent='';
+  if(photoRejection&&$('tryon-library-status').textContent===photoRejection)$('tryon-library-status').textContent='';
   photoRejection='';
   if(previewURL)URL.revokeObjectURL(previewURL);
   previewURL=null;$('tryon-local-preview').removeAttribute('src');$('tryon-local-preview').hidden=true;
@@ -77,18 +78,59 @@ function photoNotice(message) {
   $('tryon-library-status').textContent=message;
   if(frozen)$('tryon-status').textContent=message;
 }
+function photoLimit(name) {
+  const value=session?.photo_limits?.[name];
+  return Number.isSafeInteger(value)&&value>0?value:null;
+}
+function fileSizeProblem(blob) {
+  const limit=photoLimit('max_upload_bytes');
+  if(!limit||blob.size<=limit)return '';
+  const amount=limit%(1024*1024)===0?`${limit/(1024*1024)} MiB`:`${limit.toLocaleString('zh-CN')} 字节`;
+  return `照片文件超过 ${amount}，请压缩后重新选择，保留头顶和鞋履。`;
+}
+async function rasterSize(blob) {
+  if(typeof window.createImageBitmap!=='function')return null;
+  try {
+    // An <img>'s natural dimensions are density-corrected CSS pixels.
+    // Decode the source Blob as a bitmap to inspect its raster instead.
+    const bitmap=await window.createImageBitmap(blob);
+    try {return {width:bitmap.width,height:bitmap.height};}
+    finally {bitmap.close();}
+  } catch {return null;}
+}
+function rejectPhoto(message) {
+  clearPhoto();
+  photoRejection=message;
+  photoNotice(message);
+  syncControls();
+  return false;
+}
 async function previewPhoto(blob,id=null) {
   clearPhoto();const generation=previewGeneration;
-  if(!Object.hasOwn(photoTypes,blob.type)||!blob.size){photoNotice('请选择有效的 JPEG、PNG 或 WebP 照片。');return false;}
+  if(!Object.hasOwn(photoTypes,blob.type)||!blob.size)return rejectPhoto('请选择有效的 JPEG、PNG 或 WebP 照片。');
+  const initialProblem=fileSizeProblem(blob);
+  if(initialProblem)return rejectPhoto(initialProblem);
   try {
     savedPhotoId=id;
     const url=URL.createObjectURL(blob);previewURL=url;
     const image=$('tryon-local-preview');image.src=url;await image.decode();
     if(generation!==previewGeneration)return false;
+    const sizeProblem=fileSizeProblem(blob);
+    if(sizeProblem)return rejectPhoto(sizeProblem);
+    const maxEdge=photoLimit('max_image_dimension'),maxPixels=photoLimit('max_pixels');
+    if(maxEdge||maxPixels){
+      const dimensions=await rasterSize(blob);
+      if(generation!==previewGeneration)return false;
+      if(dimensions){
+        const {width,height}=dimensions;
+        if(maxEdge&&Math.max(width,height)>maxEdge)return rejectPhoto(`照片边长超过 ${maxEdge.toLocaleString('zh-CN')} 像素，请缩小后重新选择。`);
+        if(maxPixels&&width*height>maxPixels)return rejectPhoto(`照片总像素超过 ${maxPixels.toLocaleString('zh-CN')}，请缩小后重新选择。`);
+      }
+    }
     photo=blob;image.hidden=false;syncControls();
     return true;
   } catch {
-    if(generation===previewGeneration){clearPhoto();photoNotice('无法读取这张照片，请换一张清晰的 JPEG、PNG 或 WebP。');}
+    if(generation===previewGeneration)return rejectPhoto('无法读取这张照片，请换一张清晰的 JPEG、PNG 或 WebP。');
     return false;
   }
 }
@@ -96,7 +138,8 @@ async function selectPhoto(event) {
   if(busy)return;
   const file=event.target.files?.[0];if(!file)return;
   const blob=file.slice(0,file.size,file.type);
-  if(!await previewPhoto(blob))return;
+  const preview=previewPhoto(blob),generation=previewGeneration;
+  if(!await preview||generation!==previewGeneration)return;
   photoNotice('照片已选中，尚未上传。');
   if(!storage){photoNotice('此浏览器无法保存照片，仍可在本次试穿使用。');return;}
   try {
@@ -106,7 +149,7 @@ async function selectPhoto(event) {
     const loaded=await readPhotos();
     if(loaded&&photo===blob)$('tryon-library-status').textContent='照片已保存到本机。';
   } catch {
-    if(photo===blob||(!photo&&dialog.open))$('tryon-library-status').textContent='照片未能保存到本机。';
+    if(generation===previewGeneration&&dialog.open)$('tryon-library-status').textContent='照片未能保存到本机。';
   }
 }
 function releasePhotoURLs() {
@@ -134,7 +177,9 @@ function renderPhotos() {
     image.src=url;image.alt='';image.loading='lazy';
     select.append(image,element('span',label));
     select.addEventListener('click',async()=>{
-      if(!busy&&await previewPhoto(entry.blob,entry.id))photoNotice('已选用本机照片，尚未上传。');
+      if(busy)return;
+      const preview=previewPhoto(entry.blob,entry.id),generation=previewGeneration;
+      if(await preview&&generation===previewGeneration)photoNotice('已选用本机照片，尚未上传。');
     });
     const remove=element('button','删除','text-button tryon-photo-delete');
     remove.type='button';remove.dataset.photoDelete=entry.id;
@@ -668,6 +713,9 @@ async function bootstrap(explicit=false) {
   try {
     if(!['http:','https:'].includes(location.protocol))throw new Error('本地离线浏览不支持在线试穿；衣橱和收藏仍可使用。');
     session = await api('/api/bootstrap');
+    if(photo&&(photoLimit('max_upload_bytes')||photoLimit('max_image_dimension')||photoLimit('max_pixels'))){
+      await previewPhoto(photo,savedPhotoId);
+    }
     if(previousVisitor&&previousVisitor===session.visitor?.id)visiblePages=pages;
     track('page_view');if(currentContext)track('look_open',currentContext);
     $('tryon-disclosure-title').textContent=session.disclosure.title||'照片用途';
@@ -676,7 +724,7 @@ async function bootstrap(explicit=false) {
     $('tryon-consent-label').hidden=Boolean(session.disclosure.accepted);syncControls();
     const message = session.generation_available ? '在线试穿已连接' : '试穿暂不可用：生成服务尚未就绪，衣橱仍可浏览。';
     $('tryon-availability').textContent = message;
-    $('tryon-status').textContent = message+' '+recoveryNotice;
+    if(!photoRejection)$('tryon-status').textContent = message+' '+recoveryNotice;
     await refreshJobs();
   } catch(error) {
     $('tryon-availability').textContent = '试穿暂不可用';

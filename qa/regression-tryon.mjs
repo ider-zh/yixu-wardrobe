@@ -22,10 +22,11 @@ let available = false, jobs = [], accept = false, uploadError = null, uploadErro
 let nextJobId='fixture-job-1';
 const requests = [];
 let catalogFixture=null;
+let photoLimits=null;
 let resultImage = null; // Browser-encoded synthetic WebP; never a provider output.
 const bootstrap = () => ({csrf_token:'test-csrf',visitor:{id:'test-visitor'},generation_available:available,pose_grid_available:true,
   disclosure:{version:'test-v1',title:'照片用途',items:['照片交由第三方 AI 生成试穿图，结果可供后台评估。'],accepted:accept},
-  original_retention_seconds:3600,result_max_count:1000});
+  ...(photoLimits?{photo_limits:photoLimits}:{}),original_retention_seconds:3600,result_max_count:1000});
 const server = http.createServer(async (req,res) => {
   const chunks=[]; for await (const chunk of req) chunks.push(chunk);
   const body=Buffer.concat(chunks);
@@ -538,6 +539,33 @@ try {
     assert.equal(await evaluate('localStorage.length+sessionStorage.length'),0);
   }
   console.log('PASS 401/session and 403/CSRF purge active photo/consent and remote URLs, retain local results, and never replay');
+  photoLimits={max_upload_bytes:4096,max_image_dimension:150,max_pixels:10000};
+  await client('Page.reload');
+  await wait('document.readyState==="complete"&&document.getElementById("tryon-availability").textContent.includes("已连接")');
+  await evaluate('document.getElementById("tryon-history").click()');
+  const sentBeforePreflight=requests.filter(request=>request.method==='POST'&&['/api/tryons','/api/disclosure/accept'].includes(request.url)).length;
+  const sizeCheck=(width,height,fill)=>evaluate(`(async()=>{
+   let bytes;
+   if(${fill})bytes=new Uint8Array(${fill});
+   else{
+    const canvas=document.createElement('canvas');canvas.width=${width};canvas.height=${height};
+    bytes=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
+   }
+   const input=document.getElementById('tryon-album'),transfer=new DataTransfer();
+   transfer.items.add(new File([bytes],'size-check.png',{type:'image/png'}));
+   input.files=transfer.files;input.dispatchEvent(new Event('change',{bubbles:true}));
+  })()`);
+  for(const [width,height,fill,message] of [[0,0,4097,'文件超过'],[151,40,0,'边长超过'],[101,100,0,'总像素超过']]){
+   await sizeCheck(width,height,fill);
+   await wait(`document.getElementById("tryon-library-status").textContent.includes(${JSON.stringify(message)})`);
+   assert.equal(await evaluate('document.getElementById("tryon-local-preview").hidden'),true);
+  }
+  await sizeCheck(100,100,0);
+  await wait('!document.getElementById("tryon-local-preview").hidden');
+  assert.equal(requests.filter(request=>request.method==='POST'&&['/api/tryons','/api/disclosure/accept'].includes(request.url)).length,sentBeforePreflight);
+  await evaluate('document.getElementById("tryon-close").click()');
+  photoLimits=null;
+  console.log('PASS configured file byte, edge and pixel limits reject locally while the equality boundary remains selectable.');
   // Exercise the same shipped page with a server-only full catalog revision.
   // No fixture content is written to the repository or treated as AI output.
   catalogFixture=structuredClone(baseline);

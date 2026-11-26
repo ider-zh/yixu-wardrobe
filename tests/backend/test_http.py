@@ -31,6 +31,24 @@ def test_bootstrap_is_automatic_private_host_bound_session(tmp_path: Path):
         assert c.get("/api/bootstrap", headers={"host": "unknown.invalid"}).status_code == 421
 
 
+def test_bootstrap_reports_configured_upload_limits(tmp_path):
+    from backend.app import create_app
+    from backend.settings import Settings
+
+    settings = Settings(
+        data_dir=tmp_path,
+        max_upload_bytes=1024,
+        max_image_dimension=1234,
+        max_pixels=567890,
+    )
+    with TestClient(create_app(settings), base_url="https://localhost") as client:
+        assert client.get("/api/bootstrap").json()["photo_limits"] == {
+            "max_upload_bytes": 1024,
+            "max_image_dimension": 1234,
+            "max_pixels": 567890,
+        }
+
+
 def test_disclosure_is_concise_and_legacy_acceptance_does_not_carry_over(tmp_path):
     from backend.app import create_app
     from backend.settings import Settings
