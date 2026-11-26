@@ -68,6 +68,11 @@ dialog{padding:0;border:0;background:var(--paper-light);color:var(--ink);max-wid
   overflow-wrap: anywhere;
 }
 
+.wardrobe-list-heading > button {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
 .wardrobe-list-entries {
   display: grid;
   padding: 0;
