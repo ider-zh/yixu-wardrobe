@@ -63,6 +63,12 @@ try{
  const evaluate=async expression=>{const result=await client('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(result.exceptionDetails)throw Error(JSON.stringify(result.exceptionDetails));return result.result.value;};
  const wait=async expression=>{for(let n=0;n<150;n++){if(await evaluate(expression))return;await new Promise(resolve=>setTimeout(resolve,25));}throw Error('DOM condition timed out: '+expression);};
  const navigate=async(url=origin)=>{await client('Page.navigate',{url});await wait('document.readyState==="complete" && !!document.querySelector("#hero-detail")?.dataset.open');};
+ const seedFavorites=(kind,ids)=>evaluate(`(async()=>{
+  const store=window.WardrobeFavorites.create({lookKey:'wardrobe99:favorites:v1',productKey:'yixu:product-favorites:v1'});
+  const desired=${JSON.stringify(ids)},kind=${JSON.stringify(kind)};
+  for(const id of await store.load(kind))if(!desired.includes(id))await store.set(kind,id,false);
+  await store.merge(kind,desired);
+ })()`);
  const route=async hash=>{await evaluate(`location.hash=${JSON.stringify(hash)}`);await wait(`location.hash===${JSON.stringify(hash)}`);await evaluate('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');};
  const selectServerTheme=async theme=>{
   siteTheme=theme;
@@ -167,7 +173,7 @@ try{
   assert.equal(await evaluate('document.querySelectorAll("#model-looks-gallery .card-publication").length'),owned.length);
   assert.equal(await evaluate('document.querySelectorAll("#model-looks-gallery .scene-tip").length'),0);
  }
- await route('#/home');await evaluate('localStorage.setItem("wardrobe99:favorites:v1","[9999]")');await navigate();await evaluate('document.getElementById("hero-favorite").click()');
+ await route('#/home');await seedFavorites('look',[9999]);await navigate();await evaluate('document.getElementById("hero-favorite").click()');await wait('document.getElementById("hero-favorite")?.getAttribute("aria-pressed")==="true"');
  assert.deepEqual(await evaluate('JSON.parse(localStorage.getItem("wardrobe99:favorites:v1"))'),[9999,featured.id]);
  await route('#/favorites');assert.deepEqual(await evaluate('[...document.querySelectorAll("#gallery [data-look-card]")].map(card=>Number(card.dataset.lookCard))'),[featured.id]);
  await navigate(origin+'/#look-'+featured.id);await wait('document.getElementById("detail-dialog").open');assert.equal(await evaluate('document.getElementById("detail-title").textContent'),featured.title);await evaluate('document.getElementById("close-detail").click()');await wait('!document.getElementById("home-page").hidden');
@@ -331,7 +337,7 @@ try{
    await wait('document.getElementById("detail-image").naturalWidth>0');
    assert.deepEqual(await evaluate('[...document.querySelectorAll("#detail-product-gallery [data-product-card]")].map(card=>card.dataset.productCard)'),linked.map(p=>p.product_id));
    if(viewport.width===390){
-    await evaluate('document.getElementById("detail-favorite").click()');
+    await evaluate('document.getElementById("detail-favorite").click()');await wait('document.getElementById("detail-favorite")?.getAttribute("aria-pressed")==="true"');
     assert.ok((await evaluate('JSON.parse(localStorage.getItem("wardrobe99:favorites:v1"))')).includes(look.id));
    }
    if(exclusive.length){
@@ -342,7 +348,7 @@ try{
     assert.equal(await evaluate('document.querySelector(".product-breadcrumb a").getAttribute("href")'),profile);
     await noOverflow('Model-only product '+viewport.width);
     if(viewport.width===390){
-     await evaluate('document.querySelector("#product-page [data-product-favorite]").click()');
+     await evaluate('document.querySelector("#product-page [data-product-favorite]").click()');await wait('document.querySelector("#product-page [data-product-favorite]")?.getAttribute("aria-pressed")==="true"');
      assert.ok((await evaluate('JSON.parse(localStorage.getItem("yixu:product-favorites:v1"))')).includes(product.product_id));
     }
     await evaluate('history.back()');await wait('document.getElementById("detail-dialog").open');
@@ -605,14 +611,14 @@ try{
  await noOverflow('Legacy product offline');
  console.log('PASS product themes: both structures, offline default, unchanged collections and selected assets, legacy single-image content');
  const savedProduct=sampleProducts[0];
- await evaluate('localStorage.setItem("yixu:product-favorites:v1",JSON.stringify(["future-product"]))');
+ await seedFavorites('product',['future-product']);
  await client('Page.navigate',{url:'about:blank'});await wait('location.href==="about:blank"');
  await navigate(pathToFileURL(path.join(output,'index.html')).href+'#/product/'+savedProduct.product_id);
- await evaluate('document.querySelector("#product-page [data-product-favorite]").click()');
+ await evaluate('document.querySelector("#product-page [data-product-favorite]").click()');await wait('document.querySelector("#product-page [data-product-favorite]")?.getAttribute("aria-pressed")==="true"');
  assert.deepEqual(await evaluate('JSON.parse(localStorage.getItem("yixu:product-favorites:v1"))'),['future-product',savedProduct.product_id]);
  assert.equal(await evaluate('localStorage.getItem("wardrobe99:favorites:v1")'),originalFavorites,'Product collection never overwrites outfit collection');
  await route('#/products?saved=1');assert.equal(await evaluate('document.querySelectorAll("#product-gallery [data-product-card]").length'),1);
- await evaluate('document.querySelector("#product-gallery [data-product-favorite]").click()');
+ await evaluate('document.querySelector("#product-gallery [data-product-favorite]").click()');await wait('!document.querySelector("#product-gallery [data-product-card]")');
  assert.equal(await evaluate('document.querySelectorAll("#product-gallery [data-product-card]").length'),0);
  await route('#/products?category='+encodeURIComponent(sampleProducts[1].category));
  assert.equal(await evaluate('document.querySelectorAll("#product-gallery [data-product-card]").length'),sampleProducts.filter(product=>product.category===sampleProducts[1].category).length);

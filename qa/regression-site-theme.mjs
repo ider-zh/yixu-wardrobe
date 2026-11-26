@@ -119,8 +119,11 @@ try{
  const desktopDesigns=new Set();
  for(const width of [320,390,1440]){
   await client('Emulation.setDeviceMetricsOverride',{width,height:1000,deviceScaleFactor:1,mobile:width<600});await navigate(origin);await wait('document.getElementById("hero-image-0").naturalWidth>0');
-  await evaluate(`localStorage.setItem('wardrobe99:favorites:v1','[1,99999]');localStorage.setItem('yixu:product-favorites:v1','["brown-boots-102","unknown-design"]')`);
-  await evaluate(`window.dispatchEvent(new StorageEvent('storage',{key:'wardrobe99:favorites:v1',newValue:'[1,99999]'}));window.dispatchEvent(new StorageEvent('storage',{key:'yixu:product-favorites:v1',newValue:'["brown-boots-102","unknown-design"]'}))`);
+  await evaluate(`(async()=>{
+   const store=window.WardrobeFavorites.create({lookKey:'wardrobe99:favorites:v1',productKey:'yixu:product-favorites:v1'});
+   await store.merge('look',[1,99999]);
+   await store.merge('product',['brown-boots-102','unknown-design']);
+  })()`);
   for(const theme of themes){
    await route('#/home');await choose(theme);await noOverflow('home '+theme+' '+width);
    assert.equal(await evaluate('document.querySelector(".latest-hero").firstElementChild.classList.contains("hero-copy")'),theme!=='studio');
@@ -158,10 +161,10 @@ try{
   }
   await route('#/product/'+boots.product_id);await choose('studio');await wait('document.getElementById("product-page").dataset.productTheme==="studio"');
   const saveButton='#product-page .product-actions [data-product-favorite]';
-  await evaluate(`document.querySelector(${JSON.stringify(saveButton)}).click()`);await choose('editorial');assert.equal(await evaluate(`document.querySelector(${JSON.stringify(saveButton)}).getAttribute('aria-pressed')`),'false');
-  await evaluate(`document.querySelector(${JSON.stringify(saveButton)}).click()`);await choose('studio');assert.equal(await evaluate(`document.querySelector(${JSON.stringify(saveButton)}).getAttribute('aria-pressed')`),'true');assert.match(await evaluate(`document.querySelector(${JSON.stringify(saveButton)}).textContent`),/已收藏/);assert.ok(JSON.parse(await evaluate('localStorage.getItem("yixu:product-favorites:v1")')).includes(boots.product_id));
-  await evaluate(`document.querySelector(${JSON.stringify(saveButton)}).click()`);await choose('editorial');assert.equal(await evaluate(`document.querySelector(${JSON.stringify(saveButton)}).getAttribute('aria-pressed')`),'false');assert.ok(!JSON.parse(await evaluate('localStorage.getItem("yixu:product-favorites:v1")')).includes(boots.product_id));
-  await evaluate(`document.querySelector(${JSON.stringify(saveButton)}).click()`);
+  await evaluate(`document.querySelector(${JSON.stringify(saveButton)}).click()`);await wait(`document.querySelector(${JSON.stringify(saveButton)})?.getAttribute("aria-pressed")==="false"`);await choose('editorial');assert.equal(await evaluate(`document.querySelector(${JSON.stringify(saveButton)}).getAttribute('aria-pressed')`),'false');
+  await evaluate(`document.querySelector(${JSON.stringify(saveButton)}).click()`);await wait(`document.querySelector(${JSON.stringify(saveButton)})?.getAttribute("aria-pressed")==="true"`);await choose('studio');assert.equal(await evaluate(`document.querySelector(${JSON.stringify(saveButton)}).getAttribute('aria-pressed')`),'true');assert.match(await evaluate(`document.querySelector(${JSON.stringify(saveButton)}).textContent`),/已收藏/);assert.ok(JSON.parse(await evaluate('localStorage.getItem("yixu:product-favorites:v1")')).includes(boots.product_id));
+  await evaluate(`document.querySelector(${JSON.stringify(saveButton)}).click()`);await wait(`document.querySelector(${JSON.stringify(saveButton)})?.getAttribute("aria-pressed")==="false"`);await choose('editorial');assert.equal(await evaluate(`document.querySelector(${JSON.stringify(saveButton)}).getAttribute('aria-pressed')`),'false');assert.ok(!JSON.parse(await evaluate('localStorage.getItem("yixu:product-favorites:v1")')).includes(boots.product_id));
+  await evaluate(`document.querySelector(${JSON.stringify(saveButton)}).click()`);await wait(`document.querySelector(${JSON.stringify(saveButton)})?.getAttribute("aria-pressed")==="true"`);
   await choose('editorial');
   await evaluate('window.retainedChapter=document.querySelector(".product-chapters button");window.retainedChapter.focus()');
   await choose('city-billboard');
@@ -499,7 +502,7 @@ try{
  await wait('document.getElementById("week-look-2027-01-01")?.dataset.weekLook==="1"&&document.querySelector("#week-form button").getAttribute("aria-disabled")==="false"');
  for(const id of [1,2]){
   await evaluate(`document.getElementById('week-date').value='2027-01-01';document.getElementById('week-look').value='${id}';document.getElementById('week-form').requestSubmit()`);
-  await wait(`document.getElementById('week-look-2027-01-01')?.dataset.weekLook==='${id}'`);
+  await wait(`document.getElementById('week-look-2027-01-01')?.dataset.weekLook==='${id}'&&document.querySelector('#week-form button').getAttribute('aria-disabled')==='false'`);
  }
  await client('Emulation.setTimezoneOverride',{timezoneId:'Pacific/Kiritimati'});
  await client('Page.reload');

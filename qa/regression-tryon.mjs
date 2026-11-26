@@ -549,7 +549,7 @@ try {
     catalogFixture.looks.push(look);
   }
   uploadError=null;jobs=[];
-  await evaluate('localStorage.setItem("wardrobe99:favorites:v1","[9999,101]")');
+  await evaluate(`window.WardrobeFavorites.create({lookKey:'wardrobe99:favorites:v1',productKey:'yixu:product-favorites:v1'}).merge('look',[9999,101])`);
   await load();await wait('window.WARDROBE.looks.some(look=>look.id===102)');
   await evaluate('location.hash="#/looks"');await wait('!document.getElementById("collection").hidden');
   assert.equal(await evaluate('document.querySelectorAll("[data-edition]").length'),0);
