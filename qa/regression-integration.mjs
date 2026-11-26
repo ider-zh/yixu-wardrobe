@@ -65,7 +65,7 @@ async function publicUI(t) {
   t.after(() => { for (const id of timers) clearTimeout(id); });
   window.WARDROBE = { looks: [{ id: 1, title: 'Disposable UI test', versions: { v2: { image: '', shots: Array.from({ length: 9 }, () => ({ title: 'test' })) } } }] };
   vm.runInNewContext(fs.readFileSync(path.join(root, 'tryon.js'), 'utf8'), {
-    document, window, location: { protocol: 'https:' }, fetch: b.fetch, crypto: { randomUUID }, URL, FormData,
+    document, window, location: { protocol: 'https:' }, fetch: b.fetch, crypto: { randomUUID }, URL, URLSearchParams, FormData,
     setTimeout: schedule, clearTimeout, queueMicrotask, confirm: () => true,
   });
   const $ = id => document.getElementById(id);
