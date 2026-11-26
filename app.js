@@ -104,6 +104,7 @@ function adoptCatalog(candidate) {
   buildCategories();buildContentFilters();updateCounts();updateEditionUI();renderModels();refreshFilters();renderCompareTray();
   if($('compare-dialog').open){if(compare.size>=2)openComparison();else $('compare-dialog').close();}
   routeFromURL(false,location.hash,{hydrating:true});
+  if($('wardrobe-list-picker').open)wardrobeListPage?.render();
   return true;
 }
 function buildContentFilters(){
@@ -394,6 +395,7 @@ function updateDetailActions() {
   $('detail-favorite').textContent=f?'♥ 已收藏':'♡ 收藏这套';
   $('detail-favorite').setAttribute('aria-pressed',String(f));
   $('detail-compare').hidden=!!l.model_only;
+  $('detail-list-add').hidden=!!l.model_only;
   $('detail-compare').textContent=c?'− 移出对比':'+ 加入对比';
   $('detail-compare').setAttribute('aria-pressed',String(c));
 }
@@ -402,7 +404,7 @@ function openDetail(id,preserveNavigation=false,{view=0,routed=false,hydrating=f
   const alreadyOpen=$('detail-dialog').open,detailRoute=detailHashPattern.test(location.hash);
   const preserveView=hydrating&&alreadyOpen&&state.active===id&&state.view===view;
   const restored=!alreadyOpen&&detailRoute?history.state?.wardrobeDetail:null;
-  if(restored&&typeof restored.returnRoute==='string'&&/^#\/(home|looks|models|favorites|products|product)(?:[/?]|$)/.test(restored.returnRoute))detailReturnRoute=restored.returnRoute;
+  if(restored&&typeof restored.returnRoute==='string'&&/^#\/(home|looks|models|favorites|products|product|lists)(?:[/?]|$)/.test(restored.returnRoute))detailReturnRoute=restored.returnRoute;
   else if(!alreadyOpen)detailReturnRoute=detailRoute?(l.model_only?modelRoute(l.model_id):'#/home'):location.hash||'#/home';
   if(!alreadyOpen)detailSceneOpener=restored?.sceneOpener??(!detailRoute&&state.scene?id:null);
   if(restored&&Array.isArray(restored.navigation)&&restored.navigation.includes(id))detailNavigation=restored.navigation.filter(key=>byId.has(key));
@@ -455,6 +457,7 @@ $('share-shot').addEventListener('click',shareShot);
 $('detail-tags').addEventListener('click',event=>{if(event.target.closest('[data-explore-tag]')&&event.button===0&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey)focusArchive=true;});
 $('close-detail').addEventListener('click',()=>$('detail-dialog').close());
 $('detail-favorite').addEventListener('click',()=>toggleFavorite(state.active));
+$('detail-list-add').addEventListener('click',event=>wardrobeListPage?.choose('look',state.active,event.currentTarget));
 $('detail-compare').addEventListener('click',()=>toggleCompare(state.active));
 function navigateLook(direction) {
   const list=detailList(),index=list.findIndex(l=>l.id===state.active);
@@ -484,7 +487,7 @@ document.querySelectorAll('dialog').forEach(dialog=>dialog.addEventListener('cli
 document.addEventListener('keydown',e=>{
   const editable=e.target.matches('input,textarea,select,[contenteditable]');
   if(e.key==='/'&&!editable&&!document.querySelector('dialog[open]')){e.preventDefault();if(state.scene||!['looks','favorites'].includes(state.page)){history.pushState(null,'','#/looks');routeFromURL(false);}$('search').focus();$('search').scrollIntoView({block:'center',behavior:'smooth'});}
-  if($('detail-dialog').open&&!$('tryon-dialog')?.open&&!$('compare-dialog').open&&!editable&&!e.target.closest('#view-selector, #detail-tags a')){if(e.key==='ArrowRight'){e.preventDefault();navigateLook(1);}if(e.key==='ArrowLeft'){e.preventDefault();navigateLook(-1);}}
+  if($('detail-dialog').open&&!$('tryon-dialog')?.open&&!$('compare-dialog').open&&!$('wardrobe-list-picker').open&&!editable&&!e.target.closest('#view-selector, #detail-tags a')){if(e.key==='ArrowRight'){e.preventDefault();navigateLook(1);}if(e.key==='ArrowLeft'){e.preventDefault();navigateLook(-1);}}
 });
 window.addEventListener('storage',e=>{if(e.key===productStorageKey){try{const values=JSON.parse(e.newValue||'[]');if(!Array.isArray(values))return;productFavorites.clear();values.filter(id=>typeof id==='string'&&/^[A-Za-z0-9_-]+$/.test(id)).forEach(id=>productFavorites.add(id));renderHomeProducts();if(state.page==='products')renderProducts();if(state.page==='product'){const id=/^#\/product\/([A-Za-z0-9_-]+)(?:\?(.*))?$/.exec(location.hash)?.[1];if(id)renderProduct(id);}if(state.active)renderLookProducts(state.active);}catch{}return;}if(e.key!==storageKey)return;try{const values=JSON.parse(e.newValue||'[]');if(!Array.isArray(values))return;favorites.clear();values.filter(id=>Number.isSafeInteger(id)&&id>0).forEach(id=>favorites.add(id));updateCounts();renderGallery();updateEditionUI();if(state.profileModel)renderModelProfile(state.profileModel);if(state.active)updateDetailActions();}catch{}});
 function archiveRoute(){
@@ -511,7 +514,7 @@ function routeFromURL(scroll=true,hash=location.hash,{hydrating=false}={}){
  }
  const productRoute=/^#\/product\/([A-Za-z0-9_-]+)(?:\?(.*))?$/.exec(hash);
  const profile=/^#\/models\/([A-Za-z0-9_-]+)$/.exec(hash);
- const route=/^#\/(home|looks|models|favorites|products)(?:\?(.*))?$/.exec(hash),page=productRoute?'product':profile?'models':route?.[1]||'home';
+ const route=/^#\/(home|looks|models|favorites|products|lists)(?:\?(.*))?$/.exec(hash),page=productRoute?'product':profile?'models':route?.[1]||'home';
  const params=new URLSearchParams(route?.[2]||'');
  const scene=page==='looks'?availableScene(params.get('scene')):null;
  const sceneFocus=scene&&detailReturnRoute===hash?detailSceneOpener:null,leavingScene=state.scene&&!scene;
@@ -522,6 +525,8 @@ function routeFromURL(scroll=true,hash=location.hash,{hydrating=false}={}){
  if($('detail-dialog').open){routeDetailCloses++;$('detail-dialog').close();}state.active=null;detailNavigation=null;detailSceneOpener=null;
  $('home-page').hidden=page!=='home';$('models-page').hidden=page!=='models';$('collection').hidden=!['looks','favorites'].includes(page);$('closing-note').hidden=page!=='home';
  $('products-page').hidden=page!=='products';$('product-page').hidden=page!=='product';
+ $('wardrobe-list-page').hidden=page!=='lists';$('wardrobe-list-entry-link').hidden=page!=='favorites';
+ if(page==='lists')wardrobeListPage?.render();
  if(page==='models')renderModelProfile(state.profileModel);
  if(page==='products')renderProducts();if(page==='product')renderProduct(productRoute[1]);
  renderSceneControls();
@@ -550,12 +555,25 @@ $('detail-dialog').addEventListener('close',()=>{
   history.replaceState(null,'',detailReturnRoute);routeFromURL(false);
  }
 });
-window.addEventListener('hashchange',()=>{if($('product-image-dialog').open)$('product-image-dialog').close();routeFromURL();});
+window.addEventListener('hashchange',()=>{
+ if($('product-image-dialog').open)$('product-image-dialog').close();
+ if($('wardrobe-list-picker').open)$('wardrobe-list-picker').close();
+ routeFromURL();
+});
 $('open-filters').addEventListener('click',()=>{$('filter-dialog').showModal();});
 $('close-filters').addEventListener('click',()=>$('filter-dialog').close());
 $('apply-filters').addEventListener('click',()=>$('filter-dialog').close());
 function productsForLook(id){return (data.products||[]).filter(p=>p.appearances.some(a=>a.look_id===id));}
 function publicAppearances(product){return product.appearances.filter(a=>!byId.get(a.look_id)?.model_only);}
+function wardrobeListEntry(type,id){
+ if(type==='look'){
+  const look=byId.get(id);
+  return look&&!look.model_only?{title:look.title,href:lookRoute(look)}:null;
+ }
+ const product=(data.products||[]).find(item=>item.product_id===id);
+ return product&&publicAppearances(product).length?{title:product.name,href:'#/product/'+id}:null;
+}
+const wardrobeListPage=window.WardrobeListPage?.create({escapeText:esc,resolveEntry:wardrobeListEntry});
 function renderLookProducts(id){
  const linked=productsForLook(id),fromModel=byId.get(id)?.model_only;
  $('detail-products').hidden=!linked.length;
@@ -595,10 +613,18 @@ function renderProduct(id){
  const appearances=fromModel?product.appearances.filter(a=>a.look_id===requested):indexed.length?indexed:product?.appearances||[];
  const related=[...new Map(appearances.flatMap(a=>productsForLook(a.look_id)).filter(p=>p.product_id!==id).map(p=>[p.product_id,p])).values()];
  const modelContext=appearances.map(a=>byId.get(a.look_id)).find(l=>l?.model_only);
- productPage.render({product,number:String((data.products||[]).indexOf(product)+1).padStart(3,'0'),liked:productFavorites.has(id),appearances,related,
+ productPage.render({product,number:String((data.products||[]).indexOf(product)+1).padStart(3,'0'),liked:productFavorites.has(id),listable:indexed.length>0,appearances,related,
    renderCard:p=>productCard(p,modelContext?.id),modelLink:modelContext?{href:modelRoute(modelContext.model_id),name:modelName(modelContext.model_id)}:null});
 }
 document.addEventListener('click',event=>{
+ const listProduct=event.target.closest('[data-product-list]');
+ if(listProduct){wardrobeListPage?.choose('product',listProduct.dataset.productList,listProduct);return;}
+ const listLook=event.target.closest('#wardrobe-list-panels a[href^="#look-"]');
+ if(listLook&&event.button===0&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey){
+  const id=Number(detailHashPattern.exec(listLook.hash)?.[1]);
+  if(wardrobeListEntry('look',id)){event.preventDefault();openDetail(id);}
+  return;
+ }
  const worn=event.target.closest('[data-product-look]');
  if(worn&&event.button===0&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey){
   const id=Number(worn.dataset.productLook),look=byId.get(id);

@@ -46,7 +46,7 @@ assert.ok(siteResources.public.includes('wardrobe-scenes.js'), 'Outfit scenes mu
 const html = read('index.html');
 const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]);
 assert.equal(ids.length, new Set(ids).size);
-for(const file of ['app.js','tryon-storage.js','tryon.js','product-themes.js','product-page.js','site-theme.js']) {
+for(const file of ['app.js','tryon-storage.js','tryon.js','product-themes.js','product-page.js','site-theme.js','wardrobe-lists.js','wardrobe-list-page.js']) {
   new vm.Script(read(file),{filename:file});
   for (const match of read(file).matchAll(/\$\('([^']+)'\)/g)) {
     assert.ok(ids.includes(match[1]), `Missing UI target: ${match[1]}`);

@@ -163,6 +163,35 @@ check('an intentionally empty valid catalog renders gracefully without deleting 
 check('page styles and scripts retain local dependencies for direct offline opening',()=>{
   const styles=['style.css','expressive.css','product-themes.css','tryon.css','site-theme.css'].map(file=>fs.readFileSync(path.join(root,file),'utf8')).join('\n');assert.doesNotMatch(html,/<(?:script|link)[^>]+(?:src|href)=["'](?:https?:)?\/\//i);assert.doesNotMatch(styles,/@import\s|url\(\s*["']?(?:https?:)?\/\//i);
 });
+check('local outfit lists preserve mixed items, older IDs and existing favorites',()=>{
+  const saved=new Map([['wardrobe99:favorites:v1','[1]'],['yixu:product-favorites:v1','["brown-boots-102"]']]);
+  const window={localStorage:{getItem:key=>saved.get(key)??null,setItem:(key,value)=>saved.set(key,value)}};
+  vm.runInNewContext(fs.readFileSync(path.join(root,'wardrobe-lists.js'),'utf8'),{window});
+  const lists=window.WardrobeLists;
+  const list=lists.create(' 周末 ');
+  lists.add(list,'look',1);
+  lists.add(list,'product','brown-boots-102');
+  lists.add(list,'product','brown-boots-102');
+  lists.add(list,'look',9999);
+  lists.rename(list,'散步');
+  assert.deepEqual(JSON.parse(JSON.stringify(lists.load())),[{
+    id:list,name:'散步',entries:[{type:'look',id:1},{type:'product',id:'brown-boots-102'},{type:'look',id:9999}],
+  }]);
+  lists.remove(list,'look',9999);
+  assert.equal(lists.load()[0].entries.length,2);
+  lists.removeList(list);
+  assert.equal(lists.load().length,0);
+  assert.equal(saved.get('wardrobe99:favorites:v1'),'[1]');
+  assert.equal(saved.get('yixu:product-favorites:v1'),'["brown-boots-102"]');
+  saved.set(lists.storageKey,'{bad json');
+  assert.equal(lists.load().length,0);
+  assert.throws(()=>lists.create('不能覆盖'),/无法识别/);
+  assert.equal(saved.get(lists.storageKey),'{bad json');
+  saved.delete(lists.storageKey);
+  window.localStorage.setItem=()=>{throw Error('Test quota');};
+  assert.throws(()=>lists.create('无法保存'),/无法在此浏览器中保存/);
+  assert.equal(lists.load().length,0);
+});
 for(const name of checks)console.log('PASS '+name);
 console.log('Synthetic DOM regression: '+checks.length+' checks passed.');
 await import('./regression-assets.mjs');

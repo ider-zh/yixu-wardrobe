@@ -5,12 +5,13 @@ import path from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {loadContent, publicationProjection} from '../scripts/content-lib.mjs';
+import {readSiteResources} from '../scripts/site-resources.mjs';
 
 const root = fileURLToPath(new URL('../',import.meta.url));
 const fixture = fs.mkdtempSync(path.join(os.tmpdir(),'yixu-content-'));
 const write = (relative,value) => fs.writeFileSync(path.join(fixture,relative),JSON.stringify(value));
 try {
-  for(const name of ['site-resources.json','site-theme.js','site-theme.css','admin','content','images-v2','assets','scripts','index.html','app.js','style.css','expressive.css','product-themes.js','product-page.js','product-themes.css','wardrobe-scenes.js','tryon-storage.js','tryon.js','tryon.css','favicon.svg']) {
+  for(const name of [...readSiteResources(root).public,'site-resources.json','admin','content','images-v2','assets','scripts']) {
     fs.cpSync(path.join(root,name),path.join(fixture,name),{recursive:true});
   }
   fs.mkdirSync(path.join(fixture,'docs'));
