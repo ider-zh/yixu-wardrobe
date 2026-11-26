@@ -173,6 +173,24 @@ check('page styles and scripts retain local dependencies for direct offline open
   await assert.rejects(lists.add('list','look',-1),/无法加入/);
   checks.push('local outfit lists report unavailable storage and reject invalid input');
 }
+check('palette families respect thresholds and require every selected family',()=>{
+  const window={};
+  vm.runInNewContext(fs.readFileSync(path.join(root,'wardrobe-color-match.js'),'utf8'),{window});
+  const {colorFamily,matchPalette}=window.WardrobeColorMatch;
+  for(const [hex,family] of [
+    ['#788178','neutral'],['#788278','green'],
+    ['#508279','green'],['#50827b','blue'],
+    ['#514a2d','brown'],['#514b2d','green'],
+    ['#c4b4a3','brown'],['#c5b4a3','beige'],
+    ['#a6965f','brown'],['#a6965e','yellow-orange'],
+  ])assert.equal(colorFamily(hex),family,hex);
+  assert.equal(colorFamily('#abc'),null);
+  assert.equal(matchPalette(['#788178'],['neutral','blue']),null);
+  assert.equal(matchPalette(['#788178'],['invalid']),null);
+  assert.deepEqual(JSON.parse(JSON.stringify(matchPalette(['#788178','bad','#50827b'],['blue','neutral','blue']))),[
+    {id:'blue',colors:['#50827b']},{id:'neutral',colors:['#788178']},
+  ]);
+});
 for(const name of checks)console.log('PASS '+name);
 console.log('Synthetic DOM regression: '+checks.length+' checks passed.');
 await import('./regression-assets.mjs');

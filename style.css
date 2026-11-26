@@ -172,15 +172,21 @@ dialog{padding:0;border:0;background:var(--paper-light);color:var(--ink);max-wid
   }
 }
 
-.piece-filter {
+.archive-quick-filters,
+.piece-filter,
+.color-filter {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 8px 12px;
+}
+
+.archive-quick-filters {
+  gap: 12px 24px;
   margin-top: 12px;
 }
 
-.piece-filter select {
+.archive-quick-filters select {
   min-height: 44px;
   min-width: 10rem;
   max-width: 100%;
@@ -206,4 +212,38 @@ dialog{padding:0;border:0;background:var(--paper-light);color:var(--ink);max-wid
   background: var(--paper);
   border: 1px solid currentColor;
   font-size: var(--small-text-size);
+}
+
+.color-filter select {
+  min-width: 7rem;
+}
+
+.card-color-evidence,
+.card-color-group {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+}
+
+.card-color-evidence {
+  margin-top: 6px;
+  color: var(--ink);
+  font-size: var(--small-text-size);
+}
+
+.card-color-chip {
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--ink);
+  border-radius: 50%;
+  background: var(--matched-color);
+}
+
+@media (max-width: 520px) {
+  .color-filter {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    width: 100%;
+  }
 }

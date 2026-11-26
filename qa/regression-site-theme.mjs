@@ -339,4 +339,23 @@ try{
  assert.equal(await evaluate('document.querySelector("#piece-filter-wrap").checkVisibility()'),false);
  assert.equal(await evaluate('document.querySelectorAll("#gallery .card-piece-match").length'),0);
  console.log('PASS real Chromium: owned-piece evidence, combined style filters, preserved detail route and scene independence.');
+ await route('#/looks?piece=straight-leg-pants&color=neutral');
+ await evaluate('const secondColor=document.getElementById("color-filter-second");secondColor.value="beige";secondColor.dispatchEvent(new Event("change",{bubbles:true}));');
+ const pantColors='#/looks?piece=straight-leg-pants&color=neutral&color=beige';
+ await wait(`location.hash===${JSON.stringify(pantColors)}`);
+ assert.ok(await evaluate('Array.from(document.querySelectorAll("#gallery [data-look-card]")).every(card=>card.querySelector("[data-color-match=neutral]")&&card.querySelector("[data-color-match=beige]")&&card.querySelector(".card-piece-match"))'));
+ const card101='#gallery [data-look-card="101"]';
+ assert.ok(await evaluate(`!!document.querySelector(${JSON.stringify(card101)})`));
+ assert.deepEqual(await evaluate(`Array.from(document.querySelectorAll(${JSON.stringify(card101+' [data-color-match=neutral] .card-color-chip')}),chip=>chip.title)`),['#96928f','#414143']);
+ await noOverflow('offline dual palette filters at 390px');
+ await readableText('#color-filter-wrap','dual palette filter labels');
+ await evaluate('document.querySelector(\'[data-clear="color:neutral"]\').click()');
+ assert.equal(await evaluate('location.hash'),'#/looks?piece=straight-leg-pants&color=beige');
+ assert.equal(await evaluate('document.activeElement.id'),'color-filter-first');
+ await evaluate('location.hash="#/looks?color=bogus&color=beige&color=beige&color=blue&color=brown"');
+ await wait('location.hash==="#/looks?color=beige&color=blue"');
+ await route('#/looks?scene=commute');
+ assert.equal(await evaluate('document.querySelector("#color-filter-wrap").checkVisibility()'),false);
+ assert.equal(await evaluate('document.querySelectorAll("#gallery .card-color-evidence").length'),0);
+ console.log('PASS real Chromium: two palette groups require both, chips match the swatches, and offline route normalization works.');
 }finally{for(const socket of sockets)try{socket.close();}catch{}try{process.kill(-browser.pid,'SIGTERM');}catch{}if(browser.exitCode===null&&browser.signalCode===null)await Promise.race([once(browser,'exit'),new Promise(resolve=>setTimeout(resolve,1500))]);await new Promise(resolve=>server.close(resolve));fs.rmSync(scratch,{recursive:true,force:true,maxRetries:8,retryDelay:100});}
