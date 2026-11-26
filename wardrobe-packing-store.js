@@ -4,8 +4,10 @@
   const databaseName = 'yixu:wardrobe-packing';
   const storeName = 'packing';
   const activeKey = 'active';
+  const legacyEpoch = 'legacy';
   const token = /^[A-Za-z0-9_-]+$/;
   const listeners = new Set();
+  let epochSequence = 0;
   let channel = null;
   try { channel = new window.BroadcastChannel(databaseName); } catch {}
 
@@ -132,20 +134,45 @@
     }
   }
 
-  function load() {
-    return transact('readonly', store => store.get(activeKey), value => value === undefined ? null : validateSnapshot(value));
+  function readRecord(value) {
+    if (value === undefined) return {epoch:null, snapshot:null};
+    if (hasFields(value, ['epoch', 'snapshot'])) {
+      if (!isId(value.epoch)) throw invalid();
+      return {epoch:value.epoch, snapshot:validateSnapshot(value.snapshot)};
+    }
+    return {epoch:legacyEpoch, snapshot:validateSnapshot(value)};
   }
 
-  async function replace(snapshot) {
-    const verified = validateSnapshot(snapshot);
-    return transact('readwrite', store => store.put(verified, activeKey));
+  function loadVersioned() {
+    return transact('readonly', store => store.get(activeKey), readRecord);
   }
 
-  function update(change) {
+  async function load() {
+    return (await loadVersioned()).snapshot;
+  }
+
+  function writeCurrent(expectedEpoch, action) {
     return transact('readwrite', store => store.get(activeKey), (value, store) => {
-      if (value === undefined) throw new Error('还没有打包清单。');
-      const snapshot = validateSnapshot(value);
-      store.put(change(snapshot), activeKey);
+      const current = readRecord(value);
+      if (expectedEpoch !== undefined && current.epoch !== expectedEpoch) {
+        throw new Error('打包清单已更换，请按当前清单重新操作。');
+      }
+      action(current, store);
+    });
+  }
+
+  async function replace(snapshot, expectedEpoch) {
+    const verified = validateSnapshot(snapshot);
+    const identity = window.crypto?.randomUUID?.() || `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+    const record = {epoch:`epoch-${identity}-${++epochSequence}`, snapshot:verified};
+    if (expectedEpoch === undefined) return transact('readwrite', store => store.put(record, activeKey));
+    return writeCurrent(expectedEpoch, (_, store) => { store.put(record, activeKey); });
+  }
+
+  function update(expectedEpoch, change) {
+    return writeCurrent(expectedEpoch, ({epoch, snapshot}, store) => {
+      if (!snapshot) throw new Error('还没有打包清单。');
+      store.put({epoch, snapshot:change(snapshot)}, activeKey);
     });
   }
 
@@ -155,26 +182,27 @@
     return entry;
   }
 
-  async function setChecked(key, checked) {
+  async function setChecked(key, checked, expectedEpoch) {
     if (!validKey(key) || typeof checked !== 'boolean') throw invalid();
-    return update(snapshot => {
+    return update(expectedEpoch, snapshot => {
       findEntry(snapshot.entries, key).checked = checked;
       return snapshot;
     });
   }
 
-  async function merge(targetKey, sourceKey) {
+  async function merge(targetKey, sourceKey, expectedEpoch) {
     if (!validKey(targetKey) || !validKey(sourceKey) || targetKey === sourceKey) throw invalid();
-    return update(snapshot => {
+    return update(expectedEpoch, snapshot => {
       const entries = window.WardrobePacking.mergeEntries(snapshot.entries, targetKey, sourceKey);
       if (entries === snapshot.entries) throw new Error('这项打包内容已不存在。');
       return {...snapshot, entries};
     });
   }
 
-  function clear() {
-    return transact('readwrite', store => store.delete(activeKey));
+  function clear(expectedEpoch) {
+    if (expectedEpoch === undefined) return transact('readwrite', store => store.delete(activeKey));
+    return writeCurrent(expectedEpoch, (_, store) => { store.delete(activeKey); });
   }
 
-  window.WardrobePackingStore = {load, replace, setChecked, merge, clear, subscribe, validateSnapshot};
+  window.WardrobePackingStore = {load, loadVersioned, replace, setChecked, merge, clear, subscribe, validateSnapshot};
 })();

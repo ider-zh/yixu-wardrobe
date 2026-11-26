@@ -545,6 +545,14 @@ try{
  assert.equal(await evaluate(`document.querySelector(${JSON.stringify(jacketCheck)}).checked`),false);
  await client('Page.reload');
  await wait('document.readyState==="complete"&&document.querySelectorAll("#packing-entries [data-packing-row]").length===13');
+ const stalePacking=await evaluate(`(async()=>{
+  const store=window.WardrobePackingStore,seen=await store.loadVersioned();
+  await store.replace(seen.snapshot,seen.epoch);
+  const rejected=await store.setChecked(${JSON.stringify(packingJacket)},true,seen.epoch).then(()=>false,error=>error.message.includes('已更换'));
+  const after=await store.loadVersioned();
+  return {rejected,replaced:after.epoch!==seen.epoch,stillUnchecked:!after.snapshot.entries.find(entry=>entry.key===${JSON.stringify(packingJacket)}).checked};
+ })()`);
+ assert.deepEqual(stalePacking,{rejected:true,replaced:true,stillUnchecked:true});
  assert.deepEqual(await evaluate(`window.WardrobeLists.load().then(lists=>lists.find(list=>list.id===${JSON.stringify(packingList)}).entries)`),[
   {type:'look',id:1},{type:'look',id:89},{type:'product',id:'oat-tailored-blazer-001'},
  ]);
