@@ -8833,8 +8833,8 @@
         {
           "look_id": 109,
           "piece_index": 1,
-          "reference_asset_id": "look-109-male-01-v2-r1",
-          "shot_index": 2
+          "reference_asset_id": "look-109-male-01-v2-r2",
+          "shot_index": 6
         }
       ]
     },
@@ -8884,8 +8884,8 @@
         {
           "look_id": 109,
           "piece_index": 2,
-          "reference_asset_id": "look-109-male-01-v2-r1",
-          "shot_index": 1
+          "reference_asset_id": "look-109-male-01-v2-r2",
+          "shot_index": 3
         }
       ]
     },
@@ -8935,7 +8935,7 @@
         {
           "look_id": 109,
           "piece_index": 3,
-          "reference_asset_id": "look-109-male-01-v2-r1",
+          "reference_asset_id": "look-109-male-01-v2-r2",
           "shot_index": 4
         }
       ]
@@ -9139,8 +9139,8 @@
         {
           "look_id": 111,
           "piece_index": 1,
-          "reference_asset_id": "look-111-male-01-v2-r1",
-          "shot_index": 4
+          "reference_asset_id": "look-111-male-01-v2-r2",
+          "shot_index": 8
         }
       ]
     },
@@ -9190,8 +9190,8 @@
         {
           "look_id": 111,
           "piece_index": 2,
-          "reference_asset_id": "look-111-male-01-v2-r1",
-          "shot_index": 8
+          "reference_asset_id": "look-111-male-01-v2-r2",
+          "shot_index": 6
         }
       ]
     },
@@ -9241,8 +9241,8 @@
         {
           "look_id": 111,
           "piece_index": 3,
-          "reference_asset_id": "look-111-male-01-v2-r1",
-          "shot_index": 1
+          "reference_asset_id": "look-111-male-01-v2-r2",
+          "shot_index": 7
         }
       ]
     },
@@ -9292,8 +9292,8 @@
         {
           "look_id": 111,
           "piece_index": 4,
-          "reference_asset_id": "look-111-male-01-v2-r1",
-          "shot_index": 5
+          "reference_asset_id": "look-111-male-01-v2-r2",
+          "shot_index": 3
         }
       ]
     }
