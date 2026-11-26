@@ -24,6 +24,21 @@
         "url": "https://www.shanghai.gov.cn/nw17239/20261113/e80e326ba6da46429e070dbc1c575b74.html",
         "published_at": "2026-11-13",
         "summary": "上海市政府网站刊载徐汇对西岸艺术与设计周的报道。以近期的滨江观展场景为灵感，写真设在一间虚构的版画展厅。"
+      },
+      {
+        "url": "https://www.whowhatwear.com/fashion/shopping/uniqlo-cecilie-bahnsen",
+        "published_at": "2026-11-19",
+        "summary": "Who What Wear 的原创报道以冬季步行为背景介绍轻便叠穿。女模套装用薄绗缝短外套应对街道行走和日间温差。"
+      },
+      {
+        "url": "https://www.womanandhome.com/fashion/best-knee-high-boots/",
+        "published_at": "2026-11-19",
+        "summary": "Woman & Home 的原创试穿报道讨论中长裙与靴子的换季搭配。女模套装借用裙靴比例，选更低的靴筒和宽方跟便于街区步行。"
+      },
+      {
+        "url": "https://www.shanghai.gov.cn/nw4411/20260529/14e2b628b96c4885b819328eeb9c40b8.html",
+        "published_at": "2026-05-29",
+        "summary": "解放日报报道记录了从武康大楼出发的慢行路线；用于核对女模写真选取的徐汇街区步行场景。"
       }
     ],
     "weather": {
@@ -159,6 +174,131 @@
           "preview_panel": 1
         }
       }
+    },
+    {
+      "id": 110,
+      "model_id": "female-01",
+      "model_reference_sha256": "dc0a221ff81250415bcfa3b320bc916dc02e2873f030e707083928505ca75066",
+      "title": "武康路·雾紫拾叶",
+      "category": "冬日叠穿",
+      "season": "冬季",
+      "description": "雾紫菱格短外套敞开，露出深橄榄色针织长裙。深咖低跟踝靴适合沿梧桐街道慢走。林知棠在砖墙边停下，把刚拾到的叶片迎着日光细看。",
+      "pieces": [
+        {
+          "role": "外套",
+          "name": "雾紫菱格绗缝短外套"
+        },
+        {
+          "role": "裙装",
+          "name": "深橄榄圆领针织中长裙"
+        },
+        {
+          "role": "鞋履",
+          "name": "深咖低跟踝靴"
+        }
+      ],
+      "palette": [
+        "#9e8b93",
+        "#424538",
+        "#3b2925"
+      ],
+      "details": [
+        "无领短外套以同色包边收住菱格绗缝，敞开时露出内搭的圆领。",
+        "深橄榄针织裙在小腿下部收边，步行时裙摆自然摆动。",
+        "深咖踝靴以低方跟承托，保留裙摆和靴口之间的留白。"
+      ],
+      "tags": [
+        "雾紫",
+        "橄榄绿",
+        "绗缝",
+        "针织裙",
+        "踝靴",
+        "上海散步"
+      ],
+      "mood": "见面时笑着招手，走着走着停下来捡叶，最后伸手招呼同伴一起往前走。",
+      "scene": "取景灵感来自上海徐汇武康路至安福路的梧桐街区。午后光斑落在砖墙和人行道上，墙边散落着几片梧桐叶。",
+      "edition": "v2",
+      "shots": [
+        {
+          "index": 1,
+          "title": "梧桐树下招手",
+          "emotion": "望向镜头，明朗露齿笑",
+          "pose": "正面站稳，举起右手招呼",
+          "framing": "正面全身，双靴完整"
+        },
+        {
+          "index": 2,
+          "title": "给你看这片",
+          "emotion": "睁大眼，圆唇看向镜头",
+          "pose": "向前伸开手掌，掌心托着一片叶",
+          "framing": "腰上近景，手与叶片居前"
+        },
+        {
+          "index": 3,
+          "title": "走进光斑里",
+          "emotion": "回望镜头，闭唇轻笑",
+          "pose": "斜身迈步，手臂自然下摆",
+          "framing": "斜侧全身，双靴完整"
+        },
+        {
+          "index": 4,
+          "title": "在砖墙边笑开",
+          "emotion": "望向镜头，张口大笑",
+          "pose": "坐在矮墙上，一手扶墙，一手搭在膝边",
+          "framing": "坐姿中景"
+        },
+        {
+          "index": 5,
+          "title": "顺着叶脉看",
+          "emotion": "低头微蹙眉，凝神细看",
+          "pose": "坐在墙沿，双手捏住叶片",
+          "framing": "坐姿全身，双靴完整"
+        },
+        {
+          "index": 6,
+          "title": "举到日光里",
+          "emotion": "侧眼凝望，神情好奇",
+          "pose": "抬手捏住叶柄，把叶片举到肩侧",
+          "framing": "大腿以上，外套门襟和贴袋清楚"
+        },
+        {
+          "index": 7,
+          "title": "弯身再拾一片",
+          "emotion": "抬眼看向镜头，嘴角轻扬",
+          "pose": "屈膝俯身伸手拾叶，另一手搭在膝侧",
+          "framing": "俯身全身，双靴完整"
+        },
+        {
+          "index": 8,
+          "title": "拂过袖口",
+          "emotion": "俏皮地抬眉看向镜头",
+          "pose": "低垂一侧手臂，用另一手从袖子上拂下叶片",
+          "framing": "腰上近景，绗缝走线与手势同框"
+        },
+        {
+          "index": 9,
+          "title": "一块往前走",
+          "emotion": "直视镜头，带笑招呼",
+          "pose": "在砖墙边侧伸一手，掌心向上邀请同行",
+          "framing": "正面全身，鞋尖贴近画面下缘"
+        }
+      ],
+      "asset": {
+        "asset_id": "look-110-female-01-v2-r1",
+        "file": "assets/looks/2026-11-26/look-110-female-01-v2-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 286682,
+        "sha256": "865bf9e4c863bc1bf34254f60d9888bc54835952c03dfc8cbb3dbb060194faf5",
+        "visibility": "public",
+        "layout": {
+          "rows": 3,
+          "columns": 3,
+          "preview_panel": 1
+        }
+      }
     }
-  ]
+  ],
+  "cover_look_id": 110
 }

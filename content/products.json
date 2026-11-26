@@ -8939,6 +8939,159 @@
           "shot_index": 4
         }
       ]
+    },
+    {
+      "product_id": "mist-lilac-quilted-jacket-110",
+      "name": "雾紫菱格绗缝短外套",
+      "category": "外套",
+      "subtitle": "淡紫绗线从同色包边延伸到前贴袋。",
+      "description": "短衣身配无领圆领口，雾紫包边从门襟延伸到圆角下摆。正面双贴袋延续菱格纹样。主图中被头发遮挡的领口及门襟内侧为设计推演。",
+      "color_name": "雾紫",
+      "color_hex": "#9e8b93",
+      "design_material": "有细哑光纹理的轻绗缝布面观感",
+      "notes": [
+        "无领短衣身",
+        "同色包边和圆角下摆",
+        "正面双贴袋与菱格绗线"
+      ],
+      "asset": {
+        "asset_id": "product-mist-lilac-quilted-jacket-110-main-r1",
+        "file": "assets/products/look-110/mist-lilac-quilted-jacket-110-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 130216,
+        "sha256": "51642b998f92853d23cb66f240e69b1e2ccd879cad8ade56ed742b4a30448e7f",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "贴袋与门襟包边",
+          "caption": "近看圆角贴袋、菱格走线和同色包边。写真无法分辨的细针脚与包边细节为设计推演。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-mist-lilac-quilted-jacket-110-pocket-r1",
+            "file": "assets/products/look-110/mist-lilac-quilted-jacket-110-pocket-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 651116,
+            "sha256": "96bc4832ab4334a9f7bf078412ed71d515fe29489042df68793f4a0745b519f7",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 110,
+          "piece_index": 1,
+          "reference_asset_id": "look-110-female-01-v2-r1",
+          "shot_index": 6
+        }
+      ]
+    },
+    {
+      "product_id": "deep-olive-knit-midi-dress-110",
+      "name": "深橄榄圆领针织中长裙",
+      "category": "裙装",
+      "subtitle": "从浅圆领落到小腿，裙身微微向外展开。",
+      "description": "深橄榄色针织从浅圆领垂到小腿，裙摆沉静，走动时带出轻微摆幅。主图依据写真可见的领口、色调和裙摆制作。外套遮挡的肩线、上身剪裁、长袖与袖口为设计推演。",
+      "color_name": "深橄榄",
+      "color_hex": "#424538",
+      "design_material": "细密、低光泽的针织观感",
+      "notes": [
+        "浅圆领与素色前襟",
+        "微张的中长裙摆",
+        "随步幅移动的纵向褶影"
+      ],
+      "asset": {
+        "asset_id": "product-deep-olive-knit-midi-dress-110-main-r1",
+        "file": "assets/products/look-110/deep-olive-knit-midi-dress-110-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 67526,
+        "sha256": "5257ef7f05a8cacf1bd2488d4d6fdb869e15317dd060589e63acdaaecf9b3b3a",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "裙摆垂坠",
+          "caption": "近看裙摆自然形成的纵向褶影。写真可见裙摆的垂坠与外缘，近景针织纹理及边缘收口为设计推演。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-deep-olive-knit-midi-dress-110-hem-r1",
+            "file": "assets/products/look-110/deep-olive-knit-midi-dress-110-hem-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 114016,
+            "sha256": "a374a86dc3d98e1b7704e7551b963855190b4aada5209bb7dc9533351ddeeea2",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 110,
+          "piece_index": 2,
+          "reference_asset_id": "look-110-female-01-v2-r1",
+          "shot_index": 1
+        }
+      ]
+    },
+    {
+      "product_id": "espresso-block-heel-ankle-boots-110",
+      "name": "深咖低跟踝靴",
+      "category": "鞋履",
+      "subtitle": "杏仁形鞋头与低宽鞋跟接住长裙下摆。",
+      "description": "短筒贴近脚踝，杏仁形鞋头与低宽鞋跟构成简洁轮廓。主图按写真可见的外形制作，拉链拉头、靴口内缘和底缘为设计推演。",
+      "color_name": "深咖",
+      "color_hex": "#3b2925",
+      "design_material": "光泽柔和的深咖皮面观感",
+      "notes": [
+        "简洁短靴筒",
+        "带圆弧的杏仁形鞋头",
+        "低宽方跟"
+      ],
+      "asset": {
+        "asset_id": "product-espresso-block-heel-ankle-boots-110-main-r1",
+        "file": "assets/products/look-110/espresso-block-heel-ankle-boots-110-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 78034,
+        "sha256": "d5b68409eb655581389d6d3ed7609c22307b84065e47fe4d8398bb62a42d3750",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "外侧靴筒与低跟",
+          "caption": "从侧面看短靴筒到低宽鞋跟的轮廓。近距离的鞋面纹理、底缘和鞋跟接合线在写真中不可辨，为设计推演。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-espresso-block-heel-ankle-boots-110-heel-r1",
+            "file": "assets/products/look-110/espresso-block-heel-ankle-boots-110-heel-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 125946,
+            "sha256": "d7ded1cb1f2bda170559b12d9d8b1cc81ecca850aad39387604a26105fe2d3c2",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 110,
+          "piece_index": 3,
+          "reference_asset_id": "look-110-female-01-v2-r1",
+          "shot_index": 3
+        }
+      ]
     }
   ]
 }
