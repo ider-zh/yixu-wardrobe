@@ -10,6 +10,14 @@
     return new Error(writing ? '无法在此浏览器中保存收藏。' : '无法读取此浏览器中的收藏。');
   }
 
+  function databaseError(error, writing) {
+    const failure=storageError(writing);
+    if (['SecurityError','NotSupportedError','InvalidStateError'].includes(error?.name)) {
+      failure.code='indexeddb-unavailable';
+    }
+    return failure;
+  }
+
   function invalid() {
     return new Error('现有收藏数据无法识别。');
   }
@@ -17,12 +25,15 @@
   function openDatabase(writing) {
     return new Promise((resolve, reject) => {
       let request;
-      try { request = window.indexedDB.open(databaseName, 1); }
-      catch { reject(storageError(writing)); return; }
+      try {
+        if (!window.indexedDB) throw new DOMException('', 'NotSupportedError');
+        request = window.indexedDB.open(databaseName, 1);
+      }
+      catch (error) { reject(databaseError(error, writing)); return; }
       let blocked = false;
       request.onupgradeneeded = () => request.result.createObjectStore(storeName);
       request.onblocked = () => { blocked = true; reject(storageError(writing)); };
-      request.onerror = () => reject(storageError(writing));
+      request.onerror = () => reject(databaseError(request.error, writing));
       request.onsuccess = () => {
         if (blocked) request.result.close();
         else resolve(request.result);

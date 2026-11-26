@@ -43,10 +43,10 @@ try {
   ]){const invalid=JSON.parse(validProducts);mutate(invalid);write('content/products.json',invalid);assert.throws(()=>loadContent(fixture));}
   fs.writeFileSync(path.join(fixture,'content/products.json'),validProducts);
   const before=loadContent(fixture);
-  const revisedLook=before.catalog.looks.find(look=>look.id===1);
-  assert.equal(revisedLook.previous_photo.asset.asset_id,'look-001-v2-r1');
-  assert.equal(revisedLook.previous_photo.source_url,revisedLook.previous_photo.asset.file);
-  assert.notEqual(revisedLook.previous_photo.asset.sha256,revisedLook.versions.v2.asset.sha256);
+  const registeredRevision=before.catalog.looks.find(look=>look.id===1);
+  assert.equal(registeredRevision.previous_photo.asset.asset_id,'look-001-v2-r1');
+  assert.equal(registeredRevision.previous_photo.source_url,registeredRevision.previous_photo.asset.file);
+  assert.notEqual(registeredRevision.previous_photo.asset.sha256,registeredRevision.versions.v2.asset.sha256);
   assert.equal(before.catalog.looks.find(look=>look.id===89).previous_photo,undefined);
   const registry=JSON.parse(fs.readFileSync(path.join(fixture,'content/models.json'),'utf8'));
   const male=registry.models.find(model=>model.model_id==='male-01');
