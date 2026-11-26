@@ -408,6 +408,7 @@ try{
  await route('#/looks');
  await evaluate('document.querySelector("#publication-entry-link a").click()');
  await wait('location.hash==="#/publications"&&!document.getElementById("publication-page").hidden');
+ assert.equal(await evaluate('document.activeElement.id'),'publication-title');
  const publicationDates=await evaluate('[...document.querySelectorAll("#publication-batches time")].map(time=>time.dateTime)');
  assert.deepEqual(publicationDates,[...publicationDates].sort().reverse());
  const datedLink='#/looks?batch=2026-11-26-01';

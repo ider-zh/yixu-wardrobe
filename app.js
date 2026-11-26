@@ -612,6 +612,7 @@ function routeFromURL(scroll=true,hash=location.hash,{hydrating=false}={}){
  const scene=page==='looks'?availableScene(params.get('scene')):null;
  const sceneFocus=scene&&detailReturnRoute===hash?detailSceneOpener:null,leavingScene=state.scene&&!scene;
  const archiveFocus=page==='looks'&&detailReturnRoute===hash?detailArchiveOpener:null;
+ const openingPublications=page==='publications'&&state.page!==page;
  routing=true;
  state.page=page;state.profileModel=profile?.[1]||'';state.scene=scene?.id||'';
  // Native dialog close events are queued. A route-driven close must not later
@@ -641,6 +642,7 @@ function routeFromURL(scroll=true,hash=location.hash,{hydrating=false}={}){
  if($('filter-dialog').open)$('filter-dialog').close();
  routing=false;
  if(scroll&&sceneFocus===null&&archiveFocus===null)window.scrollTo({top:0,behavior:'instant'});
+ if(openingPublications)$('publication-title').focus({preventScroll:true});
  if(sceneFocus!==null){
   const target=document.querySelector('#gallery .look-photo-button[data-open="'+sceneFocus+'"]')||document.querySelector('#scene-links [aria-current="page"]');
   target?.focus();
