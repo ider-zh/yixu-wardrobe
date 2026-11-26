@@ -1,47 +1,8 @@
-# Deployment source and verified preparation
+# 正式站模板与本地交付
 
-## Deployed baseline and current development
+日常变更走 `dev`，由[开发站发布流程](dev-README.md)处理。正式站升级需单独授权。本目录的正式站 Nginx 模板使用 `www.8882088.xyz` 与独立后台 `admin.8882088.xyz`。
 
-Commit `2582a98` was deployed on 2026-11-12. That release serves 102 public
-expressive looks with look 102 featured on the homepage. Trusted HTTPS, the
-resource API, the static snapshot, and the new images for looks 101 and 102 were
-verified. The public site is [www.8882088.xyz](https://www.8882088.xyz/); the
-independently authenticated admin site is
-[admin.8882088.xyz](https://admin.8882088.xyz/). CDN is unconfigured, so images use
-project source URLs. These are recorded release checks, not an uptime guarantee.
-
-Experience improvements started on 2026-11-13 require their own regression and
-release checks. Their scope and acceptance criteria are tracked in the
-[content publishing plan](../docs/content-publishing-plan.md). A commit, passing
-CI, or these deployment instructions do not activate a new production release.
-
-## Dynamic content release settings
-
-The source now supports expressive-only content manifests and a public CDN queue.
-This source update does not install a live deployment hook or select an image host.
-For an authorized release, set `YIXU_CONTENT_ROOT` to the release's `content/`,
-`YIXU_IMAGE_ROOT` to the read-only project resource root that resolves manifest
-paths, and retain the existing `YIXU_DATA_DIR` outside releases. Deploy only the
-generated `public/` to the main static root; archived `images/`, content manifests,
-backend code and private state do not belong in that root.
-
-At API startup, complete local content is verified and activated, public images
-are copied to the durable content-addressed archive, and allowlisted assets are
-enqueued for CDN synchronization. The archive API serves local WebP immediately;
-CDN absence or failure does not block browsing. The API lifespan runs the public
-CDN worker, so no additional service unit is needed. The private try-on worker
-remains separately supervised and uses the same release/settings. A code/resource
-delivery must restart owned processes at the controlled boundary described below;
-a Git push alone does not prove the server received or imported that revision.
-
-Verify `/api/content/catalog`, a returned `source_url`, authenticated model preview
-on the admin origin, and `/api/admin/content/overview`. With no image host configured,
-expect an honest unconfigured status and working source URLs. Only an explicitly
-configured real image host can establish actual CDN delivery; test fixtures do not.
-
-These templates add a private API/worker and an independently authenticated admin origin without replacing the static wardrobe. They contain no account keys, node endpoints, passwords or generated photos. Generated deployment files, the catalog, model, virtual environment and runtime state stay out of Git.
-
-## Rendered configuration
+## 正式站模板
 
 ```sh
 python3 deploy/render.py \
@@ -51,83 +12,18 @@ python3 deploy/render.py \
   --data-root "$PRIVATE_STATE" \
   --runtime-env "$PRIVATE_SETTINGS/runtime.env" \
   --api-port 8765
-node scripts/export-catalog.mjs --output "$BACKEND_RELEASE/catalog.json"
 ```
 
-Provide absolute paths for these operator-selected locations. The renderer writes only its named files into the explicit output directory; review before installing. The catalog exporter reads the current validated content manifests through `loadContent` and exports all active public looks, including appended batches. Its count is dynamic; the deployed baseline above contains 102 looks. The backend reads JSON and must not parse JavaScript itself.
+[render.py](render.py) 读取 [site.conf](site.conf)、[admin.conf](admin.conf) 和三个服务模板。所有路径使用绝对路径。主站 Web 根目录指向 `node scripts/build.mjs` 生成的 `public/`，后台 Web 根目录指向后端版本内的 `admin/`。部署环境的 `YIXU_CONTENT_ROOT` 指向版本目录的 `content/`，`YIXU_IMAGE_ROOT` 指向包含清单相对资源路径的版本目录或公开构建目录，`YIXU_DATA_DIR` 使用版本目录外的私有持久状态。其他设置见[后端说明](../backend/README.md)。
 
-The real regression commands already exercised for this preparation are:
+- [yixu-api.service](yixu-api.service) 与 [yixu-worker.service](yixu-worker.service) 使用同一代码和环境文件。服务用户只写私有状态，运行时解释器须在 `ProtectHome=true` 下可见。Nginx 覆写转发头，API 只监听回环并按 Host 检查角色，主站封锁管理 API。
+- [yixu-egress.service](yixu-egress.service) 使用专用传输配置。仅监听回环，`allow-lan: false`，使用明确授权的出口。凭据放私有目录，系统路由和全局代理由现场原配置管理。
+- 部署前使用 `nginx -t` 和 `systemd-analyze verify` 检查模板，保留上一个应用版本供回退，受控停止 Worker 再切换应用代码。私有自拍输入不纳入备份。
+- 切换后验证两站可信 HTTPS、证书匹配及续期、官网目录与静态快照版本一致、主推源图哈希、管理鉴权、成品所有权、API/代理回环监听和真实检测器。实际生成和成本验证需要明确授权和同意后的输入。
 
-```sh
-node qa/regression-catalog-export.mjs
-node qa/regression-deploy.mjs
-```
+## 授权环境的本地交付
 
-Both have recorded failing-before-implementation and passing-after-implementation runs in the private development evidence. This is preparation evidence, **not proof that the API, worker or admin UI are running**.
-
-## Host layout and service boundaries
-
-- Public and admin content have distinct roots. Deploy only the explicit public build to `www.8882088.xyz`; do not copy backend code, configuration or data there.
-- The application runs as its own service user on `127.0.0.1:8765`. The admin host has its own matching certificate, host-only credential and role-checked API. The public host returns 404 for admin API paths.
-- The API and worker templates expect `backend.app:create_app --factory` and `python -m backend.worker`. Verify the implemented launch contract and environment settings before installation; the environment file is private, never a public artifact.
-- Code/releases are read-only to the service user. Writable data is outside static roots. A dedicated virtual environment must use an interpreter readable under the units' `ProtectHome=true`, not a Python installation hidden in an operator home directory.
-- `yixu-egress.service` is an independent transport client. Its private configuration must set `allow-lan: false`, `bind-address: 127.0.0.1` and mixed port 7890, with only the selected authorized outbound node and an explicit rule. Do not enable TUN, change host routes/firewall/global proxy variables, add direct fallback or replace an existing proxy service.
-- Runtime configuration includes the project API key and proxy choice; administrator APIs must never return secret values. Do not use assistant credentials as the project's inference key.
-
-Service templates deliberately do not introduce generation quotas, rate limits or monetary budgets. One worker is a measured-host resource choice, not an application spending policy. Upload decoding and disk/resource safety remain required.
-
-## Official model and binary evidence
-
-YuNet was retrieved from `opencv/opencv_zoo`, commit `48b10fa505aeb51fbd127fc60a5c660040e823b7`, file `models/face_detection_yunet/face_detection_yunet_2023mar.onnx`. The downloaded 232589-byte ONNX matches the commit's Git LFS SHA-256:
-
-```text
-8f2383e4dd3cfbb4553ea8718107fc0423210dc964f9f4280604804ed2552fa4
-```
-
-Keep the model's MIT license with the private deployment artifact. The real local detector found one face in each of the nine selected panels of the first existing public reference image, and no face in a blank control. This validates the actual model loading/inference boundary, not real-user photo quality or the backend integration.
-
-The independently downloaded official `MetaCubeX/mihomo` release `v1.19.32`, asset `mihomo-linux-amd64-compatible-v1.19.32.gz`, was checked against its GitHub asset digest, then decompressed and hashed:
-
-```text
-compressed SHA-256: ba3ce607747a07f948fc35780e108a4a7c7f552a38b9bd4d115f313ebcb89c20
-binary SHA-256:     7a0d59da2e678d56c899a3db996a2ad8963286c4f3634b0451435db248f13fa1
-```
-
-Actual node credentials and source inventory remain only in private operator files. A successful unauthenticated `/v1/models` HTTPS request through this explicit proxy returned 401; that proves transport/TLS reachability, **not project-key authorization, model availability, regional eligibility or a successful image generation**.
-
-## Required cutover checks
-
-Before replacing live application configuration:
-
-1. Run all implemented backend, public UI, admin UI and retained-gallery tests; test actual uploads/detector paths, persistent queue restart, unknown-call no-replay and storage cleanup. Keep fake-provider tests distinct from real service calls.
-2. Stage an explicit immutable release and its own environment. Check ownership/modes and record existing public-build and unrelated service fingerprints. Do not include input photos in backups.
-3. Verify rendered Nginx files with the real host's `nginx -t` and units with `systemd-analyze verify`. Preserve a rollback for only the changed application paths. Stop the owned worker at a controlled boundary before changing shared application code; do not restart unrelated services.
-4. Confirm API/transport listeners are loopback only, supervisor restart/boot enablement, host-role isolation, admin/visitor login separation, safe Cookie attributes, non-cacheable private data, ownership checks and absence of any administrator original-photo API.
-5. Verify trusted HTTPS with normal DNS for both domains, certificate SANs and the existing renewal timer/reload hook. The 2026-11-12 deployment verified both application origins; a certificate or HTTP status alone does not establish that a later candidate is active. Recheck the final application's body and status after each cutover.
-6. Verify all 200 original gallery image hashes and the original public interactions. Exercise phone and desktop layouts with actual browser input.
-7. Preserve an existing authorized provider configuration. If provider setup is needed, configure an explicitly authorized project key through the private admin settings. Perform any paid photo-quality pilot only with explicit permission and consented inputs; health/configuration checks do not establish generation quality. An unavailable provider must produce an honest unavailable state.
-
-## Application CI and local verification
-
-The existing Actions invocation of `node qa/regression-expressive.mjs` keeps the original gallery and asset checks and, under `GITHUB_ACTIONS=true`, invokes `scripts/verify-application.mjs`. No workflow permission expansion is required. The application runner performs locked Python dependency sync, backend tests, Ruff checks, type checking, parsed-admin DOM/HTTP tests, actual-frontend-to-ASGI integration, Chromium try-on tests, and catalog/deployment regressions. These tests never authorize a paid generation or use ambient project keys.
-
-For the same entry point locally, run `node qa/regression-ci.mjs`. A real Chromium executable is required; use `CHROME_BIN` when it is not in a standard test location. Use a short private `CHROME_TMPDIR` if a long `TMPDIR` exceeds Chromium's UNIX socket path limit. If `uv` is absent the runner installs a pinned tool into a disposable virtual environment, not system Python. The detector comes from the pinned official URL and must match the hash above; an explicit `YIXU_TEST_FACE_MODEL` can reuse the already-verified model. The final deployment gate must include a real model run, not a skipped detector test.
-
-These are three distinct evidence levels: synthetic-provider/API fixtures, real local handlers/model inference, and the deployed HTTPS service. Only an explicitly authorized paid pilot can establish actual provider quality; passing CI is not that pilot.
-
-The private operations record owns real host addresses, node configuration, service state, credential-delivery paths, measured capacity, deployment receipts and rollback commands; they are intentionally absent from this public guide.
-
-## Opt-in local delivery and publication proof
-
-The new homepage uses the explicit `catalog.home.featured_look_id`. A Git commit,
-API import and CDN upload are separate states. The public
-`GET /api/content/publication` and authenticated content overview report **not
-verified** until the delivery command has actually checked the running origin.
-They expose no runtime paths, credentials or private user data. A successful
-receipt describes checks at its timestamp, not continuous uptime monitoring.
-
-Use this only for an already authorized local installation with an existing owned
-API service. Supply the origin, exact service and private persistent state:
+[release.mjs](../scripts/release.mjs) 针对已部署且授权的本地安装。要求干净、已提交的工作区，静态服务器使用该工作区的 `public/`，指定 API 使用同一内容清单和私有状态目录。
 
 ```sh
 node scripts/release.mjs \
@@ -137,58 +33,19 @@ node scripts/release.mjs \
   --systemd-user
 ```
 
-The default stages and validates without publishing or restarting. The source
-must be fully committed and clean, including visible untracked source/manifest
-files. The generated candidate is separate from the live `public/`; source checks,
-all declared WebP signatures/dimensions/hashes, and the candidate content revision
-must pass before replacement. To perform the authorized local cutover, repeat with
-`--activate`. Only the explicitly named `yixu-*api` unit is restarted. Do not point
-this at an unrelated unit. The static server must serve this checkout's `public/`,
-and the API unit must use this checkout's manifests/resources and the same private
-state directory.
+默认只验证并构建候选。授权切换时加入 `--activate`，脚本更新 `public/` 并只重启指定的 `yixu-*api` 服务。验证包括 API/静态内容版本和首页主推、[核心公开文件清单](../site-resources.json)，以及主推图片同源 WebP 的 MIME、字节数和 SHA-256。面向同源后台部署的鉴权和核心后台文件验证由[开发站控制器](dev-release.py)执行。
 
-After cutover, the command checks the public origin's active API revision, API
-homepage featured ID, static snapshot revision and featured ID, served HTML and
-application bytes, and the featured image's local source URL, WebP MIME, byte count
-and SHA-256. It never requires a CDN or sends a paid generation request. Only then
-is a mode-0600 `publication.json` receipt written outside the repository. The admin
-panel displays that proof separately from CDN synchronization counts. Its proof
-matches the active revision and featured image; replacing content invalidates old
-proof automatically.
+验证成功才写入私有 `publication.json`。公开 `/api/content/publication` 和后台内容概览根据当前版本及主推资源判断回执是否有效，CDN 同步独立报告。切换失败恢复上一静态目录并标记验证失败，旧回执存为 `publication.previous.json`；若 API 已导入新版本，需要核对后重试。私有数据库不回滚。两个目录改名之间可能短暂缺少静态根。进程异常终止留下 `release.lock` 时，先核对 `owner.json` 记录的进程。
 
-The current command verifies `index.html`, `app.js`, the catalog snapshot and the
-featured source image. It does not yet verify every core static file, every image
-in the latest batch, or the admin deployment. The next delivery improvement is to
-cover those files explicitly and test stale/missing files and failed-cutover
-recovery; see the staged acceptance criteria in the development plan. Do not
-infer that broader coverage from an existing publication receipt.
+授权本地环境可在命令中加 `--activate --watch`，默认每五秒检查当前工作区的已提交 HEAD。观察器跳过脏工作区及已验证 SHA，用同一把锁串行交付，每次运行对同一失败 SHA 只尝试一次，并在 `release-watch.json` 记录结果。它不拉取远端；开发服务器使用独立的发布控制器。
 
-Failed preparation leaves the current static site and previous proof unchanged.
-If restart or origin verification fails after activation, the previous static
-output is restored and current proof is marked unverified; the earlier receipt is
-preserved as `publication.previous.json`. Private content/user databases are never
-rolled back. The API may already have imported a new valid revision, so inspect
-and correct the reported mismatch, then run delivery again. During the two static
-directory renames there can be a brief missing-root interval. This small local
-cutover is not a zero-downtime immutable backend release manager. A killed process
-can leave `release.lock`; inspect its mode-0600 owner file and the process before
-manually removing a stale lock. No Git hook or host-wide configuration is installed.
-
-For explicitly enabled local automatic delivery, the same command accepts
-`--activate --watch` (default interval five seconds, configurable with
-`--interval-seconds 5`). A supervisor can run that foreground command as a dedicated
-user service. It observes only the current checkout's committed HEAD, skips dirty
-worktrees, runs deliveries serially and uses the same exclusive release lock.
-It does not pull Git, edit source, push commits or modify a production host. Each
-HEAD is attempted once per watcher run; failures are recorded privately in
-`release-watch.json` and do not cause restart loops. Correct/commit the source or
-restart the watcher after manual review to retry that HEAD. An unchanged HEAD
-already recorded in a verified receipt is skipped. Stop the watcher before
-changing deployment configuration. The GitHub workflow remains validation-only.
-
-Regression evidence for these boundaries is provided by:
+## 验证入口
 
 ```sh
+node qa/regression-deploy.mjs
 node --test qa/regression-release.mjs
-.venv/bin/python -m pytest tests/backend/test_release_publication.py
+uv run pytest tests/backend/test_release_publication.py
+node qa/regression-ci.mjs
 ```
+
+[GitHub Actions](../.github/workflows/check.yml) 执行验证和构建。实际发布以目标站点检查及对应回执为准。

@@ -58,7 +58,7 @@ def test_real_yunet_inference_blank_and_reference_panel(tmp_path):
     detector = YuNetDetector(Settings(data_dir=tmp_path, face_model=Path(model)))
     assert detector.ready
     assert detector.detect(Image.new("RGB", (400, 300), "white")) == []
-    path = Path(__file__).resolve().parents[2] / "images" / "look-001.webp"
+    path = Path(__file__).resolve().parents[2] / "images-v2" / "look-001.webp"
     with Image.open(path) as montage:
         face = detector.detect(montage.crop((0, 0, montage.width // 3, montage.height // 3)))
     assert len(face) == 1

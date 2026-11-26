@@ -63,7 +63,7 @@ async function publicUI(t) {
   const timers = new Set();
   const schedule = (fn, ms) => { const id = setTimeout(() => { timers.delete(id); fn(); }, ms); timers.add(id); return id; };
   t.after(() => { for (const id of timers) clearTimeout(id); });
-  window.WARDROBE = { looks: [{ id: 1, title: 'Disposable UI test', versions: Object.fromEntries(['v1', 'v2'].map(v => [v, { image: '', shots: Array.from({ length: 9 }, () => ({ title: 'test' })) }])) }] };
+  window.WARDROBE = { looks: [{ id: 1, title: 'Disposable UI test', versions: { v2: { image: '', shots: Array.from({ length: 9 }, () => ({ title: 'test' })) } } }] };
   vm.runInNewContext(fs.readFileSync(path.join(root, 'tryon.js'), 'utf8'), {
     document, window, location: { protocol: 'https:' }, fetch: b.fetch, crypto: { randomUUID }, URL, FormData,
     setTimeout: schedule, clearTimeout, queueMicrotask, confirm: () => true,

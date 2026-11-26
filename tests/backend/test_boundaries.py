@@ -29,7 +29,7 @@ def test_photo_auth_before_receive_and_strict_receipt_deadline(setup):
     boundary = "testmultipart"
     fields = {
         "look_id": "1",
-        "edition": "v1",
+        "edition": "v2",
         "shot_index": "1",
         "idempotency_key": "slow-upload-01",
         "disclosure_version": b["disclosure"]["version"],

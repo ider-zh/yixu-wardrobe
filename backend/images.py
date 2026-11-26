@@ -238,12 +238,12 @@ def hide_grid_original(data, settings):
     return out.getvalue()
 
 
-def crop_reference(settings, look_id, edition, shot_index):
+def crop_reference(settings, look_id, shot_index):
     try:
         root = settings.catalog_image_root.resolve()
         catalog = json.loads(settings.catalog_path.read_text())
         look = next(item for item in catalog["looks"] if item["id"] == look_id)
-        path = (root / look["versions"][edition]["image"]).resolve()
+        path = (root / look["versions"]["v2"]["image"]).resolve()
         if not path.is_relative_to(root):
             raise ValueError()
         image = decode(path.read_bytes(), settings)

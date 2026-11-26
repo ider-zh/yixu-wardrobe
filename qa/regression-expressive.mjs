@@ -46,7 +46,8 @@ const context={
   location:{hash:'#/looks',protocol:'file:',href:'file:///offline/index.html#/looks'},URL,URLSearchParams,console,setTimeout:()=>1,clearTimeout(){}
 };
 context.history={pushState(_state,_title,hash){context.location.hash=hash;},replaceState(_state,_title,hash){context.location.hash=hash;}};
-vm.createContext(context);vm.runInContext(fs.readFileSync(path.join(root,'catalog.js'),'utf8'),context);
+context.window.WARDROBE=JSON.parse(fs.readFileSync(path.join(root,'content/catalog.json'),'utf8'));
+vm.createContext(context);
 context.window.WARDROBE.revision='synthetic-static-revision';
 for(const module of ['product-themes.js','product-page.js'])vm.runInContext(fs.readFileSync(path.join(root,module),'utf8'),context);
 const app=fs.readFileSync(path.join(root,'app.js'),'utf8');
@@ -58,7 +59,7 @@ function check(name,fn){fn();checks.push(name);}
 check('footer preserves the linked exact ICP number',()=>assert.match(html,/<a\b[^>]*href="https:\/\/beian\.miit\.gov\.cn\/"[^>]*>浙ICP备2026098002号<\/a>/));
 check('public UI has no archived edition controls or fixed capacity labels',()=>{
   assert.doesNotMatch(html,/data-edition|edition-compare|百套|>100<|THE ORIGINAL/);
-  assert.equal(a.state.version,'v2');assert.equal(node('hero-total').textContent,baseline.looks.length+' 套穿搭，持续更新');
+  assert.equal(node('hero-total').textContent,baseline.looks.length+' 套穿搭，持续更新');
   for(const look of context.window.WARDROBE.looks){assert.deepEqual(Object.keys(look.versions),['v2']);assert.equal(look.versions.v2.shots.length,9);}
   assert.doesNotMatch(node('gallery').innerHTML,/images\/look-/);
 });

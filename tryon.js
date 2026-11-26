@@ -200,7 +200,7 @@ function track(event,context={}) {
   try {
     const payload={event,event_id:randomId()};
     if(Number.isInteger(context.look_id)&&byId.has(context.look_id))payload.look_id=context.look_id;
-    if(['v1','v2'].includes(context.edition))payload.edition=context.edition;
+    if(context.edition==='v2')payload.edition=context.edition;
     if(Number.isInteger(context.shot_index)&&context.shot_index>=1&&context.shot_index<=9)payload.shot_index=context.shot_index;
     api('/api/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).catch(()=>{});
   }catch { /* Observation must not interrupt browsing or opening a dialog. */ }
@@ -479,7 +479,7 @@ function renderJobs() {
   for(const job of jobs){
     const card=element('article',undefined,'tryon-job');card.dataset.jobId=job.id;card.dataset.jobStatus=job.status;
     const look=byId.get(job.look_id);
-    const heading=element('h4','LOOK '+String(job.look_id).padStart(3,'0')+' · '+(job.edition==='v1'?'造型':'生动')+' · 参考 '+String(job.shot_index).padStart(2,'0')+' · '+(look?.title||job.look_title||''));heading.tabIndex=-1;heading.dataset.jobAction='heading';card.append(heading);
+    const heading=element('h4','LOOK '+String(job.look_id).padStart(3,'0')+' · 参考 '+String(job.shot_index).padStart(2,'0')+' · '+(look?.title||job.look_title||''));heading.tabIndex=-1;heading.dataset.jobAction='heading';card.append(heading);
     let status=statusNames[job.status]||'未知状态，请刷新进度确认。';
     if(job.pose_mode==='pose_grid')status='九宫格姿态 · '+status;
     if(job.cachedImage)status+=' · 已保存到本机';

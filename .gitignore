@@ -13,14 +13,10 @@
 !/site-resources.json
 !/product-themes.js
 !/product-themes.css
-!/catalog.js
 !/style.css
 !/expressive.css
 !/favicon.svg
 !/serve.mjs
-!/image-manifest-all.json
-!/images/
-!/images/look-*.webp
 !/images-v2/
 !/images-v2/look-*.webp
 !/assets/
@@ -52,15 +48,11 @@
 !/qa/regression-expressive.mjs
 !/qa/regression-assets.mjs
 !/docs/
-!/docs/deployment-feasibility.md
-!/docs/ai-tryon-backend-design.md
 !/docs/external-agent-sop.md
 !/docs/male-outfit-sop.md
 !/docs/product-agent-sop.md
 !/docs/content-publishing-plan.md
 !/docs/site-theme-architecture.md
-!/docs/images/
-!/docs/images/wardrobe-preview.webp
 # Backend and admin source only; runtime data, credentials, models and venv stay ignored.
 !/pyproject.toml
 !/uv.lock

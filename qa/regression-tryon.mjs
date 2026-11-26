@@ -3,7 +3,6 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import http from 'node:http';
-import vm from 'node:vm';
 import {spawn} from 'node:child_process';
 import {once} from 'node:events';
 import {fileURLToPath} from 'node:url';
@@ -11,6 +10,7 @@ import {fileURLToPath} from 'node:url';
 // Real Chromium DOM/event + HTTP adapter regression. The HTTP API below is an
 // explicitly synthetic TEST fixture, never a provider or production success.
 const root = fileURLToPath(new URL('../', import.meta.url));
+const baseline = JSON.parse(fs.readFileSync(path.join(root,'content/catalog.json'),'utf8'));
 const scratch = process.env.TMPDIR || os.tmpdir();
 // Chromium's singleton UNIX socket needs a short temp path. When retaining test
 // artifacts under a long TMPDIR, set CHROME_TMPDIR to a short private scratch dir.
@@ -55,7 +55,7 @@ const server = http.createServer(async (req,res) => {
     if(req.url==='/api/tryons/fixture-job-1/image'||req.url==='/api/tryons/fixture-job-1/download'||/^\/api\/tryons\/fixture-aspect-\d+-(portrait|landscape|square)\/(image|download)$/.test(req.url)){
       assert.match(req.headers.cookie||'',/visitor_fixture=/);res.setHeader('Content-Type','image/webp');
       if(req.url.endsWith('/download'))res.setHeader('Content-Disposition','attachment; filename="synthetic-test-output.webp"');
-      res.end(resultImage || fs.readFileSync(path.join(root,'images/look-001.webp')));return;
+      res.end(resultImage || fs.readFileSync(path.join(root,'images-v2/look-001.webp')));return;
     }
     if(req.url==='/api/events') {res.end('{"accepted":true}');return;}
     if(req.url==='/api/disclosure/accept' && req.method==='POST') {
@@ -74,6 +74,10 @@ const server = http.createServer(async (req,res) => {
       finish();return;
     }
     res.statusCode=503;res.end('{"error":{"code":"fixture_unavailable","message":"测试服务未配置"}}');return;
+  }
+  if(req.url==='/catalog.js'){
+    res.setHeader('Content-Type','text/javascript');
+    res.end('window.WARDROBE = '+JSON.stringify(baseline)+';');return;
   }
   const target=path.join(root, decodeURIComponent(req.url.split('?')[0]==='/'?'index.html':req.url.split('?')[0]));
   if(!target.startsWith(root)||!fs.existsSync(target)||!fs.statSync(target).isFile()){res.statusCode=404;res.end();return;}
@@ -321,7 +325,7 @@ try {
   await load();
   await wait('document.getElementById("tryon-jobs")?.textContent.includes("前方 7")');
   await evaluate('document.getElementById("tryon-history").click()');
-  assert.match(await evaluate('document.getElementById("tryon-jobs").textContent'),/100.*生动.*01/,'Restored request keeps the automatic reference submitted with the job');
+  assert.match(await evaluate('document.getElementById("tryon-jobs").textContent'),/100.*参考.*01/,'Restored request keeps the automatic reference submitted with the job');
   assert.equal(await evaluate('document.getElementById("tryon-selection").hidden'),true,'History does not invent a new selection');
   assert.ok(!(await evaluate('document.getElementById("tryon-jobs").textContent')).includes('%'));
   jobs[0]={...jobs[0],status:'succeeded',image_url:'/api/tryons/fixture-job-1/image',download_url:'/api/tryons/fixture-job-1/download'};
@@ -331,7 +335,7 @@ try {
   await wait('!document.getElementById("tryon-refresh").disabled');
   assert.equal(await evaluate('document.activeElement.dataset.jobAction'),'download','Refreshing preserves keyboard focus on a result download');
   const downloaded=await evaluate(`(async()=>{const r=await fetch(document.querySelector('[data-job-id] a[download]').href,{credentials:'same-origin'});return {status:r.status,type:r.headers.get('content-type'),disposition:r.headers.get('content-disposition'),bytes:(await r.arrayBuffer()).byteLength};})()`);
-  assert.equal(downloaded.status,200);assert.equal(downloaded.type,'image/webp');assert.equal(downloaded.bytes, fs.statSync(path.join(root,'images/look-001.webp')).size);
+  assert.equal(downloaded.status,200);assert.equal(downloaded.type,'image/webp');assert.equal(downloaded.bytes, fs.statSync(path.join(root,'images-v2/look-001.webp')).size);
   for(const viewport of viewports){
     await setViewport(viewport);
     for(const shape of shapes){
@@ -536,8 +540,7 @@ try {
   console.log('PASS 401/session and 403/CSRF purge active photo/consent and remote URLs, retain local results, and never replay');
   // Exercise the same shipped page with a server-only full catalog revision.
   // No fixture content is written to the repository or treated as AI output.
-  const snapshot={window:{}};vm.runInNewContext(fs.readFileSync(path.join(root,'catalog.js'),'utf8'),snapshot);
-  catalogFixture=JSON.parse(JSON.stringify(snapshot.window.WARDROBE));
+  catalogFixture=structuredClone(baseline);
   catalogFixture.models=[{model_id:'female-01',name:'01 号模特'},{model_id:'female-02',name:'02 号模特'}];
   for(const id of [101,102]){
     const look=JSON.parse(JSON.stringify(catalogFixture.looks[0]));

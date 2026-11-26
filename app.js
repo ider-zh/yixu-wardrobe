@@ -13,7 +13,7 @@ const productStorageKey='yixu:product-favorites:v1';
 let productSaved=[];
 try{const value=JSON.parse(localStorage.getItem(productStorageKey)||'[]');if(Array.isArray(value))productSaved=value.filter(id=>typeof id==='string'&&/^[A-Za-z0-9_-]+$/.test(id));}catch{}
 const productFavorites=new Set(productSaved);
-const state = {category:'', season:'', query:'', model:'', region:'', latestOnly:false, favoritesOnly:false, sort:'latest', page:'home', profileModel:'', limit:24, active:null, view:0, version:'v2'};
+const state = {category:'', season:'', query:'', model:'', region:'', latestOnly:false, favoritesOnly:false, sort:'latest', page:'home', profileModel:'', limit:24, active:null, view:0};
 let filtered = [], toastTimer, detailReturnRoute = '#/home', routing = false, detailNavigation = null, focusArchive = false, routeDetailCloses = 0;
 const snapshotRevision = window.WARDROBE?.revision;
 function latestLooks(selection=indexedLooks) {
@@ -246,7 +246,7 @@ function matchLooks() {
     if (state.latestOnly && l.batch_id !== latest) return false;
     if ((state.page==='favorites'||state.favoritesOnly) && !favorites.has(l.id)) return false;
     return matchesSearch(l,state.query);
-  }).sort((a,b) => state.version==='v2'&&versionOf(a).ready!==versionOf(b).ready ? Number(versionOf(b).ready)-Number(versionOf(a).ready) : state.sort==='latest' ? latestRank.get(a.id)-latestRank.get(b.id) : state.sort==='curated' ? (a.editorialOrder??a.id)-(b.editorialOrder??b.id) : state.sort==='pieces' ? b.pieces.length-a.pieces.length || a.id-b.id : state.sort==='favorites' ? Number(favorites.has(b.id))-Number(favorites.has(a.id)) || a.id-b.id : a.id-b.id);
+  }).sort((a,b) => versionOf(a).ready!==versionOf(b).ready ? Number(versionOf(b).ready)-Number(versionOf(a).ready) : state.sort==='latest' ? latestRank.get(a.id)-latestRank.get(b.id) : state.sort==='curated' ? (a.editorialOrder??a.id)-(b.editorialOrder??b.id) : state.sort==='pieces' ? b.pieces.length-a.pieces.length || a.id-b.id : state.sort==='favorites' ? Number(favorites.has(b.id))-Number(favorites.has(a.id)) || a.id-b.id : a.id-b.id);
 }
 function refreshFilters() {
   state.limit=24;
@@ -271,7 +271,7 @@ function renderActiveFilters() {
 function renderCard(l,index) {
   const liked=favorites.has(l.id), picked=compare.has(l.id);
   const compareAction=l.model_only?'':'<button class="icon-button compare'+(picked?' selected':'')+'" data-compare="'+l.id+'" aria-pressed="'+picked+'" aria-label="'+(picked?'移出对比':'加入对比')+' '+esc(l.title)+'">'+comparison+'</button>';
-  return '<article class="look-card" style="animation-delay:'+Math.min(index,8)*25+'ms" data-look-card="'+l.id+'"><div class="image-zone"><button class="look-photo-button" data-open="'+l.id+'" aria-label="查看 '+esc(l.title)+' 的九宫格写真和搭配设计">'+(versionOf(l).ready?photo(l):'<div class="card-pending"><span>'+number(l.id)+'</span><small>写真准备中</small></div>')+'<span class="card-number">'+number(l.id)+'</span>'+'<span class="open-caption">查看写真与设计 <span>↗</span></span></button><div class="card-actions"><button class="icon-button favorite'+(liked?' selected':'')+'" data-favorite="'+l.id+'" aria-pressed="'+liked+'" aria-label="'+(liked?'取消收藏':'收藏')+' '+esc(l.title)+'">'+heart+'</button>'+compareAction+'</div></div><div class="card-meta"><div class="card-topline"><span>'+esc(l.category)+' / '+esc(l.season)+' · '+l.pieces.length+' 件搭配</span><div class="palette" aria-label="造型配色">'+palette(l)+'</div></div><button class="card-title" data-open="'+l.id+'">'+esc(l.title)+'</button><p class="card-publication">'+esc(publication(l))+'</p><p class="card-tags">'+(state.version==='v2'?(versionOf(l).moods||l.tags||[]):(l.tags||[])).slice(0,4).map(esc).join(' · ')+'</p></div></article>';
+  return '<article class="look-card" style="animation-delay:'+Math.min(index,8)*25+'ms" data-look-card="'+l.id+'"><div class="image-zone"><button class="look-photo-button" data-open="'+l.id+'" aria-label="查看 '+esc(l.title)+' 的九宫格写真和搭配设计">'+(versionOf(l).ready?photo(l):'<div class="card-pending"><span>'+number(l.id)+'</span><small>写真准备中</small></div>')+'<span class="card-number">'+number(l.id)+'</span>'+'<span class="open-caption">查看写真与设计 <span>↗</span></span></button><div class="card-actions"><button class="icon-button favorite'+(liked?' selected':'')+'" data-favorite="'+l.id+'" aria-pressed="'+liked+'" aria-label="'+(liked?'取消收藏':'收藏')+' '+esc(l.title)+'">'+heart+'</button>'+compareAction+'</div></div><div class="card-meta"><div class="card-topline"><span>'+esc(l.category)+' / '+esc(l.season)+' · '+l.pieces.length+' 件搭配</span><div class="palette" aria-label="造型配色">'+palette(l)+'</div></div><button class="card-title" data-open="'+l.id+'">'+esc(l.title)+'</button><p class="card-publication">'+esc(publication(l))+'</p><p class="card-tags">'+(versionOf(l).moods||l.tags||[]).slice(0,4).map(esc).join(' · ')+'</p></div></article>';
 }
 function renderGallery() {
   matchLooks();
@@ -308,7 +308,7 @@ function setView(view) {
   if(view>0){image.style.left=-(view-1)%3*100+'%';image.style.top=-Math.floor((view-1)/3)*100+'%';}else{image.style.left='';image.style.top='';}
   document.querySelectorAll('[data-view]').forEach(b=>{const active=Number(b.dataset.view)===view;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});
   const current=versionOf(byId.get(state.active));const names=['完整九宫格',...current.shots.map(s=>s.title)];
-  $('view-name').textContent=names[view]||'写真';const shot=current.shots[view-1];$('view-moment').textContent=state.version==='v2'?(shot?[shot.emotion,shot.pose,shot.framing].filter(Boolean).join(' · '):current.summary):'';
+  $('view-name').textContent=names[view]||'写真';const shot=current.shots[view-1];$('view-moment').textContent=shot?[shot.emotion,shot.pose,shot.framing].filter(Boolean).join(' · '):current.summary;
   const look=byId.get(state.active);image.alt=look.title+' · '+names[view];
 }
 function updateDetailActions() {
@@ -337,7 +337,7 @@ function openDetail(id,preserveNavigation=false) {
   else history.replaceState(entry,'',location.hash);
   state.active=id;
   $('detail-number').textContent='LOOK '+number(id)+' / '+l.category+' / '+l.season;
-  $('detail-title').textContent=l.title;$('detail-story').hidden=state.version!=='v2';$('detail-story-title').textContent=versionOf(l).story;$('detail-story-summary').textContent=versionOf(l).summary;
+  $('detail-title').textContent=l.title;$('detail-story-title').textContent=versionOf(l).story;$('detail-story-summary').textContent=versionOf(l).summary;
   $('detail-palette').innerHTML=palette(l);
   $('detail-description').textContent=l.description;
   $('detail-tags').innerHTML=(l.tags||[]).map(tag=>{
@@ -351,12 +351,12 @@ function openDetail(id,preserveNavigation=false) {
   $('detail-scene').textContent='写真场景 / '+l.scene;
   $('detail-image').hidden=!versionOf(l).ready;$('detail-photo-frame').classList.toggle('pending',!versionOf(l).ready);
   if(versionOf(l).ready)setImage($('detail-image'),versionOf(l));else $('detail-image').removeAttribute('src');
-  $('original-link').href=imageURL(versionOf(l));$('download-link').href=publicSource(versionOf(l).download_url,true)||publicSource(versionOf(l).source_url||versionOf(l).image);$('download-link').download='LOOK-'+number(id)+'-'+state.version+'-'+l.title+'.webp';
+  $('original-link').href=imageURL(versionOf(l));$('download-link').href=publicSource(versionOf(l).download_url,true)||publicSource(versionOf(l).source_url||versionOf(l).image);$('download-link').download='LOOK-'+number(id)+'-v2-'+l.title+'.webp';
   $('original-link').hidden=!versionOf(l).ready;$('download-link').hidden=!versionOf(l).ready;
   $('view-selector').innerHTML=[0,1,2,3,4,5,6,7,8,9].map(v=>'<button data-view="'+v+'" aria-label="'+esc(v?String(v).padStart(2,'0')+' · '+(versionOf(l).shots[v-1]?.title||'写真'+v):'完整九宫格')+'" aria-pressed="'+!v+'">'+(v?'<span class="shot-number">'+String(v).padStart(2,'0')+'</span><span class="shot-title">'+esc(versionOf(l).shots[v-1]?.title||'写真'+v)+'</span>':'九宫格')+'</button>').join('');
   $('view-selector').hidden=!versionOf(l).ready;setView(0);updateDetailActions();
-  window.WardrobeTryOn?.setContext?.({look_id:id,edition:state.version});
-  window.WardrobeTryOn?.track?.('look_open',{look_id:id,edition:state.version});
+  window.WardrobeTryOn?.setContext?.({look_id:id,edition:'v2'});
+  window.WardrobeTryOn?.track?.('look_open',{look_id:id,edition:'v2'});
   const list=detailList(),position=list.findIndex(x=>x.id===id);
   $('detail-position').textContent=(position+1)+' / '+list.length;
   $('previous-look').disabled=position<=0;$('next-look').disabled=position>=list.length-1;

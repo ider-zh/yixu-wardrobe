@@ -1,38 +1,30 @@
 # 全站主题
 
-管理员登录工作台后，在「网站主题」中选择并保存主题。前台和已登录后台应用当前部署的设置。
+管理员在工作台「网站主题」选择并保存。设置按部署存入私有 SQLite，默认 Editorial。在线访客首次打开、标签页重新可见或从浏览器缓存恢复时读取设置。读取失败或收到未知主题时保留当前布局。离线打开使用 Editorial。
 
-| 主题 | 标识 | 视觉与布局 |
-| --- | --- | --- |
-| Editorial · 留白叙事 | `editorial` | 留白、暖纸色和正文式叙事 |
-| Studio · 大图图库 | `studio` | 首页大图、产品侧栏和后台导航侧栏 |
-| 暗房样片 | `contact-sheet` | 石墨色相纸框，首页展示完整九宫格 |
-| 沙龙相册 | `salon-album` | 酒红细边和错落的相册装裱 |
-| 衣橱索引 | `wardrobe-index` | 靛灰档案底色和便于扫读的图文条目 |
-| 亚麻展室 | `linen-room` | 亚麻纹理、暖棕字体和留白展架 |
-| 靛蓝工坊 | `indigo-studio` | 蓝图方格、方形边框和单品规格表 |
-| 白瓷展柜 | `porcelain-case` | 白瓷与矿石青、居中陈列和展品标签 |
-| 夜间秀场 | `night-runway` | 深色舞台和聚光构图 |
-| 城市海报 | `city-billboard` | 街头海报的醒目标题与色块 |
-| 花园漫步 | `garden-walk` | 植物色调、弧形装裱与疏朗间距 |
-| 暮光手记 | `sunset-notes` | 暮色暖调和手记式图文 |
+## 代码入口
 
-## 配置与读取
+| 职责 | 代码 |
+| --- | --- |
+| 主题名称、管理表单与保存反馈 | [admin/index.html](../admin/index.html#L106)、[admin/app.mjs](../admin/app.mjs) |
+| 主题校验、SQLite 持久化与表约束迁移 | [backend/store.py](../backend/store.py) |
+| 公开读取 `GET /api/site-theme` | [backend/app.py](../backend/app.py) |
+| 管理端 `GET`／`PUT /api/admin/site-theme` | [backend/admin.py](../backend/admin.py) |
+| 应用主题、发布变更通知、调整节点顺序 | [site-theme.js](../site-theme.js) |
+| 全站色彩、排版与响应式布局 | [site-theme.css](../site-theme.css) |
+| 首页封面、单品结构与图集交互 | [app.js](../app.js)、[product-themes.js](../product-themes.js)、[product-themes.css](../product-themes.css)、[product-page.js](../product-page.js) |
 
-- `GET /api/site-theme` 公开返回形如 `{"theme":"editorial"}` 的当前主题，无需会话。
-- `GET /api/admin/site-theme` 读取同一设置，`PUT /api/admin/site-theme` 保存同样的 JSON。后台读取需要管理员会话，保存还需要现有的来源检查与 CSRF 令牌。
-- 设置写入当前部署的私有 SQLite，默认值为 Editorial。数据库启动时在一个写入事务中扩展旧主题表的取值约束并复制已有记录。API 响应禁止缓存，设置独立于内容清单、图片发布版本和浏览器收藏。
+三个主题接口使用 `{"theme":"editorial"}` 形状，响应禁止缓存。管理读取需要管理员会话，写入还校验来源和 CSRF。管理端在读取或保存确认后调用 `YixuSiteTheme.apply(theme)`，保存失败时保留上次确认的主题。公开页面通过 `resolve()` 和 `subscribe(listener)` 使用当前主题。新增主题时同步维护管理选项、前端白名单、后端 `ThemeName` 和样式。
 
-前台打开页面、标签页重新可见或从浏览器缓存恢复时读取服务器设置。读取失败或返回未知值时保留当前布局。初次读取成功前以及直接打开离线包时使用 Editorial。主题由当前部署设置决定。
+## 组件约定
 
-## 布局
+- Studio 将首页封面放在文案前，并为管理工作台提供桌面侧栏和窄屏横向导航。后台私有节点始终留在已鉴权的工作区，退出或收到 401 时清理并恢复 Editorial。
+- 暗房样片使用当前封面写真展示完整九宫格，并更新其说明和替代文本。其余主题截取封面镜头。
+- Studio 单品页使用 `studio`／`neutral-white` 结构和桌面信息侧栏，其余主题使用 `editorial`／`warm-paper` 的内容结构并套用各自的全站样式。两种结构渲染相同的主图、全貌、细节、穿着关联、收藏和推演披露。缩略图按钮至少 44 × 44 像素。
+- 切换时保留当前路由、筛选、收藏、产品选图和放大窗。试穿使用原有输入、照片预览、写真选择和排队节点。
 
-`site-theme.js` 公开 `resolve()` 和 `subscribe(listener)`。后台入口使用 `apply(theme)` 在读取或确认保存后应用设置。前后端均校验内置主题名称。后台保存失败时保留上次确认的显示，管理员可重新读取服务器设置。
+## 验证
 
-Studio 会调整首页照片和文案的顺序，并在已鉴权的后台容器内使用导航侧栏。其余主题通过 `site-theme.css` 应用排版和色彩。暗房样片的首页封面使用同一张写真展示完整九宫格，并同步更换图片说明。前台保留路由、筛选、收藏、已选产品图和放大窗。试穿输入、Blob 预览、写真选择和排队任务保留原节点。退出或收到 401 时清空后台私有内容。
+新增脚本或样式时更新 [site-resources.json](../site-resources.json)。构建、发布核验和开发部署均按该清单校验本地资源路径与符号链接。后台从同源公开根目录加载共享主题脚本和样式。
 
-## 构建与验证
-
-`site-resources.json` 声明前台和后台核心文件。构建、Node 发布验证和开发服务器控制器分别从候选版读取清单，校验文件名和符号链接。`catalog.js` 由内容构建生成。后台从公开根目录加载主题脚本和样式，使用现有的同源 CSP。
-
-回归覆盖匿名读取、管理员权限和 CSRF、旧数据库迁移、重启持久化、分域兼容，以及真实 Chromium 中的保存、访客重新读取、保存失败、退出和 401。测试使用合成数据验证 320、390 与 1440 像素布局，以及收藏、产品图集、试穿照片与排队节点和离线默认主题。
+运行 `node qa/regression-site-theme.mjs` 检查 320、390 和 1440 像素下的主题布局、切换状态及离线回退。接口权限、CSRF 和数据库迁移见 [tests/backend/test_admin.py](../tests/backend/test_admin.py)。

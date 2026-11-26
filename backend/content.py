@@ -851,10 +851,10 @@ class ContentService:
             raise HTTPException(503, "asset_unavailable:Public resource is unavailable")
         return data, record
 
-    def crop_reference(self, look_id, edition, shot_index):
+    def crop_reference(self, look_id, shot_index):
         from .images import png
 
-        if edition != "v2" or not 1 <= shot_index <= 9:
+        if not 1 <= shot_index <= 9:
             raise HTTPException(
                 422, "invalid_selection:Only public expressive references are available"
             )

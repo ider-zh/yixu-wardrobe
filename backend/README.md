@@ -1,232 +1,70 @@
-# Yixu private API and single worker
+# API、管理后台与试穿 Worker
 
-## Git content and public resources
+## 启动
 
-The API also imports versioned `content/` manifests at creation. Set
-`YIXU_CONTENT_ROOT` and `YIXU_IMAGE_ROOT` explicitly for a deployed release.
-Verified public WebP files are durably archived beneath `YIXU_DATA_DIR/public-content`,
-and `/api/content/catalog` returns expressive-only content with controlled same-origin
-`source_url` values. Invalid releases preserve the last good content revision.
-Legacy styling remains in source archives but not the public build or active catalog.
-
-Public CDN work uses its own durable queue and API-lifespan background thread,
-separate from private photo generation. No provider is configured by default;
-source URLs work before CDN readiness. A generic HTTPS PUT adapter is available,
-but must be matched to the selected host's actual protocol. Credentials live only
-in private `cdn-config.json`; observation and retry/verification/migration routes
-are authenticated under `/api/admin/content`. Model previews use the authenticated
-admin-origin reference route rather than a main-site API URL on the wrong Host.
-See [development notes](../DEVELOPMENT.md) for the exact resource contract and
-configuration semantics. No user input or private result enters this public queue.
-
-## Run
-
-From the repository root, install the exact locked official dependencies:
+在仓库根目录运行。API 与生成 Worker 各启动一个进程，共用私有数据目录和运行设置。代理和环境配置见[正式站模板与本地交付](../deploy/README.md)及[开发站发布](../deploy/dev-README.md)。
 
 ```sh
 uv sync --locked
-# Set these to operator-owned private/runtime locations, outside the public tree:
 export YIXU_DATA_DIR=/path/to/private/yixu
-export YIXU_CONTENT_ROOT=/path/to/project-release/content
-export YIXU_IMAGE_ROOT=/path/to/project-release
-# Legacy fixture/catalog mode additionally accepts YIXU_CATALOG_PATH.
+export YIXU_CONTENT_ROOT="$PWD/content"
+export YIXU_IMAGE_ROOT="$PWD"
 export YIXU_FACE_MODEL=/path/to/models/yunet.onnx
-export YIXU_PUBLIC_HOST=www.8882088.xyz
-export YIXU_ADMIN_HOST=admin.8882088.xyz
-export YIXU_SECURE_COOKIES=true
+export YIXU_PUBLIC_HOST=127.0.0.1:8010
+export YIXU_ADMIN_HOST=127.0.0.1:8010
+export YIXU_SECURE_COOKIES=false
 uv run uvicorn backend.app:create_app --factory --host 127.0.0.1 --port 8010 --workers 1 --no-access-log
-# Separate service, same environment and data directory:
+# 另开一个终端，沿用同一套环境变量
 uv run python -m backend.worker
-# Reconcile and process at most one eligible job, then exit:
-uv run python -m backend.worker --once
 ```
 
-The factory also supports `create_app(settings, provider=None, detector=None, clock=None)`.
-Imports never initialize storage or credentials. Deliberate app creation initializes
-SQLite/WAL and creates `initial-admin.json` only if no administrator exists. This
-private first-initialization file is 0600 beneath a 0700 directory; read it locally
-as operator, never print it in deployment logs. Passwords in SQLite are Argon2 hashes.
-Restarts do not reset credentials; password changes invalidate all admin sessions.
-Login's authoritative hash read, password verification and session creation share
-an SQLite write transaction with rotation. A login that commits first is revoked
-by rotation; one that verifies after rotation cannot use the old password.
-Incorrect `current_password` returns **403 / `current_password`**, preserving the
-valid admin session; missing/revoked authentication and invalid login credentials
-remain **401 / `admin_auth`**.
-The initial file remains unchanged after password rotation (it is a bootstrap
-receipt, not an active password store). Operators may remove it after recording
-credentials securely; existing admin credentials are not recreated.
+以上 Host 和 Cookie 配置供本地 HTTP 使用。正式环境启用默认的 Secure Cookie，反代覆写 Host 和转发头，Uvicorn 只信任本机代理。同源后台令两个 Host 相同，独立后台令两者分别匹配各自域名。访客和管理员的 HttpOnly Cookie 分开，管理 Cookie 限于 `/api/admin`，写操作校验同源及 CSRF。未设置 `YIXU_COOKIE_MAX_AGE` 时使用会话 Cookie。
 
-Nginx must preserve the configured Host and forward the original scheme only from
-a trusted loopback proxy. Roles are bound to the **exact** configured Host header;
-for direct development on a non-default port configure the host including that
-port, or send an explicit Host header. Secure cookies default true; opt into
-`YIXU_SECURE_COOKIES=false` for loopback HTTP development only. No wildcard CORS,
-parent-domain cookies, public accounts, or default persistent cookie lifetime.
-Visitor/admin cookies differ and every mutation requires exact Origin and CSRF.
+首次创建应用会初始化 SQLite 并生成私有的 `initial-admin.json`（目录 0700、文件 0600）。操作者在服务器上本地读取，避免写入日志。重启不会重置密码，密码轮换撤销已有管理员会话。初始文件作为初始化回执保留旧值，确认安全保存账号后可删除。密码使用 Argon2 哈希。配置定义见 [settings.py](settings.py)，会话与存储见 [app.py](app.py)、[admin.py](admin.py) 和 [store.py](store.py)。
 
-`YIXU_CATALOG_PATH` accepts the raw exported WARDROBE JSON: `looks[].id`,
-`looks[].versions.v1/v2.image` are used, relative to `YIXU_IMAGE_ROOT`.
-Visitors cannot choose a filesystem path, URL, model or prompt. The chosen 3x3
-panel is cropped before storage/dispatch; the full montage is never an input.
+## 查找代码
 
-## Provider and detector
+| 用途 | 入口 |
+| --- | --- |
+| 公开目录、首页、穿搭、模特、单品与源图 | [content.py](content.py) · `/api/content/` |
+| CDN 接入、同步和后台模特预览 | [cdn.py](cdn.py)、[cdn_worker.py](cdn_worker.py)、[content_admin.py](content_admin.py) · `/api/admin/content/` |
+| 发布回执与当前内容版本校验 | [publication.py](publication.py) · `/api/content/publication` |
+| 管理登录、成品评估、主题与生成设置 | [admin/app.mjs](../admin/app.mjs)、[admin.py](admin.py) · `/api/admin/` |
+| 浏览凭证、处理同意和可用性 | [app.py](app.py) · `/api/bootstrap`、`/api/disclosure/accept` |
+| 提交、排队、状态、下载和删除 | [tryon.js](../tryon.js)、[jobs.py](jobs.py) · `/api/tryons` |
+| 浏览器照片库与成品缓存 | [tryon-storage.js](../tryon-storage.js) |
+| 输入校验、成品编码与后台预览遮盖 | [images.py](images.py) |
+| 单 Worker 调度、失效清理和外部接口 | [worker.py](worker.py)、[provider.py](provider.py) |
+| 访问事件与离线地域 | [analytics.py](analytics.py)、[geolocation.py](geolocation.py) · `/api/events` |
 
-Configure model, HTTPS API base, enabled flag, project API key, and explicit
-loopback HTTP proxy through authenticated admin settings. Keys never appear in
-settings responses. Empty `api_key` preserves the current key; `clear_api_key:true`
-explicitly clears it. Runtime JSON writes are same-filesystem atomic, fsynced and
-0600. No assistant/CLI auth or ambient OpenAI/proxy environment is used. There is
-no direct-connection fallback. Missing provider key, detector or catalog is
-reported as unavailable; production has no placeholder or fake-success image.
+启动时验证内容清单和 WebP，合格资源存入 `YIXU_DATA_DIR/public-content`，导入失败则沿用最近有效版本。公开资源由同源 `source_url` 提供，CDN 通过同步和校验后才优先使用，独立于私有生成。试穿新请求和访问事件只接受生动版选择，历史任务照常按所有者读取。独立目录模式使用显式传入的 `Settings.catalog_path` 和 `catalog_image_root`，JSON 格式见 [export-catalog.mjs](../scripts/export-catalog.mjs)。资源与图床流程见[内容发布说明](../docs/content-publishing-plan.md)。
 
-The official OpenAI SDK uses image edits with two PNG inputs, `n=1`, default
-portrait `1024x1536`, `medium`, explicit transport, no redirects and
-`max_retries=0`. Model/size/quality and provider transport timeout are admin
-configurable. The Linux worker main thread enforces a total wall-clock timeout,
-not merely socket inactivity; it never retries uncertain deliveries. This is a
-technical request/input-retention bound, not a queue waiting deadline or quota.
+## 试穿与隐私
 
-The operator supplies an official YuNet ONNX model and license. Initialization
-runs real blank-image inference before claiming readiness. Local validation
-rejects malformed/animated/unsupported, oversized/pixel-bomb, no-face, multiple-face
-and too-small-face photos; corrects orientation and strips source metadata.
-Detection runs locally on CPU with bounded resized dimensions. The gate measures
-face size in visible original pixels (`YIXU_FACE_MIN_PIXELS`, default 40) so a clear
-face does not need to occupy a fixed percentage of a full-body photo. When the
-resized whole frame misses a face or detects a single undersized face, a bounded
-second pass checks up to four overlapping crops of the original. Matches are
-deduplicated in the original coordinates. The configured detector confidence
-still applies. The queue and image provider receive the full normalized photo,
-and the temporary crops stay inside validation. Input rejection happens before
-a new generation task is created.
+- 首次试穿需主动同意当前版本的照片披露，才可上传。用户选择当前穿搭及一个镜头，服务端冻结选择并裁切单格参考。可选普通试穿或九宫格姿态，后者将归一化自拍嵌入私有成品中央，管理员预览时遮盖该格。
+- 浏览器 IndexedDB 可保留用户管理的照片、任务记录和已取得成品。清理站点数据会移除本机副本，清理 Cookie 会丢失原服务端所有者凭证。离线仍可查看已取得成品。删除任务会清除本机成品，并在服务端可达时同步删除。
+- 上传在受限内存中解析。解码纠正方向、移除元数据，使用本地 YuNet 验证单个可用人脸，必要时在有限重叠区域补检。上传字节、像素、尺寸、并发、最小人脸尺寸和置信度都在 [Settings](settings.py) 配置；其他 JSON 写入有 64 KiB 技术限制。
+- 输入从接收上传起最多保留一小时，独立清理循环及启动对账覆盖排队和异常。Worker 在调用外部接口前移除磁盘输入，调用超时受剩余输入寿命限制。过期的未发任务进入 `needs_photo`，由用户显式重新提交。API 和 Worker 应持续受监督运行，主机停机期间的文件由启动清理处理。
+- SQLite 持久化按所有者隔离的队列。同一幂等键和相同内容返回已有任务，内容变化返回 409。单 Worker 使用进程锁，发送前记录可能发送状态。取消在派发决定前生效，之后丢弃返回结果。交付不明进入 `unknown`，重启也不自动重放；确定失败进入 `failed`。
+- 私有成品为带可见 AI 标识与 XMP 生成来源的 WebP，按完成顺序滚动保留最新 1,000 张，无成品时间到期。成品读取与下载校验所有者，管理员可评估生成成品，评估是可选操作。输入、试穿成品、账号和设置保存在私有目录，禁止进入 Git、静态包及公共 CDN。原始输入不纳入备份。
+- 生成并发、网络与解析限制用于保护实际运行。业务侧不设置生成次数、费用预算、IP 配额或排队时限。
 
-## State, privacy and recovery
+## 外部生成与访问统计
 
-SQLite is the accepted queue. Request content/selection is frozen, owner-scoped
-and idempotent; same key with changed bytes/selection returns 409. There is **no**
-application generation-count, money, IP, daily, rate or arbitrary queue-length
-gate, CAPTCHA, invitation code, five-minute queue deadline or output age expiry.
-A single worker is enforced with a process-held flock, not a short lease that
-could accidentally replay an active call. Existing identical retries return their
-existing job (202), and conflicting retries return 409 even if inference readiness
-has since disappeared. Genuinely new unavailable submissions return 503 before
-image validation, input persistence or queue insertion; their multipart bytes are
-only received under the normal bounded in-memory upload parser.
+从后台配置明确授权的项目 Key、模型、HTTPS 接口和显式 loopback HTTP 代理。`runtime.json` 私有保存，空 Key 保留原值，`clear_api_key:true` 清除。SDK 图像编辑接收归一化照片和单格参考，输出一张图。模型、画幅、质量和请求超时可配置，默认 1024×1536、high。调用只走配置的代理，禁用 SDK 重试。缺少内容、检测器或可用配置时明确显示生成不可用。
 
-Raw reception stays in bounded memory (no multipart disk spool). Only normalized
-photo and cropped reference inputs are privately staged. Input expiry is measured
-from server request receipt, including parsing/validation and queued/failed paths.
-API lifespan and worker sweeps run independently of traffic. A one-second early
-cleanup margin accommodates the 200ms sweep interval; no raw retention extension
-is granted. Both services must be supervised: no stopped process can physically
-delete disk data while the machine/services remain down; startup sweeps immediately.
-Inputs are removed **before** the external request, and the in-memory request is
-bounded by remaining input lifetime. Expired unsent work becomes `needs_photo`,
-not an automatic paid retry. A new explicit submission is required; in-place
-photo replacement is intentionally not implemented (the contract makes it optional).
+第一方事件仅接收 `page_view`、`look_open`、`tryon_open` 及受控选择字段，按访客及事件 ID 去重。任务数、结果状态和容量源自服务端。访问地域仅对新浏览事件查本地 MMDB，保存国家及中国省级区域等粗粒度信息，后台统计按各区域的浏览凭证去重。IP、UA、照片、凭据及详细位置不进入事件存储。
 
-Possible-send states are persisted before entering the adapter. On worker restart,
-`generating`/`postprocessing` become `unknown` and are never replayed. Definitive
-provider rejections and invalid output are `failed`; uncertain delivery is
-`unknown`. Canceling an executing call records cancellation and discards its
-result without another request. Valid unsent queued work resumes.
+离线地域库默认为私有目录的 `geoip/city.mmdb`，或用 `YIXU_GEOIP_DATABASE` 指定。用 `maxminddb.open_database` 验证临时文件后原子替换，服务会检测更新。缺少库时显示未知，历史事件不回填。后台保留 [DB-IP City Lite](https://db-ip.com/db/download/ip-to-city-lite) 署名。
 
-After loading/removing inputs and loading runtime settings, the worker makes a
-final cancellation/expiry decision in a short SQLite write transaction shared
-with DELETE. Its commit is the cooperative dispatch linearization point: a
-cancellation committed before this decision prevents adapter entry. After that
-commit delivery is possible, even before Python schedules adapter entry. There
-is no promise of a physical zero-gap, and no database lock is held during network
-generation; DELETE remains available and canceled results are not published.
-Possible-send recovery stays conservative even for a crash before adapter entry.
-
-Results are fully decoded and privately re-encoded WebP with a visible AI label
-and XMP provenance (job/selection/prompt version/model only). Same-filesystem
-staging, fsync, durable SQLite GC intent and startup reconciliation recover
-publication/eviction crashes. Global publication evicts oldest before publishing
-the 1001st result; output retention is FIFO latest 1000, without a time TTL.
-Public image/download APIs require the owner; admin result APIs expose generated
-outputs only, never originals. Reviews are optional metadata, not a generation gate.
-
-First-party analytics accept only `page_view`, `look_open`, `tryon_open` and a
-small typed selection/event-id schema; no raw IP, UA, query, filename, photo or
-credential fields. Event IDs deduplicate per visitor. Overview generation/queue,
-status, bytes and retained-result counts come from server SQLite state, not
-client claims. Unreviewed results are available normally.
-
-### Visitor geography
-
-New `page_view` events are enriched locally with country and Chinese province
-when available. The separate `event_geo` table stores only coarse geography,
-lookup status, source and database build epoch; it contains no raw IP, city,
-coordinates or user agent. Existing events remain untouched and appear as
-historical unknowns. Event retries do not duplicate visits or trigger another
-lookup. Region visitor counts deduplicate browser owners within each region;
-they are not a count of actual people and should not be added across regions.
-The administrator overview exposes `visitor_geo`; public APIs never expose it.
-
-Install the official [DB-IP City Lite MMDB](https://db-ip.com/db/download/ip-to-city-lite)
-in the private data directory at `geoip/city.mmdb`, or set
-`YIXU_GEOIP_DATABASE` to its absolute path. The runtime dependency is locked in
-`uv.lock`. Database files stay outside Git and static exports, readable only by
-the service user. Download the current monthly HTTPS archive, decompress to a
-temporary file, verify it with `maxminddb.open_database`, then atomically rename
-it over `city.mmdb`; the reader detects replacement without restart. Updating
-the file does not rewrite past event geography. Missing or invalid databases
-degrade to unknown without blocking events. No automatic download or external
-lookup occurs during a visitor request.
-
-DB-IP Lite includes IPv4/IPv6 and uses CC BY 4.0; the results section links to
-[DB-IP.com](https://db-ip.com/) as required by its
-[attribution terms](https://db-ip.com/db/lite.php). Province accuracy is not
-guaranteed: VPNs, carrier exits and database coverage affect estimates. Only the
-database's first-level subdivision is used; cities never stand in for provinces.
-Uvicorn supplies the client address under its trusted-proxy policy; Nginx must
-overwrite forwarded headers and Uvicorn must only trust the configured local
-proxy. Application code ignores client-supplied IP/geography headers and fields.
-
-For a same-origin `/admin/` installation set `YIXU_ADMIN_HOST` equal to
-`YIXU_PUBLIC_HOST` and proxy `/api/admin/` on that origin. Authentication and
-same-origin CSRF remain mandatory; administrator cookies are restricted to
-`/api/admin`. Legacy separate-host deployments retain their existing host split.
-
-## Technical environment controls
-
-- Required production paths/hosts: `YIXU_DATA_DIR`, `YIXU_CATALOG_PATH`,
-  `YIXU_IMAGE_ROOT`, `YIXU_FACE_MODEL`, `YIXU_PUBLIC_HOST`, `YIXU_ADMIN_HOST`.
-- `YIXU_SECURE_COOKIES` defaults true.
-- `YIXU_COOKIE_MAX_AGE` is optional; unset means session cookies (no one-year default).
-- Non-upload POST/PUT/PATCH bodies have a fixed 65536-byte technical JSON parsing
-  bound enforced at ASGI receive before authentication/body parsing, independent
-  of Content-Length (including unknown-length/chunked streams). Oversize bodies
-  return 413 / `json_too_large`; bounded buffering stops at the first excess chunk.
-  `/api/tryons` instead retains its authenticated multipart upload-byte bound.
-- `YIXU_MAX_UPLOAD_BYTES` defaults 12582912; `YIXU_MAX_PIXELS` 24000000;
-  `YIXU_MAX_IMAGE_DIMENSION` 8000.
-- `YIXU_IMAGE_CONCURRENCY` defaults 1: local reception/validation backpressure,
-  not a per-user or accepted-generation quota. Run one API worker on the small host.
-- `YIXU_FACE_MIN_PIXELS` 40; `YIXU_FACE_MIN_FRACTION` 0.025;
-  `YIXU_DETECTOR_SCORE_THRESHOLD` 0.85.
-
-## Verify, without paid calls
+## 验证
 
 ```sh
 uv run pytest tests/backend -q
-# Also exercise real YuNet with an operator-supplied official model and public reference panel:
-YIXU_TEST_FACE_MODEL=/path/to/models/yunet.onnx uv run pytest tests/backend -q
 uv run ruff check backend tests/backend
 uv run ruff format --check backend tests/backend
 uv run mypy backend
-uv run python -m compileall -q backend tests/backend
+node qa/regression-ci.mjs
 ```
 
-Tests inject fake generation only at the documented provider seam. The real SDK is
-also exercised via controlled HTTP transport and a real local CONNECT proxy; no
-paid provider call is made. Recovery includes a real SIGKILL after possible-send,
-real TCP uvicorn factory startup/shutdown, FIFO 1001 boundary, session/host/CSRF
-separation, metadata/face gates, idle TTL, cancellation races and settings redaction.
-`provider.generate` receives keyword `photo:bytes`, `reference:bytes`, `prompt:str`,
-`runtime:Runtime`, `timeout:float` and returns encoded image bytes; detector has
-`ready:bool` and `detect(PIL.Image)` returning face `(x,y,width,height)` tuples;
-clock is a zero-argument timestamp callable. There are no production fake classes.
+应用回归使用受控提供方和浏览器，覆盖任务恢复、权限、清理和本机工作台。完整回归可用 `CHROME_BIN` 指定 Chromium，用 `YIXU_TEST_FACE_MODEL` 指定已核验的 YuNet 模型。官方模型固定版本及摘要见 [verify-application.mjs](../scripts/verify-application.mjs)。

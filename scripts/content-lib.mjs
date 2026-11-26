@@ -154,6 +154,9 @@ export function loadContent(root) {
       fail(input.edition === 'v2', 'New outfits must be expressive only');
       fail(!Object.hasOwn(input, 'model_only') || typeof input.model_only === 'boolean', 'Model-only indexing requires a boolean');
       fail(text(input.mood) && text(input.scene) && Array.isArray(input.tags) && input.tags.length > 0 && input.tags.every(text), 'Expressive mood, scene and tags required');
+    } else {
+      fail(object(input.versions) && Object.keys(input.versions).length === 1 &&
+        Object.hasOwn(input.versions, 'v2'), 'Baseline outfits must be expressive only');
     }
     let version = batch ? {
       image: input.asset?.file, asset: input.asset, shots: input.shots,

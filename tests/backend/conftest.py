@@ -45,9 +45,7 @@ def picture(color="red", size=(300, 400), format="PNG"):
 def setup(tmp_path):
     (tmp_path / "catalog").mkdir()
     (tmp_path / "catalog/grid.png").write_bytes(picture("blue", (300, 600)))
-    catalog = {
-        "looks": [{"id": 1, "versions": {"v1": {"image": "grid.png"}, "v2": {"image": "grid.png"}}}]
-    }
+    catalog = {"looks": [{"id": 1, "versions": {"v2": {"image": "grid.png"}}}]}
     (tmp_path / "catalog.json").write_text(json.dumps(catalog))
     settings = Settings(
         data_dir=tmp_path / "private",
@@ -76,7 +74,7 @@ def consent(client, headers, bootstrap):
 def submit(client, headers, bootstrap, key="request-001", image=None, **fields):
     data = {
         "look_id": "1",
-        "edition": "v1",
+        "edition": "v2",
         "shot_index": "1",
         "idempotency_key": key,
         "disclosure_version": bootstrap["disclosure"]["version"],

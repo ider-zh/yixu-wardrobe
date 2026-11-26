@@ -1,111 +1,8 @@
-# 衣序开发说明
+# 衣序开发指南
 
-仓库：[ider-zh/yixu-wardrobe](https://github.com/ider-zh/yixu-wardrobe)。用户说明见 [README](README.md) / [English](README.en.md)，维护授权见 [AGENTS.md](AGENTS.md)。
+## 本地浏览与验证
 
-## 运行与职责
-
-前端为静态 HTML/CSS/JavaScript，后端复用 Python/FastAPI/SQLite。外部 agent 按[热点穿搭 SOP](docs/external-agent-sop.md)与[单品图组 SOP](docs/product-agent-sop.md)更新项目清单和最终 WebP。新穿搭默认同时交付已验收的生动九宫格和 `pieces` 中每件单品的独立产品页。后台负责访问分析、资源 API、用户穿搭观察、系统模特预览及 CDN 同步观察，不提供另一套穿搭编辑来源。
-
-内容制作使用登记模特参考照片、确定的服装描述与九镜头脚本直接生成生动成片。复刻已有款式时，可以附上已确认的衣装图。人物采用基于参考照片的中性表述，最终九宫格保留细象牙色分隔，并按 SOP 实际验收表情、动作、含鞋履镜头与互动数量。公开清单只登记最终 `v2` WebP。私有参考、生成母本和实际提示词留在私有工作区。分隔位于三等分边界附近，保持现有九格预览与试穿裁切坐标；不改变画布尺寸来额外插缝。
-
-动态内容、仅生动展示、项目图片 URL、同步队列和后台观察已随 `2582a98` 于 2026-11-12 部署。该次线上验收确认公开 102 套、首页主推 102，HTTPS、资源 API、静态快照及第 101、102 套新图可用；主站为 [www.8882088.xyz](https://www.8882088.xyz/)，后台为 [admin.8882088.xyz](https://admin.8882088.xyz/)。CDN 尚未配置，图片使用项目 URL。2026-11-13 的后续体验改动须独立完成回归和交付验收，源码检查或推送不代表线上版本已经切换。[实施计划](docs/content-publishing-plan.md)记录本轮范围、分阶段待办与验收条件。
-
-静态浏览使用 Node.js 22 或更新版本：
-
-```sh
-node scripts/check.mjs
-node scripts/build.mjs
-```
-
-完整复制生成的 `public/` 后直接打开 `public/index.html` 即可离线浏览。根目录 `index.html` + 冻结的 `catalog.js` 仍能浏览初始快照；日更内容的离线快照由构建从清单生成。需要调试源码 HTTP 行为时可运行 `node serve.mjs`，该开发服务器只用于本机，公开部署应仅提供 `public/` 与受控 API。
-
-后端依赖与启动见 [backend/README.md](backend/README.md)。生产经 Nginx 将同源 `/api/` 转发至仅监听 loopback 的单进程 API；管理域沿用独立会话和 Host/CSRF 校验。
-
-## 最新一期与浏览结构
-
-首页、全部穿搭、模特和收藏分别使用 hash 路由，继续支持静态部署与直接打开文件。首页最新一期不受衣橱中的风格、季节、搜索或收藏筛选影响；下方最近更新最多六套，排除首屏套装。完整衣橱默认最新发布，分类是筛选条件，手机端使用筛选弹窗。历史 `#look-编号` 链接继续打开相同套装，关闭详情返回之前的页面及筛选。旧收藏存储键和编号保持不变。
-
-Node 构建和 Python API 都生成 `catalog.home`：`featured_look_id`、`recent_look_ids`、`latest_batch_id`，以及完整的 `latestOrder`。首页和默认列表共用这套顺序，`displayOrder` 保留风格漫游顺序。历史基线没有发布日期时使用 `null`，排在有发布记录的内容之后，不根据图片修改时间推断上新。
-
-批次穿搭可设置 `model_only: true`，通过模特页 `#/models/<model_id>` 及 `/api/content/models/<model_id>/looks` 浏览。首页、全站穿搭和批次索引排除这些套装，关联全为这类套装的单品从全站单品列表隐去。公开内容快照与 API 仍提供资源，以便从模特页打开穿搭、单品详情及稳定链接。混合批次优先使用可在首页展示的指定封面，指定封面仅限模特页时使用批次内第一套可在首页展示的穿搭。
-
-前端从构建快照立即呈现内容，API 与快照均有 `revision` 时只接受相同内容版本；不同版本显示同步状态并保留快照，避免旧进程的 100 套目录覆盖新构建的 101 套。同一内容版本仍可更新经过验证的 CDN 地址。完成交付后刷新页面取得相应版本的快照。
-
-构建先在同一文件系统暂存完整输出，再切换专用 `public/`，写入失败时保留旧输出。`node scripts/build.mjs --output 空的候选目录` 只生成候选，不触碰当前网站；显式目标非空时拒绝写入。交付命令和可选的本地提交观察器见 [部署说明](deploy/README.md)。普通 CI 不部署站点。
-
-## 内容源与文件
-
-- `content/catalog.json`：从原目录迁移的生动基线，保留 1—100 编号、分类、单品与镜头；未核对的模特归属为 `null`。总容量不再限制为 100。
-- `content/models.json`：系统模特登记表。`name` 是模特页、模特筛选、后台与离线快照使用的显示名，改名时只更新这一字段后按常规流程构建及发布。`model_id`、基础体和既有穿搭中的关联保持稳定。`production_sop` 可指定 `docs/` 下的角色制作 SOP，缺省使用通用 SOP。日更从通用入口识别任务指定的角色，再执行 `node scripts/resolve-model.mjs "<模特编号或名称>"` 取得角色规范与参考图。
-- `content/batches/*.json`：每日一个批次，仅 `v2` 生动。包含实际热点来源、地区、天气依据、模特参考哈希、完整穿搭、九镜头及图片元数据。
-- `content/batch.schema.json`：由后端 `Batch` 模型导出的 JSON Schema。修改模型后同步更新该文件；Node 校验和后端导入都必须接受有效交付并拒绝不完整内容。
-- `assets/looks/YYYY-MM-DD/*.webp`：外部 agent 的最终公开图片。只提交最终 WebP，不提交生成母本、完整提示词或私人调研记录。
-- `catalog.js`、`images/`、`images-v2/`、`image-manifest-all.json`：冻结迁移资料及历史图片完整性基线。公开构建不复制历史 `images/` 或旧 catalog，而是生成仅生动的快照。
-- `scripts/content-lib.mjs`：清单读取、引用和 WebP 校验、离线快照资料生成。`scripts/check.mjs` 继续校验 200 张历史图片并校验所有新增清单资源。
-- `backend/content.py`：验证候选内容，归档公开 WebP，原子激活版本，提供只读资源接口；坏候选保留上一有效版本。
-- `backend/cdn.py` / `cdn_worker.py`：可替换图床接口、持久队列、核对和迁移；API 生命周期运行后台同步，不需要外部 agent 直传。
-- `admin/`：既有分析、用户成品与质量观察，以及新增系统模特和内容/CDN 状态。
-
-外部 agent 的内容变更通常只需要新增批次 JSON 与最终 WebP；新增模特时再更新模型注册。新编号不得与基线或其他批次重复。使用新资源修订与新 `asset_id` 修改图片，已发布的资源身份不能替换为其他字节。
-
-本地生成记录、用户数据、凭据和归档目录不进入 Git。`.gitignore` 使用白名单；新资源只开放指定公开目录，不扩大到任意服务器文件。
-
-## 资源接口与本地图片
-
-生产环境显式配置：
-
-- `YIXU_CONTENT_ROOT`：版本化 `content/` 的绝对目录。
-- `YIXU_IMAGE_ROOT`：能够解析清单相对图片路径的只读项目资源根目录，不是私有用户数据目录。
-- `YIXU_DATA_DIR`：独立于代码发布目录的持久私有数据目录。
-
-未显式传入 `Settings.content_root` 的旧测试/兼容 catalog 可以继续使用原来的受控目录流程；正式动态部署应设置以上路径，避免依赖工作目录推断。
-
-接收新代码与资源后重启应用，构造阶段自动验证并导入候选版本。有效内容复制到 `YIXU_DATA_DIR/public-content/assets/<sha256>.webp`，数据库和活动指针保存在该独立目录内。源文件校验或导入失败时不替换已有可见版本，后台显示 `content_validation_failed`。源码推送本身不安装部署钩子，也不代表服务器已收到版本。
-
-公开读取：
-
-```text
-GET /api/content/catalog
-GET /api/content/home
-GET /api/content/looks?offset=0&limit=24&model=female-01&region=杭州&q=针织
-GET /api/content/looks/{look_id}
-GET /api/content/models
-GET /api/content/batches
-GET /api/content/assets/{asset_id}
-GET /api/content/assets/{asset_id}/download
-```
-
-完整快照用于前端初始化，列表接口提供分页与过滤。接口仅返回活动版本的 `v2` 和允许公开的资源。`image_url` 默认等于项目图片 `source_url`，例如 `/api/content/assets/look-001-v2-r1`；具体资产 ID 以清单为准。该 URL 返回已归档的同一份 WebP，不暴露文件系统路径。CDN 验证后逐图优先返回 CDN URL，前端失败时单次回退到 `source_url`。
-
-新试穿只接受可见的生动内容，按本地归档裁切实际镜头，在接收任务时冻结参考输入；旧任务保留原记录。收藏仍在浏览器本地，接口分页或不完整列表不能清除未知收藏编号。
-
-## 图床接口与同步状态
-
-尚未选定真实免费图床。默认状态是“未配置”，所有图片继续使用项目 URL；这一状态不会阻塞新内容展示。后台显示活动内容版本、真实任务数量、字节数和同步结果，不伪造已上传比例。
-
-当前通用接入约定是向明确配置的 HTTPS 地址 `PUT` 原始 `image/webp`，发送 `X-Asset-ID`、`X-Content-SHA256` 以及可选 Bearer 凭据，成功响应 JSON `{ "id": "远端标识", "url": "https://允许的域名/图片.webp" }`。它不等于已接入任一家图床；选择平台后按该平台实际协议实现相同的上传与读取接口。
-
-操作方在私有环境调用 `CdnService(YIXU_DATA_DIR).configure(...)`，写入私有 `cdn-config.json`，配置字段为 `upload_url`、`allowed_hosts`、`token`、`timeout_seconds`。不把实际配置、账户或密钥写入仓库；后台只读脱敏配置状态，当前不提供通用凭据编辑页面。外部 agent 无需这些凭据。
-
-上传只处理内容服务明确传入的公开白名单，不扫描用户目录，不同步 v1、自拍或私人试穿结果。远端返回必须满足 HTTPS 主机白名单、无重定向、真实 WebP、尺寸、字节数与哈希一致。当前接入不支持图床重压缩变体；需要变体时先扩展并验证接入约定。
-
-网络读取有字节、像素、socket 超时及传输截止限制；操作方应按选定平台继续验证真实连通与故障行为。上传与崩溃恢复使用进程锁和持久状态；结果未知不自动重传。明确失败可重试，已有远端对象标识的未知任务可仅重新核对，不重新上传。
-
-管理接口均要求管理域、有效登录与修改请求的 CSRF：
-
-```text
-GET  /api/admin/content/overview
-GET  /api/admin/content/models
-POST /api/admin/content/cdn/jobs/{job_id}/retry
-POST /api/admin/content/cdn/jobs/{job_id}/verify
-POST /api/admin/content/cdn/migrate
-```
-
-迁移请求体为 `{ "asset_ids": ["已登记的公开资源编号"] }`。切换默认配置只影响新资产，旧副本继续可用；显式迁移从本地归档创建当前图床的任务，新副本验证前不撤掉旧链接。私有参考图只显示状态，不产生公开预览 URL。用户自拍仍禁止管理员读取。
-
-## 验证与构建
-
-推送前必需：
+使用 Node.js 22。完整验证还需要 Python 3.12、`uv` 与 Chromium，依赖由 [pyproject.toml](pyproject.toml) 和 [uv.lock](uv.lock) 固定。
 
 ```sh
 node scripts/check.mjs
@@ -113,75 +10,29 @@ node qa/regression-expressive.mjs
 node scripts/build.mjs
 ```
 
-完整本地 CI 入口：
+打开 `public/index.html` 可离线浏览，或运行 `node serve.mjs` 访问本机 `http://127.0.0.1:4219/`。构建根据内容清单和 [静态资源白名单](site-resources.json) 生成 `public/catalog.js` 并复制公开资源。指定 `--output <空目录>` 可构建独立候选。独立 JSON 导出使用 `node scripts/export-catalog.mjs --output <文件>`。
 
-```sh
-node qa/regression-ci.mjs
-```
+运行 `node qa/regression-ci.mjs` 执行完整回归，覆盖 Python 后端、后台交互、真实 Chromium、前端与 ASGI 联动、目录导出与发布模板。可通过 `CHROME_BIN` 指定本地浏览器，完整入口会按固定摘要核验测试用检测器。常规 GitHub Actions 只读验证和构建。
 
-该入口检查历史与新增资源的签名、尺寸和 SHA-256，运行后端、类型和格式检查、管理界面、真实 Chromium、实际前端到 ASGI、目录导出和部署模板回归。没有真实图床调用或付费生图。新增内容回归在临时目录内测试第 101 套、第二位模特、仅生动、源 URL、引用错误及路径拒绝，不生成虚构生产内容。
+## 代码入口
 
-构建先验证候选，再替换专用 `public/`。它仅复制页面代码、公开资产并生成离线 catalog，不包含后台、私有数据、原始生成记录或历史造型。文件数量与图片清单动态计算，不再锁定 209 个文件。首次基线的公开图片为 100 张生动九宫格和一张模特基础体。
+| 要改什么 | 从这里开始 |
+| --- | --- |
+| 首页、全部穿搭、模特、收藏、路由、九宫格 | [index.html](index.html)、[app.js](app.js)、[style.css](style.css)、[expressive.css](expressive.css) |
+| 单品详情、图集、布局 | [product-page.js](product-page.js)、[product-themes.js](product-themes.js)、[product-themes.css](product-themes.css) |
+| 全站主题、后台设置和共享资源 | [主题规范](docs/site-theme-architecture.md)、[site-theme.js](site-theme.js)、[site-theme.css](site-theme.css)、[site-resources.json](site-resources.json) |
+| 试穿界面、同源浏览器副本、后端队列 | [tryon.js](tryon.js)、[tryon-storage.js](tryon-storage.js)、[tryon.css](tryon.css)、[backend/jobs.py](backend/jobs.py)、[backend/worker.py](backend/worker.py) |
+| 内容清单、构建与资源 API | [内容架构与发布](docs/content-publishing-plan.md)、[scripts/content-lib.mjs](scripts/content-lib.mjs)、[backend/content.py](backend/content.py) |
+| 后台、访问分析、CDN 与运行配置 | [admin/](admin/)、[后端说明](backend/README.md)、[backend/analytics.py](backend/analytics.py)、[backend/cdn.py](backend/cdn.py) |
 
-如仅导出 JSON，运行 `node scripts/export-catalog.mjs --output 输出路径`。后端 schema 改动后重新导出 `Batch.model_json_schema()` 到 `content/batch.schema.json`。
+## 内容与发布
 
-## 历史图片与部署
+制作穿搭先读[外部 agent SOP](docs/external-agent-sop.md)，使用 `node scripts/resolve-model.mjs "<模特编号或名称>"` 解析登记参考与角色规范。单品制作见[单品 SOP](docs/product-agent-sop.md)。批次、写真修订、单品和模特清单的维护入口见[内容架构](docs/content-publishing-plan.md)。
 
-开发迭代使用 `dev` 分支，目标为 `https://dev-yixu.8882088.xyz/` 与同源后台 `/admin/`。应用服务器在该提交 CI 成功后执行本地构建、后端测试和独立开发版本切换，再验收本地源站与公开 HTTPS。cn001 通过 FRP 反代开发域名，正式站按独立流程发布。独立目录、用户、数据、失败恢复、定时器和域名/证书准备见[开发站发布说明](deploy/dev-README.md)。首次配置和真实交付状态以对应回执为准，不由文档或 CI 推断已上线。正式后台域名迁移留待后续获授权的正式站升级处理。
+在 `dev` 分支迭代。开发环境在 CI 通过后通过独立服务构建、导入并核验 `https://dev-yixu.8882088.xyz/` 及同源 `/admin/`。开发站流程见[开发站部署](deploy/dev-README.md)，正式交付另循[部署说明](deploy/README.md)。源码推送、CI、站点内容/图片验收和 CDN 同步各有独立结果。
 
-后台访问概览新增离线 IP 国家与中国省级统计，只有新页面访问会记录粗粒度归属，不保存原始 IP，不回填历史数据。数据库不进入 Git 或公开包；缺失、损坏、保留地址或查不到的地址正常降级，来源与局限在后台披露。配置与数据边界见[后端说明](backend/README.md)；运行 `node qa/regression-admin.mjs`、`node qa/regression-visitor-geo.mjs` 以及 `uv run --frozen pytest -q` 验证管理员交互、移动端地域显示和私有 API。
+## 单品主题与内容合同
 
-200 张历史写真于 2026-11-11 从 PNG 转为原尺寸有损 WebP，FFmpeg/libwebp 质量 85、压缩级别 6，总计 48,176,224 字节；原始 PNG 保留在 Git 历史。新增基础体为 1536 × 1024、71,786 字节，未裁剪。新图片采用同样的 WebP 质量起点，实际尺寸和哈希以各自清单为准，不依赖编码器跨版本字节一致。
+[products.schema.json](content/products.schema.json) 约束单品数据。[product-page.js](product-page.js) 统一处理图集、穿着参考、设计推演、图片回源和收藏。外部交付使用纯文本与结构化图片，主题由全站设置决定。
 
-生产模板及验证步骤见 [deploy/README.md](deploy/README.md)，私人照片处理规则见[试穿实施说明](docs/ai-tryon-backend-design.md)。[Cloudflare 可行性调查](docs/deployment-feasibility.md)是历史参考，不代表当前部署方案。
-
-GitHub Actions 只有读权限，只校验和构建。源码推送、CI、服务端接收、CDN 同步和网站上线分别报告。部署和外部服务配置按项目授权单独执行，本次开发不改变既有主站或私人服务配置。
-
-## 历史写真修订
-
-`content/look-revisions.json` 登记已验收的历史生动写真。文件使用 `schema_version: 1` 和 `revisions` 数组。每个条目登记一个 1–100 的 `look_id`、基线的 `replaces_asset_id`、已登记模特及参考哈希、使用新路径和新 ID 的公开 WebP `asset`，以及 `story`、`summary`、`moods` 和九条依次编号的 `shots`。照片放入 `assets/looks/`。构建和 API 均校验旧图与新版，不修改历史基线。
-
-修订沿用历史编号、详情链接、收藏和原单品顺序。原 WebP 与原资源 URL 保留。单品穿着关联指向当前修订及对应镜头。修订不登记日更批次或发布日期。第 001 套《都市通勤》使用 `look-001-female-01-v2-r2`，配有六件单品及十张单品图。
-
-## 单品样板
-
-`content/products.json` 登记独立单品页面，结构见 `content/products.schema.json`。每个单品拥有稳定 `product_id`、描述、颜色、设计材质文字、细节说明、一张公开 WebP 主图及 `appearances`；可选 `gallery` 最多登记八张附图，每项包含 `title`、`caption`、`asset`。可选 `role` 区分全貌 `view` 与细节 `detail`，默认 `detail`；`design_study` 默认为 false，设计推演使用严格布尔值 true 并在说明中披露参考边界。关联使用 `look_id`、从 1 开始的 `piece_index`、精确写真 `reference_asset_id` 和 `shot_index`，校验器拒绝过期写真、未知穿搭、重复关联和私人资源。更新写真修订时需同步核对单品关联。
-
-最终图位于 `assets/products/`，为约 4:5 的独立陈列图，不采用穿搭写真九宫格布局。详情页按完整形态、可选多角度、设计细节、穿着上下文组织；画廊支持缩略图切换和键盘大图浏览，多角度在手机端可横向滑动，设计推演在卡片、主图、替代文本与放大说明中保持标识。棕裙包含主图 r2 和腰头、裙摆近景；长靴包含主图 r2、正面/侧面/背面三张全貌与四张独立细节，背面标为设计推演，穿着参考复用原写真第 3 镜头。原 r1 文件保留。细节通过双联合图切分，不放大原生像素；合图母本与实际提示词仅私有保存。全部图片均为 AI 设计演绎，不代表实物工艺或材质成分验证。缺少单品清单的历史内容继续显示原文字单品，不创建虚构商品。
-
-2026-11-14 六件测试在原有针织一图（`blue-knit-102`）、裙三图（`brown-skirt-102`）、长靴八图（`brown-boots-102`）基础上，新增外套六图（`navy-jacket-102`）、包四图（`navy-bag-102`）、耳钉三图（`silver-studs-102`）；图数含主图，原写真穿着参考另通过关联复用。新增十三张 WebP 共 994,200 字节（约 971 KiB），旧三件数据和图片不变。包的两张细节为设计推演；原写真耳饰像素不足以验证金属色、精确弧度或表面，银色为用户确认的设计方向，整组耳钉在描述中披露 AI 设计推演，两张附图同时标记 true，未生成未知耳针/耳堵。完整制作与逐件盘点见[独立单品 SOP](docs/product-agent-sop.md)。这些是审图及清单集成记录，提交、CI、LAN 与 CDN 状态分别核验，不由文档推断已上线。
-
-Node 构建和 Python 导入均将该清单纳入内容版本与公开资产白名单。`GET /api/content/products?category=上装&look_id=102` 提供列表，`GET /api/content/products/{product_id}` 提供独立详情，图片走现有归档、CDN 校验和加载失败回源流程。前端使用 `#/products`、`#/product/{product_id}`，支持完整离线包；新本地收藏键为 `yixu:product-favorites:v1`，沿用的穿搭收藏键和编号不变。此功能不增加访问采集或购买流程。
-
-同日跨系列扩展增加第 3 套新中式三件八图、第 5 套机能街头五件十五图、第 7 套度假旅行三件八图，共十一件、三十一张 WebP、2,707,514 字节。该次扩展后产品总数为十七件，产品图共五十六张；原六件条目保持原样。三套仍引用冻结的 v2 写真修订，不修改历史穿搭或发布时间，也不增加新发布批次。完整单品映射及参考盲区见[单品 SOP](docs/product-agent-sop.md)的“跨系列拆解与参考边界”。
-
-### 全站布局
-
-管理员登录后，在“网站主题”中从 12 套方案选择并保存。配置保存到当前部署的私有数据库，在线前台和已登录工作台使用该设置。已有部署升级时自动迁移原有主题设置。前台在打开页面、标签页重新可见或从浏览器缓存恢复时重新读取，保留当前路由、筛选、收藏、产品选图及试穿照片和任务。主题清单、静态资源及回归见[全站主题架构](docs/site-theme-architecture.md)。
-
-Editorial 是无设置和离线时的默认布局。已打开的在线页面遇到短时读取失败时保留最后一个有效主题。旧浏览器偏好、URL 参数和单品 `presentation` 无法覆盖全站设置。新增共享资源须登记 `site-resources.json`，由构建及发布核验读取同一候选清单。
-
-### 单品主题与内容合同
-
-单品内容与页面主题分开维护。外部 agent 交付图片、语义化角色、描述和章节标题，页面框架负责排版、画廊交互、收藏、图片回源和设计推演披露。清单不接受 HTML、CSS、脚本或远程主题地址；文案始终按纯文本转义显示。
-
-单品可选 `copy`。历史 `presentation` 字段继续保留在内容合同中：
-
-```json
-{
-  "presentation": {"theme": "studio", "preset": "neutral-white"},
-  "copy": {
-    "hero_title": "从容的线条，稳稳落下。",
-    "views_title": "从不同角度，认识它。",
-    "details_title": "近一点，看见分寸。",
-    "worn_title": "回到这身穿搭。",
-    "related_title": "一起组成喜欢的搭配。"
-  }
-}
-```
-
-历史 `theme` 和 `preset` 仍用 `^[a-z][a-z0-9-]{0,63}$` 校验，以兼容已有清单和快照。Studio 使用内置的 `studio` / `neutral-white` 侧栏布局，其余主题使用 `editorial` / `warm-paper` 的内容结构。主题 CSS 负责呈现各自的视觉风格。单品图集、设计推演说明和穿着关联沿用相同数据。
-
-`copy` 仅接受示例中的五个键，每项为 1—200 字符的非空白纯文本，可逐项省略以使用框架标题。省略整个对象时，Node 快照与资源 API 一致输出 `presentation: {"theme":"editorial"}`、`copy: {}`；可选的空值标题及配色不出现在公开输出中。字段受清单校验、内容版本和交付验证约束，不能通过清单覆盖设计推演标识、图片说明或穿着关联。
-
-验证主题时，在开发站管理工作台切换布局，再打开同一个单品链接核对图集和收藏。回归覆盖两种排版、失效设置回退、离线浏览及手机操作。
+单品 `copy` 可逐项提供 `hero_title`、`views_title`、`details_title`、`worn_title`、`related_title`。每项有值时为 1–200 字符的非空白纯文本，省略则使用页面默认标题。快照和 API 保留已有 `presentation.theme` 和可选 `presentation.preset`（匹配 `^[a-z][a-z0-9-]{0,63}$`），省略时使用 `theme: editorial`。实际页面由全站 Studio 选择侧栏结构，其余主题使用 Editorial 结构。

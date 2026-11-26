@@ -20,7 +20,7 @@ from .images import crop_reference, hide_grid_original, validate_photo
 class Submission(BaseModel):
     model_config = ConfigDict(extra="forbid")
     look_id: int = Field(ge=1, le=2_147_483_647)
-    edition: Literal["v1", "v2"]
+    edition: Literal["v2"]
     shot_index: int = Field(ge=1, le=9)
     idempotency_key: str = Field(min_length=8, max_length=128, pattern=r"^[A-Za-z0-9_-]+$")
     disclosure_version: str
@@ -104,9 +104,9 @@ class Jobs:
             raise HTTPException(503, "unavailable:Provider, detector or catalog is not configured")
         photo = validate_photo(raw, self.settings, self.detector)
         reference = (
-            self.content.crop_reference(data.look_id, data.edition, data.shot_index)
+            self.content.crop_reference(data.look_id, data.shot_index)
             if self.content is not None and self.content.enabled
-            else crop_reference(self.settings, data.look_id, data.edition, data.shot_index)
+            else crop_reference(self.settings, data.look_id, data.shot_index)
         )
         job_id = secrets.token_hex(16)
         with self.store.connect() as db:

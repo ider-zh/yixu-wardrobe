@@ -31,7 +31,7 @@ assert.ok(!files.some(name => name.startsWith('images/')), 'Archived styling mus
 const snapshot = fs.readFileSync(path.join(output,'catalog.js'),'utf8');
 assert.ok(!snapshot.includes('"v1"') && !snapshot.includes('"images/'), 'Offline public snapshot contains expressive content only');
 assert.ok(!files.some(name => /\.(?:png|jpe?g)$/i.test(name)));
-const manifest = JSON.parse(fs.readFileSync(path.join(root, 'image-manifest-all.json'), 'utf8'));
+const baseline = JSON.parse(fs.readFileSync(path.join(root, 'content/catalog.json'), 'utf8'));
 for (const photo of content.publicAssets) {
   assert.equal(digest(fs.readFileSync(path.join(output, photo.file))), photo.sha256);
 }
@@ -55,14 +55,14 @@ try {
 // Exercise the actual validation CLI in an isolated copy, never mutate source.
 const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'yixu-assets-'));
 try {
-  for (const name of ['site-resources.json', 'site-theme.js', 'site-theme.css', 'admin', 'scripts', 'content', 'backend', 'deploy', 'images', 'images-v2', 'assets', 'docs', 'catalog.js', 'app.js', 'index.html', 'style.css', 'expressive.css','product-themes.js','product-page.js','product-themes.css', 'tryon-storage.js', 'tryon.js', 'tryon.css', 'favicon.svg', 'README.md', 'README.en.md', 'DEVELOPMENT.md', 'AGENTS.md', 'image-manifest-all.json']) {
+  for (const name of ['site-resources.json', 'site-theme.js', 'site-theme.css', 'admin', 'scripts', 'content', 'backend', 'deploy', 'images-v2', 'assets', 'docs', 'app.js', 'index.html', 'style.css', 'expressive.css','product-themes.js','product-page.js','product-themes.css', 'tryon-storage.js', 'tryon.js', 'tryon.css', 'favicon.svg', 'README.md', 'README.en.md', 'DEVELOPMENT.md', 'AGENTS.md', 'pyproject.toml', 'uv.lock', 'qa', 'tests', '.github']) {
     fs.cpSync(path.join(root, name), path.join(fixture, name), {recursive: true});
   }
   const control = run('scripts/check.mjs', fixture);
   assert.equal(control.status, 0, control.stderr);
-  const file = path.join(fixture, manifest.v1[0].file);
+  const file = path.join(fixture, baseline.looks[0].versions.v2.asset.file);
   const original = fs.readFileSync(file);
-  const manifestFile = path.join(fixture, 'image-manifest-all.json');
+  const manifestFile = path.join(fixture, 'content/catalog.json');
   const originalManifest = fs.readFileSync(manifestFile);
   for (const [name, mutate, rehash] of [
     ['wrong WebP signature', bytes => { bytes[0] = 0; }, true],
@@ -74,7 +74,7 @@ try {
     mutate(bytes);
     fs.writeFileSync(file, bytes);
     const changed = JSON.parse(originalManifest);
-    if (rehash) changed.v1[0].sha256 = digest(bytes);
+    if (rehash) changed.looks[0].versions.v2.asset.sha256 = digest(bytes);
     fs.writeFileSync(manifestFile, JSON.stringify(changed));
     const rejected = run('scripts/check.mjs', fixture);
     assert.notEqual(rejected.status, 0, `Must reject ${name}`);
@@ -104,13 +104,17 @@ try {
     server.once('error', error => { clearTimeout(timer); reject(error); });
     server.once('exit', code => { clearTimeout(timer); reject(new Error('Preview server exited: ' + code)); });
   });
-  for (const name of ['images/look-001.webp', 'images-v2/look-100.webp', 'assets/model-bases/female-01.webp']) {
+  for (const name of ['catalog.js', 'images-v2/look-100.webp', 'assets/model-bases/female-01.webp']) {
     const response = await fetch('http://127.0.0.1:4219/' + name, {signal: AbortSignal.timeout(10000)});
     assert.equal(response.status, 200);
-    assert.equal(response.headers.get('content-type'), 'image/webp');
-    assert.equal(digest(Buffer.from(await response.arrayBuffer())), digest(fs.readFileSync(path.join(root, name))));
+    assert.equal(response.headers.get('content-type'), name.endsWith('.webp') ? 'image/webp' : 'text/javascript; charset=utf-8');
+    assert.equal(digest(Buffer.from(await response.arrayBuffer())), digest(fs.readFileSync(path.join(output, name))));
   }
-  console.log('PASS HTTP preview serves real WebP bytes with image/webp MIME type');
+  for (const name of ['images/look-001.webp', 'content/catalog.json', 'admin/index.html']) {
+    const response = await fetch('http://127.0.0.1:4219/' + name, {signal: AbortSignal.timeout(10000)});
+    assert.equal(response.status, 404);
+  }
+  console.log('PASS HTTP preview serves the built catalog and WebP assets only');
 } finally {
   if (server.exitCode === null && server.signalCode === null) {
     const stopped = once(server, 'exit');
