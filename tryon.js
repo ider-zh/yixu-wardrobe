@@ -421,6 +421,10 @@ function showTryOnComparison(job,reference){
   source.src=reference.source_url;
 }
 $('tryon-comparison-close').addEventListener('click',closeTryOnComparison);
+comparisonDialog.addEventListener('cancel',event=>{
+  event.preventDefault();
+  closeTryOnComparison();
+});
 comparisonDialog.addEventListener('close',()=>{
   if(comparisonDialog.open)return;
   const id=comparisonJob?.id;

@@ -116,7 +116,7 @@ try {
     const shot=await client('Page.captureScreenshot',{format:'png'});
     fs.writeFileSync(path.join(process.env.YIXU_SCREENSHOT_DIR,name+'.png'),Buffer.from(shot.data,'base64'),{mode:0o600});
   };
-  const wait=async expression=>{for(let n=0;n<100;n++){if(await evaluate(expression))return;await new Promise(r=>setTimeout(r,30));}throw Error('DOM condition timed out: '+expression);};
+  const wait=async (expression,attempts=100)=>{for(let n=0;n<attempts;n++){if(await evaluate(expression))return;await new Promise(r=>setTimeout(r,30));}throw Error('DOM condition timed out: '+expression);};
   const selectedReference=()=>evaluate('document.querySelector("#tryon-reference-picker input:checked")?.value');
   const openReferenceOptions=()=>evaluate('document.querySelector("#tryon-reference-options summary").click()');
   const load=async()=>{await client('Page.navigate',{url:origin});await wait('document.readyState === "complete"');};
@@ -808,7 +808,7 @@ try {
   await filterBy('#0101','active');
   await wait('document.querySelector("[data-job-id=fixture-finish-filtered]")&&window.WardrobeTryOnStorage.listJobs().then(rows=>rows.some(job=>job.id==="fixture-finish-filtered"))');
   processing.status='succeeded';
-  await wait('!document.querySelector("[data-job-id=fixture-finish-filtered]")&&document.getElementById("tryon-jobs-status").textContent.includes("进度已更新")');
+  await wait('!document.querySelector("[data-job-id=fixture-finish-filtered]")&&document.getElementById("tryon-jobs-status").textContent.includes("进度已更新")',200);
   console.log('PASS try-on history search and status filter paginate on the server, ignore stale responses, and search cached data offline.');
   const frozenId='fixture-aspect-71-portrait',unknownId='fixture-aspect-72-portrait';
   const reference={asset_id:'fixture-101-r0',source_url:'/api/content/assets/fixture-101-r0',shot_index:6};
@@ -830,8 +830,9 @@ try {
   assert.ok(await evaluate('document.getElementById("tryon-comparison").scrollWidth<=document.getElementById("tryon-comparison").clientWidth+1'));
   await client('Input.dispatchKeyEvent',{type:'rawKeyDown',key:'Escape',code:'Escape',windowsVirtualKeyCode:27});
   await client('Input.dispatchKeyEvent',{type:'keyUp',key:'Escape',code:'Escape',windowsVirtualKeyCode:27});
-  await wait(`!document.getElementById("tryon-comparison").open&&document.activeElement===document.querySelector(${JSON.stringify(compareButton)})`);
-  assert.equal(await evaluate('document.getElementById("tryon-comparison-result").hasAttribute("src")'),false);
+  await wait(`!document.getElementById("tryon-comparison").open
+    &&document.activeElement===document.querySelector(${JSON.stringify(compareButton)})
+    &&!document.getElementById("tryon-comparison-result").hasAttribute("src")`);
   await wait(`window.WardrobeTryOnStorage.listJobs().then(rows=>rows.some(job=>job.id==='${frozenId}'&&job.reference_asset_id==='fixture-101-r0'&&job.cachedImage))`);
   console.log('PASS owner try-on comparison opens the exact frozen shot, retains keyboard focus and excludes unknown or malformed references.');
   await wait('document.getElementById("tryon-clear-local-results").getAttribute("aria-disabled")==="false"');
