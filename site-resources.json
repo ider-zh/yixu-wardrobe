@@ -1,5 +1,5 @@
 {
   "schema_version": 1,
-  "public": ["index.html", "app.js", "wardrobe-scenes.js", "wardrobe-lists.js", "wardrobe-list-page.js", "wardrobe-piece-match.js", "wardrobe-color-match.js", "wardrobe-framing.js", "wardrobe-product-compare.js", "site-theme.js", "site-theme.css", "product-themes.js", "product-page.js", "style.css", "expressive.css", "product-themes.css", "tryon-storage.js", "tryon.js", "tryon.css", "favicon.svg"],
+  "public": ["index.html", "app.js", "wardrobe-scenes.js", "wardrobe-lists.js", "wardrobe-list-page.js", "wardrobe-piece-match.js", "wardrobe-color-match.js", "wardrobe-framing.js", "wardrobe-product-compare.js", "wardrobe-publication.js", "site-theme.js", "site-theme.css", "product-themes.js", "product-page.js", "style.css", "expressive.css", "product-themes.css", "tryon-storage.js", "tryon.js", "tryon.css", "favicon.svg"],
   "admin": ["index.html", "app.mjs", "admin.css"]
 }

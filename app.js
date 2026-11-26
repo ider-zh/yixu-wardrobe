@@ -14,13 +14,14 @@ const productStorageKey='yixu:product-favorites:v1';
 let productSaved=[];
 try{const value=JSON.parse(localStorage.getItem(productStorageKey)||'[]');if(Array.isArray(value))productSaved=value.filter(id=>typeof id==='string'&&/^[A-Za-z0-9_-]+$/.test(id));}catch{}
 const productFavorites=new Set(productSaved);
-const state = {category:'', season:'', query:'', model:'', region:'', piece:'', colors:[], latestOnly:false, favoritesOnly:false, sort:'latest', page:'home', profileModel:'', scene:'', limit:24, active:null, view:0};
+const state = {category:'', season:'', query:'', model:'', region:'', piece:'', colors:[], batch:'', latestOnly:false, favoritesOnly:false, sort:'latest', page:'home', profileModel:'', scene:'', limit:24, active:null, view:0};
 let filtered = [], toastTimer, detailReturnRoute = '#/home', routing = false, detailNavigation = null, focusArchive = false, routeDetailCloses = 0, detailSceneOpener = null, detailArchiveOpener = null;
 const scenes = new Map((window.WARDROBE_SCENES || []).map(scene=>[scene.id,scene]));
 const pieceMatch = window.WardrobePieceMatch;
 const pieceTypes = new Map((pieceMatch?.categories || []).map(category=>[category.id,category.title]));
 const colorMatch = window.WardrobeColorMatch;
 const colorTypes = new Map((colorMatch?.families || []).map(color=>[color.id,color.label]));
+let publications = new Map();
 const snapshotRevision = window.WARDROBE?.revision;
 function latestLooks(selection=indexedLooks) {
   const rank = new Map((data.latestOrder || []).map((id,index)=>[id,index]));
@@ -99,6 +100,9 @@ function adoptCatalog(candidate) {
   data={...candidate,products:offeredProducts.map(p=>({...p,presentation:{theme:'editorial',...p.presentation},copy:p.copy||{},asset:productAsset(p.asset),gallery:(p.gallery||[]).map(image=>({...image,asset:productAsset(image.asset)}))})),looks:next};looks=next;byId.clear();looks.forEach(l=>byId.set(l.id,l));
   models=Array.isArray(data.models)?data.models.map(model=>({...model,id:model.model_id||model.id})):[];
   indexedLooks=looks.filter(l=>!l.model_only);
+  const directory=window.WardrobePublication?.build(data);
+  publications=new Map((directory?.batches||[]).map(batch=>[batch.id,batch]));
+  if(directory?.undatedLookIds.length)publications.set('undated',{id:'undated',title:'历史穿搭',lookIds:directory.undatedLookIds});
   categories=[...new Set([...(data.categoryOrder||[]),...indexedLooks.map(l=>l.category)])].filter(c=>indexedLooks.some(l=>l.category===c));
   window.WARDROBE=data;window.WardrobeTryOn?.setCatalog?.(data);
   if(state.category&&!categories.includes(state.category))state.category='';
@@ -245,6 +249,7 @@ function matchesSearch(look,query) {
 }
 function matchLooks() {
   const latest=state.latestOnly?latestBatch():'',latestRank=new Map(latestLooks().map((look,index)=>[look.id,index]));
+  const batchIds=state.batch?new Set(publications.get(state.batch)?.lookIds):null;
   filtered = indexedLooks.filter(l => {
     if (state.category && l.category !== state.category) return false;
     if (state.season && l.season !== state.season) return false;
@@ -252,6 +257,7 @@ function matchLooks() {
     if (state.region && l.region !== state.region) return false;
     if (state.piece && !pieceMatch.matchingPieces(l,state.piece).length) return false;
     if (state.colors.length && !colorMatch.matchPalette(l.palette,state.colors)) return false;
+    if (batchIds && !batchIds.has(l.id)) return false;
     if (state.latestOnly && l.batch_id !== latest) return false;
     if ((state.page==='favorites'||state.favoritesOnly) && !favorites.has(l.id)) return false;
     return matchesSearch(l,state.query);
@@ -270,7 +276,7 @@ function refreshFilters() {
   document.querySelectorAll('[data-category]').forEach(b=>{const active=b.dataset.category===state.category;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});
   renderGallery(); renderActiveFilters();syncArchiveURL();
 }
-function resetFilters() { Object.assign(state,{category:'',season:'',query:'',model:'',region:'',piece:'',colors:[],latestOnly:false,favoritesOnly:false,sort:'latest'});refreshFilters(); }
+function resetFilters() { Object.assign(state,{category:'',season:'',query:'',model:'',region:'',piece:'',colors:[],batch:'',latestOnly:false,favoritesOnly:false,sort:'latest'});refreshFilters(); }
 function renderActiveFilters() {
   const entries=[];
   if(state.category)entries.push(['category',state.category]);
@@ -279,6 +285,7 @@ function renderActiveFilters() {
   if(state.region)entries.push(['region',state.region]);
   if(state.piece)entries.push(['piece','手头单品 '+pieceTypes.get(state.piece)]);
   for(const id of state.colors)entries.push(['color:'+id,'色系 '+colorTypes.get(id)]);
+  if(state.batch)entries.push(['batch',publications.get(state.batch)?.date||'历史穿搭']);
   if(state.latestOnly)entries.push(['latestOnly','最新批次']);
   if(state.query)entries.push(['query','“'+state.query+'”']);
   if(state.favoritesOnly&&state.page!=='favorites')entries.push(['favoritesOnly','我的收藏']);
@@ -286,6 +293,14 @@ function renderActiveFilters() {
   $('active-filters').innerHTML=entries.map(([key,label])=>'<button class="filter-pill" data-clear="'+key+'" aria-label="清除'+esc(label)+'筛选">'+esc(label)+' <span aria-hidden="true">×</span></button>').join('');
 }
 function sceneRoute(id) { return '#/looks?'+new URLSearchParams({scene:id}); }
+function renderPublications(){
+  $('publication-batches').innerHTML=[...publications.values()].map(({id,date,title,lookIds})=>{
+    const dateLabel=date?'<time datetime="'+esc(date)+'">'+esc(date)+'</time>':'<span>未登记日期</span>';
+    const href='#/looks?'+new URLSearchParams({batch:id});
+    return '<li><a class="publication-entry" href="'+esc(href)+'">'+dateLabel+'<strong>'+esc(title)+'</strong><span>'+lookIds.length+' 套 ↗</span></a></li>';
+  }).join('');
+  $('publication-empty').hidden=[...publications.keys()].some(id=>id!=='undated');
+}
 function sceneLook(id) {
   const look=byId.get(id);
   return look&&!look.model_only&&versionOf(look).ready ? look : null;
@@ -374,6 +389,7 @@ $('active-filters').addEventListener('click',e=>{
  refreshFilters();
  if(key==='piece')$('piece-filter').focus();
  if(key.startsWith('color:'))$('color-filter-first').focus();
+ if(key==='batch')document.querySelector('#publication-entry-link a')?.focus();
 });
 $('season').addEventListener('change',e=>{if(e.target.name!=='season')return;state.season=e.target.value;refreshFilters();});
 $('search').addEventListener('input',e=>{state.query=e.target.value;state.limit=24;renderGallery();renderActiveFilters();syncArchiveURL();});
@@ -455,7 +471,7 @@ function openDetail(id,preserveNavigation=false,{view=0,routed=false,hydrating=f
   if(restored&&typeof restored.returnRoute==='string'&&/^#\/(home|looks|models|favorites|products|product|lists)(?:[/?]|$)/.test(restored.returnRoute))detailReturnRoute=restored.returnRoute;
   else if(!alreadyOpen)detailReturnRoute=detailRoute?(l.model_only?modelRoute(l.model_id):'#/home'):location.hash||'#/home';
   if(!alreadyOpen)detailSceneOpener=restored?.sceneOpener??(!detailRoute&&state.scene?id:null);
-  if(!alreadyOpen)detailArchiveOpener=restored?.archiveOpener??(!detailRoute&&state.page==='looks'&&(state.piece||state.colors.length)?id:null);
+  if(!alreadyOpen)detailArchiveOpener=restored?.archiveOpener??(!detailRoute&&state.page==='looks'&&(state.piece||state.colors.length||state.batch)?id:null);
   if(restored&&Array.isArray(restored.navigation)&&restored.navigation.includes(id))detailNavigation=restored.navigation.filter(key=>byId.has(key));
   else if(!preserveNavigation||!detailNavigation?.includes(id)){
     const profile=l.model_only?l.model_id:state.profileModel;
@@ -569,7 +585,7 @@ window.addEventListener('storage',e=>{if(e.key===productStorageKey){try{const va
 function archiveRoute(){
  if(state.scene)return sceneRoute(state.scene);
  const params=new URLSearchParams();
- for(const [key,value] of [['category',state.category],['season',state.season],['q',state.query],['model',state.model],['region',state.region],['piece',state.piece],['latest',state.latestOnly?'1':''],['saved',state.favoritesOnly&&state.page!=='favorites'?'1':''],['sort',state.sort==='latest'?'':state.sort]])if(value)params.set(key,value);
+ for(const [key,value] of [['category',state.category],['season',state.season],['q',state.query],['model',state.model],['region',state.region],['piece',state.piece],['batch',state.batch],['latest',state.latestOnly?'1':''],['saved',state.favoritesOnly&&state.page!=='favorites'?'1':''],['sort',state.sort==='latest'?'':state.sort]])if(value)params.set(key,value);
  for(const color of state.colors)params.append('color',color);
  return '#/'+state.page+(params.size?'?'+params:'');
 }
@@ -591,7 +607,7 @@ function routeFromURL(scroll=true,hash=location.hash,{hydrating=false}={}){
  }
  const productRoute=/^#\/product\/([A-Za-z0-9_-]+)(?:\?(.*))?$/.exec(hash);
  const profile=/^#\/models\/([A-Za-z0-9_-]+)$/.exec(hash);
- const route=/^#\/(home|looks|models|favorites|products|lists)(?:\?(.*))?$/.exec(hash),page=productRoute?'product':profile?'models':route?.[1]||'home';
+ const route=/^#\/(home|looks|models|favorites|products|lists|publications)(?:\?(.*))?$/.exec(hash),page=productRoute?'product':profile?'models':route?.[1]||'home';
  const params=new URLSearchParams(route?.[2]||'');
  const scene=page==='looks'?availableScene(params.get('scene')):null;
  const sceneFocus=scene&&detailReturnRoute===hash?detailSceneOpener:null,leavingScene=state.scene&&!scene;
@@ -604,7 +620,9 @@ function routeFromURL(scroll=true,hash=location.hash,{hydrating=false}={}){
  $('home-page').hidden=page!=='home';$('models-page').hidden=page!=='models';$('collection').hidden=!['looks','favorites'].includes(page);$('closing-note').hidden=page!=='home';
  $('products-page').hidden=page!=='products';$('product-page').hidden=page!=='product';
  $('wardrobe-list-page').hidden=page!=='lists';$('wardrobe-list-entry-link').hidden=page!=='favorites';
+ $('publication-page').hidden=page!=='publications';$('publication-entry-link').hidden=page!=='looks';
  if(page==='lists')wardrobeListPage?.render();
+ if(page==='publications')renderPublications();
  if(page==='models')renderModelProfile(state.profileModel);
  if(page==='products')renderProducts();if(page==='product')renderProduct(productRoute[1]);
  renderSceneControls();
@@ -613,9 +631,12 @@ function routeFromURL(scroll=true,hash=location.hash,{hydrating=false}={}){
   const filters=scene?new URLSearchParams():params;
   const piece=filters.get('piece');
   const colors=page==='looks'?selectedColors(filters.getAll('color')):[];
-  Object.assign(state,{category:filters.get('category')||'',season:filters.get('season')||'',query:filters.get('q')||'',model:filters.get('model')||'',region:filters.get('region')||'',piece:page==='looks'&&pieceTypes.has(piece)?piece:'',colors,latestOnly:filters.get('latest')==='1',favoritesOnly:page==='favorites'||filters.get('saved')==='1',sort:['latest','curated','id','pieces','favorites'].includes(filters.get('sort'))?filters.get('sort'):'latest'});
+  const requestedBatch=page==='looks'?filters.get('batch'):null;
+  const batch=publications.has(requestedBatch)?requestedBatch:'';
+  if(requestedBatch&&!batch)notify('这一批次暂不可用，已返回穿搭档案。');
+  Object.assign(state,{category:filters.get('category')||'',season:filters.get('season')||'',query:filters.get('q')||'',model:filters.get('model')||'',region:filters.get('region')||'',piece:page==='looks'&&pieceTypes.has(piece)?piece:'',colors,batch,latestOnly:filters.get('latest')==='1',favoritesOnly:page==='favorites'||filters.get('saved')==='1',sort:['latest','curated','id','pieces','favorites'].includes(filters.get('sort'))?filters.get('sort'):'latest'});
   refreshFilters();
-  if((params.has('scene')||params.has('piece')||params.has('color'))&&hash===location.hash&&archiveRoute()!==hash)history.replaceState(history.state,'',archiveRoute());
+  if((params.has('scene')||params.has('piece')||params.has('color')||params.has('batch'))&&hash===location.hash&&archiveRoute()!==hash)history.replaceState(history.state,'',archiveRoute());
  }
  if($('filter-dialog').open)$('filter-dialog').close();
  routing=false;
@@ -626,7 +647,8 @@ function routeFromURL(scroll=true,hash=location.hash,{hydrating=false}={}){
  }
  if(archiveFocus!==null){
   const card=document.querySelector('#gallery .look-photo-button[data-open="'+archiveFocus+'"]');
-  (card||(state.piece?$('piece-filter'):$('color-filter-first'))).focus();
+  const fallback=state.piece?$('piece-filter'):state.colors.length?$('color-filter-first'):document.querySelector('#publication-entry-link a');
+  (card||fallback)?.focus();
  }
  if((focusArchive||leavingScene)&&page==='looks'){focusArchive=false;$('collection-title').tabIndex=-1;$('collection-title').focus({preventScroll:true});}
 }

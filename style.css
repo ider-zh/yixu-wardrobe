@@ -269,3 +269,47 @@ dialog{padding:0;border:0;background:var(--paper-light);color:var(--ink);max-wid
   font-size: var(--small-text-size);
   line-height: 1.45;
 }
+
+.publication-entry-link {
+  margin: 0 0 16px;
+  font-size: var(--small-text-size);
+}
+
+.publication-entry-link a,
+.publication-entry strong {
+  text-decoration: underline;
+  text-underline-offset: .2em;
+}
+
+.publication-batches {
+  display: grid;
+  max-width: 58rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.publication-entry {
+  display: grid;
+  grid-template-columns: minmax(8rem, auto) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px 16px;
+  min-height: 56px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  overflow-wrap: anywhere;
+}
+
+.publication-entry:hover {
+  background: var(--paper-light);
+}
+
+@media (max-width: 540px) {
+  .publication-entry {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .publication-entry strong {
+    grid-row: 2;
+  }
+}

@@ -216,6 +216,25 @@ check('palette families respect thresholds and require every selected family',()
     {id:'blue',colors:['#50827b']},{id:'neutral',colors:['#788178']},
   ]);
 });
+check('release archive uses real Shanghai dates and safe public covers',()=>{
+  const window={};
+  vm.runInNewContext(fs.readFileSync(path.join(root,'wardrobe-publication.js'),'utf8'),{window});
+  const directory=window.WardrobePublication.build(loadContent(root).catalog);
+  const wukang=directory.batches.find(batch=>batch.id==='2026-11-26-01');
+  assert.deepEqual(Array.from(wukang.lookIds),[110]);
+  assert.equal(wukang.date,'2026-11-26');
+  assert.match(wukang.title,/雾紫拾叶/);
+  const westBund=directory.batches.find(batch=>batch.id==='2026-11-12-01');
+  assert.deepEqual(Array.from(westBund.lookIds),[101,102]);
+  assert.ok(directory.undatedLookIds.includes(1));
+  assert.ok(!directory.undatedLookIds.includes(109));
+  const midnight=window.WardrobePublication.build({
+    looks:[{id:1,title:'跨午夜'},{id:2,title:'无日期'}],
+    batches:[{batch_id:'2026-11-26-01',publish_date:'2026-11-26',published_at:'2026-11-25T16:01:00Z',look_ids:[1]}],
+  });
+  assert.equal(midnight.batches[0].date,'2026-11-26');
+  assert.deepEqual(Array.from(midnight.undatedLookIds),[2]);
+});
 for(const name of checks)console.log('PASS '+name);
 console.log('Synthetic DOM regression: '+checks.length+' checks passed.');
 await import('./regression-assets.mjs');
