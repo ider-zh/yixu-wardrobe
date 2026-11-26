@@ -334,6 +334,7 @@ $('reset-filters').addEventListener('click',resetFilters);$('empty-reset').addEv
 $('load-more').addEventListener('click',()=>{const previous=state.limit;state.limit+=24;renderGallery();document.querySelector('[data-look-card="'+filtered[previous]?.id+'"] .look-photo-button')?.focus({preventScroll:true});});
 const detailHashPattern=/^#look-(\d+)(?:\?(.*))?$/;
 const onlineDocument=()=>location.protocol==='http:'||location.protocol==='https:';
+let shareAttempt=0;
 function shareAsset(look) {
   if(!look||look.model_only)return '';
   const version=versionOf(look),asset=version.asset;
@@ -350,6 +351,7 @@ function linkedShot(look,query) {
 function detailList() { return detailNavigation ? detailNavigation.map(id=>byId.get(id)).filter(Boolean) : latestLooks(); }
 function setView(view) {
   state.view=view;
+  shareAttempt++;
   const frame=$('detail-photo-frame'),image=$('detail-image');
   frame.classList.toggle('single-view',view>0);
   if(view>0){image.style.left=-(view-1)%3*100+'%';image.style.top=-Math.floor((view-1)/3)*100+'%';}else{image.style.left='';image.style.top='';}
@@ -366,13 +368,14 @@ function setView(view) {
 async function shareShot() {
   const look=byId.get(state.active),view=state.view;
   if(!view||!shareAsset(look))return;
+  const attempt=++shareAttempt;
   const hash=lookRoute(look,view),online=onlineDocument();
   const url=online?new URL(location.href):null;
   if(url){url.search='';url.username='';url.password='';url.hash=hash;}
   const text=url?.href||hash;
   let copied=false;
   try{await navigator.clipboard.writeText(text);copied=true;}catch{}
-  if(!$('detail-dialog').open||state.active!==look.id||state.view!==view||shareAsset(byId.get(look.id))!==shareAsset(look))return;
+  if(attempt!==shareAttempt||!$('detail-dialog').open)return;
   const status=$('share-shot-status'),manual=$('share-shot-manual'),field=$('share-shot-link');
   manual.hidden=copied;
   if(copied){status.textContent=online?'已复制单格链接。':'已复制链接片段，可粘贴到衣序页面地址末尾。';return;}

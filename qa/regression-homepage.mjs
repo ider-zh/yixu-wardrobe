@@ -262,6 +262,12 @@ try{
  await wait('!document.getElementById("share-shot-manual").hidden');
  assert.equal(await evaluate('document.getElementById("share-shot-link").value'),origin+'/'+sharedShot);
  assert.equal(await evaluate('document.activeElement.id'),'share-shot-link');
+ await evaluate(`window.shareAttempts=[];navigator.clipboard.writeText=()=>new Promise((resolve,reject)=>window.shareAttempts.push({resolve,reject}));
+   document.getElementById("share-shot").click();document.getElementById("share-shot").click();window.shareAttempts[1].resolve();`);
+ await wait('document.getElementById("share-shot-status").textContent==="已复制单格链接。"');
+ await evaluate('window.shareAttempts[0].reject(Error("Late denial"));Promise.resolve()');
+ assert.equal(await evaluate('document.getElementById("share-shot-manual").hidden'),true);
+ assert.equal(await evaluate('document.getElementById("share-shot-status").textContent'),'已复制单格链接。');
  await client('Page.reload');await wait(selectedFourth);
  const invalidShots=[
   'shot=10&photo='+featured.versions.v2.asset.asset_id,
