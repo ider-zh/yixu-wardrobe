@@ -619,6 +619,11 @@ try{
  await wait('location.hash==="#look-87?shot=3&photo=look-087-v2-r1"&&document.getElementById("detail-dialog").open');
  await evaluate('document.getElementById("close-detail").click()');
  await wait(`location.hash===${JSON.stringify(loaferProduct)}&&!document.getElementById("detail-dialog").open&&document.activeElement.id==="product-styling-link-87"`);
+ await evaluate('document.getElementById("product-styling-link-107").focus();document.activeElement.click()');
+ await wait('document.getElementById("detail-dialog").open&&location.hash.startsWith("#look-107?")');
+ await evaluate('history.back()');
+ await wait(`location.hash===${JSON.stringify(loaferProduct)}&&document.activeElement.id==="product-styling-link-107"`);
+ assert.ok(await evaluate('(()=>{const box=document.activeElement.getBoundingClientRect();return box.top>=0&&box.bottom<=innerHeight;})()'));
  await route('#/product/brown-boots-102');
  assert.equal(await evaluate('!!document.getElementById("product-styling-title")'),false);
  console.log('PASS real Chromium: styled shoe alternatives name real appearances, keep original products and link to verified shots.');
@@ -631,12 +636,14 @@ try{
   assert.equal(await evaluate('document.getElementById("current-look-image").dataset.source'),catalog.looks.find(look=>look.id===1).versions.v2.source_url);
   assert.equal(await evaluate('document.activeElement.id'),'close-look-revision');
   await noOverflow('offline revision comparison '+width);
-  await client('Input.dispatchKeyEvent',{type:'keyDown',key:'ArrowRight',code:'ArrowRight',windowsVirtualKeyCode:39});
+  await client('Input.dispatchKeyEvent',{type:'rawKeyDown',key:'ArrowRight',code:'ArrowRight',windowsVirtualKeyCode:39});
+  await client('Input.dispatchKeyEvent',{type:'keyUp',key:'ArrowRight',code:'ArrowRight',windowsVirtualKeyCode:39});
   assert.equal(await evaluate('location.hash'),'#look-1');
   await evaluate('document.getElementById("previous-look-image").dispatchEvent(new Event("error"))');
   assert.equal(await evaluate('document.getElementById("previous-look-image").parentElement.dataset.imageStatus'),'图片暂不可用');
   assert.equal(await evaluate('document.getElementById("current-look-image").hidden'),false);
-  await client('Input.dispatchKeyEvent',{type:'keyDown',key:'Escape',code:'Escape',windowsVirtualKeyCode:27});
+  await client('Input.dispatchKeyEvent',{type:'rawKeyDown',key:'Escape',code:'Escape',windowsVirtualKeyCode:27});
+  await client('Input.dispatchKeyEvent',{type:'keyUp',key:'Escape',code:'Escape',windowsVirtualKeyCode:27});
   await wait('!document.getElementById("look-revision-dialog").open&&document.activeElement.id==="detail-revision"');
   await route('#look-89');
   assert.equal(await evaluate('document.getElementById("detail-revision").hidden'),true);
