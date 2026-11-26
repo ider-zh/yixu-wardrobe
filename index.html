@@ -151,6 +151,16 @@
     <button id="tryon-more" class="outline-button" type="button" hidden>加载更早的记录 ↓</button>
   </section>
 </dialog>
+<dialog id="piece-compare-dialog" class="piece-compare-dialog" aria-labelledby="piece-compare-title">
+  <div class="compare-heading">
+    <h2 id="piece-compare-title">同类单品对比</h2>
+    <button id="close-piece-compare" type="button" aria-label="关闭单品对比">×</button>
+  </div>
+  <label for="piece-compare-choice" class="piece-compare-label">选择第二件同类单品</label>
+  <select id="piece-compare-choice"></select>
+  <p id="piece-compare-status" role="status"></p>
+  <div id="piece-compare-content" class="piece-compare-content"></div>
+</dialog>
 <dialog id="wardrobe-list-picker" class="wardrobe-list-picker" aria-labelledby="wardrobe-list-picker-title">
   <button id="close-wardrobe-list-picker" class="dialog-close" type="button" aria-label="关闭清单选择">×</button>
   <h2 id="wardrobe-list-picker-title">加入搭配清单</h2>
@@ -161,5 +171,5 @@
   </form>
   <p id="wardrobe-list-picker-status" class="wardrobe-list-status" role="status"></p>
 </dialog>
-<script src="catalog.js"></script><script src="wardrobe-scenes.js"></script><script src="tryon-storage.js"></script><script src="tryon.js"></script><script src="product-themes.js"></script><script src="product-page.js"></script><script src="wardrobe-lists.js"></script><script src="wardrobe-list-page.js"></script><script src="wardrobe-piece-match.js"></script><script src="wardrobe-color-match.js"></script><script src="wardrobe-framing.js"></script><script src="app.js"></script>
+<script src="catalog.js"></script><script src="wardrobe-scenes.js"></script><script src="tryon-storage.js"></script><script src="tryon.js"></script><script src="product-themes.js"></script><script src="product-page.js"></script><script src="wardrobe-lists.js"></script><script src="wardrobe-list-page.js"></script><script src="wardrobe-piece-match.js"></script><script src="wardrobe-color-match.js"></script><script src="wardrobe-framing.js"></script><script src="wardrobe-product-compare.js"></script><script src="app.js"></script>
 </body></html>

@@ -110,6 +110,7 @@ function adoptCatalog(candidate) {
   if($('compare-dialog').open){if(compare.size>=2)openComparison();else $('compare-dialog').close();}
   routeFromURL(false,location.hash,{hydrating:true});
   if($('wardrobe-list-picker').open)wardrobeListPage?.render();
+  productComparison?.refresh();
   return true;
 }
 function buildContentFilters(){
@@ -641,6 +642,7 @@ $('detail-dialog').addEventListener('close',()=>{
 window.addEventListener('hashchange',()=>{
  if($('product-image-dialog').open)$('product-image-dialog').close();
  if($('wardrobe-list-picker').open)$('wardrobe-list-picker').close();
+ if($('piece-compare-dialog').open)$('piece-compare-dialog').close();
  routeFromURL();
 });
 $('open-filters').addEventListener('click',()=>{$('filter-dialog').showModal();});
@@ -648,6 +650,8 @@ $('close-filters').addEventListener('click',()=>$('filter-dialog').close());
 $('apply-filters').addEventListener('click',()=>$('filter-dialog').close());
 function productsForLook(id){return (data.products||[]).filter(p=>p.appearances.some(a=>a.look_id===id));}
 function publicAppearances(product){return product.appearances.filter(a=>!byId.get(a.look_id)?.model_only);}
+function indexedProducts(){return (data.products||[]).filter(product=>publicAppearances(product).length);}
+function comparableProduct(product){return product.asset?.visibility==='public'&&!!publicSource(product.asset.source_url||product.asset.file);}
 function wardrobeListEntry(type,id){
  if(type==='look'){
   const look=byId.get(id);
@@ -657,15 +661,21 @@ function wardrobeListEntry(type,id){
  return product&&publicAppearances(product).length?{title:product.name,href:'#/product/'+id}:null;
 }
 const wardrobeListPage=window.WardrobeListPage?.create({escapeText:esc,resolveEntry:wardrobeListEntry});
+const productComparison=window.WardrobeProductCompare?.create({
+ products:()=>indexedProducts().filter(comparableProduct),escapeText:esc,imageAttributes,
+});
 function renderLookProducts(id){
  const linked=productsForLook(id),fromModel=byId.get(id)?.model_only;
  $('detail-products').hidden=!linked.length;
- $('detail-product-gallery').innerHTML=linked.map(product=>productCard(product,fromModel?id:null)).join('');
+ $('detail-product-gallery').innerHTML=linked.map(product=>productCard(product,{lookId:fromModel?id:null})).join('');
 }
-function productCard(product,lookId=null){
+function productCard(product,{lookId=null,compare=false}={}){
  const liked=productFavorites.has(product.product_id);
  const href='#/product/'+product.product_id+(lookId&&publicAppearances(product).length?'?look='+lookId:'');
- return `<article class="product-card" data-product-card="${esc(product.product_id)}"><a class="product-card-photo" href="${href}" aria-label="查看 ${esc(product.name)}"><img ${imageAttributes(product.asset)} alt="${esc(product.name)} · AI设计单品" loading="lazy" decoding="async"></a><div class="product-card-meta"><p>${esc(product.category)} <span>DESIGN OBJECT</span></p><h3><a href="${href}">${esc(product.name)}</a></h3><span class="product-color"><i style="background:${product.color_hex}"></i>${esc(product.color_name)}</span><button class="product-save" data-product-favorite="${esc(product.product_id)}" aria-pressed="${liked}" aria-label="${liked?'取消收藏':'收藏单品'} ${esc(product.name)}">${liked?'♥ 已收藏':'♡ 收藏单品'}</button></div></article>`;
+ const productId=esc(product.product_id),name=esc(product.name);
+ const favorite=`<button class="product-save" data-product-favorite="${productId}" aria-pressed="${liked}" aria-label="${liked?'取消收藏':'收藏单品'} ${name}">${liked?'♥ 已收藏':'♡ 收藏单品'}</button>`;
+ const actions=compare?`<div class="product-card-actions">${favorite}<button type="button" class="product-compare-trigger" id="piece-compare-add-${productId}" data-product-compare="${productId}" aria-haspopup="dialog" aria-label="对比 ${name}">对比单品</button></div>`:favorite;
+ return `<article class="product-card" data-product-card="${productId}"><a class="product-card-photo" href="${href}" aria-label="查看 ${name}"><img ${imageAttributes(product.asset)} alt="${name} · AI设计单品" loading="lazy" decoding="async"></a><div class="product-card-meta"><p>${esc(product.category)} <span>DESIGN OBJECT</span></p><h3><a href="${href}">${name}</a></h3><span class="product-color"><i style="background:${product.color_hex}"></i>${esc(product.color_name)}</span>${actions}</div></article>`;
 }
 function renderHomeProducts(){
  const selected=productsForLook(featuredLook()?.id);$('home-products').hidden=!selected.length;
@@ -673,11 +683,11 @@ function renderHomeProducts(){
 }
 function renderProducts(){
  const params=new URLSearchParams(location.hash.split('?')[1]),category=params.get('category')||'',saved=params.get('saved')==='1';
- const products=(data.products||[]).filter(p=>publicAppearances(p).length),categories=[...new Set(products.map(p=>p.category))];
+ const products=indexedProducts(),categories=[...new Set(products.map(p=>p.category))];
  const choices=[['全部单品','#/products',!category&&!saved],...categories.map(c=>[c,'#/products?'+new URLSearchParams({category:c}),category===c&&!saved]),['我的单品收藏','#/products?saved=1',saved]];
  $('product-filters').innerHTML=choices.map(([title,href,active])=>`<a href="${esc(href)}" ${active?'aria-current="page"':''}>${esc(title)}</a>`).join('');
  const selected=products.filter(p=>(!category||p.category===category)&&(!saved||productFavorites.has(p.product_id)));
- $('product-gallery').innerHTML=selected.map(p=>productCard(p)).join('');$('product-empty').hidden=!!selected.length;
+ $('product-gallery').innerHTML=selected.map(product=>productCard(product,{compare:comparableProduct(product)})).join('');$('product-empty').hidden=!!selected.length;
 }
 const productPage=window.YixuProductPage.create({
  isLiked:id=>productFavorites.has(id),
@@ -697,9 +707,11 @@ function renderProduct(id){
  const related=[...new Map(appearances.flatMap(a=>productsForLook(a.look_id)).filter(p=>p.product_id!==id).map(p=>[p.product_id,p])).values()];
  const modelContext=appearances.map(a=>byId.get(a.look_id)).find(l=>l?.model_only);
  productPage.render({product,number:String((data.products||[]).indexOf(product)+1).padStart(3,'0'),liked:productFavorites.has(id),listable:indexed.length>0,appearances,related,
-   renderCard:p=>productCard(p,modelContext?.id),modelLink:modelContext?{href:modelRoute(modelContext.model_id),name:modelName(modelContext.model_id)}:null});
+   renderCard:p=>productCard(p,{lookId:modelContext?.id}),modelLink:modelContext?{href:modelRoute(modelContext.model_id),name:modelName(modelContext.model_id)}:null});
 }
 document.addEventListener('click',event=>{
+ const compareProduct=event.target.closest('[data-product-compare]');
+ if(compareProduct){productComparison?.open(compareProduct.dataset.productCompare,compareProduct);return;}
  const listProduct=event.target.closest('[data-product-list]');
  if(listProduct){wardrobeListPage?.choose('product',listProduct.dataset.productList,listProduct);return;}
  const listLook=event.target.closest('#wardrobe-list-panels a[href^="#look-"]');

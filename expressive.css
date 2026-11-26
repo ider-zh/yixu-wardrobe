@@ -380,3 +380,112 @@ body{--accent:#69734f;--paper:#f3f0e7}
     margin-inline: auto;
   }
 }
+
+.product-card-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0 12px;
+  margin-top: 8px;
+}
+
+.product-card-actions button {
+  min-height: 44px;
+  margin: 0;
+}
+
+.product-compare-trigger {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: .18em;
+  font-size: var(--small-text-size);
+}
+
+.piece-compare-dialog {
+  box-sizing: border-box;
+  width: min(900px, calc(100vw - 24px));
+  max-width: calc(100vw - 24px);
+  max-height: calc(100dvh - 24px);
+  padding: clamp(12px, 3vw, 32px);
+  overflow: auto;
+}
+
+.piece-compare-label {
+  display: block;
+  margin-bottom: 6px;
+}
+
+#piece-compare-choice {
+  width: min(100%, 30rem);
+  min-height: 44px;
+  padding: 6px 10px;
+  color: var(--ink);
+  background: var(--paper-light);
+  border: 1px solid var(--line);
+  font: inherit;
+}
+
+#piece-compare-status {
+  margin: 8px 0 14px;
+  color: var(--ink);
+  font-size: var(--small-text-size);
+}
+
+.piece-compare-content {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(8px, 2vw, 24px);
+}
+
+.piece-compare-content:has(> :only-child) {
+  grid-template-columns: minmax(0, 22rem);
+}
+
+.piece-compare-card {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.piece-compare-card h3,
+.piece-compare-card h4 {
+  margin: 10px 0 6px;
+}
+
+.piece-compare-photo {
+  aspect-ratio: 4 / 5;
+  background: var(--paper);
+  border: 1px solid var(--line);
+}
+
+.piece-compare-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.piece-compare-facts,
+.piece-compare-notes {
+  font-size: var(--small-text-size);
+  line-height: 1.55;
+}
+
+.piece-compare-facts dt {
+  font-weight: 600;
+}
+
+.piece-compare-facts dd {
+  margin: 0 0 8px;
+}
+
+.piece-compare-notes {
+  padding-inline-start: 1.2em;
+}
+
+.piece-compare-card a {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  text-decoration: underline;
+  text-underline-offset: .18em;
+}

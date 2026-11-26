@@ -384,4 +384,25 @@ try{
  await wait(`location.hash===${JSON.stringify(compareOrigin)}&&!document.getElementById("detail-dialog").open`);
  assert.equal(await evaluate('document.getElementById("compare-count").textContent'),'3 / 3 套');
  console.log('PASS real Chromium: full-body comparison preserves order and selection, identifies fallback and links to a precise shot.');
+ await route('#/products');
+ assert.equal(await evaluate('!!document.querySelector(\'[data-product-compare="black-penny-loafers-109"]\')'),false);
+ await evaluate('document.getElementById("piece-compare-add-brown-boots-102").focus();document.activeElement.click()');
+ await wait('document.getElementById("piece-compare-dialog").open');
+ assert.equal(await evaluate('document.activeElement.id'),'piece-compare-choice');
+ assert.equal(await evaluate('Array.from(document.getElementById("piece-compare-choice").options).some(option=>option.value==="navy-bag-102")'),false);
+ await evaluate(`(()=>{const choice=document.getElementById('piece-compare-choice');choice.value='black-ankle-boots-005';choice.dispatchEvent(new Event('change'));})()`);
+ await wait('document.querySelectorAll(".piece-compare-photo img").length===2&&Array.from(document.querySelectorAll(".piece-compare-photo img")).every(image=>image.naturalWidth>0)');
+ assert.equal(await evaluate('Array.from(document.querySelectorAll(".piece-compare-photo img")).every(image=>getComputedStyle(image).objectFit==="contain")'),true);
+ assert.equal(await evaluate('document.getElementById("piece-compare-dialog").scrollWidth<=document.getElementById("piece-compare-dialog").clientWidth+1'),true);
+ await evaluate(`(()=>{const choice=document.getElementById('piece-compare-choice');choice.add(new Option('测试跨类','navy-bag-102'));choice.value='navy-bag-102';choice.dispatchEvent(new Event('change'));})()`);
+ await wait('document.getElementById("piece-compare-status").textContent.includes("请重新选择同类单品")');
+ assert.equal(await evaluate('!!document.getElementById("piece-compare-link-brown-boots-102")&&document.querySelectorAll(".piece-compare-card").length===1'),true);
+ await evaluate('document.getElementById("close-piece-compare").click()');
+ await wait('!document.getElementById("piece-compare-dialog").open&&document.activeElement.id==="piece-compare-add-brown-boots-102"');
+ await evaluate('document.getElementById("piece-compare-add-oat-tailored-blazer-001").click()');
+ await evaluate(`(()=>{const choice=document.getElementById('piece-compare-choice');choice.value='herringbone-blazer-004';choice.dispatchEvent(new Event('change'));})()`);
+ assert.equal(await evaluate('document.querySelectorAll(".piece-compare-card").length'),2);
+ await evaluate('document.getElementById("piece-compare-link-herringbone-blazer-004").click()');
+ await wait('location.hash==="#/product/herringbone-blazer-004"&&!document.getElementById("piece-compare-dialog").open');
+ console.log('PASS real Chromium: same-category pieces compare with uncropped photos, reject other categories and preserve detail navigation.');
 }finally{for(const socket of sockets)try{socket.close();}catch{}try{process.kill(-browser.pid,'SIGTERM');}catch{}if(browser.exitCode===null&&browser.signalCode===null)await Promise.race([once(browser,'exit'),new Promise(resolve=>setTimeout(resolve,1500))]);await new Promise(resolve=>server.close(resolve));fs.rmSync(scratch,{recursive:true,force:true,maxRetries:8,retryDelay:100});}
