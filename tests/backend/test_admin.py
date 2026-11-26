@@ -271,3 +271,63 @@ def test_admin_generated_only_results_optional_review_and_delete(setup):
         }
         assert admin.get("/api/admin/results").json()["items"] == []
         assert admin.get(result["image_url"]).status_code == 404
+
+
+def test_admin_review_filter_paginates_only_matching_protected_results(setup):
+    app, _public, _headers, bootstrap, _provider, _detector, clock = setup
+    verdicts = ("unreviewed", "approved", "rejected")
+    with app.state.store.connect() as db:
+        db.executemany(
+            """
+            INSERT INTO jobs (id, owner, idempotency_key, fingerprint, status, look_id, edition,
+                shot_index, created, expires, published, output_bytes, verdict)
+            VALUES (?, ?, ?, ?, ?, 1, 'v2', 1, ?, ?, ?, ?, ?)
+            """,
+            [
+                (
+                    f"review-fixture-{index}",
+                    bootstrap["visitor"]["id"],
+                    f"review-key-{index}",
+                    "fixture",
+                    "failed" if index == 81 else "succeeded",
+                    clock.now - 120,
+                    clock.now + 3600,
+                    clock.now - 60 + index // 4,
+                    0 if index == 82 else 100,
+                    None if index == 0 else verdicts[index % 3],
+                )
+                for index in range(83)
+            ],
+        )
+
+    with TestClient(app, base_url="https://admin.localhost") as admin:
+        assert admin.get("/api/admin/results?verdict=unreviewed").status_code == 401
+        assert admin.get("/api/admin/results?verdict=invalid").status_code == 401
+        headers = login(admin, app.state.settings.data_dir)
+        bad = admin.get("/api/admin/results?verdict=invalid")
+        assert bad.status_code == 422 and bad.json()["error"]["code"] == "invalid_verdict"
+
+        listing = admin.get("/api/admin/results").json()
+        assert listing["has_more"] and len(listing["items"]) == 24
+        assert {row["review"]["verdict"] for row in listing["items"]} == set(verdicts)
+        for verdict_index, verdict in enumerate(verdicts):
+            first = admin.get(f"/api/admin/results?verdict={verdict}").json()
+            second = admin.get(f"/api/admin/results?verdict={verdict}&offset=24").json()
+            assert len(first["items"]) == 24 and first["has_more"]
+            assert len(second["items"]) == 3 and not second["has_more"]
+            rows = first["items"] + second["items"]
+            expected = [f"review-fixture-{index}" for index in range(80, -1, -1) if index % 3 == verdict_index]
+            assert [row["id"] for row in rows] == expected
+            assert all(row["review"]["verdict"] == verdict for row in rows)
+            assert all(row["image_url"] == f"/api/admin/results/{row['id']}/image" for row in rows)
+
+        moved = "review-fixture-6"
+        response = admin.post(
+            f"/api/admin/results/{moved}/review", headers=headers,
+            json={"verdict": "approved", "notes": "checked"},
+        )
+        assert response.status_code == 200
+        next_unreviewed = admin.get("/api/admin/results?verdict=unreviewed&offset=24").json()
+        assert [row["id"] for row in next_unreviewed["items"]] == ["review-fixture-3", "review-fixture-0"]
+        next_approved = admin.get("/api/admin/results?verdict=approved&offset=24").json()
+        assert any(row["id"] == moved and row["review"]["notes"] == "checked" for row in next_approved["items"])

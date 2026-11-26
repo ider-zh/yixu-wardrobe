@@ -107,6 +107,8 @@ main { max-width: 1248px; margin: 0 auto; padding: 48px 24px 40px; }
 .job-list strong { font-weight: 550; margin-right: 14px; }
 .job-error { color: var(--danger); }
 .status-chip { display: inline-block; border: 1px solid #ccd2c2; color: #46553e; padding: 2px 8px; font-size: var(--small-text-size); line-height: 1.6; vertical-align: middle; }
+.results-filter { max-width: 280px; margin: 14px 0 20px; }
+.results-filter select { display: block; margin-top: 6px; }
 .results-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
 .result-card { min-width: 0; border: 1px solid var(--line); background: var(--paper); }
 .result-preview { aspect-ratio: 2 / 3; background: #e6e5dc; display: grid; place-items: center; }

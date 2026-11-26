@@ -6,7 +6,9 @@ export function createAdminApp({ document, fetch, confirm, applySiteTheme = them
   let passwordMinimum = 16;
   let savedSiteTheme = null;
   let resultOffset = 0;
+  let resultVerdict = '';
   const resultIds = new Set();
+  const resultFilter = $('#result-verdict-filter');
   const runtimeFields = { model: '#provider-model', api_base: '#provider-api-base', proxy_url: '#provider-proxy', size: '#provider-size', quality: '#provider-quality', provider_timeout_seconds: '#provider-timeout' };
   let supportedRuntime = new Set();
   const showSession = (authenticated, minimum) => {
@@ -23,7 +25,7 @@ export function createAdminApp({ document, fetch, confirm, applySiteTheme = them
     busy = true;
     $('#error').hidden = true;
     $('#notice').textContent = '正在处理，请稍候…';
-    const controls = [...document.querySelectorAll('button:not([data-visitor-page])')];
+    const controls = [...document.querySelectorAll('button:not([data-visitor-page]), #result-verdict-filter')];
     controls.forEach(button => { button.disabled = true; });
     $('#main').setAttribute('aria-busy', 'true');
     pending = (async () => {
@@ -107,6 +109,8 @@ export function createAdminApp({ document, fetch, confirm, applySiteTheme = them
     $('#results-empty').hidden = true;
     $('#load-more-results').hidden = true;
     resultOffset = 0;
+    resultVerdict = '';
+    setFieldValue(resultFilter, resultVerdict);
     resultIds.clear();
     for (const selector of Object.values(runtimeFields)) setFieldValue($(selector), '');
     $('#provider-key').value = '';
@@ -252,10 +256,22 @@ export function createAdminApp({ document, fetch, confirm, applySiteTheme = them
     form.append(fieldset);
     form.addEventListener('submit', event => {
       event.preventDefault();
+      const focused = document.activeElement === save;
+      let reloaded = false;
       run(async () => {
-        await request(`/results/${encodeURIComponent(item.id)}/review`, { method: 'POST', body: { verdict: verdict.value, notes: notes.value } });
+        const review = { verdict: verdict.value, notes: notes.value };
+        await request(`/results/${encodeURIComponent(item.id)}/review`, { method: 'POST', body: review });
+        if (resultVerdict && review.verdict !== resultVerdict) {
+          card.remove();
+          resultIds.delete(item.id);
+          resultOffset = 0;
+          updateResultsFooter(false);
+        }
         await loadResults();
+        reloaded = true;
         $('#notice').textContent = '评价已保存，并已重新读取生成结果。';
+      }).then(() => {
+        if (reloaded && focused && document.activeElement === document.body) resultFilter.focus();
       });
     });
     const remove = node('button', '删除生成结果', 'danger outline');
@@ -274,10 +290,20 @@ export function createAdminApp({ document, fetch, confirm, applySiteTheme = them
     card.append(preview, info);
     return card;
   }
-  async function loadResults(reset = true) {
+  function updateResultsFooter(hasMore) {
+    const empty = $('#results-empty');
+    empty.hidden = resultIds.size > 0;
+    empty.textContent = resultVerdict ? '暂无符合所选评估状态的结果。' : '暂无生成结果。真实完成的试穿将在这里出现。';
+    $('#load-more-results').hidden = !hasMore;
+  }
+  async function loadResults(reset = true, verdict = resultVerdict) {
     const offset = reset ? 0 : resultOffset;
-    const data = await request(`/results?offset=${offset}&limit=24`);
+    const params = new URLSearchParams({ offset, limit: 24 });
+    if (verdict) params.set('verdict', verdict);
+    const data = await request(`/results?${params}`);
     if (reset) {
+      resultVerdict = verdict;
+      setFieldValue(resultFilter, resultVerdict);
       $('#results-grid').replaceChildren();
       resultIds.clear();
     }
@@ -287,10 +313,24 @@ export function createAdminApp({ document, fetch, confirm, applySiteTheme = them
       resultIds.add(item.id);
     }
     resultOffset = offset + data.items.length;
-    $('#results-empty').hidden = resultIds.size > 0;
-    $('#load-more-results').hidden = !data.has_more;
+    updateResultsFooter(data.has_more);
     $('#notice').textContent = '生成结果已更新。';
   }
+  resultFilter.addEventListener('change', () => {
+    const verdict = resultFilter.value;
+    const focused = document.activeElement === resultFilter;
+    let reloaded = false;
+    run(async () => {
+      try {
+        await loadResults(true, verdict);
+        reloaded = true;
+      } finally {
+        setFieldValue(resultFilter, resultVerdict);
+      }
+    }).then(() => {
+      if (reloaded && focused && document.activeElement === document.body) resultFilter.focus();
+    });
+  });
   $('#refresh-results').addEventListener('click', () => run(() => loadResults()));
   $('#load-more-results').addEventListener('click', () => run(() => loadResults(false)));
   const countText = value => Number.isSafeInteger(value) && value >= 0 ? new Intl.NumberFormat('zh-CN').format(value) : '—';

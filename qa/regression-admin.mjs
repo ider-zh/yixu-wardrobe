@@ -249,6 +249,74 @@ test('optional quality review posts exact verdict and notes then reads server st
   assert.ok(h.requests.slice(h.requests.indexOf(removal) + 1).some(r => r.url.startsWith('/api/admin/results?')));
 });
 
+test('review filters use server pages, retain the selected verdict after save and restart from the first page', async () => {
+  const verdicts = ['unreviewed', 'approved', 'rejected'];
+  const mixed = Array.from({ length: 81 }, (_, index) => result(`review-${index}`, {
+    review: { verdict: verdicts[index % verdicts.length], notes: '' },
+  }));
+  const page = (verdict, offset) => () => {
+    const filtered = verdict ? mixed.filter(row => row.review.verdict === verdict) : mixed;
+    return json({ items: filtered.slice(offset, offset + 24), has_more: offset + 24 < filtered.length });
+  };
+  const paths = {
+    all: '/api/admin/results?offset=0&limit=24',
+    unreviewed: '/api/admin/results?offset=0&limit=24&verdict=unreviewed',
+    unreviewedNext: '/api/admin/results?offset=24&limit=24&verdict=unreviewed',
+    approved: '/api/admin/results?offset=0&limit=24&verdict=approved',
+    rejected: '/api/admin/results?offset=0&limit=24&verdict=rejected',
+  };
+  const routes = sessionRoutes();
+  for (const [key, path] of Object.entries(paths)) {
+    const verdict = new URL(path, 'http://fixture').searchParams.get('verdict');
+    routes[`GET ${path}`] = page(verdict, key === 'unreviewedNext' ? 24 : 0);
+  }
+  routes['POST /api/admin/results/review-72/review'] = request => {
+    mixed[72].review = request.body;
+    return json({ saved: true, review: request.body });
+  };
+  const h = await harness(routes);
+  await login(h);
+  const filter = h.document.querySelector('#result-verdict-filter');
+  const cards = () => [...h.document.querySelectorAll('#results-grid article')];
+  const pick = async value => {
+    [...filter.options].forEach(option => { option.selected = false; });
+    [...filter.options].find(option => option.value === value).selected = true;
+    await h.fire('#result-verdict-filter', 'change');
+  };
+  assert.equal(cards().length, 24);
+  await pick('unreviewed');
+  assert.equal(h.requests.at(-1).url, paths.unreviewed);
+  assert.equal(cards().length, 24);
+  await h.fire('#load-more-results', 'click');
+  assert.equal(h.requests.at(-1).url, paths.unreviewedNext);
+  assert.equal(cards().length, 27);
+  assert.ok(cards().every(card => card.querySelector('[name="verdict"]').value === 'unreviewed'));
+  const moved = '[data-result-id="review-72"]';
+  h.document.querySelector(`${moved} [name="verdict"] [value="approved"]`).selected = true;
+  await h.fire(`${moved} .review-form`);
+  assert.equal(h.requests.at(-1).url, paths.unreviewed);
+  assert.equal(filter.value, 'unreviewed');
+  assert.equal(cards().length, 24);
+  assert.equal(h.document.querySelector(moved), null);
+  await h.fire('#load-more-results', 'click');
+  assert.equal(h.requests.at(-1).url, paths.unreviewedNext);
+  assert.equal(cards().length, 26);
+  assert.equal(new Set(cards().map(card => card.dataset.resultId)).size, 26);
+
+  h.routes[`GET ${paths.rejected}`] = () => json({ error: { code:'fixture_failure', message:'筛选暂不可用。' } }, 500);
+  await pick('rejected');
+  assert.equal(filter.value, 'unreviewed', 'A failed read cannot relabel the visible cards');
+  assert.equal(cards().length, 26);
+  await pick('approved');
+  assert.equal(h.requests.at(-1).url, paths.approved);
+  assert.ok(cards().every(card => card.querySelector('[name="verdict"]').value === 'approved'));
+  h.routes[`GET ${paths.rejected}`] = () => json({ error: { code:'auth', message:'expired' } }, 401);
+  await pick('rejected');
+  assert.equal(h.document.querySelector('#workspace').hidden, true);
+  assert.equal(filter.value, '');
+  assert.equal(cards().length, 0);
+});
+
 test('failed review/deletion preserve visible results and never claim success', async () => {
   const routes = sessionRoutes();
   routes['GET /api/admin/results?offset=0&limit=24'] = { items: [result('fixture-failure')], has_more: false };

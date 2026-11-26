@@ -1,7 +1,7 @@
 import hmac
 import json
 import secrets
-from typing import Literal
+from typing import Literal, get_args
 
 from argon2 import PasswordHasher
 from argon2.exceptions import VerificationError
@@ -12,10 +12,12 @@ from pydantic import BaseModel, ConfigDict, Field
 from .files import atomic_write
 from .store import ThemeName, digest
 
+ReviewVerdict = Literal["unreviewed", "approved", "rejected"]
+
 
 class Review(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    verdict: Literal["unreviewed", "approved", "rejected"]
+    verdict: ReviewVerdict
     notes: str = Field(default="", max_length=4000)
 
 
@@ -211,14 +213,21 @@ class Admin:
                 raise HTTPException(422, "invalid_settings:Invalid runtime settings") from None
 
         @router.get("/results")
-        def results(request: Request, offset: int = 0, limit: int = 24):
+        def results(request: Request, offset: int = 0, limit: int = 24, verdict: str | None = None):
             self.session(request)
             if offset < 0 or not 1 <= limit <= 1000:
                 raise HTTPException(422, "pagination:Invalid pagination")
+            if verdict is not None and verdict not in get_args(ReviewVerdict):
+                raise HTTPException(422, "invalid_verdict:Invalid review verdict")
             with self.store.connect() as db:
                 rows = db.execute(
-                    "SELECT * FROM jobs WHERE status='succeeded' AND output_bytes>0 ORDER BY published DESC,seq DESC LIMIT ? OFFSET ?",
-                    (limit + 1, offset),
+                    """
+                    SELECT * FROM jobs
+                    WHERE status='succeeded' AND output_bytes>0
+                    AND (? IS NULL OR COALESCE(verdict, 'unreviewed') = ?)
+                    ORDER BY published DESC, seq DESC LIMIT ? OFFSET ?
+                    """,
+                    (verdict, verdict, limit + 1, offset),
                 ).fetchall()
             from .jobs import timestamp
 
@@ -231,7 +240,10 @@ class Admin:
                         "shot_index": r["shot_index"],
                         "created_at": timestamp(r["created"]),
                         "image_url": f"/api/admin/results/{r['id']}/image",
-                        "review": {"verdict": r["verdict"], "notes": r["notes"]},
+                        "review": {
+                            "verdict": r["verdict"] if r["verdict"] is not None else "unreviewed",
+                            "notes": r["notes"],
+                        },
                     }
                     for r in rows[:limit]
                 ],

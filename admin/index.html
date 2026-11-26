@@ -86,6 +86,14 @@
       <section id="results" class="panel" aria-labelledby="results-title">
         <div class="section-heading"><div><p class="eyebrow">GENERATED, NOT ORIGINAL</p><h2 id="results-title">生成结果</h2></div><button id="refresh-results" class="outline" type="button">刷新结果 ↻</button></div>
         <p class="muted">只展示已生成的 AI 试穿图，不含上传的原始照片。缩略图与大图均需管理员会话；被用户删除或全局保留规则移除的结果将不再可用。</p>
+        <label class="results-filter" for="result-verdict-filter">评估状态
+          <select id="result-verdict-filter" aria-controls="results-grid">
+            <option value="" selected>全部</option>
+            <option value="unreviewed">未评</option>
+            <option value="approved">质量良好</option>
+            <option value="rejected">需改进</option>
+          </select>
+        </label>
         <p id="results-empty" class="empty" hidden>暂无生成结果。真实完成的试穿将在这里出现。</p>
         <div id="results-grid" class="results-grid"></div>
         <button id="load-more-results" class="outline load-more" type="button" hidden>继续加载结果 ↓</button>
