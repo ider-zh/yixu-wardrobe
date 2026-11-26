@@ -238,6 +238,16 @@
       </div>
     </div>
   </div>
+  <section class="tryon-retention" aria-labelledby="tryon-retention-title">
+    <h3 id="tryon-retention-title">管理本机试穿副本</h3>
+    <p id="tryon-retention-count" class="tryon-hint">正在读取本机副本…</p>
+    <div class="tryon-retention-actions">
+      <button id="tryon-clear-local-photos" class="outline-button" type="button" aria-disabled="true">清除本机照片</button>
+      <button id="tryon-clear-local-results" class="outline-button" type="button" aria-disabled="true">清除本机成片</button>
+      <button id="tryon-toggle-local-results" class="text-button" type="button" aria-disabled="true">暂停自动保存成片</button>
+    </div>
+    <p id="tryon-retention-status" class="tryon-hint" role="status"></p>
+  </section>
   <section class="tryon-history-area" aria-labelledby="tryon-jobs-title">
     <div class="tryon-history-heading">
       <h3 id="tryon-jobs-title" tabindex="-1">试穿记录</h3>
@@ -280,7 +290,7 @@
     </figure>
     <figure>
       <figcaption id="tryon-comparison-reference-caption">服装参考</figcaption>
-      <div class="tryon-reference-thumbnail">
+      <div class="tryon-comparison-reference">
         <img id="tryon-comparison-reference" alt="本次试穿使用的服装参考镜头">
       </div>
       <p id="tryon-comparison-reference-status" role="status"></p>

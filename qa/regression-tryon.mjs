@@ -834,6 +834,28 @@ try {
   assert.equal(await evaluate('document.getElementById("tryon-comparison-result").hasAttribute("src")'),false);
   await wait(`window.WardrobeTryOnStorage.listJobs().then(rows=>rows.some(job=>job.id==='${frozenId}'&&job.reference_asset_id==='fixture-101-r0'&&job.cachedImage))`);
   console.log('PASS owner try-on comparison opens the exact frozen shot, retains keyboard focus and excludes unknown or malformed references.');
+  await wait('document.getElementById("tryon-clear-local-results").getAttribute("aria-disabled")==="false"');
+  const writesBeforeCleanup=requests.filter(request=>request.url.startsWith('/api/tryons')&&['POST','DELETE'].includes(request.method)).length;
+  await evaluate('window.confirm=()=>true');
+  await client('Network.emulateNetworkConditions',{offline:true,latency:0,downloadThroughput:0,uploadThroughput:0});
+  await evaluate('document.getElementById("tryon-clear-local-results").click()');
+  await wait('document.getElementById("tryon-retention-status").textContent.includes("已暂停自动保存")');
+  assert.match(await evaluate('document.getElementById("tryon-retention-count").textContent'),/成片 0 张.*暂停/);
+  assert.ok(await evaluate(`window.WardrobeTryOnStorage.listJobs().then(rows=>rows.some(job=>job.id==='${frozenId}'&&!job.cachedImage&&job.reference_asset_id==='fixture-101-r0'))`));
+  await sizeCheck(80,80,0);
+  await wait('document.getElementById("tryon-clear-local-photos").getAttribute("aria-disabled")==="false"');
+  await evaluate('document.getElementById("tryon-clear-local-photos").click()');
+  await wait('document.getElementById("tryon-retention-status").textContent.includes("张本机照片")');
+  assert.match(await evaluate('document.getElementById("tryon-retention-count").textContent'),/照片 0 张/);
+  assert.equal(await evaluate('document.getElementById("tryon-local-preview").hidden'),true);
+  await client('Network.emulateNetworkConditions',{offline:false,latency:0,downloadThroughput:-1,uploadThroughput:-1});
+  await wait(`document.querySelector('[data-job-id="${frozenId}"] a[download]')?.getAttribute('href')==='/api/tryons/${frozenId}/download'`);
+  assert.ok(await evaluate('window.WardrobeTryOnStorage.listJobs().then(rows=>rows.every(job=>!job.cachedImage))'));
+  await evaluate('document.getElementById("tryon-toggle-local-results").click()');
+  await wait('document.getElementById("tryon-retention-status").textContent.includes("已恢复自动保存")');
+  await wait(`window.WardrobeTryOnStorage.listJobs().then(rows=>rows.some(job=>job.id==='${frozenId}'&&job.cachedImage))`);
+  assert.equal(requests.filter(request=>request.url.startsWith('/api/tryons')&&['POST','DELETE'].includes(request.method)).length,writesBeforeCleanup);
+  console.log('PASS local trial copies clear offline, stay cleared on reconnect, and cache again only after explicit resume.');
 } finally {
   if(client&&socket?.readyState===1)await Promise.race([client('Browser.close').catch(()=>{}),new Promise(resolve=>setTimeout(resolve,1000))]);
   if(processChrome.exitCode===null&&processChrome.signalCode===null){const exit=once(processChrome,'exit');try{process.kill(-processChrome.pid,'SIGTERM');}catch(error){if(error.code!=='ESRCH')throw error;}await exit;}
