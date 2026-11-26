@@ -40,6 +40,17 @@ def create_content_admin_router(service, content, admin):
             "cdn": service.overview(),
         }
 
+    @router.get("/looks/{look_id}/delivery")
+    def look_delivery(request: Request, look_id: int):
+        admin.session(request, required=True)
+        delivery = content.public_look_delivery(look_id)
+        service.asset_delivery_status(delivery["assets"])
+        delivery["cdn_configured"] = service.config_status()["configured"]
+        settings = request.app.state.settings
+        scheme = "https" if settings.secure_cookies else request.url.scheme
+        delivery["public_origin"] = f"{scheme}://{settings.public_host}"
+        return delivery
+
     @router.get("/models")
     def models(request: Request):
         admin.session(request, required=True)

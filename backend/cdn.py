@@ -33,6 +33,7 @@ from PIL import Image
 from .files import atomic_write
 
 STATUSES = ("queued", "uploading", "verified", "failed", "unknown", "unconfigured")
+CDN_MEDIA_DIRECTORIES = ("images-v2", "assets/looks", "assets/model-bases")
 MAX_IMAGE_BYTES = 32 * 1024 * 1024
 
 
@@ -333,10 +334,7 @@ class CdnService:
             file = PurePosixPath(str(record.get("file", "")))
             if record.get("visibility") != "public":
                 continue
-            if not any(
-                file.is_relative_to(prefix)
-                for prefix in ("images-v2", "assets/looks", "assets/model-bases")
-            ):
+            if not any(file.is_relative_to(prefix) for prefix in CDN_MEDIA_DIRECTORIES):
                 continue
             if file.suffix != ".webp" or file.is_absolute() or ".." in file.parts:
                 raise ValueError("Unsafe public asset path")
@@ -403,6 +401,43 @@ class CdnService:
                 (asset_id,),
             ).fetchone()
         return row["remote_url"] if row else source_url
+
+    def asset_delivery_status(self, assets):
+        with self.connect() as db:
+            for asset in assets:
+                key = (asset["asset_id"], asset["sha256"])
+                chosen_url = asset["image_url"]
+                using_cdn = chosen_url != asset["source_url"]
+                latest = db.execute(
+                    """SELECT id,status,updated FROM jobs WHERE asset_id=? AND sha256=?
+                       ORDER BY updated DESC,id DESC LIMIT 1""",
+                    key,
+                ).fetchone()
+                verified = (
+                    db.execute(
+                        """SELECT verified FROM jobs WHERE asset_id=? AND sha256=?
+                           AND status='verified' AND remote_url=?
+                           ORDER BY verified DESC,id DESC LIMIT 1""",
+                        (*key, chosen_url),
+                    ).fetchone()
+                    if using_cdn
+                    else None
+                )
+                eligible = any(
+                    PurePosixPath(asset["file"]).is_relative_to(path)
+                    for path in CDN_MEDIA_DIRECTORIES
+                )
+                asset["delivery"] = "cdn" if using_cdn else "source"
+                asset["cdn"] = {
+                    "status": latest["status"]
+                    if latest
+                    else "not_queued"
+                    if eligible
+                    else "source_only",
+                    "job_id": latest["id"] if latest else None,
+                    "updated_at": latest["updated"] if latest else None,
+                    "selected_verified_at": verified["verified"] if verified else None,
+                }
 
     def overview(self):
         with self.connect() as db:

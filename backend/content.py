@@ -821,6 +821,54 @@ class ContentService:
         snapshot["counts"]["models"] = len(public_models)
         return snapshot
 
+    def public_look_delivery(self, look_id):
+        if not self.ready:
+            raise HTTPException(503, "content_unavailable:Public content is unavailable")
+        snapshot = self._snapshot
+        look = next((item for item in snapshot["looks"] if item["id"] == look_id), None)
+        if look is None or look.get("model_only"):
+            raise HTTPException(404, "not_found:Outfit is unavailable in the public archive")
+        assets = []
+
+        def append(role, label, asset, product_id=None):
+            if asset["visibility"] != "public":
+                return
+            public_asset = self._public_asset(asset)
+            assets.append(
+                {
+                    "role": role,
+                    "label": label,
+                    "product_id": product_id,
+                    **{
+                        key: public_asset[key]
+                        for key in (
+                            "asset_id",
+                            "sha256",
+                            "bytes",
+                            "file",
+                            "source_url",
+                            "image_url",
+                        )
+                    },
+                }
+            )
+
+        append("current_photo", "当前写真", look["versions"]["v2"]["asset"])
+        if previous := look.get("previous_photo"):
+            append("previous_photo", "上一版写真", previous["asset"])
+        for product in snapshot.get("products", []):
+            if not any(appearance["look_id"] == look_id for appearance in product["appearances"]):
+                continue
+            product_id, name = product["product_id"], product["name"]
+            append("product_main", name + " · 主图", product["asset"], product_id)
+            for image in product.get("gallery", []):
+                append("product_gallery", name + " · " + image["title"], image["asset"], product_id)
+        return {
+            "revision": snapshot["revision"],
+            "look": {"id": look["id"], "title": look["title"]},
+            "assets": assets,
+        }
+
     def admin_models(self):
         if not self.ready:
             return []
