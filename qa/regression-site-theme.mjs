@@ -462,6 +462,8 @@ try{
  assert.deepEqual(await evaluate('window.WardrobeRecent.load()'),[{type:'product',id:'brown-boots-102'},{type:'look',id:1}]);
  await route('#/recent');
  await wait('document.querySelectorAll("#recent-items li").length===2');
+ await evaluate(`window.recentFocusBefore=document.querySelector('#recent-items a[href="#look-1"]');window.recentFocusBefore.focus();window.WardrobeRecent.remember('product','brown-boots-102')`);
+ await wait('!window.recentFocusBefore.isConnected&&document.activeElement.getAttribute("href")==="#look-1"');
  await evaluate('document.querySelector(\'#recent-items a[href="#look-1"]\').click()');
  await wait('location.hash==="#look-1"&&document.getElementById("detail-dialog").open');
  await evaluate('document.getElementById("close-detail").click()');

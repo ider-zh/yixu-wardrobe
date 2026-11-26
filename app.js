@@ -309,6 +309,9 @@ async function renderRecent(){
   try{
     const entries=await recentStore.load();
     if(request!==recentRender||state.page!=='recent')return;
+    const focusedHref=recentFocusLook===null
+      ? document.activeElement?.closest('#recent-items a')?.getAttribute('href')
+      : '#look-'+recentFocusLook;
     const available=entries.flatMap(({type,id})=>{
       const item=publicWardrobeEntry(type,id);
       return item?[{...item,type}]:[];
@@ -316,14 +319,17 @@ async function renderRecent(){
     $('recent-items').innerHTML=available.map(({title,href,type})=>'<li><a class="recent-entry" href="'+esc(href)+'"><span>'+(type==='look'?'穿搭':'单品')+'</span><strong>'+esc(title)+'</strong><span aria-hidden="true">↗</span></a></li>').join('');
     $('recent-page-status').textContent=available.length?'':'还没有可以打开的浏览记录。';
     $('recent-clear').hidden=!entries.length;
-    if(recentFocusLook!==null){
-      const link=document.querySelector('#recent-items a[href="#look-'+recentFocusLook+'"]');
-      (link||$('recent-page-title')).focus();
+    if(focusedHref){
+      const link=[...$('recent-items').querySelectorAll('a')].find(item=>item.getAttribute('href')===focusedHref);
+      (link||$('recent-page-title')).focus({preventScroll:true});
       recentFocusLook=null;
     }
   }catch(error){
     if(request!==recentRender||state.page!=='recent')return;
+    const restoreHeading=recentFocusLook!==null||$('recent-items').contains(document.activeElement);
     $('recent-items').innerHTML='';
+    if(restoreHeading)$('recent-page-title').focus({preventScroll:true});
+    recentFocusLook=null;
     $('recent-page-status').textContent=error?.message||'此浏览器无法读取浏览记录。';
     $('recent-clear').hidden=false;
   }

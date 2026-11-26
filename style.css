@@ -327,6 +327,10 @@ dialog{padding:0;border:0;background:var(--paper-light);color:var(--ink);max-wid
   max-width: 58rem;
 }
 
+.recent-page-tools button {
+  min-height: 44px;
+}
+
 .recent-page-tools p {
   margin: 0;
 }
