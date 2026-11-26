@@ -9092,6 +9092,210 @@
           "shot_index": 3
         }
       ]
+    },
+    {
+      "product_id": "slate-blue-chore-jacket-111",
+      "name": "水洗板岩蓝工装夹克",
+      "category": "外套",
+      "color_name": "板岩蓝",
+      "color_hex": "#485365",
+      "subtitle": "深蓝尖领压住水洗蓝的明暗变化。",
+      "description": "水洗板岩蓝衣身配深蓝尖领、深色纽扣和低位方贴袋。主图中写真未露出的领内、肩袖接缝和门襟细部为设计推演。",
+      "design_material": "微微泛白的哑光斜纹布面观感",
+      "notes": [
+        "深蓝尖领",
+        "低位方贴袋",
+        "平直短衣摆"
+      ],
+      "asset": {
+        "asset_id": "product-slate-blue-chore-jacket-111-main-r1",
+        "file": "assets/products/look-111/slate-blue-chore-jacket-111-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 186198,
+        "sha256": "29d803acc97619a82ca9a69695e1ecd8634901faac2bba2e74aa76b258cd480b",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "深蓝尖领与门襟",
+          "caption": "近看深蓝尖领与深色纽扣。领内走线、扣眼、扣孔和放大织纹为设计推演。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-slate-blue-chore-jacket-111-collar-r1",
+            "file": "assets/products/look-111/slate-blue-chore-jacket-111-collar-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 323838,
+            "sha256": "9ccd93a8f78957ca9290ccdb460b7b1ee128630217f5ed28dfb82cdcc8685236",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 111,
+          "piece_index": 1,
+          "reference_asset_id": "look-111-male-01-v2-r1",
+          "shot_index": 4
+        }
+      ]
+    },
+    {
+      "product_id": "warm-ivory-mock-neck-knit-111",
+      "name": "暖白半高领细针织衫",
+      "category": "上装",
+      "color_name": "暖白",
+      "color_hex": "#e6d9c2",
+      "subtitle": "短短一截暖白领口，正好露在深蓝衣领里。",
+      "description": "暖白半高领挺起一小截，衣身用细针织和直下摆收住。外套遮住的肩线、袖口与织法衔接为设计推演。",
+      "design_material": "低光泽的细密针织观感",
+      "notes": [
+        "短半高领",
+        "素色针织衣身",
+        "同色直下摆"
+      ],
+      "asset": {
+        "asset_id": "product-warm-ivory-mock-neck-knit-111-main-r1",
+        "file": "assets/products/look-111/warm-ivory-mock-neck-knit-111-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 129368,
+        "sha256": "260c8d7ea2e240c5f9d991ebe716b137b68b467e3c021bcb06c75becf4fa21f1",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "半高领罗纹",
+          "caption": "低矮罗纹领与平织衣身在领口衔接。写真无法确认罗纹针距和内侧走线，近景为设计推演。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-warm-ivory-mock-neck-knit-111-collar-r1",
+            "file": "assets/products/look-111/warm-ivory-mock-neck-knit-111-collar-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 166994,
+            "sha256": "3c6784a15cd74a4c3bac62637f4794b224853b6b350217118c3a7598f645e8b6",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 111,
+          "piece_index": 2,
+          "reference_asset_id": "look-111-male-01-v2-r1",
+          "shot_index": 8
+        }
+      ]
+    },
+    {
+      "product_id": "walnut-corduroy-straight-trousers-111",
+      "name": "胡桃棕细灯芯绒直筒长裤",
+      "category": "下装",
+      "color_name": "胡桃棕",
+      "color_hex": "#513b2c",
+      "subtitle": "纵向细绒条沿着直筒裤腿落到鞋面。",
+      "description": "主图按写真可见的胡桃棕色、细绒条和直筒裤型制作。外套及内搭遮挡的腰头、门襟、腰袢与袋口为设计推演。",
+      "design_material": "带纵向细绒条的灯芯绒观感",
+      "notes": [
+        "胡桃棕细绒条",
+        "直筒裤腿",
+        "平收裤脚"
+      ],
+      "asset": {
+        "asset_id": "product-walnut-corduroy-straight-trousers-111-main-r1",
+        "file": "assets/products/look-111/walnut-corduroy-straight-trousers-111-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 109712,
+        "sha256": "3e48fb5527319482bba081871adc6e16374c896e15260a6a6f5f8129155c220b",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "细绒条与裤脚",
+          "caption": "纵向细绒条一路落到平整的裤脚。写真可见绒面与裤脚轮廓，近景绒条和收口线迹为设计推演。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-walnut-corduroy-straight-trousers-111-hem-r1",
+            "file": "assets/products/look-111/walnut-corduroy-straight-trousers-111-hem-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 155258,
+            "sha256": "5b1070bb99e35670abebd746b752a5fe964c3b2e534abd1600d1027b627eb4cf",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 111,
+          "piece_index": 3,
+          "reference_asset_id": "look-111-male-01-v2-r1",
+          "shot_index": 1
+        }
+      ]
+    },
+    {
+      "product_id": "warm-gray-lace-up-sneakers-111",
+      "name": "浅暖灰系带低帮鞋",
+      "category": "鞋履",
+      "color_name": "浅暖灰",
+      "color_hex": "#a89e90",
+      "subtitle": "米白底缘托住浅灰圆头。",
+      "description": "低帮浅暖灰鞋面以同色鞋带收住，圆头下沿接米白平底。鞋面绒感、鞋眼排布、缝线和鞋口内侧为设计推演。",
+      "design_material": "低反光浅暖灰绒面观感",
+      "notes": [
+        "浅暖灰低帮",
+        "同色鞋带与圆头",
+        "米白平底侧沿"
+      ],
+      "asset": {
+        "asset_id": "product-warm-gray-lace-up-sneakers-111-main-r1",
+        "file": "assets/products/look-111/warm-gray-lace-up-sneakers-111-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 116166,
+        "sha256": "c44b89df008a2d15986f3147efc6a1f4f2a04de2f7a4571be6b211f707fecb90",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "鞋带与圆头",
+          "caption": "从斜前方看同色扁鞋带、圆头和米白底缘。写真中不可辨的绒面纹理、鞋眼、缝线和鞋口内侧为设计推演。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-warm-gray-lace-up-sneakers-111-laces-r1",
+            "file": "assets/products/look-111/warm-gray-lace-up-sneakers-111-laces-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 173278,
+            "sha256": "c48902f60d2e55842b6b6aa80c892c8178f4302bef0cc53d0243e31fa675084f",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 111,
+          "piece_index": 4,
+          "reference_asset_id": "look-111-male-01-v2-r1",
+          "shot_index": 5
+        }
+      ]
     }
   ]
 }
