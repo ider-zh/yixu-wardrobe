@@ -356,3 +356,91 @@ dialog{padding:0;border:0;background:var(--paper-light);color:var(--ink);max-wid
   text-decoration: underline;
   text-underline-offset: .2em;
 }
+
+.week-controls,
+.week-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+}
+
+.week-controls a {
+  min-height: 44px;
+}
+
+.week-controls a[aria-disabled="true"] {
+  opacity: .55;
+}
+
+.week-form {
+  align-items: end;
+  max-width: 58rem;
+}
+
+.week-form label {
+  display: grid;
+  gap: 6px;
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.week-form select {
+  max-width: 100%;
+  min-height: 44px;
+  padding: 6px 10px;
+  color: var(--ink);
+  background: var(--paper-light);
+  border: 1px solid var(--line);
+  font: inherit;
+}
+
+.week-days {
+  margin: 0;
+  padding: 0;
+  max-width: 58rem;
+  list-style: none;
+}
+
+.week-day {
+  display: grid;
+  grid-template-columns: minmax(7rem, auto) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px 16px;
+  min-height: 56px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--line);
+  overflow-wrap: anywhere;
+}
+
+.week-day time {
+  display: inline-block;
+}
+
+.week-day time[aria-current="date"] {
+  font-weight: 700;
+}
+
+.week-day-outfit a,
+.week-day button {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: .2em;
+}
+
+.week-day button {
+  min-height: 44px;
+}
+
+@media (max-width: 480px) {
+  .week-form label {
+    flex-basis: 100%;
+  }
+
+  .week-day {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .week-day-date {
+    grid-column: 1 / -1;
+  }
+}

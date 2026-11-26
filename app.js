@@ -505,7 +505,7 @@ function openDetail(id,preserveNavigation=false,{view=0,routed=false,hydrating=f
   const newView=!alreadyOpen||state.active!==id;
   const preserveView=hydrating&&alreadyOpen&&state.active===id&&state.view===view;
   const restored=!alreadyOpen&&detailRoute?history.state?.wardrobeDetail:null;
-  if(restored&&typeof restored.returnRoute==='string'&&/^#\/(home|looks|models|favorites|products|product|lists|publications|recent)(?:[/?]|$)/.test(restored.returnRoute))detailReturnRoute=restored.returnRoute;
+  if(restored&&typeof restored.returnRoute==='string'&&/^#\/(home|looks|models|favorites|products|product|lists|publications|recent|week)(?:[/?]|$)/.test(restored.returnRoute))detailReturnRoute=restored.returnRoute;
   else if(!alreadyOpen)detailReturnRoute=detailRoute?(l.model_only?modelRoute(l.model_id):'#/home'):location.hash||'#/home';
   if(!alreadyOpen)detailSceneOpener=restored?.sceneOpener??(!detailRoute&&state.scene?id:null);
   if(!alreadyOpen){
@@ -649,7 +649,7 @@ function routeFromURL(scroll=true,hash=location.hash,{hydrating=false}={}){
  }
  const productRoute=/^#\/product\/([A-Za-z0-9_-]+)(?:\?(.*))?$/.exec(hash);
  const profile=/^#\/models\/([A-Za-z0-9_-]+)$/.exec(hash);
- const route=/^#\/(home|looks|models|favorites|products|lists|publications|recent)(?:\?(.*))?$/.exec(hash),page=productRoute?'product':profile?'models':route?.[1]||'home';
+ const route=/^#\/(home|looks|models|favorites|products|lists|publications|recent|week)(?:\?(.*))?$/.exec(hash),page=productRoute?'product':profile?'models':route?.[1]||'home';
  const productId=productRoute?.[1]||'';
  const newProduct=productId&&state.productId!==productId;
  const params=new URLSearchParams(route?.[2]||'');
@@ -659,6 +659,7 @@ function routeFromURL(scroll=true,hash=location.hash,{hydrating=false}={}){
  recentFocusLook=page==='recent'&&detailReturnRoute===hash?detailArchiveOpener:null;
  const openingPublications=page==='publications'&&state.page!==page;
  const openingRecent=page==='recent'&&state.page!==page;
+ const openingWeek=page==='week'&&state.page!==page;
  routing=true;
  state.page=page;state.profileModel=profile?.[1]||'';state.scene=scene?.id||'';state.productId=productId;
  // Native dialog close events are queued. A route-driven close must not later
@@ -669,9 +670,11 @@ function routeFromURL(scroll=true,hash=location.hash,{hydrating=false}={}){
  $('wardrobe-list-page').hidden=page!=='lists';$('wardrobe-list-entry-link').hidden=page!=='favorites';
  $('publication-page').hidden=page!=='publications';$('publication-entry-link').hidden=page!=='looks';
  $('recent-page').hidden=page!=='recent';
+ $('week-page').hidden=page!=='week';
  if(page==='lists')wardrobeListPage?.render();
  if(page==='publications')renderPublications();
  if(page==='recent')renderRecent();
+ if(page==='week')wardrobeWeekPage?.render(params.get('date')||window.WardrobeWeekPlan.todayKey());
  if(page==='models')renderModelProfile(state.profileModel);
  if(page==='products')renderProducts();
  if(page==='product'){
@@ -696,6 +699,7 @@ function routeFromURL(scroll=true,hash=location.hash,{hydrating=false}={}){
  if(scroll&&sceneFocus===null&&archiveFocus===null)window.scrollTo({top:0,behavior:'instant'});
  if(openingPublications)$('publication-title').focus({preventScroll:true});
  if(openingRecent)$('recent-page-title').focus({preventScroll:true});
+ if(openingWeek)$('week-title').focus({preventScroll:true});
  if(sceneFocus!==null){
   const target=document.querySelector('#gallery .look-photo-button[data-open="'+sceneFocus+'"]')||document.querySelector('#scene-links [aria-current="page"]');
   target?.focus();
@@ -738,6 +742,9 @@ function publicWardrobeEntry(type,id){
  return product&&publicAppearances(product).length?{title:product.name,href:'#/product/'+id}:null;
 }
 const wardrobeListPage=window.WardrobeListPage?.create({escapeText:esc,resolveEntry:publicWardrobeEntry});
+const wardrobeWeekPage=window.WardrobeWeekPage?.create({
+ escapeText:esc,looks:()=>latestLooks(),resolveEntry:id=>publicWardrobeEntry('look',id),
+});
 const productComparison=window.WardrobeProductCompare?.create({
  products:()=>indexedProducts().filter(comparableProduct),escapeText:esc,imageAttributes,
 });
@@ -791,9 +798,9 @@ document.addEventListener('click',event=>{
  if(compareProduct){productComparison?.open(compareProduct.dataset.productCompare,compareProduct);return;}
  const listProduct=event.target.closest('[data-product-list]');
  if(listProduct){wardrobeListPage?.choose('product',listProduct.dataset.productList,listProduct);return;}
- const listLook=event.target.closest('#wardrobe-list-panels a[href^="#look-"], #recent-items a[href^="#look-"]');
- if(listLook&&event.button===0&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey){
-  const id=Number(detailHashPattern.exec(listLook.hash)?.[1]);
+ const localLook=event.target.closest('#wardrobe-list-panels a[href^="#look-"], #recent-items a[href^="#look-"], #week-days a[href^="#look-"]');
+ if(localLook&&event.button===0&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey){
+  const id=Number(detailHashPattern.exec(localLook.hash)?.[1]);
   if(publicWardrobeEntry('look',id)){event.preventDefault();openDetail(id);}
   return;
  }

@@ -473,4 +473,33 @@ try{
  await wait('document.readyState==="complete"&&document.querySelectorAll("#recent-items li").length===2');
  await noOverflow('offline recent views');
  console.log('PASS real Chromium: local recent views preserve order, ignore shot changes and model-only details, and restore focus and reload.');
+ await route('#/lists');
+ assert.ok(await evaluate('!!document.querySelector(\'#wardrobe-list-page a[href="#/week"]\')'));
+ const weekRoute='#/week?date=2026-12-31';
+ await route(weekRoute);
+ await wait('document.querySelectorAll("#week-days time").length===7');
+ assert.equal(await evaluate('document.activeElement.id'),'week-title');
+ assert.equal(await evaluate('document.getElementById("week-range").textContent'),'2026-12-28 至 2027-01-03');
+ assert.equal(await evaluate('document.getElementById("week-previous").getAttribute("href")'),'#/week?date=2026-12-24');
+ for(const id of [1,2]){
+  await evaluate(`document.getElementById('week-date').value='2027-01-01';document.getElementById('week-look').value='${id}';document.getElementById('week-form').requestSubmit()`);
+  await wait(`document.getElementById('week-look-2027-01-01')?.dataset.weekLook==='${id}'`);
+ }
+ await client('Emulation.setTimezoneOverride',{timezoneId:'Pacific/Kiritimati'});
+ await client('Page.reload');
+ await wait('document.readyState==="complete"&&document.getElementById("week-look-2027-01-01")?.dataset.weekLook==="2"');
+ assert.equal(await evaluate('document.getElementById("week-range").textContent'),'2026-12-28 至 2027-01-03');
+ await client('Emulation.setTimezoneOverride',{timezoneId:''});
+ await evaluate('document.getElementById("week-look-2027-01-01").focus();document.activeElement.click()');
+ await wait('location.hash==="#look-2"&&document.getElementById("detail-dialog").open');
+ await evaluate('document.getElementById("close-detail").click()');
+ await wait(`location.hash===${JSON.stringify(weekRoute)}&&document.getElementById("week-look-2027-01-01")?.dataset.weekLook==="2"`);
+ await evaluate('window.WardrobeWeekPlan.assign("2027-01-02",9999)');
+ await route('#/week?date=2027-01-07');
+ await route(weekRoute);
+ await wait('document.getElementById("week-day-2027-01-02")?.textContent.includes("当前目录暂无")');
+ await evaluate('document.getElementById("week-remove-2027-01-02").focus();document.activeElement.click()');
+ await wait('document.activeElement.id==="week-day-2027-01-02"&&!document.getElementById("week-remove-2027-01-02")');
+ await noOverflow('offline weekly outfits');
+ console.log('PASS real Chromium: offline weekly plans cross years, replace in place, preserve civil dates across timezones and remove unavailable entries.');
 }finally{for(const socket of sockets)try{socket.close();}catch{}try{process.kill(-browser.pid,'SIGTERM');}catch{}if(browser.exitCode===null&&browser.signalCode===null)await Promise.race([once(browser,'exit'),new Promise(resolve=>setTimeout(resolve,1500))]);await new Promise(resolve=>server.close(resolve));fs.rmSync(scratch,{recursive:true,force:true,maxRetries:8,retryDelay:100});}

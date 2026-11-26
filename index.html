@@ -21,12 +21,32 @@
     <a href="#/favorites">← 我的收藏</a>
   </div>
   <p>把穿搭和单品放在同一份清单，保存在当前浏览器。</p>
+  <p><a class="outline-button" href="#/week">一周穿搭计划 ↗</a></p>
   <form id="wardrobe-list-create" class="wardrobe-list-form">
     <label for="wardrobe-list-name">新清单</label>
     <div><input id="wardrobe-list-name" name="name" placeholder="例如周末旅行" required><button type="submit" class="solid-button">新建清单</button></div>
   </form>
   <p id="wardrobe-list-status" class="wardrobe-list-status" role="status"></p>
   <div id="wardrobe-list-panels" class="wardrobe-list-panels"></div>
+</section>
+<section id="week-page" class="collection week-page" aria-labelledby="week-title" hidden>
+  <div class="section-heading">
+    <h1 id="week-title" tabindex="-1">一周穿搭计划</h1>
+    <a href="#/lists">← 搭配清单</a>
+  </div>
+  <nav class="week-controls" aria-label="浏览穿搭计划">
+    <a id="week-previous" class="outline-button" href="#/week">← 上一周</a>
+    <a id="week-today" class="outline-button" href="#/week">本周</a>
+    <a id="week-next" class="outline-button" href="#/week">下一周 →</a>
+  </nav>
+  <p id="week-range" aria-live="polite"></p>
+  <form id="week-form" class="week-form">
+    <label for="week-date">日期<select id="week-date" required></select></label>
+    <label for="week-look">穿搭<select id="week-look" required></select></label>
+    <button type="submit" class="solid-button">保存安排</button>
+  </form>
+  <p id="week-status" role="status"></p>
+  <ol id="week-days" class="week-days"></ol>
 </section>
 <section id="recent-page" class="collection recent-page" aria-labelledby="recent-page-title" hidden>
   <div class="section-heading">
@@ -192,5 +212,5 @@
   </form>
   <p id="wardrobe-list-picker-status" class="wardrobe-list-status" role="status"></p>
 </dialog>
-<script src="catalog.js"></script><script src="wardrobe-scenes.js"></script><script src="tryon-storage.js"></script><script src="tryon.js"></script><script src="product-themes.js"></script><script src="product-page.js"></script><script src="wardrobe-lists.js"></script><script src="wardrobe-list-page.js"></script><script src="wardrobe-piece-match.js"></script><script src="wardrobe-color-match.js"></script><script src="wardrobe-framing.js"></script><script src="wardrobe-product-compare.js"></script><script src="wardrobe-publication.js"></script><script src="wardrobe-recent.js"></script><script src="app.js"></script>
+<script src="catalog.js"></script><script src="wardrobe-scenes.js"></script><script src="tryon-storage.js"></script><script src="tryon.js"></script><script src="product-themes.js"></script><script src="product-page.js"></script><script src="wardrobe-lists.js"></script><script src="wardrobe-list-page.js"></script><script src="wardrobe-piece-match.js"></script><script src="wardrobe-color-match.js"></script><script src="wardrobe-framing.js"></script><script src="wardrobe-product-compare.js"></script><script src="wardrobe-publication.js"></script><script src="wardrobe-recent.js"></script><script src="wardrobe-week-plan.js"></script><script src="wardrobe-week-page.js"></script><script src="app.js"></script>
 </body></html>

@@ -252,6 +252,15 @@ check('release archive uses real Shanghai dates and safe public covers',()=>{
   assert.equal(midnight.batches[0].date,'2026-11-26');
   assert.deepEqual(Array.from(midnight.undatedLookIds),[2]);
 });
+check('weekly plan keeps dates as civil days across leap days and years',()=>{
+  const window={};
+  vm.runInNewContext(fs.readFileSync(path.join(root,'wardrobe-week-plan.js'),'utf8'),{window});
+  const {weekDates,shiftDate}=window.WardrobeWeekPlan;
+  assert.deepEqual(Array.from(weekDates('2026-12-31')),['2026-12-28','2026-12-29','2026-12-30','2026-12-31','2027-01-01','2027-01-02','2027-01-03']);
+  assert.equal(shiftDate('2024-02-28',1),'2024-02-29');
+  assert.equal(shiftDate('2026-03-01',-1),'2026-02-28');
+  assert.throws(()=>shiftDate('2026-02-29',1));
+});
 for(const name of checks)console.log('PASS '+name);
 console.log('Synthetic DOM regression: '+checks.length+' checks passed.');
 await import('./regression-assets.mjs');
