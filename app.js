@@ -468,7 +468,7 @@ function openDetail(id,preserveNavigation=false,{view=0,routed=false,hydrating=f
   const alreadyOpen=$('detail-dialog').open,detailRoute=detailHashPattern.test(location.hash);
   const preserveView=hydrating&&alreadyOpen&&state.active===id&&state.view===view;
   const restored=!alreadyOpen&&detailRoute?history.state?.wardrobeDetail:null;
-  if(restored&&typeof restored.returnRoute==='string'&&/^#\/(home|looks|models|favorites|products|product|lists)(?:[/?]|$)/.test(restored.returnRoute))detailReturnRoute=restored.returnRoute;
+  if(restored&&typeof restored.returnRoute==='string'&&/^#\/(home|looks|models|favorites|products|product|lists|publications)(?:[/?]|$)/.test(restored.returnRoute))detailReturnRoute=restored.returnRoute;
   else if(!alreadyOpen)detailReturnRoute=detailRoute?(l.model_only?modelRoute(l.model_id):'#/home'):location.hash||'#/home';
   if(!alreadyOpen)detailSceneOpener=restored?.sceneOpener??(!detailRoute&&state.scene?id:null);
   if(!alreadyOpen)detailArchiveOpener=restored?.archiveOpener??(!detailRoute&&state.page==='looks'&&(state.piece||state.colors.length||state.batch)?id:null);

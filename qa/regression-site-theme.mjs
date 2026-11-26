@@ -430,5 +430,12 @@ try{
  await route('#/publications');
  await noOverflow('offline release archive');
  await readableText('#publication-page','offline release archive dates and titles');
+ await evaluate('document.getElementById("open-compare").click()');
+ await evaluate('document.querySelector(\'[data-compare-detail="4"]\').click()');
+ await wait('location.hash==="#look-4"&&document.getElementById("detail-dialog").open');
+ await client('Page.reload');
+ await wait('document.readyState==="complete"&&document.getElementById("detail-dialog")?.open');
+ await evaluate('document.getElementById("close-detail").click()');
+ await wait('location.hash==="#/publications"&&!document.getElementById("publication-page").hidden');
  console.log('PASS real Chromium: real batch dates, public-only cover/title, ordered looks, focus return and missing batch fallback.');
 }finally{for(const socket of sockets)try{socket.close();}catch{}try{process.kill(-browser.pid,'SIGTERM');}catch{}if(browser.exitCode===null&&browser.signalCode===null)await Promise.race([once(browser,'exit'),new Promise(resolve=>setTimeout(resolve,1500))]);await new Promise(resolve=>server.close(resolve));fs.rmSync(scratch,{recursive:true,force:true,maxRetries:8,retryDelay:100});}
