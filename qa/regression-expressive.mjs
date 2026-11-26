@@ -272,7 +272,8 @@ check('packing expands outfits and only merges explicit product appearances',()=
   assert.deepEqual(JSON.parse(JSON.stringify(jacket.sources)),[{type:'look',id:1,pieceIndex:1},{type:'product',id:'oat-tailored-blazer-001'}]);
   assert.equal(pack.missing.length,0);
   const ambiguous=window.WardrobePacking.buildEntries([{type:'look',id:1},{type:'look',id:10}],catalog);
-  assert.equal(ambiguous.entries.filter(entry=>/^product:.*loafers/.test(entry.key)).length,2);
+  const shoes=['product:espresso-penny-loafers-001','product:square-toe-loafer-010'];
+  assert.deepEqual(Array.from(ambiguous.entries.filter(entry=>shoes.includes(entry.key)),entry=>entry.key),shoes);
   const unavailable=[{type:'look',id:109},{type:'product',id:'black-penny-loafers-109'}];
   const restricted=window.WardrobePacking.buildEntries(unavailable,catalog);
   assert.equal(restricted.entries.length,0);
