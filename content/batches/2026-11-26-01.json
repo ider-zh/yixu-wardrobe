@@ -39,6 +39,21 @@
         "url": "https://www.shanghai.gov.cn/nw4411/20260529/14e2b628b96c4885b819328eeb9c40b8.html",
         "published_at": "2026-05-29",
         "summary": "解放日报报道记录了从武康大楼出发的慢行路线；用于核对女模写真选取的徐汇街区步行场景。"
+      },
+      {
+        "url": "https://www.shanghai.gov.cn/nw17239/20261118/663b03f091294b0cadb1f4c62fb07b9b.html",
+        "published_at": "2026-11-18",
+        "summary": "宝山区人民政府发布上海菊展会场信息。黄浦复兴公园分会场位于复兴中路516号，展至11月29日；环形秋千与露天花艺为男模追加写真提供取景灵感。"
+      },
+      {
+        "url": "https://www.shanghai.gov.cn/nw17239/20261026/7626eef747da4898bca00957e3f30b8e.html",
+        "published_at": "2026-10-26",
+        "summary": "上海市政府网站公布市级菊展攻略，确认黄浦复兴公园为特色分会场。"
+      },
+      {
+        "url": "https://www.gq-magazine.co.uk/article/best-jackets-men",
+        "published_at": "2026-11-02",
+        "summary": "British GQ 的原创秋冬男装外套整理包括带对比领的工装夹克，为本套短外套的领色层次提供参考。"
       }
     ],
     "weather": {
@@ -291,6 +306,135 @@
         "height": 1536,
         "bytes": 286682,
         "sha256": "865bf9e4c863bc1bf34254f60d9888bc54835952c03dfc8cbb3dbb060194faf5",
+        "visibility": "public",
+        "layout": {
+          "rows": 3,
+          "columns": 3,
+          "preview_panel": 1
+        }
+      }
+    },
+    {
+      "id": 111,
+      "model_id": "male-01",
+      "model_reference_sha256": "a3aa1c54981d036fd6a81f9456911bbdb6f4fb075359517d2223746be9cd9208",
+      "model_only": true,
+      "title": "复兴公园·雾蓝寻菊",
+      "category": "都市层次",
+      "season": "冬季",
+      "description": "水洗蓝工装夹克敞开，露出暖白半高领。胡桃棕灯芯绒长裤与米灰低帮鞋适合花径步行。周行远在菊丛与石凳间停停走走，最后在夕光下翻开手里的纸页。",
+      "pieces": [
+        {
+          "role": "外套",
+          "name": "水洗板岩蓝工装夹克"
+        },
+        {
+          "role": "上装",
+          "name": "暖白半高领细针织衫"
+        },
+        {
+          "role": "下装",
+          "name": "胡桃棕细灯芯绒直筒长裤"
+        },
+        {
+          "role": "鞋履",
+          "name": "浅暖灰系带低帮鞋"
+        }
+      ],
+      "palette": [
+        "#485365",
+        "#e6d9c2",
+        "#513b2c",
+        "#a89e90"
+      ],
+      "details": [
+        "深蓝尖领和低位贴袋给短夹克留下清楚的工装轮廓。",
+        "暖白半高领在敞开的夹克之间提亮上身。",
+        "胡桃棕灯芯绒和浅暖灰低帮鞋收住下半身。"
+      ],
+      "tags": [
+        "工装夹克",
+        "半高领",
+        "灯芯绒",
+        "低帮鞋",
+        "上海赏菊"
+      ],
+      "mood": "从挥手入园到坐下翻纸页，边走边发现有趣的菊花和花径。",
+      "scene": "取景灵感来自上海黄浦复兴公园菊展。午后花径两侧摆着浅黄与奶白色菊花，石凳和轻纱环形装置在树影下。",
+      "edition": "v2",
+      "shots": [
+        {
+          "index": 1,
+          "title": "入口处招手",
+          "emotion": "露齿笑，直视镜头",
+          "pose": "在花径站定，抬右手招呼",
+          "framing": "正面全身，双鞋完整"
+        },
+        {
+          "index": 2,
+          "title": "看这丛白菊",
+          "emotion": "扬眉圆唇，惊讶地看向观者",
+          "pose": "手指示意身侧的白菊，手和花留有间距",
+          "framing": "腰上中景"
+        },
+        {
+          "index": 3,
+          "title": "沿花径回望",
+          "emotion": "闭唇笑，回望镜头",
+          "pose": "沿碎石路侧身迈步，手臂随步幅摆动",
+          "framing": "侧前方全身，双鞋完整"
+        },
+        {
+          "index": 4,
+          "title": "在石凳旁笑开",
+          "emotion": "眯眼张口大笑，朝向镜头",
+          "pose": "一手撑在低石凳上，另一手搁在身侧",
+          "framing": "坐姿中景，外套方贴袋清楚"
+        },
+        {
+          "index": 5,
+          "title": "低头看看路线",
+          "emotion": "低头凝神",
+          "pose": "坐在低石凳上，双手展开折纸",
+          "framing": "坐姿全身，双鞋与鞋带完整"
+        },
+        {
+          "index": 6,
+          "title": "凑近看花瓣",
+          "emotion": "微张唇，侧目好奇",
+          "pose": "轻轻前倾，隔着一段距离看黄菊",
+          "framing": "侧前方中景"
+        },
+        {
+          "index": 7,
+          "title": "让出一条路",
+          "emotion": "歪头轻笑，目光看向观者",
+          "pose": "侧身迈步，摊开一手请同伴先走",
+          "framing": "斜侧全身，双鞋完整"
+        },
+        {
+          "index": 8,
+          "title": "把眼镜扶正",
+          "emotion": "眉眼带笑，直视镜头",
+          "pose": "抬一手轻扶镜腿",
+          "framing": "胸上近景，半高领清楚"
+        },
+        {
+          "index": 9,
+          "title": "花径尽头再看一眼",
+          "emotion": "平静含笑，望向镜头",
+          "pose": "站在花径上，双手持展开的折纸",
+          "framing": "正面全身，双鞋完整"
+        }
+      ],
+      "asset": {
+        "asset_id": "look-111-male-01-v2-r1",
+        "file": "assets/looks/2026-11-26/look-111-male-01-v2-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 368646,
+        "sha256": "22bb35187303c13984fe6ffccc1609ae995d54c704f00875d6a8ce28abe25e5b",
         "visibility": "public",
         "layout": {
           "rows": 3,
