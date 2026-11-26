@@ -267,6 +267,27 @@
     <button id="tryon-more" class="outline-button" type="button" hidden>加载更早的记录 ↓</button>
   </section>
 </dialog>
+<dialog id="tryon-comparison" class="tryon-comparison" aria-labelledby="tryon-comparison-title">
+  <header class="compare-heading">
+    <h2 id="tryon-comparison-title">试穿成片与服装参考</h2>
+    <button id="tryon-comparison-close" type="button" aria-label="关闭试穿对比" autofocus>×</button>
+  </header>
+  <div class="tryon-comparison-grid">
+    <figure>
+      <figcaption>我的试穿成片</figcaption>
+      <img id="tryon-comparison-result" alt="AI 生成的试穿成片">
+      <p id="tryon-comparison-result-status" role="status"></p>
+    </figure>
+    <figure>
+      <figcaption id="tryon-comparison-reference-caption">服装参考</figcaption>
+      <div class="tryon-reference-thumbnail">
+        <img id="tryon-comparison-reference" alt="本次试穿使用的服装参考镜头">
+      </div>
+      <p id="tryon-comparison-reference-status" role="status"></p>
+      <a id="tryon-comparison-reference-link" target="_blank" rel="noopener">查看参考九宫格 ↗</a>
+    </figure>
+  </div>
+</dialog>
 <dialog id="piece-compare-dialog" class="piece-compare-dialog" aria-labelledby="piece-compare-title">
   <div class="compare-heading">
     <h2 id="piece-compare-title">同类单品对比</h2>

@@ -34,7 +34,7 @@ const server = http.createServer(async (req,res) => {
   if (req.url.startsWith('/api/')) {
     res.setHeader('Content-Type','application/json');res.setHeader('Cache-Control','no-store');
     if(req.url==='/api/content/catalog'&&catalogFixture){res.end(JSON.stringify(catalogFixture));return;}
-    if(/^\/api\/content\/assets\/fixture-10[12](?:\/download)?$/.test(req.url)){
+    if(/^\/api\/content\/assets\/fixture-10[12](?:-r0)?(?:\/download)?$/.test(req.url)){
       res.setHeader('Content-Type','image/webp');
       if(req.url.endsWith('/download'))res.setHeader('Content-Disposition','attachment; filename="fixture-look.webp"');
       res.end(fs.readFileSync(path.join(root,'images-v2/look-001.webp')));return;
@@ -802,7 +802,38 @@ try {
   await client('Network.emulateNetworkConditions',{offline:false,latency:0,downloadThroughput:-1,uploadThroughput:-1});
   await evaluate('document.getElementById("tryon-clear-history-filter").click()');
   await wait('document.querySelector("[data-job-id=fixture-unrelated-history]")&&document.activeElement.id==="tryon-history-look"');
+  await wait('!document.getElementById("tryon-refresh").disabled');
+  const processing={id:'fixture-finish-filtered',status:'generating',look_id:101,look_title:filterLook,edition:'v2',shot_index:1,created_at:'2026-11-26T00:00:00Z'};
+  jobs.unshift(processing);
+  await filterBy('#0101','active');
+  await wait('document.querySelector("[data-job-id=fixture-finish-filtered]")&&window.WardrobeTryOnStorage.listJobs().then(rows=>rows.some(job=>job.id==="fixture-finish-filtered"))');
+  processing.status='succeeded';
+  await wait('!document.querySelector("[data-job-id=fixture-finish-filtered]")&&document.getElementById("tryon-jobs-status").textContent.includes("进度已更新")');
   console.log('PASS try-on history search and status filter paginate on the server, ignore stale responses, and search cached data offline.');
+  const frozenId='fixture-aspect-71-portrait',unknownId='fixture-aspect-72-portrait';
+  const reference={asset_id:'fixture-101-r0',source_url:'/api/content/assets/fixture-101-r0',shot_index:6};
+  const completeFixture=id=>({id,status:'succeeded',look_id:101,edition:'v2',shot_index:6,created_at:'2026-11-26T00:00:00Z',
+    image_url:'/api/tryons/'+id+'/image',download_url:'/api/tryons/'+id+'/download'});
+  jobs=[{...completeFixture(frozenId),reference},{...completeFixture(unknownId),reference:{...reference,source_url:'https://private.invalid/reference'}}];
+  paginate=false;
+  await evaluate('document.getElementById("tryon-clear-history-filter").click()');
+  const compareButton='[data-job-id="'+frozenId+'"] [data-job-action="compare"]';
+  await wait(`document.querySelector(${JSON.stringify(compareButton)})`);
+  assert.ok(await evaluate(`document.querySelector('[data-job-id="${unknownId}"]').textContent.includes('未保存可核对')`));
+  await evaluate(`document.querySelector(${JSON.stringify(compareButton)}).focus()`);
+  await client('Input.dispatchKeyEvent',{type:'keyDown',key:'Enter',code:'Enter',windowsVirtualKeyCode:13,text:'\r',unmodifiedText:'\r'});
+  await client('Input.dispatchKeyEvent',{type:'keyUp',key:'Enter',code:'Enter',windowsVirtualKeyCode:13});
+  await wait('document.getElementById("tryon-comparison").open&&document.getElementById("tryon-comparison-reference").naturalWidth>0&&document.getElementById("tryon-comparison-result").naturalWidth>0');
+  assert.deepEqual(await evaluate(`(()=>{const pic=document.getElementById('tryon-comparison-reference');
+    return [pic.getAttribute('src'),pic.style.left,pic.style.top,document.activeElement.id];
+  })()`),[reference.source_url,'-200%','-100%','tryon-comparison-close']);
+  assert.ok(await evaluate('document.getElementById("tryon-comparison").scrollWidth<=document.getElementById("tryon-comparison").clientWidth+1'));
+  await client('Input.dispatchKeyEvent',{type:'rawKeyDown',key:'Escape',code:'Escape',windowsVirtualKeyCode:27});
+  await client('Input.dispatchKeyEvent',{type:'keyUp',key:'Escape',code:'Escape',windowsVirtualKeyCode:27});
+  await wait(`!document.getElementById("tryon-comparison").open&&document.activeElement===document.querySelector(${JSON.stringify(compareButton)})`);
+  assert.equal(await evaluate('document.getElementById("tryon-comparison-result").hasAttribute("src")'),false);
+  await wait(`window.WardrobeTryOnStorage.listJobs().then(rows=>rows.some(job=>job.id==='${frozenId}'&&job.reference_asset_id==='fixture-101-r0'&&job.cachedImage))`);
+  console.log('PASS owner try-on comparison opens the exact frozen shot, retains keyboard focus and excludes unknown or malformed references.');
 } finally {
   if(client&&socket?.readyState===1)await Promise.race([client('Browser.close').catch(()=>{}),new Promise(resolve=>setTimeout(resolve,1000))]);
   if(processChrome.exitCode===null&&processChrome.signalCode===null){const exit=once(processChrome,'exit');try{process.kill(-processChrome.pid,'SIGTERM');}catch(error){if(error.code!=='ESRCH')throw error;}await exit;}

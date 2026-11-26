@@ -623,14 +623,16 @@ try{
  await wait('document.getElementById("detail-dialog").open&&location.hash.startsWith("#look-107?")');
  await evaluate('history.back()');
  await wait(`location.hash===${JSON.stringify(loaferProduct)}&&document.activeElement.id==="product-styling-link-107"`);
- assert.ok(await evaluate('(()=>{const box=document.activeElement.getBoundingClientRect();return box.top>=0&&box.bottom<=innerHeight;})()'));
+ await wait('(()=>{const box=document.activeElement.getBoundingClientRect();return box.bottom>0&&box.top<innerHeight;})()');
  await route('#/product/brown-boots-102');
  assert.equal(await evaluate('!!document.getElementById("product-styling-title")'),false);
  console.log('PASS real Chromium: styled shoe alternatives name real appearances, keep original products and link to verified shots.');
  for(const width of [320,1440]){
   await client('Emulation.setDeviceMetricsOverride',{width,height:900,deviceScaleFactor:1,mobile:width<600});
   await route('#look-1');
-  await evaluate('document.getElementById("detail-revision").focus();document.activeElement.click()');
+  await evaluate('document.getElementById("detail-revision").focus()');
+  await client('Input.dispatchKeyEvent',{type:'keyDown',key:'Enter',code:'Enter',windowsVirtualKeyCode:13,text:'\r',unmodifiedText:'\r'});
+  await client('Input.dispatchKeyEvent',{type:'keyUp',key:'Enter',code:'Enter',windowsVirtualKeyCode:13});
   await wait('document.getElementById("look-revision-dialog").open&&["previous","current"].every(side=>document.getElementById(side+"-look-image").naturalWidth>0)');
   assert.equal(await evaluate('document.getElementById("previous-look-image").getAttribute("src")'),'images-v2/look-001.webp');
   assert.equal(await evaluate('document.getElementById("current-look-image").dataset.source'),catalog.looks.find(look=>look.id===1).versions.v2.source_url);

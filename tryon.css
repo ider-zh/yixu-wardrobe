@@ -150,3 +150,14 @@
 }
 .tryon-history-filter button{min-height:44px}
 .tryon-history-filter button[aria-disabled=true]{opacity:.65;cursor:default}
+
+.tryon-comparison{width:710px;max-width:calc(100vw - 24px);max-height:calc(100dvh - 24px);padding:clamp(12px,3vw,24px)}
+.tryon-comparison h2{font-size:clamp(20px,4vw,27px);text-wrap:balance}
+#tryon-comparison-close{flex:none;min-width:44px;min-height:44px;font-size:28px}
+.tryon-comparison-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(8px,2vw,20px);margin-top:12px}
+.tryon-comparison-grid figure{min-width:0;margin:0}
+.tryon-comparison-grid figcaption{font-weight:600;margin-bottom:6px}
+.tryon-comparison-grid p{font-size:var(--small-text-size);line-height:1.5}
+.tryon-comparison-grid p:empty{display:none}
+#tryon-comparison-result{width:100%;max-height:68dvh;object-fit:contain;object-position:top}
+#tryon-comparison-reference-link{display:inline-flex;min-height:44px;align-items:center;text-decoration:underline;font-size:var(--small-text-size)}
