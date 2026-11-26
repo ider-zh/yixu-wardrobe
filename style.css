@@ -253,6 +253,10 @@ dialog{padding:0;border:0;background:var(--paper-light);color:var(--ink);max-wid
   margin: 0 0 16px;
 }
 
+.comparison-controls button {
+  min-height: 44px;
+}
+
 .comparison-controls button[aria-pressed="true"] {
   border-color: var(--ink);
   color: var(--paper);
