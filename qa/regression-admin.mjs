@@ -54,6 +54,111 @@ async function login(h) {
   await h.fire('#login-form');
 }
 
+function deliveryFixture(id, title = '通勤搭配') {
+  const resource = (role, label, asset_id, product_id = null) => ({
+    role, label, asset_id, product_id, sha256: 'a'.repeat(64), bytes: 262144,
+    file: `assets/${product_id ? 'products' : 'looks'}/${asset_id}.webp`,
+    source_url: `/api/content/assets/${asset_id}`, image_url: `/api/content/assets/${asset_id}`,
+    delivery: 'source', cdn: { status: 'not_queued', job_id: null, updated_at: null, selected_verified_at: null },
+  });
+  const main = resource('current_photo', '当前写真', `look-${id}-r2`);
+  main.delivery = 'cdn';
+  main.image_url = `https://fixture-cdn.example/${main.asset_id}.webp`;
+  main.cdn = { status: 'failed', job_id: 27, updated_at: 1800000100, selected_verified_at: 1800000000 };
+  const previous = resource('previous_photo', '上一版写真', `look-${id}-r1`);
+  previous.cdn.status = 'source_only';
+  return {
+    revision: 'fixture-delivery-revision', look: {id, title}, public_origin: 'https://fixture-public.example', cdn_configured: true,
+    assets: [main, previous, resource('product_main', '外套 · 主图', `coat-${id}`, 'coat'),
+      resource('product_gallery', '外套 · 袖口', `coat-${id}-cuff`, 'coat')],
+  };
+}
+
+function queryDelivery(h, value) {
+  const input = h.document.querySelector('#delivery-look');
+  input.value = value;
+  input.dispatchEvent(new h.window.Event('input', {bubbles: true}));
+  return h.fire('#delivery-form');
+}
+
+test('delivery query displays selected public URL separately from the latest task and remains read-only', async () => {
+  const routes = sessionRoutes();
+  routes['GET /api/admin/content/looks/101/delivery'] = deliveryFixture(101, '<mark>已公开</mark>');
+  routes['GET /api/admin/content/looks/109/delivery'] = () => json({error: {code: 'not_found', message: 'Outfit unavailable'}}, 404);
+  const h = await harness(routes);
+  await h.app.start();
+  await queryDelivery(h, '101');
+  assert.equal(h.requests.filter(request => request.url.endsWith('/delivery')).length, 0);
+  await login(h);
+  await queryDelivery(h, 'not a look');
+  assert.match(h.document.querySelector('#delivery-status').textContent, /有效的穿搭编号/);
+  assert.equal(h.requests.filter(request => request.url.endsWith('/delivery')).length, 0);
+
+  await queryDelivery(h, ' #000101 ');
+  const result = h.document.querySelector('#delivery-result');
+  assert.equal(result.hidden, false);
+  assert.match(result.querySelector('h4').textContent, /LOOK 101.*<mark>已公开<\/mark>/);
+  assert.equal(result.querySelectorAll('a, img, mark, button').length, 0);
+  assert.deepEqual([...result.querySelectorAll('[data-delivery-role]')].map(row => row.dataset.deliveryRole),
+    ['current_photo', 'previous_photo', 'product_main', 'product_gallery']);
+  const current = result.querySelector('[data-delivery-role="current_photo"]').textContent;
+  assert.match(current, /当前使用：CDN.*最新同步：失败/s);
+  assert.match(current, /https:\/\/fixture-public\.example\/api\/content\/assets\/look-101-r2/);
+  assert.match(current, /https:\/\/fixture-cdn\.example\/look-101-r2\.webp/);
+  assert.match(current, /SHA-256.*a{64}.*源文件.*assets\/looks\/look-101-r2\.webp.*所用 CDN 验证时间/s);
+  assert.match(result.querySelector('[data-delivery-role="previous_photo"]').textContent, /当前使用：回源.*最新同步：仅回源/s);
+  assert.equal(h.requests.filter(request => request.url.endsWith('/delivery')).at(-1).credentials, 'same-origin');
+  assert.equal(h.requests.filter(request => request.url.includes('/content/') && request.method !== 'GET').length, 0);
+
+  await queryDelivery(h, '109');
+  assert.equal(result.hidden, true);
+  assert.equal(result.children.length, 0);
+  assert.match(h.document.querySelector('#delivery-status').textContent, /没有找到公开索引中的穿搭/);
+  assert.equal(h.document.querySelector('#workspace').hidden, false);
+});
+
+test('delivery queries discard responses after changing IDs or logging out', async () => {
+  const routes = sessionRoutes();
+  const firstResponse = Promise.withResolvers(), logoutResponse = Promise.withResolvers();
+  routes['GET /api/admin/content/looks/101/delivery'] = () => firstResponse.promise;
+  routes['GET /api/admin/content/looks/102/delivery'] = deliveryFixture(102, '新的查询');
+  routes['GET /api/admin/content/looks/103/delivery'] = () => logoutResponse.promise;
+  const h = await harness(routes);
+  await login(h);
+
+  const older = queryDelivery(h, '101');
+  const olderRequest = h.requests.at(-1);
+  await queryDelivery(h, '102');
+  assert.equal(olderRequest.signal.aborted, true);
+  firstResponse.resolve(json({error: {code: 'admin_auth', message: 'Old response'}}, 401));
+  await older;
+  assert.match(h.document.querySelector('#delivery-result h4').textContent, /新的查询/);
+  assert.equal(h.document.querySelector('#workspace').hidden, false);
+
+  const inFlight = queryDelivery(h, '103');
+  const lastRequest = h.requests.at(-1);
+  await h.fire('#logout', 'click');
+  assert.equal(lastRequest.signal.aborted, true);
+  logoutResponse.resolve(json(deliveryFixture(103, '晚到的结果')));
+  await inFlight;
+  assert.equal(h.document.querySelector('#delivery-look').value, '');
+  assert.equal(h.document.querySelector('#delivery-result').hidden, true);
+  assert.equal(h.document.querySelector('#delivery-result').children.length, 0);
+  assert.equal(h.document.querySelector('#workspace').hidden, true);
+});
+
+test('a current delivery authentication error clears the session and requests a fresh login', async () => {
+  const routes = sessionRoutes();
+  routes['GET /api/admin/content/looks/101/delivery'] = () => json({error: {code: 'admin_auth', message: 'Session expired'}}, 401);
+  const h = await harness(routes);
+  await login(h);
+  await queryDelivery(h, '101');
+  assert.equal(h.document.querySelector('#workspace').hidden, true);
+  assert.equal(h.document.querySelector('#delivery-look').value, '');
+  assert.match(h.document.querySelector('#error').textContent, /会话已失效/);
+  assert.equal(h.requests.at(-1).url, '/api/admin/bootstrap');
+});
+
 test('login submits prelogin CSRF and logout uses rotated token, clears private DOM and reboots', async () => {
   const h = await harness(sessionRoutes());
   await login(h);

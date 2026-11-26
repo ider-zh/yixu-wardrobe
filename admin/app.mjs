@@ -7,6 +7,9 @@ export function createAdminApp({ document, fetch, confirm, applySiteTheme = them
   let savedSiteTheme = null;
   let resultOffset = 0;
   let resultVerdict = '';
+  let deliverySequence = 0;
+  let deliveryPending = Promise.resolve();
+  let deliveryController = null;
   const resultIds = new Set();
   const resultFilter = $('#result-verdict-filter');
   const runtimeFields = { model: '#provider-model', api_base: '#provider-api-base', proxy_url: '#provider-proxy', size: '#provider-size', quality: '#provider-quality', provider_timeout_seconds: '#provider-timeout' };
@@ -51,13 +54,14 @@ export function createAdminApp({ document, fetch, confirm, applySiteTheme = them
     })();
     return pending;
   }
-  async function request(path, { method = 'GET', body } = {}) {
+  async function request(path, { method = 'GET', body, signal } = {}) {
     let response;
     try {
       response = await fetch(`/api/admin${path}`, {
         method, credentials: 'same-origin', cache: 'no-store',
         headers: { Accept: 'application/json', ...(method !== 'GET' ? { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf } : {}) },
         ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+        ...(signal ? { signal } : {}),
       });
     } catch { throw new Error('无法连接管理服务，请检查网络后重新连接。'); }
     let data;
@@ -68,7 +72,7 @@ export function createAdminApp({ document, fetch, confirm, applySiteTheme = them
       // A verified session with an incorrect current password is not revoked.
       // Match the backend's distinct validation code, never suppress an auth 401.
       const incorrectCurrent = path === '/password' && response.status === 403 && data.error?.code === 'current_password';
-      throw Object.assign(new Error(incorrectCurrent ? '当前密码不正确，请重新输入；管理员会话仍有效。' : data.error?.message || detail || '请求未成功，请稍后重试。'), { sessionExpired: response.status === 401 && path !== '/login' && path !== '/bootstrap' });
+      throw Object.assign(new Error(incorrectCurrent ? '当前密码不正确，请重新输入；管理员会话仍有效。' : data.error?.message || detail || '请求未成功，请稍后重试。'), { httpStatus:response.status, sessionExpired: response.status === 401 && path !== '/login' && path !== '/bootstrap' });
     }
     return data;
   }
@@ -100,6 +104,8 @@ export function createAdminApp({ document, fetch, confirm, applySiteTheme = them
     $('#results-grid').replaceChildren();
     $('#models-grid').replaceChildren();
     $('#cdn-jobs').replaceChildren();
+    resetDelivery();
+    $('#delivery-look').value = '';
     $('#content-status').textContent = '尚未读取资源状态。';
     $('#publication-status').textContent = '尚未核对网站发布状态。';
     $('#cdn-status').textContent = '尚未读取 CDN 配置。';
@@ -499,6 +505,127 @@ export function createAdminApp({ document, fetch, confirm, applySiteTheme = them
   }
   $('#refresh-overview').addEventListener('click', () => run(loadOverview));
   const cdnStatusNames = { queued: '待同步', uploading: '上传中', verified: '已验证', failed: '失败', unknown: '待人工核对', unconfigured: '未配置' };
+  const deliveryRoles = new Map([
+    ['current_photo', '当前写真'], ['previous_photo', '上一版写真'],
+    ['product_main', '单品主图'], ['product_gallery', '单品附图'],
+  ]);
+  const deliveryTaskNames = {...cdnStatusNames, not_queued:'未排队', source_only:'仅回源'};
+  function resetDelivery() {
+    deliverySequence++;
+    deliveryController?.abort();
+    deliveryController = null;
+    deliveryPending = Promise.resolve();
+    $('#delivery-status').textContent = '输入穿搭编号查询公开资源。';
+    $('#delivery-result').replaceChildren();
+    $('#delivery-result').hidden = true;
+  }
+  function publicDeliveryOrigin(value) {
+    try {
+      const url = new URL(value);
+      if (['https:', 'http:'].includes(url.protocol) && !url.username && !url.password && url.pathname === '/' && !url.search && !url.hash) return url.origin;
+    } catch { /* Preserve the public resource path when no origin is supplied. */ }
+    return '';
+  }
+  function assetDeliveryCard(asset, publicOrigin) {
+    const role = deliveryRoles.get(asset?.role);
+    if (!role || typeof asset.asset_id !== 'string' || !/^[A-Za-z0-9_-]{1,128}$/.test(asset.asset_id)
+      || typeof asset.sha256 !== 'string' || !/^[a-f0-9]{64}$/.test(asset.sha256)
+      || !Number.isSafeInteger(asset.bytes) || asset.bytes < 1
+      || typeof asset.file !== 'string' || !/^(?:assets|images-v2)\/.+\.webp$/.test(asset.file)
+      || asset.file.includes('\\') || asset.file.split('/').some(part => !part || part === '.' || part === '..')
+      || asset.source_url !== `/api/content/assets/${asset.asset_id}` || !['cdn', 'source'].includes(asset.delivery)) {
+      throw new Error('穿搭资源响应异常，请重新查询。');
+    }
+    const card = node('li', undefined, 'delivery-asset');
+    card.dataset.deliveryRole = asset.role;
+    const title = node('strong', asset.label || role);
+    const signals = node('p', undefined, 'delivery-signals');
+    signals.append(
+      node('span', `当前使用：${asset.delivery === 'cdn' ? 'CDN' : '回源'}`, 'status-chip'),
+      node('span', `最新同步：${deliveryTaskNames[asset.cdn?.status] || '未知'}`, 'status-chip'),
+    );
+    const facts = node('dl', undefined, 'delivery-facts');
+    const add = (label, value, code = false) => {
+      const row = node('div'), info = node('dd');
+      if (code) info.append(node('code', value));
+      else info.textContent = value;
+      row.append(node('dt', label), info);
+      facts.append(row);
+    };
+    add('资源编号', asset.asset_id, true);
+    if (asset.product_id) add('单品编号', asset.product_id, true);
+    add('SHA-256', asset.sha256, true);
+    add('大小', `${new Intl.NumberFormat('zh-CN').format(asset.bytes)} 字节`);
+    add('源文件', asset.file, true);
+    add('回源地址', publicOrigin + asset.source_url, true);
+    if (asset.delivery === 'cdn') add('当前 CDN 地址', asset.image_url, true);
+    const {job_id, updated_at, selected_verified_at} = asset.cdn || {};
+    if (job_id != null) add('最新任务', `#${job_id}${Number.isFinite(updated_at) ? ` · ${timeText(updated_at * 1000)}` : ''}`);
+    if (Number.isFinite(selected_verified_at)) add('所用 CDN 验证时间', timeText(selected_verified_at * 1000));
+    card.append(title, signals, facts);
+    return card;
+  }
+  function renderDelivery(data, lookId) {
+    if (data?.look?.id !== lookId || typeof data.look.title !== 'string' || !Array.isArray(data.assets)) {
+      throw new Error('穿搭交付响应异常，请重新查询。');
+    }
+    const photos = [], products = [];
+    const publicOrigin = publicDeliveryOrigin(data.public_origin);
+    for (const asset of data.assets) {
+      const card = assetDeliveryCard(asset, publicOrigin);
+      (asset.role.startsWith('product_') ? products : photos).push(card);
+    }
+    const number = String(lookId).padStart(3, '0');
+    const result = $('#delivery-result');
+    result.replaceChildren(
+      node('h4', `LOOK ${number} · ${data.look.title}`),
+      node('p', `内容版本 ${data.revision || '未知'} · ${data.cdn_configured ? 'CDN 已配置' : 'CDN 未配置'}`, 'delivery-revision muted'),
+    );
+    for (const [label, cards] of [['写真', photos], ['单品资源', products]]) {
+      if (!cards.length) continue;
+      const list = node('ul', undefined, 'delivery-assets');
+      list.append(...cards);
+      result.append(node('h5', label), list);
+    }
+    result.hidden = false;
+    $('#delivery-status').textContent = data.assets.length ? `已读取 ${data.assets.length} 项公开资源。` : '当前没有可核对的公开资源。';
+  }
+  $('#delivery-look').addEventListener('input', resetDelivery);
+  $('#delivery-form').addEventListener('submit', event => {
+    event.preventDefault();
+    if ($('#workspace').hidden || busy) return;
+    resetDelivery();
+    const input = $('#delivery-look');
+    const value = input.value.trim();
+    const lookId = Number(value.replace(/^#/, ''));
+    if (!/^#?\d+$/.test(value) || !Number.isSafeInteger(lookId) || lookId < 1 || lookId > 2147483647) {
+      $('#delivery-status').textContent = '请输入有效的穿搭编号，例如 001。';
+      input.focus();
+      return;
+    }
+    const sequence = deliverySequence;
+    const controller = deliveryController = new AbortController();
+    const isCurrent = () => sequence === deliverySequence && !$('#workspace').hidden;
+    $('#delivery-status').textContent = '正在读取穿搭交付…';
+    deliveryPending = (async () => {
+      try {
+        const data = await request(`/content/looks/${lookId}/delivery`, {signal:controller.signal});
+        if (isCurrent()) renderDelivery(data, lookId);
+      } catch (error) {
+        if (!isCurrent()) return;
+        if (error.sessionExpired) {
+          if (busy) await pending;
+          if (isCurrent()) await run(async () => { throw error; });
+          return;
+        }
+        $('#delivery-status').textContent = error.httpStatus === 404
+          ? '没有找到公开索引中的穿搭，请核对编号。'
+          : error.message || '穿搭交付读取失败，请重新查询。';
+      } finally {
+        if (sequence === deliverySequence) deliveryController = null;
+      }
+    })();
+  });
   async function loadContent() {
     try {
       const data = await request('/content/overview');
@@ -627,11 +754,12 @@ export function createAdminApp({ document, fetch, confirm, applySiteTheme = them
     });
   });
   $('#logout').addEventListener('click', () => run(async () => {
+    resetDelivery();
     await request('/logout', { method: 'POST' });
     showSession(false);
     await bootstrap();
   }));
-  return { start: () => run(bootstrap), idle: () => pending };
+  return { start: () => run(bootstrap), idle: () => Promise.all([pending, deliveryPending]) };
 }
 
 if (typeof document !== 'undefined') {

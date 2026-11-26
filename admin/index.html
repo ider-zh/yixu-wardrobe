@@ -105,6 +105,15 @@
         <dl id="cdn-metrics" class="metrics">
           <div><dt>待同步</dt><dd data-cdn-metric="queued">—</dd></div><div><dt>上传中</dt><dd data-cdn-metric="uploading">—</dd></div><div><dt>已验证</dt><dd data-cdn-metric="verified">—</dd></div><div><dt>失败</dt><dd data-cdn-metric="failed">—</dd></div><div><dt>待人工核对</dt><dd data-cdn-metric="unknown">—</dd></div><div><dt>未配置</dt><dd data-cdn-metric="unconfigured">—</dd></div>
         </dl>
+        <section class="delivery-panel" aria-labelledby="delivery-title">
+          <h3 id="delivery-title">穿搭交付核对</h3>
+          <form id="delivery-form" class="delivery-form">
+            <label for="delivery-look">公开穿搭编号</label>
+            <div><input id="delivery-look" inputmode="numeric" autocomplete="off" placeholder="例如 001" required><button type="submit" class="outline">查询交付</button></div>
+          </form>
+          <p id="delivery-status" class="muted" role="status">输入穿搭编号查询公开资源。</p>
+          <div id="delivery-result" hidden></div>
+        </section>
         <p class="field-hint">仅明确失败的当前图床任务可重试；交付结果未知时不会自动重传。图床密钥与用户照片不会显示或进入公共同步。</p><ul id="cdn-jobs" class="job-list"></ul>
       </section>
       <section id="models" class="panel" aria-labelledby="models-title">
