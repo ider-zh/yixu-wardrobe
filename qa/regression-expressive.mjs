@@ -184,13 +184,15 @@ check('local outfit lists preserve mixed items, older IDs and existing favorites
   assert.equal(saved.get('wardrobe99:favorites:v1'),'[1]');
   assert.equal(saved.get('yixu:product-favorites:v1'),'["brown-boots-102"]');
   saved.set(lists.storageKey,'{bad json');
-  assert.equal(lists.load().length,0);
+  assert.throws(()=>lists.load(),/无法识别/);
   assert.throws(()=>lists.create('不能覆盖'),/无法识别/);
   assert.equal(saved.get(lists.storageKey),'{bad json');
   saved.delete(lists.storageKey);
   window.localStorage.setItem=()=>{throw Error('Test quota');};
   assert.throws(()=>lists.create('无法保存'),/无法在此浏览器中保存/);
   assert.equal(lists.load().length,0);
+  window.localStorage.getItem=()=>{throw Error('Test denied');};
+  assert.throws(()=>lists.load(),/无法读取/);
 });
 for(const name of checks)console.log('PASS '+name);
 console.log('Synthetic DOM regression: '+checks.length+' checks passed.');

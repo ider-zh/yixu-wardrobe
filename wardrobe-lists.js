@@ -9,7 +9,7 @@
       || (type === 'product' && typeof id === 'string' && token.test(id));
   }
 
-  function readLists() {
+  function load() {
     let raw;
     try {
       raw = window.localStorage.getItem(storageKey);
@@ -53,10 +53,6 @@
     }
   }
 
-  function load() {
-    try { return readLists(); } catch { return []; }
-  }
-
   function listName(name) {
     const trimmed = typeof name === 'string' && name.trim();
     if (!trimmed) throw new Error('请输入搭配清单名称。');
@@ -71,7 +67,7 @@
 
   function create(name) {
     const trimmedName = listName(name);
-    const lists = readLists();
+    const lists = load();
     const base = window.crypto?.randomUUID?.() || `list-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
     let id = base;
     for (let suffix = 1; lists.some(list => list.id === id); suffix++) id = `${base}-${suffix}`;
@@ -81,20 +77,20 @@
   }
 
   function rename(listId, name) {
-    const lists = readLists();
+    const lists = load();
     findList(lists, listId).name = listName(name);
     writeLists(lists);
   }
 
   function removeList(listId) {
-    const lists = readLists();
+    const lists = load();
     const list = findList(lists, listId);
     writeLists(lists.filter(item => item !== list));
   }
 
   function add(listId, type, id) {
     if (!isEntry(type, id)) throw new Error('这件内容无法加入搭配清单。');
-    const lists = readLists();
+    const lists = load();
     const {entries} = findList(lists, listId);
     if (entries.some(item => item.type === type && item.id === id)) return;
     entries.push({type, id});
@@ -103,7 +99,7 @@
 
   function remove(listId, type, id) {
     if (!isEntry(type, id)) throw new Error('这件内容无法从搭配清单中移除。');
-    const lists = readLists();
+    const lists = load();
     const list = findList(lists, listId);
     const entries = list.entries.filter(item => item.type !== type || item.id !== id);
     if (entries.length === list.entries.length) return;

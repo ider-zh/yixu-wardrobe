@@ -703,6 +703,10 @@ try{
  await evaluate('window.confirm=()=>true;document.querySelector("[data-list-delete]").click()');
  assert.equal(await evaluate('document.querySelectorAll(".wardrobe-list-group").length'),0);
  assert.deepEqual(await evaluate(`${JSON.stringify(listFavoriteKeys)}.map(key=>localStorage.getItem(key))`),favoriteValues);
+ await evaluate(`localStorage.setItem(window.WardrobeLists.storageKey,'{broken');window.dispatchEvent(new StorageEvent('storage',{key:window.WardrobeLists.storageKey}));`);
+ assert.match(await evaluate('document.getElementById("wardrobe-list-status").textContent'),/无法识别/);
+ assert.equal(await evaluate('document.getElementById("wardrobe-list-panels").textContent'),'');
+ assert.equal(await evaluate('localStorage.getItem(window.WardrobeLists.storageKey)'),'{broken');
  await navigate(pathToFileURL(path.join(output,'index.html')).href+'#/lists');
  await evaluate('document.getElementById("wardrobe-list-name").value="离线清单";document.getElementById("wardrobe-list-create").requestSubmit()');
  await wait('Array.from(document.querySelectorAll(".wardrobe-list-heading h2")).some(title=>title.textContent==="离线清单")');

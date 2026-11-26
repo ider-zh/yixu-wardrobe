@@ -22,6 +22,7 @@
     let selected = null;
     let opener = null;
     let lists = [];
+    let readFailed = false;
 
     function entryMarkup(listId, entry) {
       const entryId = escapeText(entry.id);
@@ -84,7 +85,22 @@
     }
 
     function render() {
-      lists = store.load();
+      try {
+        lists = store.load();
+      } catch (error) {
+        readFailed = true;
+        lists = [];
+        panels.replaceChildren();
+        choices.replaceChildren();
+        showError(status, error);
+        showError(pickerStatus, error);
+        return;
+      }
+      if (readFailed) {
+        status.textContent = '';
+        pickerStatus.textContent = '';
+        readFailed = false;
+      }
       const active = panels.contains(document.activeElement) ? document.activeElement : null;
       const openDetails = new Set([...panels.querySelectorAll('details[open]')].map(detail => detail.id));
       panels.innerHTML = lists.map(list => listMarkup(list, openDetails)).join('')
