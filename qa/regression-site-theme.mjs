@@ -612,10 +612,10 @@ try{
  assert.deepEqual(await evaluate('[...document.querySelectorAll(".product-styling-kind")].map(label=>label.textContent)'),['原款搭法','相近鞋型','相近鞋型']);
  assert.equal(await evaluate('document.querySelectorAll("#product-worn-section .product-worn").length'),1);
  await noOverflow('styling ideas at 320px');
- await evaluate('document.querySelector(\'[data-styling-look="87"] a\').click()');
+ await evaluate('document.getElementById("product-styling-link-87").focus();document.activeElement.click()');
  await wait('location.hash==="#look-87?shot=3&photo=look-087-v2-r1"&&document.getElementById("detail-dialog").open');
  await evaluate('document.getElementById("close-detail").click()');
- await wait(`location.hash===${JSON.stringify(loaferProduct)}&&!document.getElementById("detail-dialog").open`);
+ await wait(`location.hash===${JSON.stringify(loaferProduct)}&&!document.getElementById("detail-dialog").open&&document.activeElement.id==="product-styling-link-87"`);
  await route('#/product/brown-boots-102');
  assert.equal(await evaluate('!!document.getElementById("product-styling-title")'),false);
  console.log('PASS real Chromium: styled shoe alternatives name real appearances, keep original products and link to verified shots.');

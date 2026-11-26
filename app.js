@@ -16,6 +16,7 @@ try{const value=JSON.parse(localStorage.getItem(productStorageKey)||'[]');if(Arr
 const productFavorites=new Set(productSaved);
 const state = {category:'', season:'', query:'', model:'', region:'', piece:'', colors:[], batch:'', latestOnly:false, favoritesOnly:false, sort:'latest', page:'home', profileModel:'', productId:'', scene:'', limit:24, active:null, view:0};
 let filtered = [], toastTimer, detailReturnRoute = '#/home', routing = false, detailNavigation = null, focusArchive = false, routeDetailCloses = 0, detailSceneOpener = null, detailArchiveOpener = null;
+let detailProductFocus = '';
 const scenes = new Map((window.WARDROBE_SCENES || []).map(scene=>[scene.id,scene]));
 const styleIdeas = new Map((window.WardrobeStylingIdeas || []).map(group=>[group.productId,group]));
 const pieceMatch = window.WardrobePieceMatch;
@@ -500,7 +501,7 @@ function updateDetailActions() {
   $('detail-compare').textContent=c?'− 移出对比':'+ 加入对比';
   $('detail-compare').setAttribute('aria-pressed',String(c));
 }
-function openDetail(id,preserveNavigation=false,{view=0,routed=false,hydrating=false}={}) {
+function openDetail(id,preserveNavigation=false,{view=0,routed=false,hydrating=false,openerId=''}={}) {
   const l=byId.get(id);if(!l)return;
   const alreadyOpen=$('detail-dialog').open,detailRoute=detailHashPattern.test(location.hash);
   const newView=!alreadyOpen||state.active!==id;
@@ -509,6 +510,7 @@ function openDetail(id,preserveNavigation=false,{view=0,routed=false,hydrating=f
   if(restored&&typeof restored.returnRoute==='string'&&/^#\/(home|looks|models|favorites|products|product|lists|publications|recent|week|packing|backup)(?:[/?]|$)/.test(restored.returnRoute))detailReturnRoute=restored.returnRoute;
   else if(!alreadyOpen)detailReturnRoute=detailRoute?(l.model_only?modelRoute(l.model_id):'#/home'):location.hash||'#/home';
   if(!alreadyOpen)detailSceneOpener=restored?.sceneOpener??(!detailRoute&&state.scene?id:null);
+  if(!alreadyOpen)detailProductFocus=restored?.productFocusId||openerId;
   if(!alreadyOpen){
     const fromFilteredArchive=state.page==='looks'&&(state.piece||state.colors.length||state.batch);
     detailArchiveOpener=restored?.archiveOpener??(!detailRoute&&(fromFilteredArchive||state.page==='recent')?id:null);
@@ -520,7 +522,7 @@ function openDetail(id,preserveNavigation=false,{view=0,routed=false,hydrating=f
       :(['looks','favorites'].includes(state.page)&&filtered.some(look=>look.id===id)?filtered:latestLooks());
     detailNavigation=selection.map(look=>look.id);
   }
-  const entry={...history.state,wardrobeDetail:{returnRoute:detailReturnRoute,navigation:detailNavigation,sceneOpener:detailSceneOpener,archiveOpener:detailArchiveOpener}};
+  const entry={...history.state,wardrobeDetail:{returnRoute:detailReturnRoute,navigation:detailNavigation,sceneOpener:detailSceneOpener,archiveOpener:detailArchiveOpener,productFocusId:detailProductFocus}};
   const hash=lookRoute(l,view);
   // Treat the scene's detail carousel as a single visit so Back can return to the list.
   if(routed||location.hash===hash||(alreadyOpen&&detailSceneOpener!==null))history.replaceState(entry,'',hash);
@@ -657,6 +659,7 @@ function routeFromURL(scroll=true,hash=location.hash,{hydrating=false}={}){
  const scene=page==='looks'?availableScene(params.get('scene')):null;
  const sceneFocus=scene&&detailReturnRoute===hash?detailSceneOpener:null,leavingScene=state.scene&&!scene;
  const archiveFocus=page==='looks'&&detailReturnRoute===hash?detailArchiveOpener:null;
+ const productFocus=page==='product'&&detailReturnRoute===hash?detailProductFocus:'';
  recentFocusLook=page==='recent'&&detailReturnRoute===hash?detailArchiveOpener:null;
  const openingPublications=page==='publications'&&state.page!==page;
  const openingRecent=page==='recent'&&state.page!==page;
@@ -668,6 +671,7 @@ function routeFromURL(scroll=true,hash=location.hash,{hydrating=false}={}){
  // Native dialog close events are queued. A route-driven close must not later
  // overwrite a detail URL restored by Back before that close event arrives.
  if($('detail-dialog').open){routeDetailCloses++;$('detail-dialog').close();}state.active=null;detailNavigation=null;detailSceneOpener=null;detailArchiveOpener=null;
+ detailProductFocus='';
  $('home-page').hidden=page!=='home';$('models-page').hidden=page!=='models';$('collection').hidden=!['looks','favorites'].includes(page);$('closing-note').hidden=page!=='home';
  $('products-page').hidden=page!=='products';$('product-page').hidden=page!=='product';
  $('wardrobe-list-page').hidden=page!=='lists';$('wardrobe-list-entry-link').hidden=page!=='favorites';
@@ -690,6 +694,7 @@ function routeFromURL(scroll=true,hash=location.hash,{hydrating=false}={}){
  if(page==='product'){
   renderProduct(productId);
   if(newProduct)rememberView('product',productId);
+  if(/^product-styling-link-\d+$/.test(productFocus))$(productFocus)?.focus({preventScroll:true});
  }
  renderSceneControls();
  document.querySelectorAll('[data-page]').forEach(link=>{if(link.dataset.page===page||(page==='product'&&link.dataset.page==='products'))link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');});
@@ -837,7 +842,7 @@ document.addEventListener('click',event=>{
  const worn=event.target.closest('[data-product-look]');
  if(worn&&event.button===0&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey){
   const id=Number(worn.dataset.productLook),look=byId.get(id);
-  if(look){event.preventDefault();openDetail(id,false,{view:linkedShot(look,detailHashPattern.exec(worn.hash)?.[2])});}
+  if(look){event.preventDefault();openDetail(id,false,{view:linkedShot(look,detailHashPattern.exec(worn.hash)?.[2]),openerId:worn.id});}
   return;
  }
  const button=event.target.closest('[data-product-favorite]');

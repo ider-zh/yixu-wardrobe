@@ -26,7 +26,7 @@ function render(view){
  const images=productImages(product),views=images.filter(image=>image.role==='view'),details=images.filter(image=>image.role==='detail');
  const worn=appearances.map(renderWorn).join('');
  const stylingCards=styling?.items.map(item=>`<article class="product-styling-card" data-styling-look="${item.lookId}">
-   <a href="${esc(item.href)}" data-product-look="${item.lookId}" aria-label="查看 ${esc(item.title)} 的第 ${item.shotIndex} 镜头">${item.preview}</a>
+   <a id="product-styling-link-${item.lookId}" href="${esc(item.href)}" data-product-look="${item.lookId}" aria-label="查看 ${esc(item.title)} 的第 ${item.shotIndex} 镜头">${item.preview}</a>
    <div><p class="product-styling-kind">${item.same?'原款搭法':'相近鞋型'}</p><h3>${esc(item.title)}</h3>
    <p>${esc(item.tip)}</p><p class="product-styling-piece">${esc(item.piece)} · 第 ${item.shotIndex} 镜头</p></div>
  </article>`).join('')||'';
