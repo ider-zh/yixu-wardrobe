@@ -36,7 +36,7 @@ Node 构建和 Python API 都生成 `catalog.home`：`featured_look_id`、`recen
 ## 内容源与文件
 
 - `content/catalog.json`：从原目录迁移的生动基线，保留 1—100 编号、分类、单品与镜头；未核对的模特归属为 `null`。总容量不再限制为 100。
-- `content/models.json`：系统模特注册。`female-01` 使用 `assets/model-bases/female-01.webp` 五视角基础体；其他模特通过清单更新。
+- `content/models.json`：系统模特登记表。`name` 是模特页、模特筛选、后台与离线快照使用的显示名，改名时只更新这一字段后按常规流程构建及发布。`model_id`、基础体和既有穿搭中的关联保持稳定。`production_sop` 可指定 `docs/` 下的角色制作 SOP，缺省使用通用 SOP。日更从通用入口识别任务指定的角色，再执行 `node scripts/resolve-model.mjs "<模特编号或名称>"` 取得角色规范与参考图。
 - `content/batches/*.json`：每日一个批次，仅 `v2` 生动。包含实际热点来源、地区、天气依据、模特参考哈希、完整穿搭、九镜头及图片元数据。
 - `content/batch.schema.json`：由后端 `Batch` 模型导出的 JSON Schema。修改模型后同步更新该文件；Node 校验和后端导入都必须接受有效交付并拒绝不完整内容。
 - `assets/looks/YYYY-MM-DD/*.webp`：外部 agent 的最终公开图片。只提交最终 WebP，不提交生成母本、完整提示词或私人调研记录。

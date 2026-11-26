@@ -145,6 +145,23 @@ def content_fixture(tmp_path):
     return settings, batch, models
 
 
+def test_model_display_name_updates_from_registry(content_fixture):
+    settings, _, models = content_fixture
+    service = ContentService(settings)
+    before = service.catalog()
+    model = models["models"][1]
+    model.update(name="试验显示名", production_sop="docs/male-outfit-sop.md")
+    write_json(settings.content_root / "models.json", models)
+
+    assert service.import_content()
+    after = service.catalog()
+    assert after["revision"] != before["revision"]
+    assert after["looks"] == before["looks"]
+    assert after["models"][1]["name"] == service.admin_models()[1]["name"] == model["name"]
+    assert after["models"][1]["reference"] == before["models"][1]["reference"]
+    assert "production_sop" not in after["models"][1]
+
+
 def test_dynamic_catalog_sources_downloads_and_filtering(content_fixture):
     settings, _, _ = content_fixture
     app = create_app(settings, provider=Provider(), detector=Detector(), clock=Clock())

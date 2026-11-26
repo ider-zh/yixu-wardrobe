@@ -144,13 +144,18 @@ try{
   const modelFilter=new URLSearchParams(link.split('?')[1]).get('model');
   const id=modelFilter||link.split('/').at(-1);
   assert.ok(actualModels.has(id));
+  const displayName=catalog.models.find(model=>model.model_id===id).name;
+  await route('#/models');
+  assert.equal(await evaluate(`document.querySelector(${JSON.stringify('.model-looks-link[href="'+link+'"]')}).closest(".model-card").querySelector("h2").textContent`),displayName);
   await route(link);
   if(modelFilter){
    await wait('!document.getElementById("collection").hidden');
    assert.equal(await evaluate('document.getElementById("model-filter").value'),id);
+   assert.equal(await evaluate('document.getElementById("model-filter").selectedOptions[0].textContent'),displayName);
    continue;
   }
   await wait('!document.getElementById("model-profile").hidden');
+  assert.equal(await evaluate('document.getElementById("model-profile-title").textContent'),displayName+'的穿搭');
   const owned=catalog.latestOrder.filter(key=>catalog.looks.find(look=>look.id===key).model_id===id);
   assert.deepEqual(await evaluate('[...document.querySelectorAll("#model-looks-gallery [data-look-card]")].map(card=>Number(card.dataset.lookCard))'),owned);
  }

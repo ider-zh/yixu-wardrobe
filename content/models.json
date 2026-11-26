@@ -3,7 +3,7 @@
   "models": [
     {
       "model_id": "female-01",
-      "name": "01 号模特",
+      "name": "林知棠",
       "reference": {
         "asset_id": "model-female-01-reference-r1",
         "file": "assets/model-bases/female-01.webp",
@@ -24,7 +24,8 @@
     },
     {
       "model_id": "male-01",
-      "name": "01 号男模特",
+      "name": "周行远",
+      "production_sop": "docs/male-outfit-sop.md",
       "reference": {
         "asset_id": "model-male-01-reference-r1",
         "file": "assets/model-bases/male-01.webp",
