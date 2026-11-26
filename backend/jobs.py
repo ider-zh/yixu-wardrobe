@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import re
 import secrets
 from datetime import UTC, datetime
 from typing import Literal
@@ -38,6 +39,22 @@ def timestamp(value):
     return datetime.fromtimestamp(value, UTC).isoformat().replace("+00:00", "Z")
 
 
+def frozen_reference(row):
+    asset_id = row.get("reference_asset_id")
+    source = row.get("reference_source_url")
+    shot = row.get("shot_index")
+    if (
+        not isinstance(asset_id, str)
+        or not re.fullmatch(r"[A-Za-z0-9_-]{1,128}", asset_id)
+        or source != f"/api/content/assets/{asset_id}"
+        or row.get("edition") != "v2"
+        or type(shot) is not int
+        or not 1 <= shot <= 9
+    ):
+        return None
+    return {"asset_id": asset_id, "source_url": source, "shot_index": shot}
+
+
 class Jobs:
     def __init__(self, store, settings, available, detector, clock, content=None):
         self.store, self.settings = store, settings
@@ -61,7 +78,7 @@ class Jobs:
             raise HTTPException(404, "not_found:Job not found")
         return dict(row)
 
-    def shape(self, row):
+    def shape(self, row, *, include_reference=False):
         with self.store.connect() as db:
             position = (
                 db.execute(
@@ -72,7 +89,7 @@ class Jobs:
                 else 0
             )
         ready = row["output_bytes"] > 0 and row["status"] == "succeeded"
-        return {
+        job = {
             "id": row["id"],
             "status": row["status"],
             "look_id": row["look_id"],
@@ -88,6 +105,9 @@ class Jobs:
             "error_code": row["error_code"],
             "error_message": row["error_message"],
         }
+        if include_reference:
+            job["reference"] = frozen_reference(row)
+        return job
 
     def look_titles(self):
         if self.content is not None and self.content.enabled:
@@ -143,7 +163,7 @@ class Jobs:
                 (*params, limit + 1, offset),
             ).fetchall()
         return {
-            "items": [self.shape(dict(row)) for row in rows[:limit]],
+            "items": [self.shape(dict(row), include_reference=True) for row in rows[:limit]],
             "has_more": len(rows) > limit,
         }
 
@@ -164,17 +184,20 @@ class Jobs:
                 raise HTTPException(
                     409, "idempotency_conflict:This request key has different content"
                 )
-            return self.shape(dict(old))
+            return self.shape(dict(old), include_reference=True)
         # Existing requests need neither fresh inference readiness nor input writes.
         if not self.available():
             raise HTTPException(503, "unavailable:Provider, detector or catalog is not configured")
         photo = validate_photo(raw, self.settings, self.detector)
-        look_title = self.look_titles().get(data.look_id)
-        reference = (
-            self.content.crop_reference(data.look_id, data.shot_index)
-            if self.content is not None and self.content.enabled
-            else crop_reference(self.settings, data.look_id, data.shot_index)
-        )
+        reference_asset_id = reference_source_url = None
+        if self.content is not None and self.content.enabled:
+            reference, reference_asset_id, look_title = self.content.capture_reference(
+                data.look_id, data.shot_index
+            )
+            reference_source_url = f"/api/content/assets/{reference_asset_id}"
+        else:
+            look_title = self.look_titles().get(data.look_id)
+            reference = crop_reference(self.settings, data.look_id, data.shot_index)
         job_id = secrets.token_hex(16)
         with self.store.connect() as db:
             db.execute("BEGIN IMMEDIATE")
@@ -187,11 +210,12 @@ class Jobs:
                     raise HTTPException(
                         409, "idempotency_conflict:This request key has different content"
                     )
-                return self.shape(dict(old))
+                return self.shape(dict(old), include_reference=True)
             db.execute(
                 """INSERT INTO jobs (id,owner,idempotency_key,fingerprint,status,
-                       look_id,look_title,edition,shot_index,created,expires,pose_mode)
-                       VALUES (?,?,?,?,'validating',?,?,?,?,?,?,?)""",
+                       look_id,look_title,edition,shot_index,reference_asset_id,reference_source_url,
+                       created,expires,pose_mode)
+                       VALUES (?,?,?,?,'validating',?,?,?,?,?,?,?,?,?)""",
                 (
                     job_id,
                     owner,
@@ -201,6 +225,8 @@ class Jobs:
                     look_title,
                     data.edition,
                     data.shot_index,
+                    reference_asset_id,
+                    reference_source_url,
                     received,
                     received + 3600,
                     data.pose_mode,
@@ -228,7 +254,7 @@ class Jobs:
             ).rowcount
         if not updated:
             self.drop_inputs(job_id)
-        return self.shape(self.get(job_id, owner))
+        return self.shape(self.get(job_id, owner), include_reference=True)
 
     def purge_inputs(self):
         # One-second early margin covers the 200ms cleanup tick, never extending raw TTL.
@@ -386,7 +412,7 @@ class Jobs:
         @router.get("/tryons/{job_id}")
         def detail(request: Request, job_id: str):
             visitor = require_visitor(request)
-            return self.shape(self.get(job_id, visitor["id"]))
+            return self.shape(self.get(job_id, visitor["id"]), include_reference=True)
 
         @router.get("/tryons/{job_id}/image")
         def image(request: Request, job_id: str):

@@ -51,6 +51,7 @@ class Store:
                     id TEXT UNIQUE NOT NULL, owner TEXT NOT NULL,
                     idempotency_key TEXT NOT NULL, fingerprint TEXT NOT NULL,
                     status TEXT NOT NULL, look_id INTEGER, look_title TEXT, edition TEXT, shot_index INTEGER,
+                    reference_asset_id TEXT, reference_source_url TEXT,
                     created REAL NOT NULL, expires REAL NOT NULL,
                     cancel_requested INTEGER DEFAULT 0,
                     error_code TEXT, error_message TEXT,
@@ -71,8 +72,9 @@ class Store:
             job_columns = {row["name"] for row in db.execute("PRAGMA table_info(jobs)")}
             if "pose_mode" not in job_columns:
                 db.execute("ALTER TABLE jobs ADD COLUMN pose_mode TEXT NOT NULL DEFAULT 'original'")
-            if "look_title" not in job_columns:
-                db.execute("ALTER TABLE jobs ADD COLUMN look_title TEXT")
+            for column in ("look_title", "reference_asset_id", "reference_source_url"):
+                if column not in job_columns:
+                    db.execute(f"ALTER TABLE jobs ADD COLUMN {column} TEXT")
             self._migrate_site_preferences(db)
         self.db_path.chmod(0o600)
 

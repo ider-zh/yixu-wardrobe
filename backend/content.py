@@ -869,6 +869,9 @@ class ContentService:
         return data, record
 
     def crop_reference(self, look_id, shot_index):
+        return self.capture_reference(look_id, shot_index)[0]
+
+    def capture_reference(self, look_id, shot_index):
         from .images import png
 
         if not 1 <= shot_index <= 9:
@@ -880,10 +883,13 @@ class ContentService:
         )
         if look is None:
             raise HTTPException(422, "invalid_selection:Selected look is unavailable")
-        data, _ = self.asset(look["versions"]["v2"]["asset"]["asset_id"])
+        asset_id = look["versions"]["v2"]["asset"]["asset_id"]
+        data, asset = self.asset(asset_id)
+        if asset["visibility"] != "public" or asset["asset_id"] != asset_id:
+            raise HTTPException(404, "not_found:Public reference not found")
         with Image.open(io.BytesIO(data)) as image:
             col, row = (shot_index - 1) % 3, (shot_index - 1) // 3
-            return png(
+            crop = png(
                 image.convert("RGB").crop(
                     (
                         image.width * col // 3,
@@ -893,6 +899,7 @@ class ContentService:
                     )
                 )
             )
+        return crop, asset_id, look["title"]
 
     def router(self):
         router = APIRouter(prefix="/api/content")
