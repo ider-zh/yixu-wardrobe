@@ -468,6 +468,15 @@ dialog{padding:0;border:0;background:var(--paper-light);color:var(--ink);max-wid
   max-width: 58rem;
 }
 
+.packing-form label {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.packing-form select {
+  width: 100%;
+  min-width: 0;
+}
+
 .packing-heading h2 {
   margin: 0;
   overflow-wrap: anywhere;

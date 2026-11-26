@@ -549,5 +549,7 @@ try{
   {type:'look',id:1},{type:'look',id:89},{type:'product',id:'oat-tailored-blazer-001'},
  ]);
  await noOverflow('offline packing checklist');
+ await client('Emulation.setDeviceMetricsOverride',{width:320,height:844,deviceScaleFactor:1,mobile:true});
+ await noOverflow('offline packing checklist at 320px with long merge choices');
  console.log('PASS real Chromium: packing retains real sources, counts, checkmarks, merge order and the original outfit list.');
 }finally{for(const socket of sockets)try{socket.close();}catch{}try{process.kill(-browser.pid,'SIGTERM');}catch{}if(browser.exitCode===null&&browser.signalCode===null)await Promise.race([once(browser,'exit'),new Promise(resolve=>setTimeout(resolve,1500))]);await new Promise(resolve=>server.close(resolve));fs.rmSync(scratch,{recursive:true,force:true,maxRetries:8,retryDelay:100});}
