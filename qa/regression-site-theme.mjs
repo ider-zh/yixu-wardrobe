@@ -560,4 +560,50 @@ try{
  await client('Emulation.setDeviceMetricsOverride',{width:320,height:844,deviceScaleFactor:1,mobile:true});
  await noOverflow('offline packing checklist at 320px with long merge choices');
  console.log('PASS real Chromium: packing retains real sources, counts, checkmarks, merge order and the original outfit list.');
+ await route('#/backup');
+ assert.equal(await evaluate('document.activeElement.id'),'backup-title');
+ const incomingBackup={
+  schemaVersion:1,
+  favorites:{looks:[9997],products:['future-test-piece']},
+  lists:[{id:packingList,name:'导入名称',entries:[{type:'look',id:9996}]}],
+  week:[{date:'2027-01-01',lookId:4},{date:'2027-01-03',lookId:5}],
+  packing:await evaluate('window.WardrobePackingStore.load().then(snapshot=>({...snapshot,title:"不能覆盖本机"}))'),
+ };
+ const selectBackup=async data=>evaluate(`(()=>{
+  const input=document.getElementById('backup-file'),transfer=new DataTransfer();
+  transfer.items.add(new File([${JSON.stringify(JSON.stringify(data))}],'衣橱测试.json',{type:'application/json'}));
+  input.files=transfer.files;input.dispatchEvent(new Event('change'));
+ })()`);
+ await selectBackup({...incomingBackup,photos:[]});
+ await wait('document.getElementById("backup-apply").disabled&&document.getElementById("backup-status").textContent.includes("额外字段")');
+ assert.ok(!await evaluate('JSON.parse(localStorage.getItem("wardrobe99:favorites:v1")||"[]").includes(9997)'));
+ await selectBackup(incomingBackup);
+ await wait('!document.getElementById("backup-preview").hidden&&!document.getElementById("backup-apply").disabled');
+ assert.equal(await evaluate('document.querySelectorAll("#backup-preview-counts dd").length'),5);
+ assert.ok(!await evaluate('JSON.parse(localStorage.getItem("wardrobe99:favorites:v1")||"[]").includes(9997)'),'Preview does not write');
+ await evaluate('document.getElementById("backup-apply").click()');
+ await wait('document.querySelectorAll("#backup-results li").length===5');
+ assert.ok(await evaluate('JSON.parse(localStorage.getItem("wardrobe99:favorites:v1")).includes(9997)&&JSON.parse(localStorage.getItem("yixu:product-favorites:v1")).includes("future-test-piece")'));
+ const importedList=await evaluate(`window.WardrobeLists.load().then(lists=>lists.find(list=>list.id===${JSON.stringify(packingList)}))`);
+ assert.equal(importedList.name,'跨年短途');
+ assert.deepEqual(importedList.entries.at(-1),{type:'look',id:9996});
+ assert.deepEqual(await evaluate('window.WardrobeWeekPlan.load()'),[{date:'2027-01-01',lookId:2},{date:'2027-01-03',lookId:5}]);
+ assert.equal(await evaluate('window.WardrobePackingStore.load().then(snapshot=>snapshot.title)'),'跨年短途');
+ await selectBackup(incomingBackup);
+ await wait('!document.getElementById("backup-apply").disabled');
+ await evaluate('document.getElementById("backup-apply").click()');
+ await wait('document.querySelectorAll("#backup-results li").length===5&&[...document.querySelectorAll("#backup-results li")].every(item=>item.textContent.includes("无变更"))');
+ await evaluate(`(()=>{
+  const create=URL.createObjectURL,click=HTMLAnchorElement.prototype.click;
+  URL.createObjectURL=blob=>{if(blob.type==='application/json')window.capturedBackup=blob;return create.call(URL,blob);};
+  HTMLAnchorElement.prototype.click=function(){
+   if(this.download==='yixu-wardrobe-backup.json'){window.capturedBackupName=this.download;return;}
+   return click.call(this);
+  };
+  document.getElementById('backup-export').click();
+ })()`);
+ await wait('window.capturedBackupName==="yixu-wardrobe-backup.json"&&!!window.capturedBackup');
+ assert.deepEqual(await evaluate('window.capturedBackup.text().then(text=>Object.keys(JSON.parse(text)).sort())'),['favorites','lists','packing','schemaVersion','week']);
+ await noOverflow('offline backup preview at 320px');
+ console.log('PASS real Chromium: backup file preflight, explicit merge, preserved local values, repeat import and safe export shape.');
 }finally{for(const socket of sockets)try{socket.close();}catch{}try{process.kill(-browser.pid,'SIGTERM');}catch{}if(browser.exitCode===null&&browser.signalCode===null)await Promise.race([once(browser,'exit'),new Promise(resolve=>setTimeout(resolve,1500))]);await new Promise(resolve=>server.close(resolve));fs.rmSync(scratch,{recursive:true,force:true,maxRetries:8,retryDelay:100});}

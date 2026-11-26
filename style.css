@@ -526,3 +526,50 @@ dialog{padding:0;border:0;background:var(--paper-light);color:var(--ink);max-wid
   padding-inline-start: 28px;
   font-size: var(--small-text-size);
 }
+
+.backup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  gap: 14px 20px;
+}
+
+.backup-actions label {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.backup-actions input {
+  width: 100%;
+  min-width: 0;
+  max-width: 25rem;
+  font: inherit;
+}
+
+.backup-actions button,
+#backup-apply {
+  min-height: 44px;
+}
+
+.backup-counts,
+.backup-results {
+  max-width: 32rem;
+}
+
+.backup-counts > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.backup-counts dd {
+  margin: 0;
+}
+
+.backup-results {
+  overflow-wrap: anywhere;
+}

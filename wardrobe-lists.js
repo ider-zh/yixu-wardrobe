@@ -202,5 +202,30 @@
     });
   }
 
-  window.WardrobeLists = {storageKey, load, create, rename, removeList, add, remove, subscribe};
+  async function mergeBackup(incoming) {
+    const verified = parseLists(incoming);
+    return update(lists => {
+      const existing = new Map(lists.map(list => [list.id, list]));
+      let additions = 0;
+      for (const list of verified) {
+        const current = existing.get(list.id);
+        if (!current) {
+          lists.push(list);
+          additions++;
+          continue;
+        }
+        const keys = new Set(current.entries.map(entry => `${entry.type}:${entry.id}`));
+        for (const entry of list.entries) {
+          const key = `${entry.type}:${entry.id}`;
+          if (keys.has(key)) continue;
+          current.entries.push(entry);
+          keys.add(key);
+          additions++;
+        }
+      }
+      return additions;
+    });
+  }
+
+  window.WardrobeLists = {storageKey, load, create, rename, removeList, add, remove, subscribe, mergeBackup};
 })();

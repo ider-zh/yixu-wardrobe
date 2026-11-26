@@ -67,24 +67,30 @@
     });
   }
 
-  async function transact(writing, action) {
+  async function transact(writing, action, onResult = value => value) {
     const database = await openDatabase(writing);
     try {
       return await new Promise((resolve, reject) => {
-        let transaction, request;
+        let transaction, request, store;
         try {
           transaction = database.transaction(storeName, writing ? 'readwrite' : 'readonly');
-          request = action(transaction.objectStore(storeName));
+          store = transaction.objectStore(storeName);
+          request = action(store);
         } catch {
           reject(storageError(writing));
           return;
         }
-        transaction.onabort = () => reject(storageError(writing));
+        let result, failure;
+        request.onsuccess = () => {
+          try { result = onResult(request.result, store); }
+          catch (error) { failure = error; transaction.abort(); }
+        };
+        transaction.onabort = () => reject(failure || storageError(writing));
         transaction.oncomplete = () => {
           if (writing) {
             try { updates?.postMessage(null); } catch {}
           }
-          resolve(request.result);
+          resolve(result);
         };
       });
     } finally {
@@ -120,6 +126,24 @@
     await transact(true, store => store.delete(date));
   }
 
+  async function mergeBackup(records) {
+    for (const {date, lookId} of records) {
+      parseDate(date);
+      if (!validLookId(lookId)) throw new RangeError('请输入有效穿搭编号。');
+    }
+    return transact(true, store => store.getAllKeys(), (keys, store) => {
+      const occupied = new Set(keys);
+      let additions = 0;
+      for (const {date, lookId} of records) {
+        if (occupied.has(date)) continue;
+        store.add({date, lookId});
+        occupied.add(date);
+        additions++;
+      }
+      return additions;
+    });
+  }
+
   function subscribe(listener) {
     if (typeof listener !== 'function') throw new TypeError('请选择有效的更新监听函数。');
     const notify = () => listener();
@@ -127,5 +151,5 @@
     return () => updates?.removeEventListener('message', notify);
   }
 
-  window.WardrobeWeekPlan = {todayKey, shiftDate, weekDates, load, assign, remove, subscribe};
+  window.WardrobeWeekPlan = {todayKey, shiftDate, weekDates, load, assign, remove, subscribe, mergeBackup};
 })();

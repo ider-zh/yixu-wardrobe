@@ -21,13 +21,31 @@
     <a href="#/favorites">← 我的收藏</a>
   </div>
   <p>把穿搭和单品放在同一份清单，保存在当前浏览器。</p>
-  <div class="wardrobe-list-entry-link"><a class="outline-button" href="#/week">一周穿搭计划 ↗</a><a class="outline-button" href="#/packing">旅行打包清单 ↗</a></div>
+  <div class="wardrobe-list-entry-link"><a class="outline-button" href="#/week">一周穿搭计划 ↗</a><a class="outline-button" href="#/packing">旅行打包清单 ↗</a><a class="outline-button" href="#/backup">导出与恢复衣橱 ↗</a></div>
   <form id="wardrobe-list-create" class="wardrobe-list-form">
     <label for="wardrobe-list-name">新清单</label>
     <div><input id="wardrobe-list-name" name="name" placeholder="例如周末旅行" required><button type="submit" class="solid-button">新建清单</button></div>
   </form>
   <p id="wardrobe-list-status" class="wardrobe-list-status" role="status"></p>
   <div id="wardrobe-list-panels" class="wardrobe-list-panels"></div>
+</section>
+<section id="backup-page" class="collection backup-page" aria-labelledby="backup-title" hidden>
+  <div class="section-heading">
+    <h1 id="backup-title" tabindex="-1">导出与恢复衣橱</h1>
+    <a href="#/lists">← 搭配清单</a>
+  </div>
+  <p>备份当前浏览器里的穿搭与单品收藏、搭配清单、周计划和打包清单。</p>
+  <div class="backup-actions">
+    <button id="backup-export" type="button" class="outline-button">下载衣橱备份</button>
+    <label for="backup-file">选择备份文件 <input id="backup-file" type="file" accept=".json,application/json"></label>
+  </div>
+  <p id="backup-status" role="status"></p>
+  <section id="backup-preview" aria-labelledby="backup-preview-title" hidden>
+    <h2 id="backup-preview-title">备份预览</h2>
+    <dl id="backup-preview-counts" class="backup-counts"></dl>
+    <button id="backup-apply" type="button" class="solid-button" disabled>合并到当前衣橱</button>
+  </section>
+  <ul id="backup-results" class="backup-results"></ul>
 </section>
 <section id="packing-page" class="collection packing-page" aria-labelledby="packing-title" hidden>
   <div class="section-heading">
@@ -236,5 +254,5 @@
   </form>
   <p id="wardrobe-list-picker-status" class="wardrobe-list-status" role="status"></p>
 </dialog>
-<script src="catalog.js"></script><script src="wardrobe-scenes.js"></script><script src="tryon-storage.js"></script><script src="tryon.js"></script><script src="product-themes.js"></script><script src="product-page.js"></script><script src="wardrobe-lists.js"></script><script src="wardrobe-list-page.js"></script><script src="wardrobe-piece-match.js"></script><script src="wardrobe-color-match.js"></script><script src="wardrobe-framing.js"></script><script src="wardrobe-product-compare.js"></script><script src="wardrobe-publication.js"></script><script src="wardrobe-recent.js"></script><script src="wardrobe-week-plan.js"></script><script src="wardrobe-week-page.js"></script><script src="wardrobe-packing.js"></script><script src="wardrobe-packing-store.js"></script><script src="wardrobe-packing-page.js"></script><script src="app.js"></script>
+<script src="catalog.js"></script><script src="wardrobe-scenes.js"></script><script src="tryon-storage.js"></script><script src="tryon.js"></script><script src="product-themes.js"></script><script src="product-page.js"></script><script src="wardrobe-lists.js"></script><script src="wardrobe-list-page.js"></script><script src="wardrobe-piece-match.js"></script><script src="wardrobe-color-match.js"></script><script src="wardrobe-framing.js"></script><script src="wardrobe-product-compare.js"></script><script src="wardrobe-publication.js"></script><script src="wardrobe-recent.js"></script><script src="wardrobe-week-plan.js"></script><script src="wardrobe-week-page.js"></script><script src="wardrobe-packing.js"></script><script src="wardrobe-packing-store.js"></script><script src="wardrobe-packing-page.js"></script><script src="wardrobe-backup-schema.js"></script><script src="wardrobe-backup.js"></script><script src="wardrobe-backup-page.js"></script><script src="app.js"></script>
 </body></html>

@@ -21,6 +21,9 @@
 !/wardrobe-packing.js
 !/wardrobe-packing-store.js
 !/wardrobe-packing-page.js
+!/wardrobe-backup-schema.js
+!/wardrobe-backup.js
+!/wardrobe-backup-page.js
 !/product-page.js
 !/site-theme.js
 !/site-theme.css
