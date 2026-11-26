@@ -365,7 +365,16 @@ dialog{padding:0;border:0;background:var(--paper-light);color:var(--ink);max-wid
 }
 
 .week-controls a {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 44px;
   min-height: 44px;
+}
+
+.week-page button[aria-disabled="true"] {
+  opacity: .55;
+  cursor: wait;
 }
 
 .week-controls a[aria-disabled="true"] {

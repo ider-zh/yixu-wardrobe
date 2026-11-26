@@ -16,6 +16,7 @@
     const dateChoice = byId('week-date');
     const lookChoice = byId('week-look');
     const status = byId('week-status');
+    const save = form.querySelector('button[type="submit"]');
     const plan = window.WardrobeWeekPlan;
     const esc = escapeText;
     const pending = new Set();
@@ -23,6 +24,13 @@
     let dates = [];
     let renderNumber = 0;
     let readFailed = false;
+
+    function updatePendingControls() {
+      save.setAttribute('aria-disabled', String(pending.has(dateChoice.value)));
+      for(const button of days.querySelectorAll('[data-week-remove]')) {
+        button.setAttribute('aria-disabled', String(pending.has(button.dataset.weekRemove)));
+      }
+    }
 
     function weekLink(link, date, offset) {
       try {
@@ -64,6 +72,7 @@
       const activeDay = active?.closest('[data-week-day]');
       const byDate = new Map(records.map(record => [record.date, record]));
       days.innerHTML = dates.map((date, index) => dayMarkup(date, index, byDate.get(date), todayKey)).join('');
+      updatePendingControls();
       if (active?.id && !page.hidden) {
         (byId(active.id) || byId(activeDay?.id) || dateChoice).focus({preventScroll:true});
       }
@@ -95,6 +104,7 @@
       weekLink(previous, anchor, -7);
       weekLink(next, anchor, 7);
       updateChoices(sameAnchor);
+      updatePendingControls();
 
       try {
         const records = await plan.load();
@@ -113,8 +123,14 @@
     }
 
     async function change(date, action, confirmation) {
-      if (!dates.includes(date) || pending.has(date)) return;
+      if (!dates.includes(date)) return;
+      if (pending.has(date)) {
+        status.textContent = '这一天正在保存，请稍候。';
+        return;
+      }
       pending.add(date);
+      status.textContent = '正在保存这一天的安排。';
+      updatePendingControls();
       try {
         await action();
         if (dates.includes(date) && !page.hidden && await render(anchor) && !page.hidden) {
@@ -124,9 +140,11 @@
         if (dates.includes(date) && !page.hidden) status.textContent = error.message;
       } finally {
         pending.delete(date);
+        updatePendingControls();
       }
     }
 
+    dateChoice.addEventListener('change', updatePendingControls);
     form.addEventListener('submit', event => {
       event.preventDefault();
       const date = dateChoice.value;

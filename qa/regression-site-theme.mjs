@@ -484,6 +484,19 @@ try{
  assert.equal(await evaluate('document.getElementById("week-range").textContent'),'2026-12-28 至 2027-01-03');
  assert.equal(await evaluate('document.getElementById("week-previous").getAttribute("href")'),'#/week?date=2026-12-24');
  assert.equal(await evaluate('document.getElementById("week-today").getAttribute("href")'),'#/week');
+ await evaluate(`(()=>{
+  const plan=window.WardrobeWeekPlan,assign=plan.assign;
+  const gate=new Promise(resolve=>{window.finishWeekWrite=resolve;});
+  plan.assign=(date,id)=>gate.then(()=>{plan.assign=assign;return assign(date,id);});
+  document.getElementById('week-date').value='2027-01-01';
+  document.getElementById('week-look').value='1';
+  document.getElementById('week-form').requestSubmit();
+ })()`);
+ await wait('document.querySelector("#week-form button").getAttribute("aria-disabled")==="true"');
+ await evaluate('document.getElementById("week-look").value="2";document.getElementById("week-form").requestSubmit()');
+ assert.match(await evaluate('document.getElementById("week-status").textContent'),/正在保存/);
+ await evaluate('window.finishWeekWrite()');
+ await wait('document.getElementById("week-look-2027-01-01")?.dataset.weekLook==="1"&&document.querySelector("#week-form button").getAttribute("aria-disabled")==="false"');
  for(const id of [1,2]){
   await evaluate(`document.getElementById('week-date').value='2027-01-01';document.getElementById('week-look').value='${id}';document.getElementById('week-form').requestSubmit()`);
   await wait(`document.getElementById('week-look-2027-01-01')?.dataset.weekLook==='${id}'`);
