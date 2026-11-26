@@ -183,6 +183,7 @@ check('palette families respect thresholds and require every selected family',()
     ['#514a2d','brown'],['#514b2d','green'],
     ['#c4b4a3','brown'],['#c5b4a3','beige'],
     ['#a6965f','brown'],['#a6965e','yellow-orange'],
+    ['#666A70','neutral'],['#1E2228','neutral'],['#FF4000','yellow-orange'],
   ])assert.equal(colorFamily(hex),family,hex);
   assert.equal(colorFamily('#abc'),null);
   assert.equal(matchPalette(['#788178'],['neutral','blue']),null);

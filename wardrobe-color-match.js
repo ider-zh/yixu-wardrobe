@@ -35,8 +35,9 @@
     // Approximate families from the catalog's RGB swatches. Earlier ranges take priority.
     if (chroma < 10 || lightness < 24) return 'neutral';
     const hue = hueDegrees(red, green, blue, maximum, chroma);
+    if (chroma === 10 && hue >= 170 && hue < 255) return 'neutral';
     if (hue >= 20 && hue < 72 && lightness >= 180 && chroma < 74) return 'beige';
-    if (hue >= 22 && hue < 62 && chroma >= 72 && lightness >= 111) return 'yellow-orange';
+    if (hue >= 14 && hue < 62 && chroma >= 72 && lightness >= 111) return 'yellow-orange';
     if (hue >= 50 && hue < 170) return 'green';
     if (hue >= 170 && hue < 255) return 'blue';
     if (hue >= 255 && hue < 338) return 'purple';

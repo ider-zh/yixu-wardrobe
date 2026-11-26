@@ -703,7 +703,7 @@ window.YixuSiteTheme?.subscribe(({theme})=>{
 $('scene-links').innerHTML=[...scenes.values()].map(scene=>'<a data-scene="'+esc(scene.id)+'" href="'+esc(sceneRoute(scene.id))+'">'+esc(scene.title)+'</a>').join('');
 $('piece-filter').innerHTML='<option value="">全部单品类型</option>'+[...pieceTypes].map(([id,title])=>'<option value="'+esc(id)+'">'+esc(title)+'</option>').join('');
 const colorOptions=[...colorTypes].map(([id,label])=>'<option value="'+esc(id)+'">'+esc(label)+'</option>').join('');
-$('color-filter-first').innerHTML='<option value="">全部色系</option>'+colorOptions;
+$('color-filter-first').innerHTML='<option value="">不选</option>'+colorOptions;
 $('color-filter-second').innerHTML='<option value="">不选</option>'+colorOptions;
 adoptCatalog(window.WARDROBE || {looks:[],categoryOrder:[]});updateCounts();
 hydrateCatalog();
