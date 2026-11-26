@@ -358,7 +358,8 @@ dialog{padding:0;border:0;background:var(--paper-light);color:var(--ink);max-wid
 }
 
 .week-controls,
-.week-form {
+.week-form,
+.packing-form {
   display: flex;
   flex-wrap: wrap;
   gap: 10px 14px;
@@ -381,19 +382,22 @@ dialog{padding:0;border:0;background:var(--paper-light);color:var(--ink);max-wid
   opacity: .55;
 }
 
-.week-form {
+.week-form,
+.packing-form {
   align-items: end;
   max-width: 58rem;
 }
 
-.week-form label {
+.week-form label,
+.packing-form label {
   display: grid;
   gap: 6px;
   flex: 1 1 12rem;
   min-width: 0;
 }
 
-.week-form select {
+.week-form select,
+.packing-form select {
   max-width: 100%;
   min-height: 44px;
   padding: 6px 10px;
@@ -441,7 +445,8 @@ dialog{padding:0;border:0;background:var(--paper-light);color:var(--ink);max-wid
 }
 
 @media (max-width: 480px) {
-  .week-form label {
+  .week-form label,
+  .packing-form label {
     flex-basis: 100%;
   }
 
@@ -452,4 +457,63 @@ dialog{padding:0;border:0;background:var(--paper-light);color:var(--ink);max-wid
   .week-day-date {
     grid-column: 1 / -1;
   }
+}
+
+.packing-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  max-width: 58rem;
+}
+
+.packing-heading h2 {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.packing-heading button {
+  min-height: 44px;
+}
+
+.packing-entries {
+  display: grid;
+  max-width: 58rem;
+  margin: 12px 0 20px;
+  padding: 0;
+  list-style: none;
+}
+
+.packing-entries > li {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--line);
+  overflow-wrap: anywhere;
+}
+
+.packing-entries label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+.packing-entries input {
+  flex: 0 0 auto;
+  inline-size: 18px;
+  block-size: 18px;
+  accent-color: var(--ink);
+}
+
+.packing-entries a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: .2em;
+}
+
+.packing-entries ul {
+  margin: 0;
+  padding-inline-start: 28px;
+  font-size: var(--small-text-size);
 }

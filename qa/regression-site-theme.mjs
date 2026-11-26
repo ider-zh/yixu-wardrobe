@@ -518,4 +518,36 @@ try{
  await wait('document.activeElement.id==="week-day-2027-01-02"&&!document.getElementById("week-remove-2027-01-02")');
  await noOverflow('offline weekly outfits');
  console.log('PASS real Chromium: offline weekly plans cross years, replace in place, preserve civil dates across timezones and remove unavailable entries.');
+ const packingList=await evaluate(`(async()=>{
+  const lists=window.WardrobeLists,id=await lists.create('跨年短途');
+  await lists.add(id,'look',1);
+  await lists.add(id,'look',89);
+  await lists.add(id,'product','oat-tailored-blazer-001');
+  return id;
+ })()`);
+ await route('#/packing');
+ await wait(`[...document.getElementById('packing-source').options].some(option=>option.value===${JSON.stringify(packingList)})`);
+ assert.equal(await evaluate('document.activeElement.id'),'packing-title');
+ await evaluate(`document.getElementById('packing-source').value=${JSON.stringify(packingList)};document.getElementById('packing-source-form').requestSubmit()`);
+ await wait('document.querySelectorAll("#packing-entries [data-packing-row]").length===14');
+ const packingJacket='product:oat-tailored-blazer-001';
+ const jacketCheck=`[data-packing-check="${packingJacket}"]`;
+ assert.equal(await evaluate(`document.querySelectorAll('[data-packing-row="${packingJacket}"] .packing-entry-sources a').length`),2);
+ await evaluate(`document.querySelector(${JSON.stringify(jacketCheck)}).focus();document.activeElement.click()`);
+ await wait(`window.WardrobePackingStore.load().then(snapshot=>snapshot.entries.find(entry=>entry.key===${JSON.stringify(packingJacket)}).checked)`);
+ await evaluate(`(()=>{
+  const target=document.getElementById('packing-merge-target'),source=document.getElementById('packing-merge-source');
+  target.value=${JSON.stringify(packingJacket)};target.dispatchEvent(new Event('change'));
+  source.value=[...source.options].find(option=>option.value&&option.value!==target.value&&!option.disabled).value;
+  source.dispatchEvent(new Event('change'));document.getElementById('packing-merge-form').requestSubmit();
+ })()`);
+ await wait('document.querySelectorAll("#packing-entries [data-packing-row]").length===13');
+ assert.equal(await evaluate(`document.querySelector(${JSON.stringify(jacketCheck)}).checked`),false);
+ await client('Page.reload');
+ await wait('document.readyState==="complete"&&document.querySelectorAll("#packing-entries [data-packing-row]").length===13');
+ assert.deepEqual(await evaluate(`window.WardrobeLists.load().then(lists=>lists.find(list=>list.id===${JSON.stringify(packingList)}).entries)`),[
+  {type:'look',id:1},{type:'look',id:89},{type:'product',id:'oat-tailored-blazer-001'},
+ ]);
+ await noOverflow('offline packing checklist');
+ console.log('PASS real Chromium: packing retains real sources, counts, checkmarks, merge order and the original outfit list.');
 }finally{for(const socket of sockets)try{socket.close();}catch{}try{process.kill(-browser.pid,'SIGTERM');}catch{}if(browser.exitCode===null&&browser.signalCode===null)await Promise.race([once(browser,'exit'),new Promise(resolve=>setTimeout(resolve,1500))]);await new Promise(resolve=>server.close(resolve));fs.rmSync(scratch,{recursive:true,force:true,maxRetries:8,retryDelay:100});}

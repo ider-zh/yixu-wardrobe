@@ -21,13 +21,37 @@
     <a href="#/favorites">← 我的收藏</a>
   </div>
   <p>把穿搭和单品放在同一份清单，保存在当前浏览器。</p>
-  <p><a class="outline-button" href="#/week">一周穿搭计划 ↗</a></p>
+  <div class="wardrobe-list-entry-link"><a class="outline-button" href="#/week">一周穿搭计划 ↗</a><a class="outline-button" href="#/packing">旅行打包清单 ↗</a></div>
   <form id="wardrobe-list-create" class="wardrobe-list-form">
     <label for="wardrobe-list-name">新清单</label>
     <div><input id="wardrobe-list-name" name="name" placeholder="例如周末旅行" required><button type="submit" class="solid-button">新建清单</button></div>
   </form>
   <p id="wardrobe-list-status" class="wardrobe-list-status" role="status"></p>
   <div id="wardrobe-list-panels" class="wardrobe-list-panels"></div>
+</section>
+<section id="packing-page" class="collection packing-page" aria-labelledby="packing-title" hidden>
+  <div class="section-heading">
+    <h1 id="packing-title" tabindex="-1">旅行打包清单</h1>
+    <a href="#/lists">← 搭配清单</a>
+  </div>
+  <form id="packing-source-form" class="packing-form">
+    <label for="packing-source">从搭配清单生成<select id="packing-source" required></select></label>
+    <button type="submit" class="solid-button">生成打包清单</button>
+  </form>
+  <p id="packing-status" role="status"></p>
+  <section id="packing-current" aria-labelledby="packing-current-name" hidden>
+    <div class="packing-heading">
+      <h2 id="packing-current-name" tabindex="-1"></h2>
+      <button id="packing-clear" class="outline-button" type="button">删除打包清单</button>
+    </div>
+    <p id="packing-missing" hidden></p>
+    <ul id="packing-entries" class="packing-entries"></ul>
+    <form id="packing-merge-form" class="packing-form">
+      <label for="packing-merge-target">保留条目<select id="packing-merge-target" required></select></label>
+      <label for="packing-merge-source">要并入的条目<select id="packing-merge-source" required></select></label>
+      <button type="submit" class="outline-button">合并两项</button>
+    </form>
+  </section>
 </section>
 <section id="week-page" class="collection week-page" aria-labelledby="week-title" hidden>
   <div class="section-heading">
@@ -212,5 +236,5 @@
   </form>
   <p id="wardrobe-list-picker-status" class="wardrobe-list-status" role="status"></p>
 </dialog>
-<script src="catalog.js"></script><script src="wardrobe-scenes.js"></script><script src="tryon-storage.js"></script><script src="tryon.js"></script><script src="product-themes.js"></script><script src="product-page.js"></script><script src="wardrobe-lists.js"></script><script src="wardrobe-list-page.js"></script><script src="wardrobe-piece-match.js"></script><script src="wardrobe-color-match.js"></script><script src="wardrobe-framing.js"></script><script src="wardrobe-product-compare.js"></script><script src="wardrobe-publication.js"></script><script src="wardrobe-recent.js"></script><script src="wardrobe-week-plan.js"></script><script src="wardrobe-week-page.js"></script><script src="app.js"></script>
+<script src="catalog.js"></script><script src="wardrobe-scenes.js"></script><script src="tryon-storage.js"></script><script src="tryon.js"></script><script src="product-themes.js"></script><script src="product-page.js"></script><script src="wardrobe-lists.js"></script><script src="wardrobe-list-page.js"></script><script src="wardrobe-piece-match.js"></script><script src="wardrobe-color-match.js"></script><script src="wardrobe-framing.js"></script><script src="wardrobe-product-compare.js"></script><script src="wardrobe-publication.js"></script><script src="wardrobe-recent.js"></script><script src="wardrobe-week-plan.js"></script><script src="wardrobe-week-page.js"></script><script src="wardrobe-packing.js"></script><script src="wardrobe-packing-store.js"></script><script src="wardrobe-packing-page.js"></script><script src="app.js"></script>
 </body></html>

@@ -261,6 +261,19 @@ check('weekly plan keeps dates as civil days across leap days and years',()=>{
   assert.equal(shiftDate('2026-03-01',-1),'2026-02-28');
   assert.throws(()=>shiftDate('2026-02-29',1));
 });
+check('packing expands outfits and only merges explicit product appearances',()=>{
+  const window={};
+  vm.runInNewContext(fs.readFileSync(path.join(root,'wardrobe-packing.js'),'utf8'),{window});
+  const catalog=loadContent(root).catalog;
+  const source=[{type:'look',id:1},{type:'look',id:89},{type:'product',id:'oat-tailored-blazer-001'}];
+  const pack=window.WardrobePacking.buildEntries(source,catalog);
+  assert.equal(pack.entries.length,14);
+  const jacket=pack.entries.find(entry=>entry.key==='product:oat-tailored-blazer-001');
+  assert.deepEqual(JSON.parse(JSON.stringify(jacket.sources)),[{type:'look',id:1,pieceIndex:1},{type:'product',id:'oat-tailored-blazer-001'}]);
+  assert.equal(pack.missing.length,0);
+  const ambiguous=window.WardrobePacking.buildEntries([{type:'look',id:1},{type:'look',id:10}],catalog);
+  assert.equal(ambiguous.entries.filter(entry=>/^product:.*loafers/.test(entry.key)).length,2);
+});
 for(const name of checks)console.log('PASS '+name);
 console.log('Synthetic DOM regression: '+checks.length+' checks passed.');
 await import('./regression-assets.mjs');
