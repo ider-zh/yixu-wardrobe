@@ -325,8 +325,10 @@ try{
  assert.equal(await evaluate('document.querySelectorAll("#detail-pieces .detail-piece-match").length'),1);
  await evaluate('document.getElementById("close-detail").click()');
  await wait(`location.hash===${JSON.stringify(streetPants)}&&!document.getElementById("detail-dialog").open`);
+ await wait('document.activeElement.matches(\'#gallery .look-photo-button[data-open="5"]\')');
  await evaluate('document.querySelector(\'[data-clear="piece"]\').click()');
  assert.equal(await evaluate('location.hash'),street);
+ assert.equal(await evaluate('document.activeElement.id'),'piece-filter');
  await evaluate(`location.hash=${JSON.stringify(street+'&piece=unknown')}`);
  await wait(`location.hash===${JSON.stringify(street)}`);
  await route('#/looks?piece=trench-coat');

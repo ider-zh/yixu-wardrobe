@@ -14,7 +14,7 @@ let productSaved=[];
 try{const value=JSON.parse(localStorage.getItem(productStorageKey)||'[]');if(Array.isArray(value))productSaved=value.filter(id=>typeof id==='string'&&/^[A-Za-z0-9_-]+$/.test(id));}catch{}
 const productFavorites=new Set(productSaved);
 const state = {category:'', season:'', query:'', model:'', region:'', piece:'', latestOnly:false, favoritesOnly:false, sort:'latest', page:'home', profileModel:'', scene:'', limit:24, active:null, view:0};
-let filtered = [], toastTimer, detailReturnRoute = '#/home', routing = false, detailNavigation = null, focusArchive = false, routeDetailCloses = 0, detailSceneOpener = null;
+let filtered = [], toastTimer, detailReturnRoute = '#/home', routing = false, detailNavigation = null, focusArchive = false, routeDetailCloses = 0, detailSceneOpener = null, detailArchiveOpener = null;
 const scenes = new Map((window.WARDROBE_SCENES || []).map(scene=>[scene.id,scene]));
 const pieceMatch = window.WardrobePieceMatch;
 const pieceTypes = new Map((pieceMatch?.categories || []).map(category=>[category.id,category.title]));
@@ -336,7 +336,13 @@ $('model-filter').addEventListener('change',e=>{state.model=e.target.value;refre
 $('region-filter').addEventListener('change',e=>{state.region=e.target.value;refreshFilters();});
 $('piece-filter').addEventListener('change',e=>{state.piece=pieceTypes.has(e.target.value)?e.target.value:'';refreshFilters();});
 $('latest-only').addEventListener('change',e=>{state.latestOnly=e.target.checked;refreshFilters();});
-$('active-filters').addEventListener('click',e=>{const b=e.target.closest('[data-clear]');if(!b)return;state[b.dataset.clear]=['favoritesOnly','latestOnly'].includes(b.dataset.clear)?false:'';refreshFilters();});
+$('active-filters').addEventListener('click',e=>{
+ const key=e.target.closest('[data-clear]')?.dataset.clear;
+ if(!key)return;
+ state[key]=['favoritesOnly','latestOnly'].includes(key)?false:'';
+ refreshFilters();
+ if(key==='piece')$('piece-filter').focus();
+});
 $('season').addEventListener('change',e=>{if(e.target.name!=='season')return;state.season=e.target.value;refreshFilters();});
 $('search').addEventListener('input',e=>{state.query=e.target.value;state.limit=24;renderGallery();renderActiveFilters();syncArchiveURL();});
 $('favorites-only').addEventListener('change',e=>{state.favoritesOnly=e.target.checked;refreshFilters();});
@@ -417,6 +423,7 @@ function openDetail(id,preserveNavigation=false,{view=0,routed=false,hydrating=f
   if(restored&&typeof restored.returnRoute==='string'&&/^#\/(home|looks|models|favorites|products|product|lists)(?:[/?]|$)/.test(restored.returnRoute))detailReturnRoute=restored.returnRoute;
   else if(!alreadyOpen)detailReturnRoute=detailRoute?(l.model_only?modelRoute(l.model_id):'#/home'):location.hash||'#/home';
   if(!alreadyOpen)detailSceneOpener=restored?.sceneOpener??(!detailRoute&&state.scene?id:null);
+  if(!alreadyOpen)detailArchiveOpener=restored?.archiveOpener??(!detailRoute&&state.page==='looks'&&state.piece?id:null);
   if(restored&&Array.isArray(restored.navigation)&&restored.navigation.includes(id))detailNavigation=restored.navigation.filter(key=>byId.has(key));
   else if(!preserveNavigation||!detailNavigation?.includes(id)){
     const profile=l.model_only?l.model_id:state.profileModel;
@@ -424,7 +431,7 @@ function openDetail(id,preserveNavigation=false,{view=0,routed=false,hydrating=f
       :(['looks','favorites'].includes(state.page)&&filtered.some(look=>look.id===id)?filtered:latestLooks());
     detailNavigation=selection.map(look=>look.id);
   }
-  const entry={...history.state,wardrobeDetail:{returnRoute:detailReturnRoute,navigation:detailNavigation,sceneOpener:detailSceneOpener}};
+  const entry={...history.state,wardrobeDetail:{returnRoute:detailReturnRoute,navigation:detailNavigation,sceneOpener:detailSceneOpener,archiveOpener:detailArchiveOpener}};
   const hash=lookRoute(l,view);
   // Treat the scene's detail carousel as a single visit so Back can return to the list.
   if(routed||location.hash===hash||(alreadyOpen&&detailSceneOpener!==null))history.replaceState(entry,'',hash);
@@ -533,11 +540,12 @@ function routeFromURL(scroll=true,hash=location.hash,{hydrating=false}={}){
  const params=new URLSearchParams(route?.[2]||'');
  const scene=page==='looks'?availableScene(params.get('scene')):null;
  const sceneFocus=scene&&detailReturnRoute===hash?detailSceneOpener:null,leavingScene=state.scene&&!scene;
+ const archiveFocus=page==='looks'&&detailReturnRoute===hash?detailArchiveOpener:null;
  routing=true;
  state.page=page;state.profileModel=profile?.[1]||'';state.scene=scene?.id||'';
  // Native dialog close events are queued. A route-driven close must not later
  // overwrite a detail URL restored by Back before that close event arrives.
- if($('detail-dialog').open){routeDetailCloses++;$('detail-dialog').close();}state.active=null;detailNavigation=null;detailSceneOpener=null;
+ if($('detail-dialog').open){routeDetailCloses++;$('detail-dialog').close();}state.active=null;detailNavigation=null;detailSceneOpener=null;detailArchiveOpener=null;
  $('home-page').hidden=page!=='home';$('models-page').hidden=page!=='models';$('collection').hidden=!['looks','favorites'].includes(page);$('closing-note').hidden=page!=='home';
  $('products-page').hidden=page!=='products';$('product-page').hidden=page!=='product';
  $('wardrobe-list-page').hidden=page!=='lists';$('wardrobe-list-entry-link').hidden=page!=='favorites';
@@ -555,10 +563,14 @@ function routeFromURL(scroll=true,hash=location.hash,{hydrating=false}={}){
  }
  if($('filter-dialog').open)$('filter-dialog').close();
  routing=false;
- if(scroll&&sceneFocus===null)window.scrollTo({top:0,behavior:'instant'});
+ if(scroll&&sceneFocus===null&&archiveFocus===null)window.scrollTo({top:0,behavior:'instant'});
  if(sceneFocus!==null){
   const target=document.querySelector('#gallery .look-photo-button[data-open="'+sceneFocus+'"]')||document.querySelector('#scene-links [aria-current="page"]');
   target?.focus();
+ }
+ if(archiveFocus!==null){
+  const card=document.querySelector('#gallery .look-photo-button[data-open="'+archiveFocus+'"]');
+  (card||$('piece-filter')).focus();
  }
  if((focusArchive||leavingScene)&&page==='looks'){focusArchive=false;$('collection-title').tabIndex=-1;$('collection-title').focus({preventScroll:true});}
 }
