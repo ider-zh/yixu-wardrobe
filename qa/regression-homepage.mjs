@@ -667,14 +667,29 @@ try{
  await wait('!document.getElementById("wardrobe-list-picker").open&&document.activeElement.id==="detail-list-add"');
  await evaluate('document.getElementById("close-detail").click()');
  await wait('location.hash==="#/looks?scene=weekend-walk"');
- await route(bootsHash);
- await evaluate('document.querySelector("[data-product-list]").click()');
- await wait('document.getElementById("wardrobe-list-picker").open');
- await evaluate('document.querySelector("[data-list-choice]").click();document.getElementById("close-wardrobe-list-picker").click()');
+ const listCatalogGate=Promise.withResolvers();
+ catalogHold=listCatalogGate.promise;
+ const updatedProductName=boots.name+' · 清单水合夹具';
+ apiCatalog.products.find(product=>product.product_id===boots.product_id).name=updatedProductName;
+ try{
+  await navigate(origin+'/?list-catalog=delayed'+bootsHash);
+  await evaluate('window.listOpener=document.querySelector("[data-product-list]");window.listOpener.click()');
+  await wait('document.getElementById("wardrobe-list-picker").open');
+  await evaluate('document.querySelector("[data-list-choice]").click()');
+  listCatalogGate.resolve();
+  await wait(`window.WARDROBE.products.some(product=>product.product_id===${JSON.stringify(boots.product_id)}&&product.name===${JSON.stringify(updatedProductName)})`);
+  assert.equal(await evaluate('window.listOpener.isConnected'),false,'Hydration redraws the product page');
+  await evaluate('document.getElementById("close-wardrobe-list-picker").click()');
+  await wait('document.activeElement.matches("[data-product-list]")');
+ }finally{
+  listCatalogGate.resolve();
+  catalogHold=null;
+  apiCatalog=structuredClone(catalog);
+ }
  await route('#/lists');
  const mixedLinks='Array.from(document.querySelectorAll(".wardrobe-list-entry a"),link=>link.getAttribute("href"))';
  assert.deepEqual(await evaluate(mixedLinks),['#look-38',bootsHash]);
- await client('Page.reload');await wait('!document.getElementById("wardrobe-list-page").hidden&&document.querySelectorAll(".wardrobe-list-entry").length===2');
+ await client('Page.reload');await wait('document.getElementById("wardrobe-list-page")?.hidden===false&&document.querySelectorAll(".wardrobe-list-entry").length===2');
  assert.deepEqual(await evaluate(mixedLinks),['#look-38',bootsHash]);
  await evaluate('const form=document.querySelector("[data-list-rename]");form.closest("details").open=true;form.elements.name.value="周末散步";form.requestSubmit()');
  await wait('document.querySelector(".wardrobe-list-heading h2")?.textContent==="周末散步"');

@@ -185,7 +185,8 @@
     picker.addEventListener('close', () => {
       if (picker.open) return;
       selected = null;
-      if (opener?.isConnected) opener.focus({preventScroll:true});
+      const target = opener?.isConnected ? opener : opener?.id ? byId(opener.id) : null;
+      if (target && !target.closest('[hidden]')) target.focus({preventScroll:true});
       opener = null;
     });
     window.addEventListener('storage', event => {
