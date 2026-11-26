@@ -23,6 +23,7 @@
     let opener = null;
     let lists = [];
     let readFailed = false;
+    const pending = new WeakMap();
 
     function entryMarkup(listId, entry) {
       const entryId = escapeText(entry.id);
@@ -117,20 +118,42 @@
       region.textContent = error?.message || '无法保存搭配清单。';
     }
 
+    async function mutate(scope, key, region, action, complete) {
+      let actions = pending.get(scope);
+      if (!actions) {
+        actions = new Set();
+        pending.set(scope, actions);
+      }
+      if (actions.has(key)) return;
+      actions.add(key);
+      const active = document.activeElement;
+      const inScope = () => scope === page ? !page.hidden && !picker.open : picker.open && selected === scope;
+      try {
+        const result = await action();
+        const keepFocus = document.activeElement === active || (active?.id && document.activeElement?.id === active.id);
+        render();
+        if (!readFailed && inScope()) complete(result, keepFocus);
+      } catch (error) {
+        if (inScope()) showError(region, error);
+      } finally {
+        actions.delete(key);
+      }
+    }
+
     function createList(form, region, afterCreate) {
       form.addEventListener('submit', event => {
         event.preventDefault();
         const input = nameInput(form);
-        try {
-          const id = store.create(input.value);
-          input.value = '';
-          render();
+        const submitted = input.value;
+        const scope = form === pickerForm ? selected : page;
+        if (!scope) return;
+        mutate(scope, form.id, region, () => store.create(submitted), (id, keepFocus) => {
+          if (input.value === submitted) {
+            input.value = '';
+            if (keepFocus) afterCreate(id);
+          }
           region.textContent = '已新建清单。';
-          afterCreate(id);
-        } catch (error) {
-          showError(region, error);
-          input.focus();
-        }
+        });
       });
     }
 
@@ -142,59 +165,53 @@
       if (!form) return;
       event.preventDefault();
       const id = form.dataset.listRename;
-      try {
-        store.rename(id, nameInput(form).value);
-        const details = form.closest('details');
-        details.open = false;
-        details.querySelector('summary').focus({preventScroll:true});
-        render();
+      const submitted = nameInput(form).value;
+      mutate(page, `rename:${id}`, status, () => store.rename(id, submitted), (_, keepFocus) => {
+        const details = byId(`wardrobe-list-edit-${id}`);
+        const input = byId(`wardrobe-list-name-input-${id}`);
+        if (keepFocus && details && (input.value === submitted || input.value === submitted.trim())) {
+          const list = lists.find(item => item.id === id);
+          if (list) input.value = list.name;
+          details.open = false;
+          details.querySelector('summary').focus({preventScroll:true});
+        }
         status.textContent = '已保存清单名称。';
-      } catch (error) {
-        showError(status, error);
-        nameInput(form).focus();
-      }
+      });
     });
 
     panels.addEventListener('click', event => {
       const removeEntry = event.target.closest('[data-list-remove]');
       const removeList = event.target.closest('[data-list-delete]');
-      try {
-        if (removeEntry) {
-          const {listRemove, entryType, entryId} = removeEntry.dataset;
-          const row = removeEntry.closest('li');
-          const neighbor = row.nextElementSibling || row.previousElementSibling;
-          const nextId = neighbor?.querySelector('[data-list-remove]')?.id;
-          store.remove(listRemove, entryType, entryType === 'look' ? Number(entryId) : entryId);
-          render();
-          (byId(nextId) || byId(`wardrobe-list-rename-${listRemove}`))?.focus({preventScroll:true});
+      if (removeEntry) {
+        const {listRemove, entryType, entryId} = removeEntry.dataset;
+        const row = removeEntry.closest('li');
+        const neighbor = row.nextElementSibling || row.previousElementSibling;
+        const nextId = neighbor?.querySelector('[data-list-remove]')?.id;
+        mutate(page, removeEntry.id, status, () => store.remove(listRemove, entryType, entryType === 'look' ? Number(entryId) : entryId), (_, keepFocus) => {
+          if (keepFocus) (byId(nextId) || byId(`wardrobe-list-rename-${listRemove}`))?.focus({preventScroll:true});
           status.textContent = '已从清单移除。';
-        } else if (removeList) {
-          const id = removeList.dataset.listDelete;
-          const position = lists.findIndex(list => list.id === id);
-          const list = lists[position];
-          if (!list || !window.confirm(`删除清单「${list.name}」？`)) return;
-          store.removeList(id);
-          render();
+        });
+      } else if (removeList) {
+        const id = removeList.dataset.listDelete;
+        const position = lists.findIndex(list => list.id === id);
+        const list = lists[position];
+        if (!list || pending.get(page)?.has(removeList.id) || !window.confirm(`删除清单「${list.name}」？`)) return;
+        mutate(page, removeList.id, status, () => store.removeList(id), (_, keepFocus) => {
           const next = lists[position] || lists[position - 1];
-          (byId(`wardrobe-list-delete-${next?.id}`) || nameInput(createForm)).focus({preventScroll:true});
+          if (keepFocus) (byId(`wardrobe-list-delete-${next?.id}`) || nameInput(createForm)).focus({preventScroll:true});
           status.textContent = '已删除清单。';
-        }
-      } catch (error) {
-        showError(status, error);
+        });
       }
     });
 
     choices.addEventListener('click', event => {
       const option = event.target.closest('[data-list-choice]');
       if (!selected || !option || option.getAttribute('aria-disabled') === 'true') return;
-      try {
-        store.add(option.dataset.listChoice, selected.type, selected.id);
-        render();
-        byId(option.id)?.focus();
+      const scope = selected;
+      mutate(scope, option.id, pickerStatus, () => store.add(option.dataset.listChoice, scope.type, scope.id), (_, keepFocus) => {
+        if (keepFocus) byId(option.id)?.focus();
         pickerStatus.textContent = '已加入清单。';
-      } catch (error) {
-        showError(pickerStatus, error);
-      }
+      });
     });
 
     closePicker.addEventListener('click', () => picker.close());

@@ -2,6 +2,7 @@
   'use strict';
 
   const storageKey = 'yixu:wardrobe-lists:v1';
+  const lockStore = 'locks';
   const token = /^[A-Za-z0-9_-]+$/;
 
   function isEntry(type, id) {
@@ -53,6 +54,74 @@
     }
   }
 
+  function lockError() {
+    return new Error('无法在此浏览器中安全保存搭配清单。');
+  }
+
+  function openLockDatabase() {
+    return new Promise((resolve, reject) => {
+      const indexedDB = window.indexedDB;
+      if (!indexedDB) {
+        reject(lockError());
+        return;
+      }
+      const request = indexedDB.open('yixu:wardrobe-list-locks', 1);
+      let blocked = false;
+      request.onupgradeneeded = () => request.result.createObjectStore(lockStore);
+      request.onblocked = () => {
+        blocked = true;
+        reject(lockError());
+      };
+      request.onerror = () => reject(lockError());
+      request.onsuccess = () => {
+        if (blocked) request.result.close();
+        else resolve(request.result);
+      };
+    });
+  }
+
+  async function withDatabaseLock(action) {
+    let database;
+    try { database = await openLockDatabase(); } catch { throw lockError(); }
+    try {
+      return await new Promise((resolve, reject) => {
+        let transaction, request;
+        try {
+          transaction = database.transaction(lockStore, 'readwrite');
+          request = transaction.objectStore(lockStore).get(storageKey);
+        } catch {
+          reject(lockError());
+          return;
+        }
+        transaction.onabort = () => reject(lockError());
+        // The readwrite transaction is exclusive across tabs. Its callback
+        // changes localStorage synchronously without storing list data in IndexedDB.
+        request.onsuccess = () => {
+          try { resolve(action()); } catch (error) { reject(error); }
+        };
+      });
+    } finally {
+      database.close();
+    }
+  }
+
+  async function update(action) {
+    const readAndUpdate = () => action(load());
+    const locks = window.navigator?.locks;
+    if (typeof locks?.request !== 'function') return withDatabaseLock(readAndUpdate);
+
+    let acquired = false;
+    try {
+      return await locks.request(storageKey, () => {
+        acquired = true;
+        return readAndUpdate();
+      });
+    } catch (error) {
+      if (acquired) throw error;
+      throw lockError();
+    }
+  }
+
   function listName(name) {
     const trimmed = typeof name === 'string' && name.trim();
     if (!trimmed) throw new Error('请输入搭配清单名称。');
@@ -65,46 +134,52 @@
     return list;
   }
 
-  function create(name) {
+  async function create(name) {
     const trimmedName = listName(name);
-    const lists = load();
-    const base = window.crypto?.randomUUID?.() || `list-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
-    let id = base;
-    for (let suffix = 1; lists.some(list => list.id === id); suffix++) id = `${base}-${suffix}`;
-    lists.push({id, name:trimmedName, entries:[]});
-    writeLists(lists);
-    return id;
+    return update(lists => {
+      const base = window.crypto?.randomUUID?.() || `list-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+      let id = base;
+      for (let suffix = 1; lists.some(list => list.id === id); suffix++) id = `${base}-${suffix}`;
+      lists.push({id, name:trimmedName, entries:[]});
+      writeLists(lists);
+      return id;
+    });
   }
 
-  function rename(listId, name) {
-    const lists = load();
-    findList(lists, listId).name = listName(name);
-    writeLists(lists);
+  async function rename(listId, name) {
+    const trimmedName = listName(name);
+    return update(lists => {
+      findList(lists, listId).name = trimmedName;
+      writeLists(lists);
+    });
   }
 
-  function removeList(listId) {
-    const lists = load();
-    const list = findList(lists, listId);
-    writeLists(lists.filter(item => item !== list));
+  async function removeList(listId) {
+    return update(lists => {
+      const list = findList(lists, listId);
+      writeLists(lists.filter(item => item !== list));
+    });
   }
 
-  function add(listId, type, id) {
+  async function add(listId, type, id) {
     if (!isEntry(type, id)) throw new Error('这件内容无法加入搭配清单。');
-    const lists = load();
-    const {entries} = findList(lists, listId);
-    if (entries.some(item => item.type === type && item.id === id)) return;
-    entries.push({type, id});
-    writeLists(lists);
+    return update(lists => {
+      const {entries} = findList(lists, listId);
+      if (entries.some(item => item.type === type && item.id === id)) return;
+      entries.push({type, id});
+      writeLists(lists);
+    });
   }
 
-  function remove(listId, type, id) {
+  async function remove(listId, type, id) {
     if (!isEntry(type, id)) throw new Error('这件内容无法从搭配清单中移除。');
-    const lists = load();
-    const list = findList(lists, listId);
-    const entries = list.entries.filter(item => item.type !== type || item.id !== id);
-    if (entries.length === list.entries.length) return;
-    list.entries = entries;
-    writeLists(lists);
+    return update(lists => {
+      const list = findList(lists, listId);
+      const entries = list.entries.filter(item => item.type !== type || item.id !== id);
+      if (entries.length === list.entries.length) return;
+      list.entries = entries;
+      writeLists(lists);
+    });
   }
 
   window.WardrobeLists = {storageKey, load, create, rename, removeList, add, remove};

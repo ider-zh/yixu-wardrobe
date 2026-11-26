@@ -676,6 +676,7 @@ try{
   await evaluate('window.listOpener=document.querySelector("[data-product-list]");window.listOpener.click()');
   await wait('document.getElementById("wardrobe-list-picker").open');
   await evaluate('document.querySelector("[data-list-choice]").click()');
+  await wait('document.querySelector("[data-list-choice]").getAttribute("aria-disabled")==="true"');
   listCatalogGate.resolve();
   await wait(`window.WARDROBE.products.some(product=>product.product_id===${JSON.stringify(boots.product_id)}&&product.name===${JSON.stringify(updatedProductName)})`);
   assert.equal(await evaluate('window.listOpener.isConnected'),false,'Hydration redraws the product page');
@@ -699,9 +700,10 @@ try{
  await wait('location.hash==="#/lists"&&!document.getElementById("detail-dialog").open');
  await noOverflow('Mixed wardrobe list at 390px');
  await evaluate('document.querySelector(\'[data-list-remove][data-entry-type="look"]\').click()');
+ await wait('document.querySelectorAll(".wardrobe-list-entry").length===1');
  assert.deepEqual(await evaluate(mixedLinks),[bootsHash]);
  await evaluate('window.confirm=()=>true;document.querySelector("[data-list-delete]").click()');
- assert.equal(await evaluate('document.querySelectorAll(".wardrobe-list-group").length'),0);
+ await wait('document.querySelectorAll(".wardrobe-list-group").length===0');
  assert.deepEqual(await evaluate(`${JSON.stringify(listFavoriteKeys)}.map(key=>localStorage.getItem(key))`),favoriteValues);
  await evaluate(`localStorage.setItem(window.WardrobeLists.storageKey,'{broken');window.dispatchEvent(new StorageEvent('storage',{key:window.WardrobeLists.storageKey}));`);
  assert.match(await evaluate('document.getElementById("wardrobe-list-status").textContent'),/无法识别/);
