@@ -6,7 +6,7 @@ import secrets
 from datetime import UTC, datetime
 from typing import Literal
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Query, Request
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from starlette.concurrency import run_in_threadpool
 from starlette.datastructures import UploadFile
@@ -15,6 +15,13 @@ from starlette.responses import JSONResponse
 
 from .files import atomic_write
 from .images import crop_reference, hide_grid_original, validate_photo
+
+HistoryStatus = Literal["all", "active", "success", "failed"]
+HISTORY_STATUS_GROUPS = {
+    "active": ("queued", "validating", "generating", "postprocessing"),
+    "success": ("succeeded",),
+    "failed": ("failed", "unknown", "needs_photo", "expired", "canceled"),
+}
 
 
 class Submission(BaseModel):
@@ -69,6 +76,7 @@ class Jobs:
             "id": row["id"],
             "status": row["status"],
             "look_id": row["look_id"],
+            "look_title": row.get("look_title"),
             "edition": row["edition"],
             "shot_index": row["shot_index"],
             "pose_mode": row["pose_mode"],
@@ -79,6 +87,64 @@ class Jobs:
             "download_url": f"/api/tryons/{row['id']}/download" if ready else None,
             "error_code": row["error_code"],
             "error_message": row["error_message"],
+        }
+
+    def look_titles(self):
+        if self.content is not None and self.content.enabled:
+            return self.content.look_titles()
+        if self.settings.catalog_path is None:
+            return {}
+        try:
+            catalog = json.loads(self.settings.catalog_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return {}
+        looks = catalog.get("looks") if isinstance(catalog, dict) else None
+        if not isinstance(looks, list):
+            return {}
+        return {
+            look["id"]: look["title"]
+            for look in looks
+            if isinstance(look, dict)
+            and type(look.get("id")) is int
+            and isinstance(look.get("title"), str)
+        }
+
+    def history(self, owner, offset, limit, look, status):
+        conditions = ["owner=?"]
+        params: list[str | int] = [owner]
+        statuses = HISTORY_STATUS_GROUPS.get(status)
+        if statuses:
+            conditions.append("status IN (" + ",".join("?" for _ in statuses) + ")")
+            params.extend(statuses)
+
+        needle = look.strip().casefold()
+        number = needle.removeprefix("#")
+        if number.isascii() and number.isdecimal():
+            look_id = int(number)
+            if not 1 <= look_id <= 2_147_483_647:
+                return {"items": [], "has_more": False}
+            conditions.append("look_id=?")
+            params.append(look_id)
+            needle = ""
+        current_titles = self.look_titles() if needle else {}
+        with self.store.connect() as db:
+            if needle:
+                def title_matches(title, look_id):
+                    text = title if isinstance(title, str) and title else current_titles.get(look_id, "")
+                    return needle in text.casefold()
+
+                db.create_function(
+                    "tryon_title_matches", 2, title_matches, deterministic=True
+                )
+                conditions.append("tryon_title_matches(look_title, look_id)")
+            rows = db.execute(
+                "SELECT * FROM jobs WHERE " + " AND ".join(conditions)
+                + " ORDER BY seq DESC LIMIT ? OFFSET ?",
+                (*params, limit + 1, offset),
+            ).fetchall()
+        return {
+            "items": [self.shape(dict(row)) for row in rows[:limit]],
+            "has_more": len(rows) > limit,
         }
 
     def accept(self, owner, data, raw, received):
@@ -103,6 +169,7 @@ class Jobs:
         if not self.available():
             raise HTTPException(503, "unavailable:Provider, detector or catalog is not configured")
         photo = validate_photo(raw, self.settings, self.detector)
+        look_title = self.look_titles().get(data.look_id)
         reference = (
             self.content.crop_reference(data.look_id, data.shot_index)
             if self.content is not None and self.content.enabled
@@ -123,13 +190,15 @@ class Jobs:
                 return self.shape(dict(old))
             db.execute(
                 """INSERT INTO jobs (id,owner,idempotency_key,fingerprint,status,
-                       look_id,edition,shot_index,created,expires,pose_mode) VALUES (?,?,?,?,'validating',?,?,?,?,?,?)""",
+                       look_id,look_title,edition,shot_index,created,expires,pose_mode)
+                       VALUES (?,?,?,?,'validating',?,?,?,?,?,?,?)""",
                 (
                     job_id,
                     owner,
                     data.idempotency_key,
                     fingerprint,
                     data.look_id,
+                    look_title,
                     data.edition,
                     data.shot_index,
                     received,
@@ -302,19 +371,17 @@ class Jobs:
                 await form.close()
 
         @router.get("/tryons")
-        def listing(request: Request, offset: int = 0, limit: int = 100):
+        def listing(
+            request: Request,
+            offset: int = 0,
+            limit: int = 100,
+            look: str = Query("", max_length=200),
+            status: HistoryStatus = "all",
+        ):
             visitor = require_visitor(request)
-            if offset < 0 or not 1 <= limit <= 1000:
+            if not 0 <= offset <= 2**63 - 1 or not 1 <= limit <= 1000:
                 raise HTTPException(422, "pagination:Invalid pagination")
-            with self.store.connect() as db:
-                rows = db.execute(
-                    "SELECT * FROM jobs WHERE owner=? ORDER BY seq DESC LIMIT ? OFFSET ?",
-                    (visitor["id"], limit + 1, offset),
-                ).fetchall()
-            return {
-                "items": [self.shape(dict(r)) for r in rows[:limit]],
-                "has_more": len(rows) > limit,
-            }
+            return self.history(visitor["id"], offset, limit, look, status)
 
         @router.get("/tryons/{job_id}")
         def detail(request: Request, job_id: str):

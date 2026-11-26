@@ -403,6 +403,9 @@ class ContentService:
     def ready(self):
         return bool(self._snapshot)
 
+    def look_titles(self):
+        return {look["id"]: look["title"] for look in self._snapshot.get("looks", [])}
+
     def _load_active(self):
         with self.connect() as db:
             row = db.execute(

@@ -50,7 +50,7 @@ class Store:
                     seq INTEGER PRIMARY KEY AUTOINCREMENT,
                     id TEXT UNIQUE NOT NULL, owner TEXT NOT NULL,
                     idempotency_key TEXT NOT NULL, fingerprint TEXT NOT NULL,
-                    status TEXT NOT NULL, look_id INTEGER, edition TEXT, shot_index INTEGER,
+                    status TEXT NOT NULL, look_id INTEGER, look_title TEXT, edition TEXT, shot_index INTEGER,
                     created REAL NOT NULL, expires REAL NOT NULL,
                     cancel_requested INTEGER DEFAULT 0,
                     error_code TEXT, error_message TEXT,
@@ -58,6 +58,7 @@ class Store:
                     verdict TEXT DEFAULT 'unreviewed', notes TEXT DEFAULT '',
                     UNIQUE(owner,idempotency_key));
                 CREATE INDEX IF NOT EXISTS queue_order ON jobs(status, seq);
+                CREATE INDEX IF NOT EXISTS jobs_owner_order ON jobs(owner, seq);
                 CREATE TABLE IF NOT EXISTS event_geo (
                     event_id INTEGER PRIMARY KEY REFERENCES events(id) ON DELETE CASCADE,
                     country_code TEXT, country_name TEXT, region_code TEXT, region_name TEXT,
@@ -67,8 +68,11 @@ class Store:
                     token_hash TEXT PRIMARY KEY, csrf TEXT, authenticated INTEGER DEFAULT 0);
             """)
             db.execute("BEGIN IMMEDIATE")
-            if "pose_mode" not in {row["name"] for row in db.execute("PRAGMA table_info(jobs)")}:
+            job_columns = {row["name"] for row in db.execute("PRAGMA table_info(jobs)")}
+            if "pose_mode" not in job_columns:
                 db.execute("ALTER TABLE jobs ADD COLUMN pose_mode TEXT NOT NULL DEFAULT 'original'")
+            if "look_title" not in job_columns:
+                db.execute("ALTER TABLE jobs ADD COLUMN look_title TEXT")
             self._migrate_site_preferences(db)
         self.db_path.chmod(0o600)
 
