@@ -237,7 +237,8 @@ try{
    await client('Input.dispatchKeyEvent',{type:'keyDown',key,code:key,windowsVirtualKeyCode:key==='ArrowRight'?39:37});
    await client('Input.dispatchKeyEvent',{type:'keyUp',key,code:key,windowsVirtualKeyCode:key==='ArrowRight'?39:37});
   }
-  assert.equal(await evaluate('location.hash'),'#look-'+featured.id,'Global arrows do not switch outfits while a shot control has focus');
+  const selectedShot='#look-'+featured.id+'?'+new URLSearchParams({shot:'3',photo:featured.versions.v2.asset.asset_id});
+  assert.equal(await evaluate('location.hash'),selectedShot,'Global arrows do not switch outfits while a shot control has focus');
   assert.equal(await evaluate('document.activeElement.dataset.view'),'3','Arrow keys do not steal shot-control focus');
   const links=await evaluate('[...document.querySelectorAll("#detail-tags>a")].map(link=>link.getAttribute("href"))');
   assert.ok(links.some(href=>new URLSearchParams(href.split('?')[1]).get('q')===specialTag));
@@ -249,6 +250,36 @@ try{
  }
  apiCatalog=structuredClone(catalog);
  console.log('PASS named shots at 320/390px, keyboard focus, shared-only encoded tag search and source-aware detail Back from home/archive/favorites');
+ const sharedShot='#look-'+featured.id+'?'+new URLSearchParams({shot:'4',photo:featured.versions.v2.asset.asset_id});
+ await navigate(origin+'/?visit=discard'+sharedShot);
+ const selectedFourth='document.querySelector(\'[data-view="4"]\')?.getAttribute("aria-pressed")==="true"';
+ await wait(selectedFourth);
+ assert.equal(await evaluate('document.getElementById("share-shot").hidden'),false);
+ await evaluate('Object.defineProperty(navigator,"clipboard",{configurable:true,value:{writeText:async value=>{window.copiedShot=value;}}});document.getElementById("share-shot").click()');
+ await wait('typeof window.copiedShot==="string"');
+ assert.equal(await evaluate('window.copiedShot'),origin+'/'+sharedShot);
+ await evaluate('navigator.clipboard.writeText=async()=>{throw Error("Test denied")};document.getElementById("share-shot").click()');
+ await wait('!document.getElementById("share-shot-manual").hidden');
+ assert.equal(await evaluate('document.getElementById("share-shot-link").value'),origin+'/'+sharedShot);
+ assert.equal(await evaluate('document.activeElement.id'),'share-shot-link');
+ await client('Page.reload');await wait(selectedFourth);
+ const invalidShots=[
+  'shot=10&photo='+featured.versions.v2.asset.asset_id,
+  'shot=4&photo=previous-revision',
+  'shot=4&shot=5&photo='+featured.versions.v2.asset.asset_id,
+ ];
+ for(const query of invalidShots){
+  await navigate(origin+'/#look-'+featured.id+'?'+query);
+  await wait('document.querySelector(\'[data-view="0"]\')?.getAttribute("aria-pressed")==="true"');
+  assert.equal(await evaluate('location.hash'),'#look-'+featured.id);
+  assert.equal(await evaluate('document.getElementById("share-shot").hidden'),true);
+ }
+ await navigate(pathToFileURL(path.join(output,'index.html')).href+sharedShot);
+ await wait(selectedFourth);
+ await evaluate('Object.defineProperty(navigator,"clipboard",{configurable:true,value:{writeText:async value=>{window.copiedShot=value;}}});document.getElementById("share-shot").click()');
+ await wait('typeof window.copiedShot==="string"');
+ assert.equal(await evaluate('window.copiedShot'),sharedShot,'Offline copying keeps the local filesystem path private');
+ console.log('PASS shot deep links, reload, expired revision/invalid shot fallback, clipboard denial and offline privacy');
  apiCatalog=structuredClone(catalog);apiCatalog.revision='stale-test-revision';apiCatalog.looks=apiCatalog.looks.filter(look=>look.id!==featured.id);apiCatalog.home={featured_look_id:apiCatalog.looks[0].id,recent_look_ids:[],latest_batch_id:null};
  await navigate();await wait('document.getElementById("catalog-status").textContent.includes("同步中")');assert.equal(await evaluate('document.getElementById("hero-title").textContent'),featured.title);assert.equal(await evaluate('window.WARDROBE.revision'),catalog.revision);
  apiCatalog=structuredClone(catalog);await navigate();await wait('document.getElementById("hero-image-0").naturalWidth>0');assert.equal(await evaluate('document.getElementById("catalog-status").textContent'),'');
@@ -435,13 +466,15 @@ try{
     const look=catalog.looks.find(look=>look.id===appearance.look_id),version=look.versions.v2;
     assert.equal(appearance.reference_asset_id,version.asset.asset_id,'Appearance uses the exact published photo revision');
     const source=await evaluate(`(()=>{const card=document.querySelectorAll('#product-worn-section .product-worn')[${index}],photo=card.querySelector('.photo-window'),image=photo.querySelector('img');return {href:card.getAttribute('href'),look:card.dataset.productLook,caption:card.querySelector('.product-worn-source').textContent,src:image.getAttribute('src'),alt:image.alt,x:photo.style.getPropertyValue('--panel-x'),y:photo.style.getPropertyValue('--panel-y')};})()`);
-    assert.equal(source.href,'#look-'+look.id);assert.equal(source.look,String(look.id));
+    const expectedSource='#look-'+look.id+(look.model_only?'':'?'+new URLSearchParams({shot:String(appearance.shot_index),photo:appearance.reference_asset_id}));
+    assert.equal(source.href,expectedSource);assert.equal(source.look,String(look.id));
     assert.equal(source.src,version.source_url);
     assert.ok(source.caption.includes('第 '+appearance.shot_index+' 镜头'));
     assert.ok(source.alt.includes(version.shots[appearance.shot_index-1].title),'Original wearing preview names the declared shot');
     assert.equal(source.x,-((appearance.shot_index-1)%3)*100+'%');assert.equal(source.y,-Math.floor((appearance.shot_index-1)/3)*100+'%');
     await evaluate(`document.querySelectorAll('#product-worn-section .product-worn')[${index}].click()`);await wait('document.getElementById("detail-dialog").open');
     assert.equal(await evaluate('document.getElementById("detail-title").textContent'),look.title);
+    assert.equal(await evaluate(`document.querySelector('#view-selector button[aria-pressed="true"]').dataset.view`),String(look.model_only?0:appearance.shot_index));
     assert.equal(await evaluate('document.getElementById("detail-image").getAttribute("src")'),version.source_url);
     const piece=await evaluate(`(()=>{const row=document.querySelectorAll('#detail-pieces>li')[${appearance.piece_index-1}];return {number:row.querySelector('.piece-number').textContent,role:row.querySelector('.piece-role').textContent,name:row.lastElementChild.textContent};})()`);
     assert.deepEqual(piece,{number:String(appearance.piece_index).padStart(2,'0'),...look.pieces[appearance.piece_index-1]},'The source outfit keeps its original piece ordering and identity');

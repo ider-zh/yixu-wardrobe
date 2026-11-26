@@ -102,9 +102,8 @@ function adoptCatalog(candidate) {
   if(state.latestOnly&&!latestBatch())state.latestOnly=false;
   for(const id of compare)if(!byId.has(id)||byId.get(id).model_only)compare.delete(id);
   buildCategories();buildContentFilters();updateCounts();updateEditionUI();renderModels();refreshFilters();renderCompareTray();
-  if($('detail-dialog').open){if(byId.has(state.active)){const view=state.view;openDetail(state.active,true);setView(view);}else{$('detail-dialog').close();state.active=null;}}
   if($('compare-dialog').open){if(compare.size>=2)openComparison();else $('compare-dialog').close();}
-  routeFromURL(false);
+  routeFromURL(false,location.hash,{preserveUnlinkedView:true});
   return true;
 }
 function buildContentFilters(){
@@ -333,6 +332,21 @@ $('favorites-only').addEventListener('change',e=>{state.favoritesOnly=e.target.c
 $('sort').addEventListener('change',e=>{state.sort=e.target.value;refreshFilters();});
 $('reset-filters').addEventListener('click',resetFilters);$('empty-reset').addEventListener('click',resetFilters);
 $('load-more').addEventListener('click',()=>{const previous=state.limit;state.limit+=24;renderGallery();document.querySelector('[data-look-card="'+filtered[previous]?.id+'"] .look-photo-button')?.focus({preventScroll:true});});
+const detailHashPattern=/^#look-(\d+)(?:\?(.*))?$/;
+const onlineDocument=()=>location.protocol==='http:'||location.protocol==='https:';
+function shareAsset(look) {
+  if(!look||look.model_only)return '';
+  const version=versionOf(look),asset=version.asset;
+  return version.ready&&asset?.visibility==='public'&&typeof asset.asset_id==='string'&&/^[A-Za-z0-9_-]{1,128}$/.test(asset.asset_id) ? asset.asset_id : '';
+}
+function lookRoute(look,view=0) {
+  const hash='#look-'+look.id,asset=view>0?shareAsset(look):'';
+  return asset ? hash+'?'+new URLSearchParams({shot:String(view),photo:asset}) : hash;
+}
+function linkedShot(look,query) {
+  const params=new URLSearchParams(query),shot=params.get('shot'),asset=shareAsset(look);
+  return asset&&params.size===2&&/^[1-9]$/.test(shot)&&params.get('photo')===asset ? Number(shot) : 0;
+}
 function detailList() { return detailNavigation ? detailNavigation.map(id=>byId.get(id)).filter(Boolean) : latestLooks(); }
 function setView(view) {
   state.view=view;
@@ -343,6 +357,29 @@ function setView(view) {
   const current=versionOf(byId.get(state.active));const names=['完整九宫格',...current.shots.map(s=>s.title)];
   $('view-name').textContent=names[view]||'写真';const shot=current.shots[view-1];$('view-moment').textContent=shot?[shot.emotion,shot.pose,shot.framing].filter(Boolean).join(' · '):current.summary;
   const look=byId.get(state.active);image.alt=look.title+' · '+names[view];
+  $('share-shot').hidden=!view||!shareAsset(look);
+  $('share-shot').textContent=onlineDocument()?'复制单格链接':'复制单格链接片段';
+  $('share-shot-status').textContent='';
+  $('share-shot-manual').hidden=true;
+  $('share-shot-link').value='';
+}
+async function shareShot() {
+  const look=byId.get(state.active),view=state.view;
+  if(!view||!shareAsset(look))return;
+  const hash=lookRoute(look,view),online=onlineDocument();
+  const url=online?new URL(location.href):null;
+  if(url){url.search='';url.username='';url.password='';url.hash=hash;}
+  const text=url?.href||hash;
+  let copied=false;
+  try{await navigator.clipboard.writeText(text);copied=true;}catch{}
+  if(!$('detail-dialog').open||state.active!==look.id||state.view!==view||shareAsset(byId.get(look.id))!==shareAsset(look))return;
+  const status=$('share-shot-status'),manual=$('share-shot-manual'),field=$('share-shot-link');
+  manual.hidden=copied;
+  if(copied){status.textContent=online?'已复制单格链接。':'已复制链接片段，可粘贴到衣序页面地址末尾。';return;}
+  status.textContent=online?'请选择下方链接手动复制。':'可手动复制下方片段，再粘贴到衣序页面地址末尾。';
+  field.value=text;
+  field.focus();
+  field.select();
 }
 function updateDetailActions() {
   const l=byId.get(state.active);if(!l)return;
@@ -353,9 +390,9 @@ function updateDetailActions() {
   $('detail-compare').textContent=c?'− 移出对比':'+ 加入对比';
   $('detail-compare').setAttribute('aria-pressed',String(c));
 }
-function openDetail(id,preserveNavigation=false) {
+function openDetail(id,preserveNavigation=false,{view=0,routed=false}={}) {
   const l=byId.get(id);if(!l)return;
-  const alreadyOpen=$('detail-dialog').open,detailRoute=/^#look-/.test(location.hash);
+  const alreadyOpen=$('detail-dialog').open,detailRoute=detailHashPattern.test(location.hash);
   const restored=!alreadyOpen&&detailRoute?history.state?.wardrobeDetail:null;
   if(restored&&typeof restored.returnRoute==='string'&&/^#\/(home|looks|models|favorites|products|product)(?:[/?]|$)/.test(restored.returnRoute))detailReturnRoute=restored.returnRoute;
   else if(!alreadyOpen)detailReturnRoute=detailRoute?(l.model_only?modelRoute(l.model_id):'#/home'):location.hash||'#/home';
@@ -368,9 +405,10 @@ function openDetail(id,preserveNavigation=false) {
     detailNavigation=selection.map(look=>look.id);
   }
   const entry={...history.state,wardrobeDetail:{returnRoute:detailReturnRoute,navigation:detailNavigation,sceneOpener:detailSceneOpener}};
+  const hash=lookRoute(l,view);
   // Treat the scene's detail carousel as a single visit so Back can return to the list.
-  if(location.hash==='#look-'+id||(alreadyOpen&&detailSceneOpener!==null))history.replaceState(entry,'','#look-'+id);
-  else history.pushState(entry,'','#look-'+id);
+  if(routed||location.hash===hash||(alreadyOpen&&detailSceneOpener!==null))history.replaceState(entry,'',hash);
+  else history.pushState(entry,'',hash);
   state.active=id;
   $('detail-number').textContent='LOOK '+number(id)+' / '+l.category+' / '+l.season;
   $('detail-title').textContent=l.title;$('detail-story-title').textContent=versionOf(l).story;$('detail-story-summary').textContent=versionOf(l).summary;
@@ -390,7 +428,7 @@ function openDetail(id,preserveNavigation=false) {
   $('original-link').href=imageURL(versionOf(l));$('download-link').href=publicSource(versionOf(l).download_url,true)||publicSource(versionOf(l).source_url||versionOf(l).image);$('download-link').download='LOOK-'+number(id)+'-v2-'+l.title+'.webp';
   $('original-link').hidden=!versionOf(l).ready;$('download-link').hidden=!versionOf(l).ready;
   $('view-selector').innerHTML=[0,1,2,3,4,5,6,7,8,9].map(v=>'<button data-view="'+v+'" aria-label="'+esc(v?String(v).padStart(2,'0')+' · '+(versionOf(l).shots[v-1]?.title||'写真'+v):'完整九宫格')+'" aria-pressed="'+!v+'">'+(v?'<span class="shot-number">'+String(v).padStart(2,'0')+'</span><span class="shot-title">'+esc(versionOf(l).shots[v-1]?.title||'写真'+v)+'</span>':'九宫格')+'</button>').join('');
-  $('view-selector').hidden=!versionOf(l).ready;setView(0);updateDetailActions();
+  $('view-selector').hidden=!versionOf(l).ready;setView(view);updateDetailActions();
   window.WardrobeTryOn?.setContext?.({look_id:id,edition:'v2'});
   window.WardrobeTryOn?.track?.('look_open',{look_id:id,edition:'v2'});
   const list=detailList(),position=list.findIndex(x=>x.id===id);
@@ -399,7 +437,13 @@ function openDetail(id,preserveNavigation=false) {
   if(!$('detail-dialog').open)$('detail-dialog').showModal();
   $('detail-dialog').scrollTop=0;
 }
-$('view-selector').addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(b)setView(Number(b.dataset.view));});
+$('view-selector').addEventListener('click',e=>{
+  const button=e.target.closest('[data-view]');if(!button)return;
+  setView(Number(button.dataset.view));
+  const hash=lookRoute(byId.get(state.active),state.view);
+  if(location.hash!==hash)history.replaceState(history.state,'',hash);
+});
+$('share-shot').addEventListener('click',shareShot);
 $('detail-tags').addEventListener('click',event=>{if(event.target.closest('[data-explore-tag]')&&event.button===0&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey)focusArchive=true;});
 $('close-detail').addEventListener('click',()=>$('detail-dialog').close());
 $('detail-favorite').addEventListener('click',()=>toggleFavorite(state.active));
@@ -442,15 +486,17 @@ function archiveRoute(){
  return '#/'+state.page+(params.size?'?'+params:'');
 }
 function syncArchiveURL(){if(!routing&&['looks','favorites'].includes(state.page)&&!$('detail-dialog').open)history.replaceState(null,'',archiveRoute());}
-function routeFromURL(scroll=true,hash=location.hash){
- const detail=/^#look-(\d+)$/.exec(hash);
+function routeFromURL(scroll=true,hash=location.hash,{preserveUnlinkedView=false}={}){
+ const detail=detailHashPattern.exec(hash);
  if(detail){
-  const id=Number(detail[1]),alreadyOpen=$('detail-dialog').open;
-  if(byId.has(id)){
+  const id=Number(detail[1]),look=byId.get(id),alreadyOpen=$('detail-dialog').open;
+  if(look){
    const restored=history.state?.wardrobeDetail;
    const sceneId=/^#\/looks\?scene=([a-z0-9-]+)$/.exec(restored?.returnRoute)?.[1];
    if(!alreadyOpen&&restored?.sceneOpener&&sceneId!==state.scene&&availableScene(sceneId))routeFromURL(false,restored.returnRoute);
-   openDetail(id,alreadyOpen);
+   const unlinked=preserveUnlinkedView&&alreadyOpen&&state.active===id&&detail[2]===undefined&&!shareAsset(look);
+   const view=unlinked?state.view:linkedShot(look,detail[2]);
+   openDetail(id,alreadyOpen,{view,routed:true});
    return;
   }
   notify('这套穿搭暂未发布');
@@ -491,7 +537,7 @@ $('detail-dialog').addEventListener('close',()=>{
  if(routeDetailCloses){routeDetailCloses--;return;}
  if($('detail-dialog').open)return;
  state.active=null;detailNavigation=null;
- if(/^#look-/.test(location.hash)){
+ if(detailHashPattern.test(location.hash)){
   if(detailSceneOpener!==null){history.back();return;}
   history.replaceState(null,'',detailReturnRoute);routeFromURL(false);
  }
@@ -530,7 +576,7 @@ const productPage=window.YixuProductPage.create({
  renderWorn(a){
   const look=byId.get(a.look_id),version={...versionOf(look),previewPanel:a.shot_index};
   const shown={...look,versions:{v2:version}};
-  return `<a class="product-worn" data-product-look="${look.id}" href="#look-${look.id}">${photo(shown)}<div><p class="eyebrow">LOOK ${String(look.id).padStart(3,'0')} / ${esc(publication(look))}</p><h3>${esc(look.title)}</h3><p>${esc(look.description)}</p><p class="product-worn-source">原写真穿着参考 · 第 ${a.shot_index} 镜头</p><span class="product-worn-link">走进这套穿搭 <span aria-hidden="true">↗</span></span></div></a>`;
+  return `<a class="product-worn" data-product-look="${look.id}" href="${esc(lookRoute(look,a.shot_index))}">${photo(shown)}<div><p class="eyebrow">LOOK ${String(look.id).padStart(3,'0')} / ${esc(publication(look))}</p><h3>${esc(look.title)}</h3><p>${esc(look.description)}</p><p class="product-worn-source">原写真穿着参考 · 第 ${a.shot_index} 镜头</p><span class="product-worn-link">走进这套穿搭 <span aria-hidden="true">↗</span></span></div></a>`;
  }
 });
 function renderProduct(id){
@@ -546,7 +592,11 @@ function renderProduct(id){
 }
 document.addEventListener('click',event=>{
  const worn=event.target.closest('[data-product-look]');
- if(worn&&event.button===0&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey){event.preventDefault();openDetail(Number(worn.dataset.productLook));return;}
+ if(worn&&event.button===0&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey){
+  const id=Number(worn.dataset.productLook),look=byId.get(id);
+  if(look){event.preventDefault();openDetail(id,false,{view:linkedShot(look,detailHashPattern.exec(worn.hash)?.[2])});}
+  return;
+ }
  const button=event.target.closest('[data-product-favorite]');
  if(button){
   const id=button.dataset.productFavorite,product=(data.products||[]).find(p=>p.product_id===id);if(!product)return;
