@@ -660,7 +660,9 @@ try {
   bootstrapError={error:{code:'fixture_offline',message:'Synthetic service outage'}};
   await load();
   await evaluate('document.getElementById("tryon-history").click()');
-  await wait(`document.querySelector('${cachedResult} img')?.src.startsWith('blob:') && document.querySelector('${cachedResult} img').naturalWidth>0`);
+  await wait(`document.querySelector('${cachedResult} img')?.src.startsWith('blob:')`);
+  await evaluate(`document.querySelector('${cachedResult} img').scrollIntoView({block:'center',behavior:'instant'})`);
+  await wait(`document.querySelector('${cachedResult} img')?.naturalWidth>0`);
   await choosePhoto('tryon-camera',600,1200);
   await wait(`window.WardrobeTryOnStorage.listPhotos().then(rows=>rows.length>${previousPhotos.length})`);
   const saved=await evaluate(`(async()=>{
