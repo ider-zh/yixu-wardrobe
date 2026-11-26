@@ -89,6 +89,8 @@ try{
   for(const box of bounds){assert.ok(box.width>0&&box.height>0,box.id+' is visible');assert.ok(box.top>=0&&box.bottom<=viewport.height+1,`${box.id} must fit the first screen at ${viewport.width}: ${JSON.stringify(box)}`);assert.ok(box.left>=0&&box.right<=viewport.width+1,box.id+' fits viewport width');}
   const recent=await evaluate('[...document.querySelectorAll("#recent-gallery [data-look-card]")].map(card=>Number(card.dataset.lookCard))');
   assert.deepEqual(recent,catalog.home.recent_look_ids);assert.ok(!recent.includes(featured.id));
+  assert.equal(await evaluate('document.querySelectorAll("#recent-gallery .card-publication").length'),recent.length);
+  assert.equal(await evaluate('document.querySelectorAll("#recent-gallery .scene-tip").length'),0);
   await noOverflow('Homepage '+viewport.width);
   for(const selector of ['#hero-photo-button','#hero-detail']){
    await activate(selector,viewport.width<801);
@@ -158,6 +160,8 @@ try{
   assert.equal(await evaluate('document.getElementById("model-profile-title").textContent'),displayName+'的穿搭');
   const owned=catalog.latestOrder.filter(key=>catalog.looks.find(look=>look.id===key).model_id===id);
   assert.deepEqual(await evaluate('[...document.querySelectorAll("#model-looks-gallery [data-look-card]")].map(card=>Number(card.dataset.lookCard))'),owned);
+  assert.equal(await evaluate('document.querySelectorAll("#model-looks-gallery .card-publication").length'),owned.length);
+  assert.equal(await evaluate('document.querySelectorAll("#model-looks-gallery .scene-tip").length'),0);
  }
  await route('#/home');await evaluate('localStorage.setItem("wardrobe99:favorites:v1","[9999]")');await navigate();await evaluate('document.getElementById("hero-favorite").click()');
  assert.deepEqual(await evaluate('JSON.parse(localStorage.getItem("wardrobe99:favorites:v1"))'),[9999,featured.id]);

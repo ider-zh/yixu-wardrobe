@@ -167,7 +167,7 @@ function updateEditionUI(){
  updateHeroCover(look,window.YixuSiteTheme?.resolve());
  const recentIds=Array.isArray(data.home?.recent_look_ids)?data.home.recent_look_ids:null;
  const recent=(recentIds?recentIds.map(id=>byId.get(id)):latestLooks()).filter(l=>l&&!l.model_only&&l.id!==look.id).slice(0,6);
- $('recent-gallery').innerHTML=recent.map(renderCard).join('');
+ $('recent-gallery').innerHTML=recent.map((look,index)=>renderCard(look,index)).join('');
  $('recent-note').textContent=recent.some(l=>!l.published_at&&!l.publish_date)?'最新一期之后，接着翻阅历史档案。':'';
  $('recent-gallery').parentElement.hidden=!recent.length;
 }
@@ -184,7 +184,7 @@ function renderModelProfile(id) {
   const model=models.find(item=>item.id===id),owned=model?modelLooks(id):[];
   $('model-directory').hidden=!!owned.length;
   $('model-profile').hidden=!owned.length;
-  $('model-looks-gallery').innerHTML=owned.map(renderCard).join('');
+  $('model-looks-gallery').innerHTML=owned.map((look,index)=>renderCard(look,index)).join('');
   if(!owned.length)return;
   $('model-profile-id').textContent=model.id;
   $('model-profile-title').textContent=model.name+'的穿搭';
