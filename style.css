@@ -534,6 +534,11 @@ dialog{padding:0;border:0;background:var(--paper-light);color:var(--ink);max-wid
   gap: 14px 20px;
 }
 
+.backup-page .section-heading > a {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
 .backup-actions label {
   display: grid;
   gap: 6px;
