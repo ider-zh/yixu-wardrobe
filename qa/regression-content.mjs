@@ -13,6 +13,13 @@ try {
   for(const name of ['site-resources.json','site-theme.js','site-theme.css','admin','content','images-v2','assets','scripts','index.html','app.js','style.css','expressive.css','product-themes.js','product-page.js','product-themes.css','tryon-storage.js','tryon.js','tryon.css','favicon.svg']) {
     fs.cpSync(path.join(root,name),path.join(fixture,name),{recursive:true});
   }
+  fs.mkdirSync(path.join(fixture,'docs'));
+  for(const sop of ['external-agent-sop.md','male-outfit-sop.md']){
+    fs.copyFileSync(path.join(root,'docs',sop),path.join(fixture,'docs',sop));
+  }
+  const resolveModel = (...args) => spawnSync(process.execPath,['scripts/resolve-model.mjs',...args],{
+    cwd:fixture,encoding:'utf8',timeout:5000,
+  });
   const validProducts=fs.readFileSync(path.join(fixture,'content/products.json'),'utf8');
   for(const mutate of [
     value=>value.products.push(structuredClone(value.products[0])),
@@ -35,6 +42,26 @@ try {
   ]){const invalid=JSON.parse(validProducts);mutate(invalid);write('content/products.json',invalid);assert.throws(()=>loadContent(fixture));}
   fs.writeFileSync(path.join(fixture,'content/products.json'),validProducts);
   const before=loadContent(fixture);
+  const registry=JSON.parse(fs.readFileSync(path.join(fixture,'content/models.json'),'utf8'));
+  const male=registry.models.find(model=>model.model_id==='male-01');
+  const female=registry.models.find(model=>model.model_id==='female-01');
+  assert.equal(JSON.parse(resolveModel().stdout).name,female.name);
+  for(const selector of [male.model_id,male.name,'男模特','男性角色']){
+    const result=JSON.parse(resolveModel(selector).stdout);
+    assert.equal(result.model_id,male.model_id);
+    assert.equal(result.sop,male.production_sop);
+    assert.equal(result.reference.sha256,male.reference.sha256);
+  }
+  const renamed=structuredClone(registry);
+  renamed.models.find(model=>model.model_id===male.model_id).name='试验显示名';
+  write('content/models.json',renamed);
+  assert.equal(JSON.parse(resolveModel('试验显示名').stdout).model_id,male.model_id);
+  assert.notEqual(resolveModel(male.name).status,0);
+  const afterRename=loadContent(fixture).catalog;
+  assert.equal(afterRename.models.find(model=>model.model_id===male.model_id).name,'试验显示名');
+  assert.deepEqual(afterRename.looks,before.catalog.looks);
+  assert.notEqual(afterRename.revision,before.catalog.revision);
+  write('content/models.json',registry);
   const nextId=Math.max(...before.catalog.looks.map(look=>look.id))+1;
   const latestDate=before.catalog.batches.map(batch=>batch.publish_date).sort().at(-1)||'2026-11-11';
   const publishDate=new Date(Date.parse(latestDate+'T00:00:00Z')+86400000).toISOString().slice(0,10);

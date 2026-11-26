@@ -133,6 +133,7 @@ export function loadContent(root) {
   }
   for (const model of registry.models) {
     fail(object(model) && assetId(model.model_id) && !models.has(model.model_id) && text(model.name), 'Invalid or duplicate model');
+    fail(model.production_sop == null || typeof model.production_sop === 'string' && /^docs\/[a-z0-9-]+\.md$/.test(model.production_sop), 'Invalid model production SOP path');
     registerAsset(model.reference);
     fail(Array.isArray(model.views) && model.views.every(text), 'Model views required');
     models.set(model.model_id, model);

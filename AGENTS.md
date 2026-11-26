@@ -19,7 +19,7 @@
 
 - 2026-11-12 更新目标：内容由外部 agent 通过项目清单与公开 WebP 资源更新，后台负责访问分析、资源 API、用户穿搭观察、系统模特预览及 CDN 同步观察；服务端接收已授权交付后自动同步公开资源，不以后台录入穿搭作为内容源。
 - 每日一个发布批次，默认交付一套穿搭的生动九宫格及 `pieces` 中每件单品的独立产品页，任务可指定批次规模或明确只做写真。先验收写真，再按 [单品图组与产品页 SOP](docs/product-agent-sop.md) 制作或复用单品图，并在同一次内容交付中验收全部关联。新穿搭只公开“生动”（v2）。生产使用实际附入的登记模特参考、冻结的完整衣装描述和九镜头脚本，直接生成生动九宫格。复刻已有服装时，可以补充已确认的衣装图。实际提示词、私有参考和生成母本留在仓库外。历史“造型”（v1）与原有 100 套、10 组各 10 套作为迁移基线保留，但目标公开网站不再展示 v1。保持旧编号、图片与收藏对应关系，迁移后不把 100 套作为容量上限。
-- 首位模特为 female-01，基础体为 assets/model-bases/female-01.webp。外部内容生产遵循 docs/external-agent-sop.md；架构与验收状态见 docs/content-publishing-plan.md。动态内容入口为 content/catalog.json、content/models.json、content/batches/*.json。经确认的历史照片修订写入 content/look-revisions.json，沿用原编号和单品顺序，保留基线和旧图，并同步核对单品关联。追加批次遵循 content/batch.schema.json，不修改冻结的旧 catalog.js 来日更，不得覆盖旧编号、虚构 v1 或关闭校验。
+- 外部内容生产统一从 docs/external-agent-sop.md 进入，使用 `node scripts/resolve-model.mjs` 按任务指定的角色解析制作 SOP 与登记参考。显示名以 content/models.json 的 `name` 为准，穿搭与资源按稳定 `model_id` 关联。架构与验收状态见 docs/content-publishing-plan.md。动态内容入口为 content/catalog.json、content/models.json、content/batches/*.json。经确认的历史照片修订写入 content/look-revisions.json，沿用原编号和单品顺序，保留基线和旧图，并同步核对单品关联。追加批次遵循 content/batch.schema.json，不修改冻结的旧 catalog.js 来日更，不得覆盖旧编号、虚构 v1 或关闭校验。
 - 生图人物使用模特参考照片及中性身份表述；严格竖版 2:3、3×3 等大画面与细象牙色间隔。每套重写九镜头微故事，实际验收至少 5 种表情（含露齿笑、张口大笑）、6 种动作、3 格含完整鞋履的全身或中全身、5 格与观者互动。初始 100 套只作为摄影与排版参照，不替换当前模特身份；完整细节见 SOP。
 - README.md 面向用户、中文优先；README.en.md 保持内容一致。开发、校验和部署说明放在 DEVELOPMENT.md 或 docs/。
 - 目标前端从资源 API 读取公开内容，默认使用项目图片的公开 URL；CDN 同步并验证成功后逐图优先使用 CDN 链接，未配置、同步失败或 CDN 加载失败时继续使用项目图片，不因 CDN 未就绪阻塞展示。本地保留最终 WebP，图床接入可替换。清单与交付文件使用相对路径，离线浏览通过内容快照和公开图片导出支持。构建根据内容清单生成 public/catalog.js 离线快照，支持直接打开 public/index.html；源码根目录的 index.html 保留初始快照兼容。

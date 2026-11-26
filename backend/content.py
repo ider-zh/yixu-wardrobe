@@ -66,6 +66,7 @@ class Model(Strict):
     reference: Asset
     views: list[str] = Field(min_length=1, max_length=16)
     enabled: bool = True
+    production_sop: str | None = Field(default=None, pattern=r"^docs/[a-z0-9-]+\.md$")
 
 
 class Models(Strict):
@@ -564,7 +565,9 @@ class ContentService:
                 register(entry.reference.model_dump(exclude_none=True))
             else:
                 self._verify_asset(entry.reference.model_dump(exclude_none=True), public=False)
-            model_map[entry.model_id] = entry.model_dump(mode="json", exclude_none=True)
+            model_map[entry.model_id] = entry.model_dump(
+                mode="json", exclude_none=True, exclude={"production_sop"}
+            )
         looks, ids = [], set()
         for original in baseline["looks"]:
             look = copy.deepcopy(original)

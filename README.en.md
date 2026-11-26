@@ -30,7 +30,7 @@ The frontend reads updates from the resource interface. Until a CDN is configure
 
 For offline browsing, copy the complete built `public/` folder and open its `index.html`. No browser extension or account is required. Keep the folder structure intact; see [Development notes](DEVELOPMENT.md) for building the offline package. Opening the source root's `index.html` directly still shows the frozen initial wardrobe snapshot.
 
-The 200 historical photographs are same-dimension WebP totaling 48,176,224 bytes (about 48.18 MB). The public build packages only displayable images declared by the content manifests, excluding archived styling photographs. A [five-view female model base](assets/model-bases/female-01.webp) provides the reference for future outfit creation with system model 01.
+The 200 historical photographs are same-dimension WebP totaling 48,176,224 bytes (about 48.18 MB). The public build packages displayable images declared by the content manifests. Display names and five-view references for future outfit creation are recorded in the [model registry](content/models.json).
 
 ## Favorites and photos
 
