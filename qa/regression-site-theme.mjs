@@ -340,7 +340,10 @@ try{
  assert.equal(await evaluate('document.querySelectorAll("#gallery .card-piece-match").length'),0);
  console.log('PASS real Chromium: owned-piece evidence, combined style filters, preserved detail route and scene independence.');
  await route('#/looks?piece=straight-leg-pants&color=neutral');
- await evaluate('const secondColor=document.getElementById("color-filter-second");secondColor.value="beige";secondColor.dispatchEvent(new Event("change",{bubbles:true}));');
+ assert.equal(await evaluate('document.querySelector("#color-filter-second option[value=neutral]").disabled'),true);
+ await evaluate('document.getElementById("color-filter-second").focus()');
+ await client('Input.dispatchKeyEvent',{type:'keyDown',key:'ArrowDown',code:'ArrowDown',windowsVirtualKeyCode:40});
+ await client('Input.dispatchKeyEvent',{type:'keyUp',key:'ArrowDown',code:'ArrowDown',windowsVirtualKeyCode:40});
  const pantColors='#/looks?piece=straight-leg-pants&color=neutral&color=beige';
  await wait(`location.hash===${JSON.stringify(pantColors)}`);
  assert.ok(await evaluate('Array.from(document.querySelectorAll("#gallery [data-look-card]")).every(card=>card.querySelector("[data-color-match=neutral]")&&card.querySelector("[data-color-match=beige]")&&card.querySelector(".card-piece-match"))'));

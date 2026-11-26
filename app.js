@@ -260,8 +260,9 @@ function refreshFilters() {
   $('model-filter').value=state.model;$('region-filter').value=state.region;$('latest-only').checked=state.latestOnly;
   $('piece-filter').value=state.piece;
   $('piece-filter-wrap').hidden=state.page!=='looks'||!pieceTypes.size;
-  $('color-filter-first').value=state.colors[0]||'';
-  $('color-filter-second').value=state.colors[1]||'';
+  const [firstColor='',secondColor='']=state.colors;
+  syncColorOption($('color-filter-first'),firstColor,secondColor);
+  syncColorOption($('color-filter-second'),secondColor,firstColor);
   $('color-filter-wrap').hidden=state.page!=='looks'||!colorTypes.size;
   document.querySelectorAll('input[name="season"]').forEach(input=>{input.checked=input.value===state.season;}); $('search').value=state.query; $('favorites-only').checked=state.page==='favorites'||state.favoritesOnly; $('favorites-only').disabled=state.page==='favorites'; $('sort').value=state.sort;
   document.querySelectorAll('[data-category]').forEach(b=>{const active=b.dataset.category===state.category;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});
@@ -349,6 +350,10 @@ $('category-list').addEventListener('click',event=>{const button=event.target.cl
 $('model-filter').addEventListener('change',e=>{state.model=e.target.value;refreshFilters();});
 $('region-filter').addEventListener('change',e=>{state.region=e.target.value;refreshFilters();});
 $('piece-filter').addEventListener('change',e=>{state.piece=pieceTypes.has(e.target.value)?e.target.value:'';refreshFilters();});
+function syncColorOption(input,selected,other){
+  input.value=selected;
+  for(const option of input.options||[])option.disabled=Boolean(other)&&option.value===other;
+}
 function selectedColors(values){
   return [...new Set(values.filter(value=>colorTypes.has(value)))].slice(0,2);
 }
