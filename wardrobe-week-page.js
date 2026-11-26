@@ -73,7 +73,7 @@
       const number = ++renderNumber;
       const sameAnchor = anchor === date;
       const todayKey = plan.todayKey();
-      today.href = weekRoute(todayKey);
+      today.href = '#/week';
       try {
         const nextDates = plan.weekDates(date);
         if (nextDates[0] !== dates[0]) days.innerHTML = '';

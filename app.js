@@ -674,7 +674,11 @@ function routeFromURL(scroll=true,hash=location.hash,{hydrating=false}={}){
  if(page==='lists')wardrobeListPage?.render();
  if(page==='publications')renderPublications();
  if(page==='recent')renderRecent();
- if(page==='week')wardrobeWeekPage?.render(params.get('date')||window.WardrobeWeekPlan.todayKey());
+ if(page==='week'&&wardrobeWeekPage){
+  const requestedDate=params.get('date'),date=requestedDate||window.WardrobeWeekPlan.todayKey();
+  if(!requestedDate&&hash===location.hash)history.replaceState(history.state,'','#/week?'+new URLSearchParams({date}));
+  wardrobeWeekPage.render(date);
+ }
  if(page==='models')renderModelProfile(state.profileModel);
  if(page==='products')renderProducts();
  if(page==='product'){

@@ -475,12 +475,15 @@ try{
  console.log('PASS real Chromium: local recent views preserve order, ignore shot changes and model-only details, and restore focus and reload.');
  await route('#/lists');
  assert.ok(await evaluate('!!document.querySelector(\'#wardrobe-list-page a[href="#/week"]\')'));
+ await evaluate('document.querySelector(\'#wardrobe-list-page a[href="#/week"]\').click()');
+ await wait('location.hash==="#/week?date="+window.WardrobeWeekPlan.todayKey()');
  const weekRoute='#/week?date=2026-12-31';
  await route(weekRoute);
  await wait('document.querySelectorAll("#week-days time").length===7');
  assert.equal(await evaluate('document.activeElement.id'),'week-title');
  assert.equal(await evaluate('document.getElementById("week-range").textContent'),'2026-12-28 至 2027-01-03');
  assert.equal(await evaluate('document.getElementById("week-previous").getAttribute("href")'),'#/week?date=2026-12-24');
+ assert.equal(await evaluate('document.getElementById("week-today").getAttribute("href")'),'#/week');
  for(const id of [1,2]){
   await evaluate(`document.getElementById('week-date').value='2027-01-01';document.getElementById('week-look').value='${id}';document.getElementById('week-form').requestSubmit()`);
   await wait(`document.getElementById('week-look-2027-01-01')?.dataset.weekLook==='${id}'`);
