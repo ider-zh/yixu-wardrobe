@@ -136,3 +136,17 @@
     gap: clamp(5px, 2vw, 8px);
   }
 }
+
+.tryon-history-filter{
+  display:flex;flex-wrap:wrap;align-items:end;gap:8px 12px;
+  margin-block:.75rem;
+}
+.tryon-history-filter label{
+  display:grid;flex:1 1 10rem;min-width:0;gap:4px;font-size:var(--small-text-size);
+}
+.tryon-history-filter input,.tryon-history-filter select{
+  min-width:0;min-height:44px;padding:6px 9px;border:1px solid var(--line);
+  background:var(--paper-light);color:var(--ink);font:inherit;
+}
+.tryon-history-filter button{min-height:44px}
+.tryon-history-filter button[aria-disabled=true]{opacity:.65;cursor:default}

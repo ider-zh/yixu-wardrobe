@@ -45,8 +45,13 @@ const server = http.createServer(async (req,res) => {
       res.end(JSON.stringify(bootstrap()));return;
     }
     if (req.url.split('?')[0]==='/api/tryons' && req.method==='GET') {
-      const offset=Number(new URL(req.url,'http://fixture').searchParams.get('offset')||0);
-      const payload=JSON.stringify(paginate?{items:jobs.slice(offset,offset+1),has_more:offset+1<jobs.length}:{items:jobs,has_more:false});
+      const params=new URL(req.url,'http://fixture').searchParams,offset=Number(params.get('offset')||0);
+      const look=params.get('look')?.toLowerCase(),status=params.get('status');
+      const searchId=look?.match(/^#?(\d+)$/);
+      const groups={active:['queued','validating','generating','postprocessing'],success:['succeeded'],failed:['failed','unknown','needs_photo','expired','canceled']};
+      const matches=jobs.filter(job=>(!groups[status]||groups[status].includes(job.status))&&(!look||(searchId
+        ?Number(searchId[1])===job.look_id:(job.look_title||'').toLowerCase().includes(look))));
+      const payload=JSON.stringify(paginate?{items:matches.slice(offset,offset+1),has_more:offset+1<matches.length}:{items:matches,has_more:false});
       if(holdList){holdList=false;heldList=()=>res.end(payload);return;}
       res.end(payload);return;
     }
@@ -759,6 +764,45 @@ try {
   assert.equal(await evaluate(`Boolean(document.querySelector(${JSON.stringify(photoCard)}))`),false,'Deleted local photo stays gone after reload');
   assert.equal(requests.filter(r=>r.method==='POST'&&r.url==='/api/tryons').length,postsBeforeDashboard+1);
   console.log('PASS no-login dashboard: persistence, deletion, phone layout and explicit retry with a new key, preserved history and byte-exact photo reuse');
+  await setViewport(viewports[0]);
+  const filterLook='排查夹具';
+  jobs=[
+    {id:'fixture-unrelated-history',status:'failed',look_id:102,look_title:'另一款'},
+    {id:'fixture-filter-ok',status:'succeeded',look_id:101,look_title:filterLook},
+    {id:'fixture-filter-failed-a',status:'failed',look_id:101,look_title:filterLook},
+    {id:'fixture-filter-failed-b',status:'expired',look_id:101,look_title:filterLook},
+  ].map((job,i)=>({...job,edition:'v2',shot_index:1,created_at:'2026-11-'+(20-i)+'T00:00:00Z'}));
+  paginate=true;
+  await wait('!document.getElementById("tryon-refresh").disabled');
+  const filterBy=(look,status)=>evaluate(`(()=>{
+    document.getElementById('tryon-history-look').value=${JSON.stringify(look)};
+    document.getElementById('tryon-history-status').value=${JSON.stringify(status)};
+    document.getElementById('tryon-history-filter').requestSubmit();
+  })()`);
+  await filterBy('#0101','failed');
+  await wait('document.querySelector("[data-job-id=fixture-filter-failed-a]")&&!document.getElementById("tryon-more").disabled&&!document.getElementById("tryon-more").hidden');
+  assert.equal(await evaluate('document.querySelector("[data-job-id=fixture-unrelated-history]")!==null'),false);
+  await evaluate('document.getElementById("tryon-more").click()');
+  await wait('document.querySelector("[data-job-id=fixture-filter-failed-b]")&&document.getElementById("tryon-more").hidden');
+  assert.ok(requests.some(request=>request.url.includes('offset=1')&&request.url.includes('look=%230101')&&request.url.includes('status=failed')));
+  assert.ok(await evaluate('document.getElementById("tryon-history-filter").scrollWidth<=document.getElementById("tryon-history-filter").clientWidth+1'));
+  holdList=true;
+  await filterBy(filterLook,'success');
+  for(let i=0;!heldList&&i<100;i++)await new Promise(resolve=>setTimeout(resolve,20));
+  assert.ok(heldList);
+  await filterBy('不存在于历史的标题','all');
+  heldList();heldList=null;
+  await wait('document.getElementById("tryon-jobs").textContent.includes("没有符合筛选条件")&&!document.getElementById("tryon-refresh").disabled');
+  assert.equal(await evaluate('document.querySelector("[data-job-id=fixture-filter-ok]")!==null'),false);
+  await client('Network.enable');
+  await client('Network.emulateNetworkConditions',{offline:true,latency:0,downloadThroughput:0,uploadThroughput:0});
+  await filterBy(filterLook,'failed');
+  await wait('document.querySelector("[data-job-id=fixture-filter-failed-b]")');
+  assert.match(await evaluate('document.querySelector("[data-job-id=fixture-filter-failed-b]").textContent'),/本机记录/);
+  await client('Network.emulateNetworkConditions',{offline:false,latency:0,downloadThroughput:-1,uploadThroughput:-1});
+  await evaluate('document.getElementById("tryon-clear-history-filter").click()');
+  await wait('document.querySelector("[data-job-id=fixture-unrelated-history]")&&document.activeElement.id==="tryon-history-look"');
+  console.log('PASS try-on history search and status filter paginate on the server, ignore stale responses, and search cached data offline.');
 } finally {
   if(client&&socket?.readyState===1)await Promise.race([client('Browser.close').catch(()=>{}),new Promise(resolve=>setTimeout(resolve,1000))]);
   if(processChrome.exitCode===null&&processChrome.signalCode===null){const exit=once(processChrome,'exit');try{process.kill(-processChrome.pid,'SIGTERM');}catch(error){if(error.code!=='ESRCH')throw error;}await exit;}

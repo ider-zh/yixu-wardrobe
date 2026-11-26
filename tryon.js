@@ -364,9 +364,11 @@ function element(tag,text,className) {
   const node=document.createElement(tag);if(text!==undefined)node.textContent=text;if(className)node.className=className;return node;
 }
 const activeStatuses=new Set(['queued','validating','generating','postprocessing']);
+const failedStatuses=new Set(['failed','unknown','needs_photo','expired','canceled']);
 const statusNames={queued:'排队中',validating:'正在检查照片',generating:'正在生成',postprocessing:'正在处理结果',succeeded:'生成完成',failed:'试穿失败',unknown:'生成状态未确认，不自动重试。请先检查记录，不要重复提交。',needs_photo:'输入照片已失效，请重新选择照片并明确提交新的试穿。',expired:'成片已过期，当前浏览器没有保存副本。',canceled:'已取消'};
 let jobs=[], remoteJobs=[], localJobs=new Map(), jobsRead=0, submittedReceipt=null;
 let pollTimer, refreshing=false, refreshAgain=false, visiblePages=1;
+let historyFilter={look:'',status:'all'};
 let canStoreJobs=Boolean(storage), savingResults=false, cacheAgain=false;
 const resultURLs = new Map(), resultFailures = new Set(), removingJobs = new Set();
 function jobRoute(job,suffix='') {return '/api/tryons/'+encodeURIComponent(job.id)+suffix;}
@@ -375,7 +377,7 @@ function updateJobs() {
   const shown=new Map();
   for(const job of remoteJobs){
     const local=localJobs.get(job.id);
-    if(!local?.deleted)shown.set(job.id,{...job,online:true,cachedImage:local?.cachedImage});
+    if(!local?.deleted)shown.set(job.id,{...job,online:true,look_title:job.look_title||local?.look_title,cachedImage:local?.cachedImage});
   }
   for(const job of localJobs.values()){
     if(!job.deleted&&!shown.has(job.id)){
@@ -410,7 +412,7 @@ async function storeRemoteJobs(rows, updatedAt, revision) {
   const publicFields=rows.filter(job=>typeof job.id==='string'&&job.id).map(job=>({
     id:job.id, status:job.status, look_id:job.look_id, edition:job.edition,
     shot_index:job.shot_index, pose_mode:job.pose_mode, created_at:job.created_at, queue_position:job.queue_position,
-    error_code:job.error_code, error_message:job.error_message, look_title:byId.get(job.look_id)?.title, updatedAt
+    error_code:job.error_code, error_message:job.error_message, look_title:job.look_title||byId.get(job.look_id)?.title, updatedAt
   }));
   try {
     await storage.putJobs(publicFields);
@@ -506,6 +508,41 @@ async function removeRecord(job, button) {
     $('tryon-jobs-status').textContent=error.message;button.disabled=false;
   }
 }
+function hasHistoryFilter(){
+  return !!historyFilter.look||historyFilter.status!=='all';
+}
+function matchesJob(job,filter=historyFilter,serverMatched=false){
+  if(filter.status==='active'&&!activeStatuses.has(job.status))return false;
+  if(filter.status==='success'&&job.status!=='succeeded')return false;
+  if(filter.status==='failed'&&!failedStatuses.has(job.status))return false;
+  if(serverMatched||!filter.look)return true;
+  const id=/^#?(\d+)$/.exec(filter.look);
+  if(id)return Number(id[1])===job.look_id;
+  return (job.look_title||byId.get(job.look_id)?.title||'').toLowerCase().includes(filter.look.toLowerCase());
+}
+function setHistoryFilter(look,status){
+  if(historyFilter.look===look&&historyFilter.status===status)return;
+  historyFilter={look,status};
+  visiblePages=1;
+  remoteJobs=[];
+  $('tryon-more').hidden=true;$('tryon-more-note').hidden=true;
+  $('tryon-clear-history-filter').setAttribute('aria-disabled',String(!hasHistoryFilter()));
+  $('tryon-jobs-status').textContent=session
+    ?(hasHistoryFilter()?'正在筛选在线试穿记录…':'正在读取试穿记录…')
+    :hasHistoryFilter()?'已筛选本机记录。联网并刷新后可查询在线记录。':'已显示本机试穿记录。';
+  updateJobs();
+  if(session)refreshJobs();
+}
+$('tryon-history-filter').addEventListener('submit',event=>{
+  event.preventDefault();
+  setHistoryFilter($('tryon-history-look').value.trim(),$('tryon-history-status').value);
+});
+$('tryon-clear-history-filter').addEventListener('click',()=>{
+  if(!hasHistoryFilter())return;
+  $('tryon-history-filter').reset();
+  setHistoryFilter('','all');
+  $('tryon-history-look').focus({preventScroll:true});
+});
 function renderJobs() {
   const focused=listFocusedAction();
   const list=$('tryon-jobs');list.replaceChildren();
@@ -516,15 +553,17 @@ function renderJobs() {
       URL.revokeObjectURL(url);resultURLs.delete(id);
     }
   }
-  if(!jobs.length){
-    list.append(element('p','还没有试穿记录。打开一套造型，点击「拍照试穿」开始。'));
+  const shown=jobs.filter(job=>matchesJob(job,historyFilter,job.online));
+  if(!shown.length){
+    const message=hasHistoryFilter()?'当前没有符合筛选条件的试穿记录。':'还没有试穿记录。打开一套造型，点击「拍照试穿」开始。';
+    list.append(element('p',message));
     if(focused)$('tryon-jobs-title').focus({preventScroll:true});
     return;
   }
-  for(const job of jobs){
+  for(const job of shown){
     const card=element('article',undefined,'tryon-job');card.dataset.jobId=job.id;card.dataset.jobStatus=job.status;
     const look=byId.get(job.look_id);
-    const heading=element('h4','LOOK '+String(job.look_id).padStart(3,'0')+' · 参考 '+String(job.shot_index).padStart(2,'0')+' · '+(look?.title||job.look_title||''));heading.tabIndex=-1;heading.dataset.jobAction='heading';card.append(heading);
+    const heading=element('h4','LOOK '+String(job.look_id).padStart(3,'0')+' · 参考 '+String(job.shot_index).padStart(2,'0')+' · '+(job.look_title||look?.title||''));heading.tabIndex=-1;heading.dataset.jobAction='heading';card.append(heading);
     let status=statusNames[job.status]||'未知状态，请刷新进度确认。';
     if(job.pose_mode==='pose_grid')status='九宫格姿态 · '+status;
     if(job.cachedImage)status+=' · 已保存到本机';
@@ -560,7 +599,7 @@ function renderJobs() {
       if(!imageURL&&dialog.open&&!job.cachedImage)card.append(element('p',job.online?'正在保存成片到本机…':'成片尚未保存在本机，可联网后刷新进度。','tryon-hint'));
       if(downloadURL){const link=element('a','下载结果 ↓','outline-button');link.href=downloadURL;link.download='tryon-'+job.id+'.webp';link.dataset.jobAction='download';card.append(link);}
     }
-    if(['unknown','failed','needs_photo','expired','canceled'].includes(job.status)&&job.edition==='v2'&&look?.versions.v2?.shots?.[job.shot_index-1]){
+    if(failedStatuses.has(job.status)&&job.edition==='v2'&&look?.versions.v2?.shots?.[job.shot_index-1]){
       const uncertain=job.status==='unknown';
       const retry=element('button',uncertain?'准备重试':'重新准备照片','outline-button');retry.dataset.jobRetry=job.id;retry.dataset.jobAction='retry';retry.addEventListener('click',()=>{
         if(busy)return;
@@ -587,26 +626,32 @@ function listFocusedAction() {
 async function refreshJobs() {
   if(!session)return;
   if(refreshing){refreshAgain=true;return;}
-  const revision=sessionRevision, started=Date.now();
+  const revision=sessionRevision, started=Date.now(), filter=historyFilter;
+  const current=()=>revision===sessionRevision&&filter===historyFilter;
   refreshing=true;clearTimeout(pollTimer);$('tryon-refresh').disabled=true;$('tryon-more').disabled=true;
   try {
     const collected=[];let response;
     for(let page=0;page<visiblePages;page++){
-      response=await api('/api/tryons'+(page?'?offset='+collected.length:''));
-      if(revision!==sessionRevision)return;
+      const params=new URLSearchParams();
+      if(page)params.set('offset',collected.length);
+      if(filter.look)params.set('look',filter.look);
+      if(filter.status!=='all')params.set('status',filter.status);
+      response=await api('/api/tryons'+(params.size?'?'+params:''));
+      if(!current())return;
       if(!Array.isArray(response.items))throw new Error('无法读取试穿记录，请刷新重试。');
       collected.push(...response.items);
       if(!response.has_more||!response.items.length)break;
     }
     const received=new Map(collected.map(job=>[job.id,job]));
-    if(submittedReceipt?.at>=started&&!received.has(submittedReceipt.job.id))received.set(submittedReceipt.job.id,submittedReceipt.job);
+    if(submittedReceipt?.at>=started&&matchesJob(submittedReceipt.job,filter)&&!received.has(submittedReceipt.job.id))received.set(submittedReceipt.job.id,submittedReceipt.job);
     remoteJobs=[...received.values()];updateJobs();
     storeRemoteJobs(remoteJobs,started,revision);
     $('tryon-more-note').hidden=!response.has_more;$('tryon-more').hidden=!response.has_more;
-    const latest=jobs.find(job=>activeStatuses.has(job.status))||jobs[0];
+    const matching=jobs.filter(job=>matchesJob(job,filter,job.online));
+    const latest=matching.find(job=>activeStatuses.has(job.status))||matching[0];
     const notice='进度已更新。'+(latest?'最近试穿：'+(statusNames[latest.status]||'状态待确认')+'。':'')+recoveryNotice;
     if($('tryon-jobs-status').textContent!==notice)$('tryon-jobs-status').textContent=notice;
-  } catch(error){$('tryon-jobs-status').textContent='进度暂未更新：'+error.message+' 当前内容可能不是最新状态。';}
+  } catch(error){if(current())$('tryon-jobs-status').textContent='进度暂未更新：'+error.message+' 当前内容可能不是最新状态。';}
   finally {
     refreshing=false;$('tryon-refresh').disabled=false;$('tryon-more').disabled=false;
     if(refreshAgain){refreshAgain=false;queueMicrotask(refreshJobs);}
@@ -679,7 +724,8 @@ $('tryon-submit').addEventListener('click',async()=>{
     const job=await api('/api/tryons',{method:'POST',body:form});
     if(typeof job?.id!=='string'||!job.id||typeof job.status!=='string'||!job.status)throw new Error('暂未收到有效的试穿回执。');
     submittedJobId=job.id;submittedReceipt={at:Date.now(),job};
-    remoteJobs=[job,...remoteJobs.filter(item=>item.id!==job.id)];updateJobs();
+    if(matchesJob(job))remoteJobs=[job,...remoteJobs.filter(item=>item.id!==job.id)];
+    updateJobs();
     storeRemoteJobs([job],submittedReceipt.at,sessionRevision);
     retryingUnknown=false;
     clearPhoto();

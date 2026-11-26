@@ -244,6 +244,21 @@
       <button id="tryon-refresh" class="outline-button" type="button">刷新进度</button>
     </div>
     <p class="tryon-hint">试穿完成并保存到本机后，可在当前浏览器查看成片。</p>
+    <form id="tryon-history-filter" class="tryon-history-filter" role="search" aria-label="筛选试穿记录">
+      <label for="tryon-history-look">穿搭编号或标题
+        <input id="tryon-history-look" type="search" maxlength="200" placeholder="例如 001">
+      </label>
+      <label for="tryon-history-status">试穿状态
+        <select id="tryon-history-status">
+          <option value="all">全部状态</option>
+          <option value="active">等待或生成中</option>
+          <option value="success">生成完成</option>
+          <option value="failed">未成功</option>
+        </select>
+      </label>
+      <button class="solid-button" type="submit">筛选</button>
+      <button id="tryon-clear-history-filter" class="outline-button" type="button" aria-disabled="true">清除</button>
+    </form>
     <p id="tryon-jobs-status" role="status" aria-live="polite"></p>
     <p id="tryon-storage-status" class="tryon-hint" role="status"></p>
     <p id="tryon-pending-deletion" class="tryon-hint" hidden>本机记录已删除；可访问该任务时会同步清除在线结果。</p>
