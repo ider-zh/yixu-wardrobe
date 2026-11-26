@@ -23,12 +23,10 @@
     }
 
     const products = new Map();
-    const knownProducts = new Set();
     const linkedPieces = new Map();
     for (const product of asArray(catalog?.products)) {
       if (!validProductId(product?.product_id)) continue;
       const id = product.product_id;
-      knownProducts.add(id);
       const title = titleOf(product.name);
       if (product.model_only || !title) continue;
 
@@ -57,8 +55,10 @@
       const {type, id} = entry;
       if (type === 'look' && validLookId(id)) {
         const look = looks.get(id);
-        if (!look) unavailable.set(`look:${id}`, {type, id});
-        if (!look || look.model_only) continue;
+        if (!look || look.model_only) {
+          unavailable.set(`look:${id}`, {type, id});
+          continue;
+        }
         asArray(look.pieces).forEach((piece, index) => {
           const pieceIndex = index + 1;
           const key = lookKey(id, pieceIndex);
@@ -69,7 +69,7 @@
       } else if (type === 'product' && validProductId(id)) {
         const title = products.get(id);
         if (title) add(productKey(id), title, {type, id});
-        else if (!knownProducts.has(id)) unavailable.set(productKey(id), {type, id});
+        else unavailable.set(productKey(id), {type, id});
       }
     }
     return {entries: [...rows.values()], missing: [...unavailable.values()]};

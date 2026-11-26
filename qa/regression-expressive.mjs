@@ -273,6 +273,10 @@ check('packing expands outfits and only merges explicit product appearances',()=
   assert.equal(pack.missing.length,0);
   const ambiguous=window.WardrobePacking.buildEntries([{type:'look',id:1},{type:'look',id:10}],catalog);
   assert.equal(ambiguous.entries.filter(entry=>/^product:.*loafers/.test(entry.key)).length,2);
+  const unavailable=[{type:'look',id:109},{type:'product',id:'black-penny-loafers-109'}];
+  const restricted=window.WardrobePacking.buildEntries(unavailable,catalog);
+  assert.equal(restricted.entries.length,0);
+  assert.deepEqual(JSON.parse(JSON.stringify(restricted.missing)),unavailable);
 });
 for(const name of checks)console.log('PASS '+name);
 console.log('Synthetic DOM regression: '+checks.length+' checks passed.');
