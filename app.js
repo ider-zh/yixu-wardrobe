@@ -17,6 +17,7 @@ const productFavorites=new Set(productSaved);
 const state = {category:'', season:'', query:'', model:'', region:'', piece:'', colors:[], batch:'', latestOnly:false, favoritesOnly:false, sort:'latest', page:'home', profileModel:'', productId:'', scene:'', limit:24, active:null, view:0};
 let filtered = [], toastTimer, detailReturnRoute = '#/home', routing = false, detailNavigation = null, focusArchive = false, routeDetailCloses = 0, detailSceneOpener = null, detailArchiveOpener = null;
 const scenes = new Map((window.WARDROBE_SCENES || []).map(scene=>[scene.id,scene]));
+const styleIdeas = new Map((window.WardrobeStylingIdeas || []).map(group=>[group.productId,group]));
 const pieceMatch = window.WardrobePieceMatch;
 const pieceTypes = new Map((pieceMatch?.categories || []).map(category=>[category.id,category.title]));
 const colorMatch = window.WardrobeColorMatch;
@@ -798,6 +799,19 @@ const productPage=window.YixuProductPage.create({
   return `<a class="product-worn" data-product-look="${look.id}" href="${esc(lookRoute(look,a.shot_index))}">${photo(shown)}<div><p class="eyebrow">LOOK ${String(look.id).padStart(3,'0')} / ${esc(publication(look))}</p><h3>${esc(look.title)}</h3><p>${esc(look.description)}</p><p class="product-worn-source">原写真穿着参考 · 第 ${a.shot_index} 镜头</p><span class="product-worn-link">走进这套穿搭 <span aria-hidden="true">↗</span></span></div></a>`;
  }
 });
+function stylingIdeas(product){
+ const group=styleIdeas.get(product?.product_id);
+ if(!group||!publicAppearances(product).length)return null;
+ const items=group.entries.flatMap(({lookId,pieceIndex,shotIndex,referenceAssetId,tip})=>{
+  const look=byId.get(lookId);
+  if(!look||look.model_only||shareAsset(look)!==referenceAssetId||!look.pieces[pieceIndex-1])return [];
+  const version=versionOf(look);
+  const same=product.appearances.some(appearance=>appearance.look_id===lookId&&appearance.piece_index===pieceIndex&&appearance.reference_asset_id===referenceAssetId);
+  const preview=photo({...look,versions:{v2:{...version,previewPanel:shotIndex}}});
+  return [{lookId,title:look.title,piece:look.pieces[pieceIndex-1].name,shotIndex,tip,same,href:lookRoute(look,shotIndex),preview}];
+ });
+ return items.length?{title:group.title,items}:null;
+}
 function renderProduct(id){
  const product=(data.products||[]).find(p=>p.product_id===id);
  const requested=Number(new URLSearchParams(location.hash.split('?')[1]).get('look'));
@@ -806,7 +820,7 @@ function renderProduct(id){
  const appearances=fromModel?product.appearances.filter(a=>a.look_id===requested):indexed.length?indexed:product?.appearances||[];
  const related=[...new Map(appearances.flatMap(a=>productsForLook(a.look_id)).filter(p=>p.product_id!==id).map(p=>[p.product_id,p])).values()];
  const modelContext=appearances.map(a=>byId.get(a.look_id)).find(l=>l?.model_only);
- productPage.render({product,number:String((data.products||[]).indexOf(product)+1).padStart(3,'0'),liked:productFavorites.has(id),listable:indexed.length>0,appearances,related,
+ productPage.render({product,number:String((data.products||[]).indexOf(product)+1).padStart(3,'0'),liked:productFavorites.has(id),listable:indexed.length>0,appearances,related,styling:stylingIdeas(product),
    renderCard:p=>productCard(p,{lookId:modelContext?.id}),modelLink:modelContext?{href:modelRoute(modelContext.model_id),name:modelName(modelContext.model_id)}:null});
 }
 document.addEventListener('click',event=>{

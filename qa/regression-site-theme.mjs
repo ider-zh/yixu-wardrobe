@@ -606,4 +606,17 @@ try{
  assert.deepEqual(await evaluate('window.capturedBackup.text().then(text=>Object.keys(JSON.parse(text)).sort())'),['favorites','lists','packing','schemaVersion','week']);
  await noOverflow('offline backup preview at 320px');
  console.log('PASS real Chromium: backup file preflight, explicit merge, preserved local values, repeat import and safe export shape.');
+ const loaferProduct='#/product/espresso-penny-loafers-001';
+ await route(loaferProduct);
+ assert.deepEqual(await evaluate('[...document.querySelectorAll("[data-styling-look]")].map(card=>Number(card.dataset.stylingLook))'),[1,87,107]);
+ assert.deepEqual(await evaluate('[...document.querySelectorAll(".product-styling-kind")].map(label=>label.textContent)'),['原款搭法','相近鞋型','相近鞋型']);
+ assert.equal(await evaluate('document.querySelectorAll("#product-worn-section .product-worn").length'),1);
+ await noOverflow('styling ideas at 320px');
+ await evaluate('document.querySelector(\'[data-styling-look="87"] a\').click()');
+ await wait('location.hash==="#look-87?shot=3&photo=look-087-v2-r1"&&document.getElementById("detail-dialog").open');
+ await evaluate('document.getElementById("close-detail").click()');
+ await wait(`location.hash===${JSON.stringify(loaferProduct)}&&!document.getElementById("detail-dialog").open`);
+ await route('#/product/brown-boots-102');
+ assert.equal(await evaluate('!!document.getElementById("product-styling-title")'),false);
+ console.log('PASS real Chromium: styled shoe alternatives name real appearances, keep original products and link to verified shots.');
 }finally{for(const socket of sockets)try{socket.close();}catch{}try{process.kill(-browser.pid,'SIGTERM');}catch{}if(browser.exitCode===null&&browser.signalCode===null)await Promise.race([once(browser,'exit'),new Promise(resolve=>setTimeout(resolve,1500))]);await new Promise(resolve=>server.close(resolve));fs.rmSync(scratch,{recursive:true,force:true,maxRetries:8,retryDelay:100});}

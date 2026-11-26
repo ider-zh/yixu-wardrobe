@@ -43,6 +43,29 @@ for (const {id, title, description, entries} of scenes) {
   }
 }
 assert.ok(siteResources.public.includes('wardrobe-scenes.js'), 'Outfit scenes must be included in the offline build');
+const ideasContext = {window: {}};
+vm.runInNewContext(read('wardrobe-styling-ideas.js'), ideasContext, {filename: 'wardrobe-styling-ideas.js'});
+const ideaProducts = new Set();
+for (const {productId, title, entries} of ideasContext.window.WardrobeStylingIdeas) {
+  const product = content.catalog.products.find(item => item.product_id === productId);
+  assert.ok(product && !ideaProducts.has(productId), `Invalid or duplicate styling product: ${productId}`);
+  assert.ok(typeof title === 'string' && title.trim() && Array.isArray(entries) && entries.length > 0, `Invalid styling group: ${productId}`);
+  ideaProducts.add(productId);
+  const seenLooks = new Set();
+  for (const {lookId, pieceIndex, shotIndex, referenceAssetId, tip} of entries) {
+    assert.ok(eligibleLooks.has(lookId) && !seenLooks.has(lookId), `Ineligible or duplicate styling look: ${productId}/${lookId}`);
+    seenLooks.add(lookId);
+    const look = content.catalog.looks.find(item => item.id === lookId);
+    assert.ok(Number.isInteger(pieceIndex) && pieceIndex > 0 && pieceIndex <= look.pieces.length, `Invalid styling piece: ${productId}/${lookId}`);
+    assert.ok(Number.isInteger(shotIndex) && shotIndex > 0 && shotIndex <= 9, `Invalid styling shot: ${productId}/${lookId}`);
+    assert.equal(referenceAssetId, look.versions.v2.asset.asset_id, `Outdated styling photo: ${productId}/${lookId}`);
+    assert.ok(typeof tip === 'string' && tip.trim(), `Missing styling tip: ${productId}/${lookId}`);
+  }
+  assert.ok(entries.some(entry => product.appearances.some(appearance =>
+    appearance.look_id === entry.lookId && appearance.piece_index === entry.pieceIndex &&
+    appearance.shot_index === entry.shotIndex && appearance.reference_asset_id === entry.referenceAssetId
+  )), `Styling group requires an actual appearance: ${productId}`);
+}
 const html = read('index.html');
 const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]);
 assert.equal(ids.length, new Set(ids).size);
