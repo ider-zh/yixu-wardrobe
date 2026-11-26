@@ -537,6 +537,39 @@ async function shareShot() {
   field.focus();
   field.select();
 }
+function revisionPair(look) {
+  if(!look)return null;
+  const previous=look.previous_photo,current=versionOf(look);
+  const previousSource=publicSource(previous?.source_url||previous?.image);
+  const currentSource=publicSource(current?.source_url||current?.image);
+  if(!current?.ready||!previous?.asset?.asset_id||!current.asset?.asset_id||previous.asset.asset_id===current.asset.asset_id||!previousSource||!currentSource||previousSource===currentSource)return null;
+  return [[previous,previousSource],[current,currentSource]];
+}
+function renderLookRevision(look,pair) {
+  $('look-revision-title').textContent=look.title+' · 写真版本对比';
+  const render=(side,[version,source])=>{
+    const image=$(side+'-look-image');
+    image.alt=side==='previous'?'上一版九宫格':'当前九宫格';
+    setImage(image,version);
+    $(side+'-look-source').href=source;
+  };
+  render('previous',pair[0]);
+  render('current',pair[1]);
+}
+const revisionDialog=$('look-revision-dialog');
+function closeLookRevision(){
+  if(revisionDialog.open)revisionDialog.close();
+}
+$('detail-revision').addEventListener('click',()=>{
+  const look=byId.get(state.active),pair=revisionPair(look);
+  if(!pair||revisionDialog.open)return;
+  renderLookRevision(look,pair);
+  revisionDialog.showModal();
+});
+$('close-look-revision').addEventListener('click',closeLookRevision);
+revisionDialog.addEventListener('close',()=>{
+  if(!revisionDialog.open&&$('detail-dialog').open&&!$('detail-revision').hidden)$('detail-revision').focus({preventScroll:true});
+});
 function updateDetailActions() {
   const l=byId.get(state.active);if(!l)return;
   const f=favorites.has(l.id),c=compare.has(l.id);
@@ -552,6 +585,12 @@ function openDetail(id,preserveNavigation=false,{view=0,routed=false,hydrating=f
   const alreadyOpen=$('detail-dialog').open,detailRoute=detailHashPattern.test(location.hash);
   const newView=!alreadyOpen||state.active!==id;
   const preserveView=hydrating&&alreadyOpen&&state.active===id&&state.view===view;
+  const revisions=revisionPair(l);
+  $('detail-revision').hidden=!revisions;
+  if(revisionDialog.open){
+    if(newView||!revisions)closeLookRevision();
+    else if(hydrating)renderLookRevision(l,revisions);
+  }
   const restored=!alreadyOpen&&detailRoute?history.state?.wardrobeDetail:null;
   if(restored&&typeof restored.returnRoute==='string'&&/^#\/(home|looks|models|favorites|products|product|lists|publications|recent|week|packing|backup)(?:[/?]|$)/.test(restored.returnRoute))detailReturnRoute=restored.returnRoute;
   else if(!alreadyOpen)detailReturnRoute=detailRoute?(l.model_only?modelRoute(l.model_id):'#/home'):location.hash||'#/home';
@@ -669,7 +708,7 @@ document.querySelectorAll('dialog').forEach(dialog=>dialog.addEventListener('cli
 document.addEventListener('keydown',e=>{
   const editable=e.target.matches('input,textarea,select,[contenteditable]');
   if(e.key==='/'&&!editable&&!document.querySelector('dialog[open]')){e.preventDefault();if(state.scene||!['looks','favorites'].includes(state.page)){history.pushState(null,'','#/looks');routeFromURL(false);}$('search').focus();$('search').scrollIntoView({block:'center',behavior:'smooth'});}
-  if($('detail-dialog').open&&!$('tryon-dialog')?.open&&!$('compare-dialog').open&&!$('wardrobe-list-picker').open&&!editable&&!e.target.closest('#view-selector, #detail-tags a')){if(e.key==='ArrowRight'){e.preventDefault();navigateLook(1);}if(e.key==='ArrowLeft'){e.preventDefault();navigateLook(-1);}}
+  if($('detail-dialog').open&&!revisionDialog.open&&!$('tryon-dialog')?.open&&!$('compare-dialog').open&&!$('wardrobe-list-picker').open&&!editable&&!e.target.closest('#view-selector, #detail-tags a')){if(e.key==='ArrowRight'){e.preventDefault();navigateLook(1);}if(e.key==='ArrowLeft'){e.preventDefault();navigateLook(-1);}}
 });
 window.addEventListener('storage',e=>{
  const kind=e.key===storageKey?'look':e.key===productStorageKey?'product':'';
@@ -778,6 +817,7 @@ function routeFromURL(scroll=true,hash=location.hash,{hydrating=false}={}){
  if((focusArchive||leavingScene)&&page==='looks'){focusArchive=false;$('collection-title').tabIndex=-1;$('collection-title').focus({preventScroll:true});}
 }
 $('detail-dialog').addEventListener('close',()=>{
+ closeLookRevision();
  if(routeDetailCloses){routeDetailCloses--;return;}
  if($('detail-dialog').open)return;
  state.active=null;detailNavigation=null;
@@ -787,6 +827,7 @@ $('detail-dialog').addEventListener('close',()=>{
  }
 });
 window.addEventListener('hashchange',()=>{
+ closeLookRevision();
  if($('product-image-dialog').open)$('product-image-dialog').close();
  if($('wardrobe-list-picker').open)$('wardrobe-list-picker').close();
  if($('piece-compare-dialog').open)$('piece-compare-dialog').close();

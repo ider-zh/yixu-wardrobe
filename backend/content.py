@@ -479,6 +479,9 @@ class ContentService:
         try:
             snapshot, records, blobs = self._candidate()
             canonical = json.dumps(sorted(self._source_digests), separators=(",", ":"))
+            # Match the Node snapshot revision when the public photo projection changes.
+            if any("previous_photo" in look for look in snapshot["looks"]):
+                canonical += "\nprevious-photo-v1"
             revision = hashlib.sha256(canonical.encode()).hexdigest()
             snapshot["revision"] = revision
             # Check all identities before touching the active revision.
@@ -571,6 +574,7 @@ class ContentService:
         looks, ids = [], set()
         for original in baseline["looks"]:
             look = copy.deepcopy(original)
+            look.pop("previous_photo", None)
             key = look["id"]
             if type(key) is not int or key < 1 or key in ids:
                 raise ValueError("Invalid legacy identity")
@@ -604,6 +608,7 @@ class ContentService:
                     )
                 ):
                     raise ValueError("Invalid historical look revision")
+                look["previous_photo"] = {"asset": asset, "image": asset["file"]}
                 asset = register(revised.asset.model_dump(exclude_none=True), grid=True)
                 look.update(
                     model_id=revised.model_id,
@@ -792,6 +797,15 @@ class ContentService:
                 image_url=asset["image_url"],
                 source_url=asset["source_url"],
             )
+            if (previous := look.get("previous_photo")) is not None:
+                previous_asset = self._public_asset(previous["asset"])
+                previous.update(
+                    asset=previous_asset,
+                    image=previous_asset["image_url"],
+                    image_url=previous_asset["image_url"],
+                    source_url=previous_asset["source_url"],
+                    download_url=previous_asset["source_url"] + "/download",
+                )
         public_models = []
         for model in snapshot["models"]:
             if model["reference"]["visibility"] != "public":

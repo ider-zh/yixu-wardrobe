@@ -168,6 +168,7 @@ export function loadContent(root) {
     registerAsset(version.asset, true);
     fail(version.image === version.asset.file, 'Look image and asset must agree');
     const revised = batch ? undefined : revisions.get(input.id);
+    let previousPhoto;
     if (revised) {
       const old = version.asset;
       const {asset, shots, story, summary, moods} = revised;
@@ -175,6 +176,7 @@ export function loadContent(root) {
       fail(asset.asset_id !== old.asset_id && asset.file !== old.file && asset.sha256 !== old.sha256,
         'Historical revision cannot reuse the original asset');
       registerAsset(asset, true);
+      previousPhoto = {asset: structuredClone(old), image: old.file, image_url: old.file, source_url: old.file, download_url: old.file};
       version = {image: asset.file, asset, shots, story, summary, moods};
     }
     const source = version.asset.file;
@@ -184,6 +186,7 @@ export function loadContent(root) {
     }
     Object.assign(out, {
       ...(batch && input.model_only ? {model_only: true} : {}),
+      ...(previousPhoto ? {previous_photo: previousPhoto} : {}),
       model_id: revised?.model_id ?? input.model_id ?? null,
       model_reference_sha256: revised?.model_reference_sha256 ?? input.model_reference_sha256 ?? null,
       batch_id: batch?.batch_id ?? input.batch_id ?? null,
@@ -286,7 +289,9 @@ export function loadContent(root) {
     look_count: published.filter(look => look.model_id === model.model_id).length,
     ...(model.reference.visibility === 'public' ? {reference: {...model.reference, image_url: model.reference.file, source_url: model.reference.file}} : {}),
   }));
-  const revision = digest(Buffer.from(JSON.stringify(sources.sort((a, b) => compare(a[0], b[0])))));
+  const canonical = JSON.stringify(sources.sort((a, b) => compare(a[0], b[0])));
+  // A matching revision must identify the same public projection in the snapshot and API.
+  const revision = digest(Buffer.from(revisions.size ? canonical + '\nprevious-photo-v1' : canonical));
   return {
     catalog: {schema_version: 1, revision, target: published.length, generated: published.length, expressiveGenerated: published.length,
       planned: published.length, categoryOrder: [...base.categoryOrder], displayOrder, latestOrder, home, looks: published,

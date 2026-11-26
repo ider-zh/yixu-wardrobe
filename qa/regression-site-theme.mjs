@@ -622,4 +622,24 @@ try{
  await route('#/product/brown-boots-102');
  assert.equal(await evaluate('!!document.getElementById("product-styling-title")'),false);
  console.log('PASS real Chromium: styled shoe alternatives name real appearances, keep original products and link to verified shots.');
+ for(const width of [320,1440]){
+  await client('Emulation.setDeviceMetricsOverride',{width,height:900,deviceScaleFactor:1,mobile:width<600});
+  await route('#look-1');
+  await evaluate('document.getElementById("detail-revision").focus();document.activeElement.click()');
+  await wait('document.getElementById("look-revision-dialog").open&&["previous","current"].every(side=>document.getElementById(side+"-look-image").naturalWidth>0)');
+  assert.equal(await evaluate('document.getElementById("previous-look-image").getAttribute("src")'),'images-v2/look-001.webp');
+  assert.equal(await evaluate('document.getElementById("current-look-image").dataset.source'),catalog.looks.find(look=>look.id===1).versions.v2.source_url);
+  assert.equal(await evaluate('document.activeElement.id'),'close-look-revision');
+  await noOverflow('offline revision comparison '+width);
+  await client('Input.dispatchKeyEvent',{type:'keyDown',key:'ArrowRight',code:'ArrowRight',windowsVirtualKeyCode:39});
+  assert.equal(await evaluate('location.hash'),'#look-1');
+  await evaluate('document.getElementById("previous-look-image").dispatchEvent(new Event("error"))');
+  assert.equal(await evaluate('document.getElementById("previous-look-image").parentElement.dataset.imageStatus'),'图片暂不可用');
+  assert.equal(await evaluate('document.getElementById("current-look-image").hidden'),false);
+  await client('Input.dispatchKeyEvent',{type:'keyDown',key:'Escape',code:'Escape',windowsVirtualKeyCode:27});
+  await wait('!document.getElementById("look-revision-dialog").open&&document.activeElement.id==="detail-revision"');
+  await route('#look-89');
+  assert.equal(await evaluate('document.getElementById("detail-revision").hidden'),true);
+ }
+ console.log('PASS real Chromium: two full historical images, keyboard focus, single-image fallback and no control on an unrevised outfit.');
 }finally{for(const socket of sockets)try{socket.close();}catch{}try{process.kill(-browser.pid,'SIGTERM');}catch{}if(browser.exitCode===null&&browser.signalCode===null)await Promise.race([once(browser,'exit'),new Promise(resolve=>setTimeout(resolve,1500))]);await new Promise(resolve=>server.close(resolve));fs.rmSync(scratch,{recursive:true,force:true,maxRetries:8,retryDelay:100});}
