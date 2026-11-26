@@ -629,6 +629,7 @@ function routeFromURL(scroll=true,hash=location.hash,{hydrating=false}={}){
  const detail=detailHashPattern.exec(hash);
  if(detail){
   const id=Number(detail[1]),look=byId.get(id),alreadyOpen=$('detail-dialog').open;
+  if(hydrating&&!alreadyOpen&&state.active===id)return;
   if(look){
    const restored=history.state?.wardrobeDetail;
    const sceneId=/^#\/looks\?scene=([a-z0-9-]+)$/.exec(restored?.returnRoute)?.[1];

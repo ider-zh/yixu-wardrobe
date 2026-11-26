@@ -37,6 +37,7 @@ for (const match of html.matchAll(/<input\b[^>]*>/g)) {
 }
 const dialogs=['detail-dialog','compare-dialog','about-dialog','tryon-dialog'].map(node);
 const storage=new Map([['wardrobe99:favorites:v1','[9999]']]);
+const recentViews=[];
 const context={
   window:{addEventListener(type,callback){windowEvents[type]=callback;},scrollTo(){},matchMedia(){return {matches:false,addEventListener(){}};}},
   document:{body:{dataset:{}},getElementById:node,
@@ -48,6 +49,7 @@ const context={
 };
 context.history={pushState(_state,_title,hash){context.location.hash=hash;},replaceState(_state,_title,hash){context.location.hash=hash;}};
 context.window.WARDROBE=JSON.parse(fs.readFileSync(path.join(root,'content/catalog.json'),'utf8'));
+context.window.WardrobeRecent={remember(type,id){recentViews.push({type,id});return Promise.resolve();},subscribe(){}};
 vm.createContext(context);
 context.window.WARDROBE.revision='synthetic-static-revision';
 for(const module of ['product-themes.js','product-page.js','wardrobe-framing.js'])vm.runInContext(fs.readFileSync(path.join(root,module),'utf8'),context);
@@ -74,6 +76,21 @@ check('a queued route close cannot overwrite a detail URL restored by browser Ba
   windowEvents.hashchange();assert.equal(node('detail-dialog').open,true);assert.equal(a.state.active,100);
   context.location.hash='#/looks';windowEvents.hashchange();node('detail-dialog').events.close[0]();
   a.resetFilters();
+});
+check('catalog hydration cannot reopen a closing outfit or remember it again',()=>{
+  context.location.hash='#/home';windowEvents.hashchange();
+  a.openDetail(1);
+  const count=recentViews.length;
+  node('detail-dialog').close();
+  a.adoptCatalog(baseline);
+  assert.equal(node('detail-dialog').open,false);
+  assert.equal(recentViews.length,count);
+  node('detail-dialog').events.close[0]();
+  assert.equal(context.location.hash,'#/home');
+  context.location.hash='#look-1';windowEvents.hashchange();
+  assert.equal(node('detail-dialog').open,true);
+  assert.equal(recentViews.length,count+1);
+  context.location.hash='#/looks';windowEvents.hashchange();node('detail-dialog').events.close[0]();
 });
 check('offline snapshot preserves curated category exploration without fixed category sizes',()=>{
   for(const category of baseline.categoryOrder){a.state.category=category;a.refreshFilters();assert.ok(a.getFiltered().every(l=>l.category===category));}
