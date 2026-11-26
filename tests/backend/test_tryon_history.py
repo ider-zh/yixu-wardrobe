@@ -14,8 +14,10 @@ def insert_jobs(app, owner, records):
                (id, owner, idempotency_key, fingerprint, status, look_id, look_title,
                 edition, shot_index, created, expires)
                VALUES (?, ?, ?, 'fixture', ?, ?, ?, 'v2', 1, ?, ?)""",
-            [(key, owner, key, status, look, title, now, now + 3600)
-             for key, status, look, title in records],
+            [
+                (key, owner, key, status, look, title, now, now + 3600)
+                for key, status, look, title in records
+            ],
         )
 
 
@@ -29,8 +31,16 @@ def test_tryon_history_filters_owner_and_status_before_pagination(setup):
     app, client, _headers, bootstrap, *_ = setup
     owner = bootstrap["visitor"]["id"]
     states = (
-        "queued", "validating", "generating", "postprocessing", "succeeded",
-        "failed", "unknown", "needs_photo", "expired", "canceled",
+        "queued",
+        "validating",
+        "generating",
+        "postprocessing",
+        "succeeded",
+        "failed",
+        "unknown",
+        "needs_photo",
+        "expired",
+        "canceled",
     )
     insert_jobs(app, owner, [(state, state, 101, "周末通勤") for state in states])
     insert_jobs(app, owner, [("different-look", "queued", 102, "观展")])
@@ -49,12 +59,12 @@ def test_tryon_history_filters_owner_and_status_before_pagination(setup):
         assert history(client, **active, offset=4) == {"items": [], "has_more": False}
         assert [job["id"] for job in history(stranger, **active)["items"]] == ["private-other"]
 
-        assert [job["status"] for job in history(client, look="通勤", status="success")["items"]] == [
-            "succeeded"
-        ]
-        assert [job["status"] for job in history(client, look="通勤", status="failed")["items"]] == [
-            "canceled", "expired", "needs_photo", "unknown", "failed"
-        ]
+        assert [
+            job["status"] for job in history(client, look="通勤", status="success")["items"]
+        ] == ["succeeded"]
+        assert [
+            job["status"] for job in history(client, look="通勤", status="failed")["items"]
+        ] == ["canceled", "expired", "needs_photo", "unknown", "failed"]
         assert len(history(client)["items"]) == 11
         assert history(client, look="9" * 100)["items"] == []
         assert client.get("/api/tryons", params={"status": "bogus"}).status_code == 422

@@ -149,16 +149,20 @@ class Jobs:
         current_titles = self.look_titles() if needle else {}
         with self.store.connect() as db:
             if needle:
+
                 def title_matches(title, look_id):
-                    text = title if isinstance(title, str) and title else current_titles.get(look_id, "")
+                    text = (
+                        title
+                        if isinstance(title, str) and title
+                        else current_titles.get(look_id, "")
+                    )
                     return needle in text.casefold()
 
-                db.create_function(
-                    "tryon_title_matches", 2, title_matches, deterministic=True
-                )
+                db.create_function("tryon_title_matches", 2, title_matches, deterministic=True)
                 conditions.append("tryon_title_matches(look_title, look_id)")
             rows = db.execute(
-                "SELECT * FROM jobs WHERE " + " AND ".join(conditions)
+                "SELECT * FROM jobs WHERE "
+                + " AND ".join(conditions)
                 + " ORDER BY seq DESC LIMIT ? OFFSET ?",
                 (*params, limit + 1, offset),
             ).fetchall()
