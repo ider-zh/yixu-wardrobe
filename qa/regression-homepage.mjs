@@ -23,11 +23,15 @@ const featured=catalog.looks.find(look=>look.id===catalog.home.featured_look_id)
 assert.ok(featured,'Publication projection supplies a real hero');
 let apiCatalog=structuredClone(catalog);
 let siteTheme='editorial';
+let catalogHold;
 const requested=[];
-const server=http.createServer((req,res)=>{
+const server=http.createServer(async(req,res)=>{
  requested.push(req.url);
  if(req.url==='/api/site-theme'){res.setHeader('Content-Type','application/json');res.setHeader('Cache-Control','no-store');res.end(JSON.stringify({theme:siteTheme}));return;}
- if(req.url==='/api/content/catalog'){res.setHeader('Content-Type','application/json');res.setHeader('Cache-Control','no-store');res.end(JSON.stringify(apiCatalog));return;}
+ if(req.url==='/api/content/catalog'){
+  if(catalogHold)await catalogHold;
+  res.setHeader('Content-Type','application/json');res.setHeader('Cache-Control','no-store');res.end(JSON.stringify(apiCatalog));return;
+ }
  if(req.url==='/api/bootstrap'){
   res.setHeader('Content-Type','application/json');res.end(JSON.stringify({csrf_token:'fixture-csrf',visitor:{id:'fixture'},generation_available:false,disclosure:{accepted:false,version:'fixture-v1',title:'照片用途',items:['照片交由第三方 AI 生成试穿图，结果可供后台评估。']}}));return;
  }
@@ -268,6 +272,25 @@ try{
  await evaluate('window.shareAttempts[0].reject(Error("Late denial"));Promise.resolve()');
  assert.equal(await evaluate('document.getElementById("share-shot-manual").hidden'),true);
  assert.equal(await evaluate('document.getElementById("share-shot-status").textContent'),'已复制单格链接。');
+ const catalogGate=Promise.withResolvers();
+ catalogHold=catalogGate.promise;
+ const hydratedTitle=featured.title+' · 水合夹具';
+ apiCatalog.looks.find(look=>look.id===featured.id).title=hydratedTitle;
+ try{
+  await navigate(origin+'/?catalog=delayed'+sharedShot);
+  await wait(selectedFourth);
+  await evaluate('Object.defineProperty(navigator,"clipboard",{configurable:true,value:{writeText:async()=>{throw Error("Test denied");}}});document.getElementById("share-shot").click()');
+  await wait('document.activeElement.id==="share-shot-link"');
+  catalogGate.resolve();
+  await wait(`document.getElementById("detail-title").textContent===${JSON.stringify(hydratedTitle)}`);
+  assert.equal(await evaluate('document.getElementById("share-shot-manual").hidden'),false);
+  assert.equal(await evaluate('document.activeElement.id'),'share-shot-link');
+  assert.equal(await evaluate('document.activeElement.selectionEnd'),(origin+'/'+sharedShot).length);
+ }finally{
+  catalogGate.resolve();
+  catalogHold=null;
+  apiCatalog=structuredClone(catalog);
+ }
  await client('Page.reload');await wait(selectedFourth);
  const invalidShots=[
   'shot=10&photo='+featured.versions.v2.asset.asset_id,
