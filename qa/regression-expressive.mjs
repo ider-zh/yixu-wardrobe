@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
+import { loadContent } from '../scripts/content-lib.mjs';
 
 // State and data-boundary regression for the actual app. The Chromium suite
 // separately verifies layout, native events, private uploads, and modal focus.
@@ -49,7 +50,7 @@ context.history={pushState(_state,_title,hash){context.location.hash=hash;},repl
 context.window.WARDROBE=JSON.parse(fs.readFileSync(path.join(root,'content/catalog.json'),'utf8'));
 vm.createContext(context);
 context.window.WARDROBE.revision='synthetic-static-revision';
-for(const module of ['product-themes.js','product-page.js'])vm.runInContext(fs.readFileSync(path.join(root,module),'utf8'),context);
+for(const module of ['product-themes.js','product-page.js','wardrobe-framing.js'])vm.runInContext(fs.readFileSync(path.join(root,module),'utf8'),context);
 const app=fs.readFileSync(path.join(root,'app.js'),'utf8');
 const instrumented=app.replace(/\}\)\(\);\s*$/,`window.__audit={state,byId,favorites,compare,openDetail,setView,toggleFavorite,toggleCompare,openComparison,refreshFilters,renderGallery,navigateLook,resetFilters,adoptCatalog,hydrateCatalog,imageFailed,setImage,publicSource,getFiltered:()=>filtered};})();`);
 vm.runInContext(instrumented,context);
@@ -101,6 +102,29 @@ check('comparison details outside the filter retain valid full-list navigation',
   node('comparison-content').events.click[0]({target:{closest:()=>({dataset:{compareDetail:'70'}})}});
   assert.equal(node('detail-position').textContent,(baseline.looks.length-70+1)+' / '+baseline.looks.length);a.navigateLook(1);assert.equal(a.state.active,69);a.navigateLook(-1);assert.equal(a.state.active,70);
   a.state.query=a.byId.get(70).title;a.refreshFilters();a.openDetail(70);assert.equal(node('detail-position').textContent,'1 / 1');
+});
+check('full-body comparison uses verified shots and an explicit fallback',()=>{
+  const fullBodyShot=context.window.WardrobeFraming.fullBodyShot;
+  const published=loadContent(root).catalog.looks;
+  const rawShots=new Map();
+  for(const [id,shot] of [[2,1],[4,3],[89,null]]){
+    const current=published.find(look=>look.id===id).versions.v2.shots;
+    assert.equal(fullBodyShot(current),shot);
+    const version=a.byId.get(id).versions.v2;
+    rawShots.set(version,version.shots);
+    version.shots=current;
+  }
+  a.compare.clear();node('compare-dialog').open=false;
+  for(const id of [2,4,89])a.toggleCompare(id);
+  a.openComparison();
+  assert.doesNotMatch(node('comparison-content').innerHTML,/暂无已确认的全身镜头/);
+  node('compare-full-body').events.click[0]();
+  assert.equal(node('compare-full-body').attrs['aria-pressed'],'true');
+  assert.match(node('comparison-content').innerHTML,/data-compare-detail="4" data-compare-shot="3"/);
+  assert.match(node('comparison-content').innerHTML,/data-compare-detail="89" data-compare-shot="0"/);
+  assert.match(node('comparison-content').innerHTML,/暂无已确认的全身镜头/);
+  node('compare-dialog').open=false;a.compare.clear();
+  for(const [version,shots] of rawShots)version.shots=shots;
 });
 check('favorites preserve unknown IDs through toggles and cross-tab updates',()=>{
   assert.equal(a.favorites.has(9999),true);a.toggleFavorite(70);assert.deepEqual(JSON.parse(storage.get('wardrobe99:favorites:v1')),[9999,70]);

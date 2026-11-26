@@ -247,3 +247,21 @@ dialog{padding:0;border:0;background:var(--paper-light);color:var(--ink);max-wid
     width: 100%;
   }
 }
+
+.comparison-controls {
+  display: flex;
+  margin: 0 0 16px;
+}
+
+.comparison-controls button[aria-pressed="true"] {
+  border-color: var(--ink);
+  color: var(--paper);
+  background: var(--ink);
+}
+
+.comparison-card .comparison-framing {
+  margin: 8px 0;
+  color: var(--ink);
+  font-size: var(--small-text-size);
+  line-height: 1.45;
+}

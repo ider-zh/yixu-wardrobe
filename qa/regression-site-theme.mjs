@@ -361,4 +361,27 @@ try{
  assert.equal(await evaluate('document.querySelector("#color-filter-wrap").checkVisibility()'),false);
  assert.equal(await evaluate('document.querySelectorAll("#gallery .card-color-evidence").length'),0);
  console.log('PASS real Chromium: two palette groups require both, chips match the swatches, and offline route normalization works.');
+ for(const id of [2,4,89]){
+  await route('#/looks?q='+String(id).padStart(3,'0'));
+  await evaluate(`document.querySelector('#gallery [data-compare="${id}"]').click()`);
+ }
+ const compareOrigin='#/looks?q=089';
+ await evaluate('document.getElementById("open-compare").click()');
+ await wait('document.getElementById("compare-dialog").open');
+ assert.equal(await evaluate('document.getElementById("compare-full-body").getAttribute("aria-pressed")'),'false');
+ await evaluate('document.getElementById("compare-full-body").focus();document.activeElement.click()');
+ assert.equal(await evaluate('document.getElementById("compare-full-body").getAttribute("aria-pressed")'),'true');
+ assert.equal(await evaluate('document.activeElement.id'),'compare-full-body');
+ assert.deepEqual(await evaluate('[...document.querySelectorAll("[data-compared-look]")].map(card=>[Number(card.dataset.comparedLook),card.querySelector("[data-compare-shot]").dataset.compareShot])'),[[2,'1'],[4,'3'],[89,'0']]);
+ assert.equal(await evaluate('document.querySelector(\'[data-compared-look="89"] .comparison-framing\').textContent'),'暂无已确认的全身镜头');
+ assert.equal(await evaluate('document.querySelector(\'[data-compared-look="4"] .photo-window\').style.getPropertyValue("--panel-x")'),'-200%');
+ await noOverflow('offline full-body comparison');
+ await evaluate('document.querySelector(\'[data-compare-detail="4"]\').click()');
+ const expectedShot='#look-4?'+new URLSearchParams({shot:'3',photo:catalog.looks.find(look=>look.id===4).versions.v2.asset.asset_id});
+ await wait(`location.hash===${JSON.stringify(expectedShot)}&&document.getElementById("detail-dialog").open`);
+ assert.equal(await evaluate('document.querySelector(\'#view-selector [aria-pressed="true"]\').dataset.view'),'3');
+ await evaluate('document.getElementById("close-detail").click()');
+ await wait(`location.hash===${JSON.stringify(compareOrigin)}&&!document.getElementById("detail-dialog").open`);
+ assert.equal(await evaluate('document.getElementById("compare-count").textContent'),'3 / 3 套');
+ console.log('PASS real Chromium: full-body comparison preserves order and selection, identifies fallback and links to a precise shot.');
 }finally{for(const socket of sockets)try{socket.close();}catch{}try{process.kill(-browser.pid,'SIGTERM');}catch{}if(browser.exitCode===null&&browser.signalCode===null)await Promise.race([once(browser,'exit'),new Promise(resolve=>setTimeout(resolve,1500))]);await new Promise(resolve=>server.close(resolve));fs.rmSync(scratch,{recursive:true,force:true,maxRetries:8,retryDelay:100});}

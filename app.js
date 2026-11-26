@@ -9,6 +9,7 @@ const storageKey = 'wardrobe99:favorites:v1';
 let saved = [];
 try { const value = JSON.parse(localStorage.getItem(storageKey) || '[]'); if (Array.isArray(value)) saved = value.filter(id => Number.isSafeInteger(id) && id > 0); } catch {}
 const favorites = new Set(saved), compare = new Set();
+let compareFullBody = false;
 const productStorageKey='yixu:product-favorites:v1';
 let productSaved=[];
 try{const value=JSON.parse(localStorage.getItem(productStorageKey)||'[]');if(Array.isArray(value))productSaved=value.filter(id=>typeof id==='string'&&/^[A-Za-z0-9_-]+$/.test(id));}catch{}
@@ -524,15 +525,37 @@ function renderCompareTray() {
 }
 $('compare-items').addEventListener('click',e=>{const b=e.target.closest('[data-remove-compare]');if(b)toggleCompare(Number(b.dataset.removeCompare));});
 $('clear-compare').addEventListener('click',()=>{const ids=[...compare];compare.clear();ids.forEach(syncCardButtons);renderCompareTray();updateDetailActions();});
+function renderComparison() {
+  const content=$('comparison-content');
+  $('compare-full-body').setAttribute('aria-pressed',String(compareFullBody));
+  content.style.setProperty('--compare-cols',String(compare.size));
+  content.innerHTML=[...compare].map(id=>{
+    const look=byId.get(id),version=versionOf(look);
+    const shot=compareFullBody&&version.ready?window.WardrobeFraming?.fullBodyShot(version.shots):null;
+    const shown=shot?{...look,versions:{v2:{...version,previewPanel:shot}}}:look;
+    const picture=version.ready?photo(shown):'<div class="card-pending"><span>'+number(id)+'</span><small>写真制作中</small></div>';
+    const caption=compareFullBody?'<p class="comparison-framing">'+(shot?'全身 · 第 '+shot+' 镜头':'暂无已确认的全身镜头')+'</p>':'';
+    const action=shot?'查看全身镜头':'查看九宫格写真';
+    return '<article class="comparison-card" data-compared-look="'+id+'">'+picture+caption+'<h3>'+esc(look.title)+'</h3><p class="eyebrow">LOOK '+number(id)+' · '+esc(look.category)+'</p><div class="palette">'+palette(look)+'</div><p>'+esc(look.description)+'</p><h4>搭配单品 / '+look.pieces.length+' 件</h4><ul>'+look.pieces.map(piece=>'<li>'+esc(piece.name)+'</li>').join('')+'</ul><h4>设计思路</h4><ul>'+look.details.map(detail=>'<li>'+esc(detail)+'</li>').join('')+'</ul><button class="solid-button" data-compare-detail="'+id+'" data-compare-shot="'+(shot||0)+'">'+action+' ↗</button></article>';
+  }).join('');
+}
 function openComparison() {
   if(compare.size<2)return;
-  const content=$('comparison-content');
-  content.style.setProperty('--compare-cols',String(compare.size));
-  content.innerHTML=[...compare].map(id=>{const l=byId.get(id);return '<article class="comparison-card">'+(versionOf(l).ready?photo(l):'<div class="card-pending"><span>'+number(l.id)+'</span><small>写真制作中</small></div>')+'<h3>'+esc(l.title)+'</h3><p class="eyebrow">LOOK '+number(l.id)+' · '+esc(l.category)+'</p><div class="palette">'+palette(l)+'</div><p>'+esc(l.description)+'</p><h4>搭配单品 / '+l.pieces.length+' 件</h4><ul>'+l.pieces.map(p=>'<li>'+esc(p.name)+'</li>').join('')+'</ul><h4>设计思路</h4><ul>'+l.details.map(d=>'<li>'+esc(d)+'</li>').join('')+'</ul><button class="solid-button" data-compare-detail="'+l.id+'">查看九宫格写真 ↗</button></article>';}).join('');
+  if(!$('compare-dialog').open)compareFullBody=false;
+  renderComparison();
   if(!$('compare-dialog').open)$('compare-dialog').showModal();
 }
 $('open-compare').addEventListener('click',openComparison);$('close-compare').addEventListener('click',()=>$('compare-dialog').close());
-$('comparison-content').addEventListener('click',e=>{const b=e.target.closest('[data-compare-detail]');if(b){$('compare-dialog').close();openDetail(Number(b.dataset.compareDetail));}});
+$('compare-full-body').addEventListener('click',()=>{
+  compareFullBody=!compareFullBody;
+  renderComparison();
+});
+$('comparison-content').addEventListener('click',e=>{
+  const button=e.target.closest('[data-compare-detail]');
+  if(!button)return;
+  $('compare-dialog').close();
+  openDetail(Number(button.dataset.compareDetail),false,{view:Number(button.dataset.compareShot)||0});
+});
 $('about-button').addEventListener('click',()=>$('about-dialog').showModal());$('close-about').addEventListener('click',()=>$('about-dialog').close());
 $('about-to-gallery').addEventListener('click',()=>{$('about-dialog').close();location.hash='#/looks';});
 document.querySelectorAll('dialog').forEach(dialog=>dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}}));
