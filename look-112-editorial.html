@@ -55,9 +55,15 @@
   </section>
   <section id="original" class="original" aria-labelledby="original-title">
     <div class="album-layout">
-      <figure class="album-frame" aria-label="当前写真">
-        <img id="album-image" src="assets/looks/2026-11-27/look-112-female-01-v2-r1.webp" alt="门口打个招呼" width="1024" height="1536" loading="lazy">
-      </figure>
+      <div class="album-gallery">
+        <figure class="album-frame" aria-label="当前写真">
+          <img id="album-image" src="assets/looks/2026-11-27/look-112-female-01-v2-r1.webp" alt="门口打个招呼" width="1024" height="1536" loading="lazy">
+          <button class="album-control album-arrow album-previous" id="album-previous" type="button" aria-label="上一张"></button>
+          <button class="album-control album-arrow album-next" id="album-next" type="button" aria-label="下一张"></button>
+          <button class="album-control album-play" id="album-play" type="button" aria-label="暂停轮播"></button>
+        </figure>
+        <div class="album-thumbnails" id="album-thumbnails" role="group" aria-label="选择照片"></div>
+      </div>
       <div class="album-info">
         <h2 id="original-title">写真相册</h2>
         <div class="album-caption" id="album-caption" aria-live="off">
@@ -65,12 +71,6 @@
           <h3 id="album-title">门口打个招呼</h3>
           <p id="album-note">正面全身，双鞋可见</p>
         </div>
-        <div class="album-controls" role="group" aria-label="相册播放控制">
-          <button id="album-play" type="button">暂停轮播</button>
-          <button id="album-previous" type="button" aria-label="上一张">←</button>
-          <button id="album-next" type="button" aria-label="下一张">→</button>
-        </div>
-        <div class="album-thumbnails" id="album-thumbnails" role="group" aria-label="选择照片"></div>
       </div>
     </div>
   </section>

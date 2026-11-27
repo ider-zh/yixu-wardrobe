@@ -123,6 +123,8 @@ if (shots?.length === 9) {
   let playing = !reducedMotion.matches;
   let visible = false;
   let timer;
+  let outgoing;
+  let swipeStart;
 
   function updateThumbnailImage() {
     thumbnails.style.setProperty('--album-sheet', 'url(' + JSON.stringify(albumImage.currentSrc || albumImage.src) + ')');
@@ -131,7 +133,30 @@ if (shots?.length === 9) {
   updateThumbnailImage();
 
   function showShot(index) {
-    current = (index + shots.length) % shots.length;
+    const next = (index + shots.length) % shots.length;
+    if (next !== current) {
+      outgoing?.remove();
+      if (!reducedMotion.matches && albumImage.complete && albumImage.naturalWidth) {
+        const layer = albumImage.cloneNode();
+        layer.removeAttribute('id');
+        layer.removeAttribute('loading');
+        layer.alt = '';
+        layer.setAttribute('aria-hidden', 'true');
+        layer.className = 'album-outgoing';
+        layer.src = albumImage.currentSrc || albumImage.src;
+        layer.style.setProperty('--column', current % 3);
+        layer.style.setProperty('--row', Math.floor(current / 3));
+        frame.append(layer);
+        outgoing = layer;
+        const fade = layer.animate([{opacity: 1}, {opacity: 0}], {
+          duration: 420,
+          easing: 'ease-in-out',
+          fill: 'forwards'
+        });
+        fade.onfinish = () => layer.remove();
+      }
+    }
+    current = next;
     const shot = shots[current];
     frame.style.setProperty('--column', current % 3);
     frame.style.setProperty('--row', Math.floor(current / 3));
@@ -144,7 +169,10 @@ if (shots?.length === 9) {
 
   function syncPlayback() {
     clearTimeout(timer);
-    play.textContent = playing ? '暂停轮播' : '播放轮播';
+    const label = playing ? '暂停轮播' : '播放轮播';
+    play.toggleAttribute('data-paused', !playing);
+    play.setAttribute('aria-label', label);
+    play.title = label;
     albumCaption.setAttribute('aria-live', playing ? 'off' : 'polite');
     if (playing && visible && !document.hidden) {
       timer = setTimeout(() => {
@@ -177,9 +205,29 @@ if (shots?.length === 9) {
   });
   document.querySelector('#album-previous').addEventListener('click', () => chooseShot(current - 1));
   document.querySelector('#album-next').addEventListener('click', () => chooseShot(current + 1));
+  album.addEventListener('keydown', event => {
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+    event.preventDefault();
+    chooseShot(current + (event.key === 'ArrowLeft' ? -1 : 1));
+  });
+  frame.addEventListener('pointerdown', event => {
+    if (event.target !== frame || event.pointerType !== 'touch' || !event.isPrimary) return;
+    swipeStart = {x: event.clientX, y: event.clientY};
+  });
+  frame.addEventListener('pointerup', event => {
+    if (!event.isPrimary || !swipeStart) return;
+    const x = event.clientX - swipeStart.x;
+    const y = event.clientY - swipeStart.y;
+    swipeStart = undefined;
+    if (Math.abs(x) >= 40 && Math.abs(x) > Math.abs(y) * 1.5) {
+      chooseShot(current + (x < 0 ? 1 : -1));
+    }
+  });
+  frame.addEventListener('pointercancel', () => { swipeStart = undefined; });
   document.addEventListener('visibilitychange', syncPlayback);
   reducedMotion.addEventListener('change', event => {
     if (!event.matches) return;
+    outgoing?.remove();
     playing = false;
     syncPlayback();
   });
