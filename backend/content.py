@@ -905,10 +905,10 @@ class ContentService:
             )
 
         append("current_photo", "当前写真", look["versions"]["v2"]["asset"])
-        if editorial := look.get("editorial_asset"):
-            append("editorial_photo", "穿搭特辑写真", editorial)
         if previous := look.get("previous_photo"):
             append("previous_photo", "上一版写真", previous["asset"])
+        if editorial := look.get("editorial_asset"):
+            append("editorial_photo", "穿搭特辑写真", editorial)
         for product in snapshot.get("products", []):
             if not any(appearance["look_id"] == look_id for appearance in product["appearances"]):
                 continue
