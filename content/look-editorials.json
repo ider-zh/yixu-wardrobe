@@ -1,0 +1,523 @@
+{
+  "schema_version": 1,
+  "editorials": [
+    {
+      "look_id": 1,
+      "reference_asset_id": "look-001-female-01-v2-r2",
+      "asset": {
+        "asset_id": "look-001-female-01-editorial-r1",
+        "file": "assets/looks/historical/look-001-female-01-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 70142,
+        "sha256": "e7c7313da8b05ed5861dc94a016b7f5ffd6514f5791f5bf068f3b61bb8bd12d0",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 2,
+      "reference_asset_id": "look-002-female-01-v2-r2",
+      "asset": {
+        "asset_id": "look-002-female-01-editorial-r1",
+        "file": "assets/looks/historical/look-002-female-01-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 100518,
+        "sha256": "95eb8bff01d54986daf5867b8f2167161831d4173887e70878309cdffbbc30d2",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 3,
+      "reference_asset_id": "look-003-v2-r1",
+      "asset": {
+        "asset_id": "look-003-editorial-r1",
+        "file": "assets/looks/historical/look-003-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 73736,
+        "sha256": "37817b9c8532ee0d2de9c783aba248d990ef1ef6f33499048257550c74b9b942",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 4,
+      "reference_asset_id": "look-004-female-01-v2-r2",
+      "asset": {
+        "asset_id": "look-004-female-01-editorial-r1",
+        "file": "assets/looks/historical/look-004-female-01-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 88094,
+        "sha256": "1cef6fed4fc9e972b33279b4253deccd4e045a6fab216e397938e8ce15c7a607",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 5,
+      "reference_asset_id": "look-005-v2-r1",
+      "asset": {
+        "asset_id": "look-005-editorial-r1",
+        "file": "assets/looks/historical/look-005-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 60516,
+        "sha256": "2d88267aa1449f224bba912553a5c55ce2f021ecb07b60d1aefb33627b25c16e",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 6,
+      "reference_asset_id": "look-006-female-01-v2-r2",
+      "asset": {
+        "asset_id": "look-006-female-01-editorial-r1",
+        "file": "assets/looks/historical/look-006-female-01-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 75294,
+        "sha256": "da49b239b0964ce6980635dec3aca4d70bf1be979504b3dec1bb993ecc7a7780",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 7,
+      "reference_asset_id": "look-007-v2-r1",
+      "asset": {
+        "asset_id": "look-007-editorial-r1",
+        "file": "assets/looks/historical/look-007-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 53788,
+        "sha256": "1a43b83c241874581a864a3c6f5de552e645fe5678e0da76f0e6698f0722fcb8",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 8,
+      "reference_asset_id": "look-008-female-01-v2-r2",
+      "asset": {
+        "asset_id": "look-008-female-01-editorial-r1",
+        "file": "assets/looks/historical/look-008-female-01-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 54444,
+        "sha256": "90229c1a109064deb98fd5666f778e3917637a125b5a8ab18b2c94eb1e9d896c",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 9,
+      "reference_asset_id": "look-009-female-01-v2-r2",
+      "asset": {
+        "asset_id": "look-009-female-01-editorial-r1",
+        "file": "assets/looks/historical/look-009-female-01-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 83088,
+        "sha256": "5ca54b86e92c1e304918f197551c09fcad8dc45dba3b9a47fdff336a536aeed4",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 10,
+      "reference_asset_id": "look-010-female-01-v2-r2",
+      "asset": {
+        "asset_id": "look-010-female-01-editorial-r1",
+        "file": "assets/looks/historical/look-010-female-01-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 74892,
+        "sha256": "50e0752b5c7aa59d6b5d6aeb58f3ca21e665ef083e4fb6ea8b7ca625ff08b5f5",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 11,
+      "reference_asset_id": "look-011-female-01-v2-r2",
+      "asset": {
+        "asset_id": "look-011-female-01-editorial-r1",
+        "file": "assets/looks/historical/look-011-female-01-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 50672,
+        "sha256": "2fcdaba7d8ad194f8be2a73f8246be13ee596351ed045b03d67cb641f87d12e2",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 12,
+      "reference_asset_id": "look-012-v2-r1",
+      "asset": {
+        "asset_id": "look-012-editorial-r1",
+        "file": "assets/looks/historical/look-012-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 69536,
+        "sha256": "0d8049ce766d1a825ffc5e62862b8a0535ae6c5ceaa1cb75db39c50795e2fbd6",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 13,
+      "reference_asset_id": "look-013-v2-r1",
+      "asset": {
+        "asset_id": "look-013-editorial-r1",
+        "file": "assets/looks/historical/look-013-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 65216,
+        "sha256": "521f15d4470747921ec3204d124ff3f9d99d021266ea5e28d64befc52252913f",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 14,
+      "reference_asset_id": "look-014-v2-r1",
+      "asset": {
+        "asset_id": "look-014-editorial-r1",
+        "file": "assets/looks/historical/look-014-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 65474,
+        "sha256": "02d5d63f7ba2e30eb6c4749b6611255faf75964ca3f5424722b22aeed5cd3597",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 15,
+      "reference_asset_id": "look-015-female-01-v2-r2",
+      "asset": {
+        "asset_id": "look-015-female-01-editorial-r1",
+        "file": "assets/looks/historical/look-015-female-01-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 78084,
+        "sha256": "73494bd312c52a36a7fcc4130920194209273bb21313ee109c0a47c9d98d733d",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 16,
+      "reference_asset_id": "look-016-v2-r1",
+      "asset": {
+        "asset_id": "look-016-editorial-r1",
+        "file": "assets/looks/historical/look-016-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 74604,
+        "sha256": "593b7e868c3e5d6dd4626e3eae17e026e9d5715968d30e939e693659e54b9e1c",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 17,
+      "reference_asset_id": "look-017-v2-r1",
+      "asset": {
+        "asset_id": "look-017-editorial-r1",
+        "file": "assets/looks/historical/look-017-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 86602,
+        "sha256": "edbd21457b05bd23d4a5c10bee2bb05f8917ed3d76a801952b0ffd802a93d4ce",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 18,
+      "reference_asset_id": "look-018-v2-r1",
+      "asset": {
+        "asset_id": "look-018-editorial-r1",
+        "file": "assets/looks/historical/look-018-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 100412,
+        "sha256": "1a9052a4db6effd601e59956cba5b30733cdb607e8a595e9b1566a1da9249239",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 19,
+      "reference_asset_id": "look-019-v2-r1",
+      "asset": {
+        "asset_id": "look-019-editorial-r1",
+        "file": "assets/looks/historical/look-019-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 56486,
+        "sha256": "371f0445428d247c601aad377b1d990075f88c781db47080c551a086f92c247a",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 20,
+      "reference_asset_id": "look-020-female-01-v2-r2",
+      "asset": {
+        "asset_id": "look-020-female-01-editorial-r1",
+        "file": "assets/looks/historical/look-020-female-01-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 94246,
+        "sha256": "fb3206f2682f13a44d263be9df60076f2a5ce0e00b13f90d38c81a63f44766e0",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 21,
+      "reference_asset_id": "look-021-v2-r1",
+      "asset": {
+        "asset_id": "look-021-editorial-r1",
+        "file": "assets/looks/historical/look-021-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 84372,
+        "sha256": "9ffa7950b0e8cbac60599e137b11759c98144de9dd3e9cf01d4fc8e11ebe8b6a",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 22,
+      "reference_asset_id": "look-022-v2-r1",
+      "asset": {
+        "asset_id": "look-022-editorial-r1",
+        "file": "assets/looks/historical/look-022-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 98788,
+        "sha256": "4f48a12ce2a3b6e060ad4f050adb86c51a06a2c3bc81c49b5f9c504514b0b49c",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 23,
+      "reference_asset_id": "look-023-v2-r1",
+      "asset": {
+        "asset_id": "look-023-editorial-r1",
+        "file": "assets/looks/historical/look-023-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 60550,
+        "sha256": "9eca08c75fc9021db0639893a5bc9633298930f67ec1ac0ee860bd973521ddd2",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 24,
+      "reference_asset_id": "look-024-v2-r1",
+      "asset": {
+        "asset_id": "look-024-editorial-r1",
+        "file": "assets/looks/historical/look-024-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 112434,
+        "sha256": "06d59163562272322b1c884425ba8880f17ef2ca37755d67e246dee6afa20193",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 25,
+      "reference_asset_id": "look-025-v2-r1",
+      "asset": {
+        "asset_id": "look-025-editorial-r1",
+        "file": "assets/looks/historical/look-025-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 132136,
+        "sha256": "44b27cb1a9ab3612f8da5e7be841ecc831106de383013c847bdb7327487958f1",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 26,
+      "reference_asset_id": "look-026-v2-r1",
+      "asset": {
+        "asset_id": "look-026-editorial-r1",
+        "file": "assets/looks/historical/look-026-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 89256,
+        "sha256": "268220f927c4c72d7fcbf801d6bf797e9a94f14100148804cbbdbd63964306f9",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 30,
+      "reference_asset_id": "look-030-female-01-v2-r2",
+      "asset": {
+        "asset_id": "look-030-female-01-editorial-r1",
+        "file": "assets/looks/historical/look-030-female-01-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 63098,
+        "sha256": "2775ce602ce93708df78de7397979e0de3710f530cc0188d5627d5926dc3f4d8",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 31,
+      "reference_asset_id": "look-031-female-01-v2-r2",
+      "asset": {
+        "asset_id": "look-031-female-01-editorial-r1",
+        "file": "assets/looks/historical/look-031-female-01-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 72812,
+        "sha256": "cfc354968dba1578fd4f65f85d6001a80c2e85e1a3ee63df6991948819386db1",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 40,
+      "reference_asset_id": "look-040-female-01-v2-r2",
+      "asset": {
+        "asset_id": "look-040-female-01-editorial-r1",
+        "file": "assets/looks/historical/look-040-female-01-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 71708,
+        "sha256": "2ab98fdc17e511ec7e1ea3e51ae641d4f313c94b284a40429d0a1e5d1ecf57e6",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 41,
+      "reference_asset_id": "look-041-female-01-v2-r2",
+      "asset": {
+        "asset_id": "look-041-female-01-editorial-r1",
+        "file": "assets/looks/historical/look-041-female-01-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 82174,
+        "sha256": "44ece0e5155e26ed59f1be1d2af4d82c88807b15462e9e3948ab840ec5788760",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 50,
+      "reference_asset_id": "look-050-female-01-v2-r2",
+      "asset": {
+        "asset_id": "look-050-female-01-editorial-r1",
+        "file": "assets/looks/historical/look-050-female-01-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 89776,
+        "sha256": "8497889819d90aa760dc5ba7dd60e6e5247e33aa3065c189b2d0ffeafa4b9d5a",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 51,
+      "reference_asset_id": "look-051-female-01-v2-r2",
+      "asset": {
+        "asset_id": "look-051-female-01-editorial-r1",
+        "file": "assets/looks/historical/look-051-female-01-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 96792,
+        "sha256": "fe3051d900c435c435ddd88369f661cb5681a7870e7852f2f343de074124e6d7",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 60,
+      "reference_asset_id": "look-060-female-01-v2-r2",
+      "asset": {
+        "asset_id": "look-060-female-01-editorial-r1",
+        "file": "assets/looks/historical/look-060-female-01-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 48556,
+        "sha256": "1cab541c08f54a585c3604b0cd5052a9c94c7cdf27b06fb05ec598878b254028",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 70,
+      "reference_asset_id": "look-070-female-01-v2-r2",
+      "asset": {
+        "asset_id": "look-070-female-01-editorial-r1",
+        "file": "assets/looks/historical/look-070-female-01-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 64834,
+        "sha256": "f5b1d971ad0b4137557a4c823194dce8baaf7cca77a33ae7b4c622dd61fc5084",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 80,
+      "reference_asset_id": "look-080-female-01-v2-r2",
+      "asset": {
+        "asset_id": "look-080-female-01-editorial-r1",
+        "file": "assets/looks/historical/look-080-female-01-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 81162,
+        "sha256": "da93b6abcae1c05b704e3ab7e56316f4d7162bdc4218fb9813840c246740c654",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 81,
+      "reference_asset_id": "look-081-female-01-v2-r2",
+      "asset": {
+        "asset_id": "look-081-female-01-editorial-r1",
+        "file": "assets/looks/historical/look-081-female-01-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 100728,
+        "sha256": "4194981083e6f46beb31bfc371ab17231f76a893b569bf0312d7434e51b79116",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 90,
+      "reference_asset_id": "look-090-female-01-v2-r2",
+      "asset": {
+        "asset_id": "look-090-female-01-editorial-r1",
+        "file": "assets/looks/historical/look-090-female-01-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 106214,
+        "sha256": "f2dffe5f0fcad3466c3eedee5b9ea8cdcb7b25e50279424922bbfbfed6be91b3",
+        "visibility": "public"
+      }
+    }
+  ]
+}

@@ -121,6 +121,17 @@ class LookRevisions(Strict):
     revisions: list[LookRevision] = Field(min_length=1, max_length=100)
 
 
+class LookEditorial(Strict):
+    look_id: int = Field(strict=True, ge=1, le=100)
+    reference_asset_id: str = Field(pattern=r"^[A-Za-z0-9_-]{1,128}$")
+    asset: Asset
+
+
+class LookEditorials(Strict):
+    schema_version: int = Field(strict=True, ge=1, le=1)
+    editorials: list[LookEditorial] = Field(max_length=100)
+
+
 class Piece(Strict):
     role: str = Field(min_length=1, max_length=100)
     name: str = Field(min_length=1, max_length=500)
@@ -554,6 +565,14 @@ class ContentService:
                 if revision.look_id in revisions:
                     raise ValueError("Duplicate historical look revision")
                 revisions[revision.look_id] = revision
+        editorials: dict[int, LookEditorial] = {}
+        editorials_path = self.source_root / "look-editorials.json"
+        if editorials_path.exists() or editorials_path.is_symlink():
+            editorial_manifest = LookEditorials.model_validate(self._read_json(editorials_path))
+            for editorial_entry in editorial_manifest.editorials:
+                if editorial_entry.look_id in editorials:
+                    raise ValueError("Duplicate historical editorial target")
+                editorials[editorial_entry.look_id] = editorial_entry
         records, blobs, model_map = {}, {}, {}
 
         def register(value, grid=False):
@@ -563,6 +582,19 @@ class ContentService:
                 raise ValueError("Duplicate asset identity")
             records[key], blobs[key] = record, data
             return record
+
+        def register_editorial(portrait: Asset, grids: list[dict]):
+            if (
+                portrait.layout is not None
+                or not portrait.file.startswith("assets/looks/")
+                or portrait.width * 3 != portrait.height * 2
+                or any(
+                    portrait.file == grid["file"] or portrait.sha256 == grid["sha256"]
+                    for grid in grids
+                )
+            ):
+                raise ValueError("Expected an independent 2:3 single editorial portrait")
+            return register(portrait.model_dump(exclude_none=True))
 
         for entry in models.models:
             if entry.model_id in model_map:
@@ -579,6 +611,8 @@ class ContentService:
         for original in baseline["looks"]:
             look = copy.deepcopy(original)
             look.pop("previous_photo", None)
+            if "editorial_asset" in look:
+                raise ValueError("Historical editorial must use the separate manifest")
             key = look["id"]
             if type(key) is not int or key < 1 or key in ids:
                 raise ValueError("Invalid legacy identity")
@@ -598,6 +632,7 @@ class ContentService:
             asset = register(version["asset"], grid=True)
             if len(version["shots"]) != 9 or look["category"] not in categories:
                 raise ValueError("Invalid baseline grid/category")
+            grids = [asset]
             if (revised := revisions.get(key)) is not None:
                 model = model_map.get(revised.model_id)
                 if (
@@ -614,6 +649,7 @@ class ContentService:
                     raise ValueError("Invalid historical look revision")
                 look["previous_photo"] = {"asset": asset, "image": asset["file"]}
                 asset = register(revised.asset.model_dump(exclude_none=True), grid=True)
+                grids.append(asset)
                 look.update(
                     model_id=revised.model_id,
                     model_reference_sha256=revised.model_reference_sha256,
@@ -627,6 +663,12 @@ class ContentService:
                     moods=revised.moods,
                     shots=[shot.model_dump() for shot in revised.shots],
                 )
+            if (historical_editorial := editorials.get(key)) is not None:
+                if historical_editorial.reference_asset_id != asset["asset_id"]:
+                    raise ValueError(
+                        "Historical editorial must reference the current nine-grid asset"
+                    )
+                look["editorial_asset"] = register_editorial(historical_editorial.asset, grids)
             version["image"] = asset["file"]
             look["image"], look["ready"] = asset["file"], True
             # Legacy publication dates are unknown, including after image revisions.
@@ -635,6 +677,8 @@ class ContentService:
             looks.append(look)
         if not set(range(1, 101)).issubset(ids):
             raise ValueError("Historical 1-100 identities must be preserved")
+        if not editorials.keys() <= ids:
+            raise ValueError("Historical editorial target missing from baseline")
         batches, batch_ids, dates = [], set(), set()
         batch_root = self.source_root / "batches"
         if batch_root.is_symlink():
@@ -668,13 +712,7 @@ class ContentService:
                     mode="json", exclude={"edition", "asset", "editorial_asset", "shots"}
                 )
                 if editorial := item.editorial_asset:
-                    if (
-                        editorial.layout is not None
-                        or not editorial.file.startswith("assets/looks/")
-                        or editorial.width * 3 != editorial.height * 2
-                    ):
-                        raise ValueError("Expected a 2:3 single editorial portrait")
-                    look["editorial_asset"] = register(editorial.model_dump(exclude_none=True))
+                    look["editorial_asset"] = register_editorial(editorial, [asset])
                 if not item.model_only:
                     look.pop("model_only")
                 look.update(

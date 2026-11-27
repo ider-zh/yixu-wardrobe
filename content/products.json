@@ -9902,6 +9902,798 @@
           "shot_index": 3
         }
       ]
+    },
+    {
+      "product_id": "coffee-short-suede-look-jacket-012",
+      "name": "咖色短麂皮观感夹克",
+      "category": "外套",
+      "color_name": "咖色",
+      "color_hex": "#76533C",
+      "subtitle": "暖咖短夹克用开襟露出奶油针织。",
+      "description": "写真可见咖色短衣身、翻领和绒面观感。主图对领部缝线、衣内侧与被头发遮住的衣片做了设计推演。",
+      "design_material": "低光泽细绒面观感",
+      "notes": [
+        "咖棕细绒外观",
+        "短衣身",
+        "翻领开襟"
+      ],
+      "asset": {
+        "asset_id": "product-coffee-short-suede-look-jacket-012-main-r1",
+        "file": "assets/products/look-012/coffee-short-suede-look-jacket-012-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 72220,
+        "sha256": "d8e74f5173faa0f548131594f21bc526fed1513de9ee68fa26820affa8a981cc",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 12,
+          "piece_index": 1,
+          "reference_asset_id": "look-012-v2-r1",
+          "shot_index": 9
+        }
+      ]
+    },
+    {
+      "product_id": "cream-long-knit-vest-012",
+      "name": "奶油长针织背心",
+      "category": "上装",
+      "color_name": "奶油白",
+      "color_hex": "#E4D7BF",
+      "subtitle": "奶油色细针织在衬衫外露出一排小扣。",
+      "description": "写真可见奶油色细针织、领口和暖棕小扣。主图对被夹克与裤腰遮住的袖窿、完整衣长和下摆做了设计推演。",
+      "design_material": "细密针织的视觉观感",
+      "notes": [
+        "奶油色细针织",
+        "V 领",
+        "暖棕小扣"
+      ],
+      "asset": {
+        "asset_id": "product-cream-long-knit-vest-012-main-r1",
+        "file": "assets/products/look-012/cream-long-knit-vest-012-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 133100,
+        "sha256": "f22131a8a2cdf7b1a7427cbd2607c0694782ef72585e0e398a550ffe1fbab6f5",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 12,
+          "piece_index": 2,
+          "reference_asset_id": "look-012-v2-r1",
+          "shot_index": 5
+        }
+      ]
+    },
+    {
+      "product_id": "white-stand-collar-shirt-012",
+      "name": "白色立领衬衫",
+      "category": "上装",
+      "color_name": "柔白",
+      "color_hex": "#EFEDEA",
+      "subtitle": "白色立领和袖口为咖色叠穿提亮。",
+      "description": "写真可见白色领口与袖口。被针织背心遮住的门襟、衣长和袖口扣合属于设计推演。",
+      "design_material": "平整微哑布面观感",
+      "notes": [
+        "简洁立领",
+        "白色长袖",
+        "平直袖口"
+      ],
+      "asset": {
+        "asset_id": "product-white-stand-collar-shirt-012-main-r1",
+        "file": "assets/products/look-012/white-stand-collar-shirt-012-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 17540,
+        "sha256": "e7c72a082d61472ae864bfc34503327cfe3e48c03380e9d9138ad34c73ec59d2",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 12,
+          "piece_index": 3,
+          "reference_asset_id": "look-012-v2-r1",
+          "shot_index": 5
+        }
+      ]
+    },
+    {
+      "product_id": "deep-coffee-tapered-trousers-012",
+      "name": "深咖锥形裤",
+      "category": "下装",
+      "color_name": "深咖",
+      "color_hex": "#49372B",
+      "subtitle": "深咖裤腿从胯部往脚踝收窄。",
+      "description": "照片呈现深咖裤色、抬高的腰线和收窄裤脚。腰头受腰带遮挡，门襟、袋口与裤耳细节为设计推演。",
+      "design_material": "微哑顺滑织面观感",
+      "notes": [
+        "深咖底色",
+        "高腰线",
+        "裤脚收窄"
+      ],
+      "asset": {
+        "asset_id": "product-deep-coffee-tapered-trousers-012-main-r1",
+        "file": "assets/products/look-012/deep-coffee-tapered-trousers-012-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 23998,
+        "sha256": "361295f5e4d7d32d1d9df626bb78377ca27f69fdae3da52ca6ecfb1672a8eafd",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 12,
+          "piece_index": 4,
+          "reference_asset_id": "look-012-v2-r1",
+          "shot_index": 1
+        }
+      ]
+    },
+    {
+      "product_id": "coffee-gold-geometric-scarf-012",
+      "name": "咖金几何丝巾",
+      "category": "配饰",
+      "color_name": "咖金",
+      "color_hex": "#A37537",
+      "subtitle": "咖底金色斜纹在领口形成小结。",
+      "description": "照片呈现咖色底、金色斜纹和小结两端。主图复现系结方式，颈后图案延伸和边缘收口为设计推演。",
+      "design_material": "轻柔微光缎面观感",
+      "notes": [
+        "咖底金色斜纹",
+        "短尖尾",
+        "领口小结"
+      ],
+      "asset": {
+        "asset_id": "product-coffee-gold-geometric-scarf-012-main-r1",
+        "file": "assets/products/look-012/coffee-gold-geometric-scarf-012-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 62538,
+        "sha256": "de2bada1b02e5503722e73419a6468aabec5516bad13030f75e19d50cddf5459",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 12,
+          "piece_index": 5,
+          "reference_asset_id": "look-012-v2-r1",
+          "shot_index": 5
+        }
+      ]
+    },
+    {
+      "product_id": "brown-braided-belt-012",
+      "name": "棕色编织腰带",
+      "category": "配饰",
+      "color_name": "深棕",
+      "color_hex": "#623822",
+      "subtitle": "棕色编织带身与暖金方扣相接。",
+      "description": "照片腰线可见棕色交织带身和暖金方扣。主图的带尾、扣针与缝线为设计推演。",
+      "design_material": "纹理明显的编织皮面观感",
+      "notes": [
+        "深棕交织",
+        "暖金方扣",
+        "低调光泽"
+      ],
+      "asset": {
+        "asset_id": "product-brown-braided-belt-012-main-r1",
+        "file": "assets/products/look-012/brown-braided-belt-012-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 58654,
+        "sha256": "3afd55c036f75f933f5492391e7709356b879949a3eeec8805841ba7336a4304",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 12,
+          "piece_index": 6,
+          "reference_asset_id": "look-012-v2-r1",
+          "shot_index": 9
+        }
+      ]
+    },
+    {
+      "product_id": "chestnut-lace-up-shoes-012",
+      "name": "栗色系带皮鞋",
+      "category": "鞋履",
+      "color_name": "栗棕",
+      "color_hex": "#653D2F",
+      "subtitle": "栗色系带低鞋搭配圆润鞋头。",
+      "description": "取自照片全身镜头的栗棕、系带和低跟轮廓。主图的鞋眼、鞋口内侧和接缝为设计推演。",
+      "design_material": "柔和微光皮面观感",
+      "notes": [
+        "栗棕鞋面",
+        "简洁系带",
+        "低跟圆头"
+      ],
+      "asset": {
+        "asset_id": "product-chestnut-lace-up-shoes-012-main-r1",
+        "file": "assets/products/look-012/chestnut-lace-up-shoes-012-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 61658,
+        "sha256": "afa58c810a9c38260f6572be45dcf4b1a9c34971f610b9872cd45a65feb02a3e",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 12,
+          "piece_index": 7,
+          "reference_asset_id": "look-012-v2-r1",
+          "shot_index": 1
+        }
+      ]
+    },
+    {
+      "product_id": "cream-small-shoulder-bag-012",
+      "name": "奶油小号肩包",
+      "category": "包袋",
+      "color_name": "奶油白",
+      "color_hex": "#E9DBC3",
+      "subtitle": "小号奶油色包身与单肩带收拢轮廓。",
+      "description": "照片可见奶油白小包、单肩带和暖金连接件。主图补足包口弧度、另一侧肩带连接和底部结构，属于设计推演。",
+      "design_material": "细纹微哑皮面观感",
+      "notes": [
+        "小号奶油白包",
+        "弧形单肩带",
+        "暖金连接件"
+      ],
+      "asset": {
+        "asset_id": "product-cream-small-shoulder-bag-012-main-r1",
+        "file": "assets/products/look-012/cream-small-shoulder-bag-012-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 32206,
+        "sha256": "ab82b6df1b09c8efa840ea64ab524cd4114f8535ddc48c9555977a22e9930eb4",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 12,
+          "piece_index": 8,
+          "reference_asset_id": "look-012-v2-r1",
+          "shot_index": 4
+        }
+      ]
+    },
+    {
+      "product_id": "ink-navy-asymmetric-tailored-vest-013",
+      "name": "墨蓝长款斜襟背心",
+      "category": "上装",
+      "color_name": "墨蓝",
+      "color_hex": "#263045",
+      "subtitle": "深蓝斜襟从肩线延伸到半裙上方。",
+      "description": "写真可见墨蓝无袖背心、敞开斜襟及覆盖髋部的衣摆。主图对不清楚的襟线、扣合与被发丝遮住的领肩结构做了设计推演。",
+      "design_material": "微哑细织布面观感",
+      "notes": [
+        "简洁无袖",
+        "墨蓝左斜襟",
+        "加长衣摆"
+      ],
+      "asset": {
+        "asset_id": "product-ink-navy-asymmetric-tailored-vest-013-main-r1",
+        "file": "assets/products/look-013/ink-navy-asymmetric-tailored-vest-013-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 33250,
+        "sha256": "717d22932e03d2ee0626c265894d036bcb49398ea07cd25f0802aa1c3efbd388",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 13,
+          "piece_index": 1,
+          "reference_asset_id": "look-013-v2-r1",
+          "shot_index": 4
+        }
+      ]
+    },
+    {
+      "product_id": "beige-long-sleeve-slim-knit-013",
+      "name": "米色长袖针织",
+      "category": "上装",
+      "color_name": "米色",
+      "color_hex": "#C7B59D",
+      "subtitle": "贴身米色长袖从墨蓝背心里露出。",
+      "description": "写真可见温和米色、细密针织、圆弧领口和长袖。背心遮住的衣身接缝、完整下摆和领边针法为设计推演。",
+      "design_material": "细密微哑针织观感",
+      "notes": [
+        "米色细针织",
+        "圆弧领口",
+        "贴身长袖"
+      ],
+      "asset": {
+        "asset_id": "product-beige-long-sleeve-slim-knit-013-main-r1",
+        "file": "assets/products/look-013/beige-long-sleeve-slim-knit-013-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 106558,
+        "sha256": "f51c667866baf5626647a591a5d556a2e7fa1f11b0ad94c85292e7b76f639cac",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 13,
+          "piece_index": 2,
+          "reference_asset_id": "look-013-v2-r1",
+          "shot_index": 5
+        }
+      ]
+    },
+    {
+      "product_id": "ink-navy-open-front-midi-skirt-013",
+      "name": "墨蓝膝下开襟裙",
+      "category": "裙装",
+      "color_name": "墨蓝",
+      "color_hex": "#263045",
+      "subtitle": "开襟深蓝裙片在米灰裤外展开。",
+      "description": "写真呈现墨蓝裙片、膝下长度和覆盖直裤的开襟。被马甲与腰链遮住的腰头、扣合位置及内侧叠片属于设计推演。",
+      "design_material": "有垂感的哑光织面观感",
+      "notes": [
+        "墨蓝开襟",
+        "膝下叠片",
+        "裙片逐渐外展"
+      ],
+      "asset": {
+        "asset_id": "product-ink-navy-open-front-midi-skirt-013-main-r1",
+        "file": "assets/products/look-013/ink-navy-open-front-midi-skirt-013-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 30596,
+        "sha256": "824181e43c4ad2f0fd1ccee88fb9c97ec9ff55b7e83f85f27f4af7c82e90718c",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 13,
+          "piece_index": 3,
+          "reference_asset_id": "look-013-v2-r1",
+          "shot_index": 4
+        }
+      ]
+    },
+    {
+      "product_id": "greige-straight-trousers-013",
+      "name": "米灰直筒裤",
+      "category": "下装",
+      "color_name": "米灰",
+      "color_hex": "#827F79",
+      "subtitle": "米灰直裤从蓝裙下露出清晰裤线。",
+      "description": "照片可见米灰直筒裤腿、裤脚宽度和垂坠。外裙遮住的腰头、袋口、门襟和上端剪裁均为设计推演。",
+      "design_material": "微杂色细织布面观感",
+      "notes": [
+        "米灰底色",
+        "放松直筒裤线",
+        "露出清晰裤脚"
+      ],
+      "asset": {
+        "asset_id": "product-greige-straight-trousers-013-main-r1",
+        "file": "assets/products/look-013/greige-straight-trousers-013-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 74038,
+        "sha256": "d0ad6de86c67cb0dce2e633055041f59a30eb0bb6f0cbdb14d42deac293d92c0",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 13,
+          "piece_index": 4,
+          "reference_asset_id": "look-013-v2-r1",
+          "shot_index": 2
+        }
+      ]
+    },
+    {
+      "product_id": "fine-silver-tone-waist-chain-013",
+      "name": "银色细腰链",
+      "category": "配饰",
+      "color_name": "银灰",
+      "color_hex": "#B3B5B5",
+      "subtitle": "细银色链节横过腰线，留一段自然垂落的尾链。",
+      "description": "写真可见银色椭圆链节和右侧垂链。主图对扣合、未入镜的链身长度与末端形状做了设计推演。",
+      "design_material": "微亮银色金属观感",
+      "notes": [
+        "纤细椭圆链节",
+        "银灰光泽",
+        "自然垂尾"
+      ],
+      "asset": {
+        "asset_id": "product-fine-silver-tone-waist-chain-013-main-r1",
+        "file": "assets/products/look-013/fine-silver-tone-waist-chain-013-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 23720,
+        "sha256": "7ed1b3bb57cec2a8bc946282e19ea4a067c16202676722b2ae7ffa50c7d1b7a9",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 13,
+          "piece_index": 5,
+          "reference_asset_id": "look-013-v2-r1",
+          "shot_index": 5
+        }
+      ]
+    },
+    {
+      "product_id": "black-square-toe-low-heel-pumps-013",
+      "name": "黑色方头低跟鞋",
+      "category": "鞋履",
+      "color_name": "黑色",
+      "color_hex": "#25262A",
+      "subtitle": "方头浅口搭配短方跟，收住裤脚比例。",
+      "description": "照片可见黑色方圆鞋头、浅口和短方跟。主图的鞋口边缘、内侧与接缝为设计推演。",
+      "design_material": "柔和光泽皮面观感",
+      "notes": [
+        "黑色方圆鞋头",
+        "简洁浅口",
+        "短方跟"
+      ],
+      "asset": {
+        "asset_id": "product-black-square-toe-low-heel-pumps-013-main-r1",
+        "file": "assets/products/look-013/black-square-toe-low-heel-pumps-013-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 52076,
+        "sha256": "c78acee4e4bea289fedde974cd562e6686bad165e2664a93328e66b11253ad17",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 13,
+          "piece_index": 6,
+          "reference_asset_id": "look-013-v2-r1",
+          "shot_index": 4
+        }
+      ]
+    },
+    {
+      "product_id": "small-silver-tone-hoop-earrings-013",
+      "name": "银色小耳圈",
+      "category": "饰品",
+      "color_name": "银灰",
+      "color_hex": "#B3B5B5",
+      "subtitle": "细小银色圆环贴在耳侧。",
+      "description": "写真中的小号银色耳圈用于造型参考。主图基于近景补足成对形态、圆环厚度、反光与开合处轮廓，均为设计推演。",
+      "design_material": "细亮银色金属观感",
+      "notes": [
+        "小号圆环",
+        "细窄轮廓",
+        "银色光泽"
+      ],
+      "asset": {
+        "asset_id": "product-small-silver-tone-hoop-earrings-013-main-r1",
+        "file": "assets/products/look-013/small-silver-tone-hoop-earrings-013-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 17994,
+        "sha256": "9fcec5b168f1b9ff52086cd8aa4f7629b829e57fd1f9d934bf7d6ab4cbcd4026",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 13,
+          "piece_index": 7,
+          "reference_asset_id": "look-013-v2-r1",
+          "shot_index": 8
+        }
+      ]
+    },
+    {
+      "product_id": "gray-soft-tote-013",
+      "name": "灰色软皮观感托特包",
+      "category": "包袋",
+      "color_name": "暖灰",
+      "color_hex": "#7B7772",
+      "subtitle": "灰色软包身配窄深色双提带。",
+      "description": "照片可见暖灰托特包身、窄双提带和侧片。主图补足底部、另一侧连接件和隐约遮挡的包口，属于设计推演。",
+      "design_material": "细滑微哑软皮面观感",
+      "notes": [
+        "暖灰包身",
+        "窄深色双提带",
+        "柔软方形侧片"
+      ],
+      "asset": {
+        "asset_id": "product-gray-soft-tote-013-main-r1",
+        "file": "assets/products/look-013/gray-soft-tote-013-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 71104,
+        "sha256": "ff28622b843eebab63892cbd676236e22b879221a012a416d7fb1c1f80a2b668",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 13,
+          "piece_index": 8,
+          "reference_asset_id": "look-013-v2-r1",
+          "shot_index": 4
+        }
+      ]
+    },
+    {
+      "product_id": "pale-gray-light-trench-014",
+      "name": "浅灰薄风衣",
+      "category": "外套",
+      "color_name": "浅灰",
+      "color_hex": "#C1B8B5",
+      "subtitle": "浅灰长衣身用敞开的翻领拉出纵线。",
+      "description": "写真可见浅灰衣身、宽翻领、深色纽扣和袖袢。被遮挡的腰部、口袋和衣内侧结构属于设计推演。",
+      "design_material": "轻盈平滑的哑光布面观感",
+      "notes": [
+        "浅灰底色",
+        "宽翻领",
+        "长衣身与袖袢"
+      ],
+      "asset": {
+        "asset_id": "product-pale-gray-light-trench-014-main-r1",
+        "file": "assets/products/look-014/pale-gray-light-trench-014-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 38296,
+        "sha256": "102bced585fff5bffc2afdef532310199f006d565f158bd4933034df64717785",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 14,
+          "piece_index": 1,
+          "reference_asset_id": "look-014-v2-r1",
+          "shot_index": 5
+        }
+      ]
+    },
+    {
+      "product_id": "brown-gray-microcheck-waistcoat-014",
+      "name": "棕灰格纹西装马甲",
+      "category": "上装",
+      "color_name": "棕灰",
+      "color_hex": "#645652",
+      "subtitle": "棕灰细格与深色扣用于收束腰线。",
+      "description": "写真可见棕灰细格、V 领和深色扣。主图对袖窿、腰省和完整前摆做了设计推演。",
+      "design_material": "细密格纹织面观感",
+      "notes": [
+        "棕灰细格",
+        "深 V 领",
+        "深色圆扣"
+      ],
+      "asset": {
+        "asset_id": "product-brown-gray-microcheck-waistcoat-014-main-r1",
+        "file": "assets/products/look-014/brown-gray-microcheck-waistcoat-014-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 259562,
+        "sha256": "261638fdbe90116f79dce6e7dbcf11414fe573da46f0558773eaff880c57019f",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 14,
+          "piece_index": 2,
+          "reference_asset_id": "look-014-v2-r1",
+          "shot_index": 8
+        }
+      ]
+    },
+    {
+      "product_id": "white-wide-sleeve-shirt-014",
+      "name": "白色宽袖衬衫",
+      "category": "上装",
+      "color_name": "柔白",
+      "color_hex": "#F3F0ED",
+      "subtitle": "白色尖领和宽袖口让叠穿更清晰。",
+      "description": "写真露出白色尖领和宽袖口。完整袖管、被马甲遮挡的门襟与下摆属于设计推演。",
+      "design_material": "平整微哑布面观感",
+      "notes": [
+        "白色尖领",
+        "宽长袖",
+        "深袖口"
+      ],
+      "asset": {
+        "asset_id": "product-white-wide-sleeve-shirt-014-main-r1",
+        "file": "assets/products/look-014/white-wide-sleeve-shirt-014-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 22488,
+        "sha256": "b1513bb7531e576374c21103ca91ab87098b3736241847284c75bc3121f16be1",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 14,
+          "piece_index": 3,
+          "reference_asset_id": "look-014-v2-r1",
+          "shot_index": 6
+        }
+      ]
+    },
+    {
+      "product_id": "dark-green-wide-leg-trousers-014",
+      "name": "墨绿宽腿西裤",
+      "category": "下装",
+      "color_name": "墨绿",
+      "color_hex": "#354139",
+      "subtitle": "墨绿色宽裤腿形成放松的纵向轮廓。",
+      "description": "写真呈现墨绿高腰和宽裤腿。主图对腰头内侧、袋口及门襟做了设计推演。",
+      "design_material": "低反光的平整织面观感",
+      "notes": [
+        "墨绿底色",
+        "宽腿裤线",
+        "自然垂坠"
+      ],
+      "asset": {
+        "asset_id": "product-dark-green-wide-leg-trousers-014-main-r1",
+        "file": "assets/products/look-014/dark-green-wide-leg-trousers-014-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 26552,
+        "sha256": "518bae09fe8bdfc48ed2b0363f5f6bd08ac62534d1ca64cfc6a465e1a5224dd6",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 14,
+          "piece_index": 4,
+          "reference_asset_id": "look-014-v2-r1",
+          "shot_index": 5
+        }
+      ]
+    },
+    {
+      "product_id": "dark-brown-plain-belt-014",
+      "name": "深棕皮面观感腰带",
+      "category": "配饰",
+      "color_name": "深棕",
+      "color_hex": "#49362E",
+      "subtitle": "深棕窄带配一枚暖金色方扣。",
+      "description": "原写真可见深棕窄带与暖金色方扣。主图腰带末端、扣针与未入镜的连接件均为设计推演。",
+      "design_material": "细滑皮面与低光暖金观感",
+      "notes": [
+        "深棕窄带",
+        "暖金圆角方扣",
+        "简洁光泽"
+      ],
+      "asset": {
+        "asset_id": "product-dark-brown-plain-belt-014-main-r1",
+        "file": "assets/products/look-014/dark-brown-plain-belt-014-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 23262,
+        "sha256": "6318d3b1f2b57ee920e089195998c59bd5ecbe0a778045fec408564ac7370813",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 14,
+          "piece_index": 5,
+          "reference_asset_id": "look-014-v2-r1",
+          "shot_index": 2
+        }
+      ]
+    },
+    {
+      "product_id": "brown-double-monk-strap-shoes-014",
+      "name": "棕色双扣僧侣鞋",
+      "category": "鞋履",
+      "color_name": "深棕",
+      "color_hex": "#493229",
+      "subtitle": "低帮深棕鞋以双扣收住鞋面。",
+      "description": "写真坐姿镜头呈现深棕、低帮和扣带。主图对另一侧鞋扣、扣孔、鞋口内侧和接缝做了设计推演。",
+      "design_material": "带温和光泽的皮面观感",
+      "notes": [
+        "双扣鞋面",
+        "棕色低帮",
+        "柔和方圆头"
+      ],
+      "asset": {
+        "asset_id": "product-brown-double-monk-strap-shoes-014-main-r1",
+        "file": "assets/products/look-014/brown-double-monk-strap-shoes-014-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 61090,
+        "sha256": "9dfaeda30fb34f0b0d45d9ea3a04c003ef337b05866d8e3018e6fe2481e86d00",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 14,
+          "piece_index": 6,
+          "reference_asset_id": "look-014-v2-r1",
+          "shot_index": 7
+        }
+      ]
+    },
+    {
+      "product_id": "warm-gold-cushion-wristwatch-014",
+      "name": "金色方形腕表",
+      "category": "配饰",
+      "color_name": "暖金",
+      "color_hex": "#B49A65",
+      "subtitle": "暖金色表框、浅色表盘和深棕细表带。",
+      "description": "写真可见小号暖金表框、浅色表盘和细棕带。主图的刻度、指针、表带缝线与开合结构为设计推演。",
+      "design_material": "暖金金属色与细滑皮面观感",
+      "notes": [
+        "圆角方形表框",
+        "浅色表盘",
+        "深棕细表带"
+      ],
+      "asset": {
+        "asset_id": "product-warm-gold-cushion-wristwatch-014-main-r1",
+        "file": "assets/products/look-014/warm-gold-cushion-wristwatch-014-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 28978,
+        "sha256": "434ff492bb955641e5af3ea71c420d6b08dd9988ac5a90058a2c616e3f6a4c39",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 14,
+          "piece_index": 7,
+          "reference_asset_id": "look-014-v2-r1",
+          "shot_index": 6
+        }
+      ]
+    },
+    {
+      "product_id": "brown-short-handle-doctor-bag-014",
+      "name": "棕色短柄医生包",
+      "category": "包袋",
+      "color_name": "深棕",
+      "color_hex": "#493630",
+      "subtitle": "深棕小包以双短柄和微弧上沿收束。",
+      "description": "写真可见深棕包身、短柄和暖金连接件。主图对另一侧连接、包口和底部结构做了设计推演。",
+      "design_material": "微光滑面观感",
+      "notes": [
+        "棕色包身",
+        "双短提柄",
+        "弧形上沿"
+      ],
+      "asset": {
+        "asset_id": "product-brown-short-handle-doctor-bag-014-main-r1",
+        "file": "assets/products/look-014/brown-short-handle-doctor-bag-014-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 77656,
+        "sha256": "5bc577c21222946642ef3693666b66b83302bd219323b95be060963cad1ab03f",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 14,
+          "piece_index": 8,
+          "reference_asset_id": "look-014-v2-r1",
+          "shot_index": 7
+        }
+      ]
     }
   ]
 }

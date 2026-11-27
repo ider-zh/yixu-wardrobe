@@ -148,9 +148,10 @@ try {
   fs.unlinkSync(assetPath);fs.writeFileSync(assetPath,original);
   console.log('PASS content rejects conflicting IDs, stale model/image hashes, private/v1 assets, invalid grids, traversal and symlinks');
 
-  // Isolate the synthetic revision from revisions and product links in the release corpus.
+  // Isolate the synthetic revision from existing historical and product links.
   const revisionPath = 'content/look-revisions.json';
-  for (const file of [revisionPath, 'content/products.json']) {
+  const editorialPath = 'content/look-editorials.json';
+  for (const file of [revisionPath, editorialPath, 'content/products.json']) {
     fs.rmSync(path.join(fixture, file), {force:true});
   }
   const unrevised = loadContent(fixture);
@@ -190,6 +191,34 @@ try {
   assert.notEqual(revised.catalog.revision, unrevised.catalog.revision);
   assert.ok(revised.publicAssets.some(asset => asset.asset_id === originalAsset.asset_id));
   assert.ok(revised.publicAssets.some(asset => asset.asset_id === fixtureRevision.asset.asset_id));
+  const portrait = before.catalog.looks.find(look => look.editorial_asset).editorial_asset;
+  const editorialFile = 'assets/looks/revision-fixture/look-001-editorial.webp';
+  fs.copyFileSync(path.join(fixture, portrait.file), path.join(fixture, editorialFile));
+  const editorialAsset = {...portrait, asset_id:'fixture-look-001-editorial', file:editorialFile};
+  const editorialManifest = {schema_version:1, editorials:[
+    {look_id:1, reference_asset_id:fixtureRevision.asset.asset_id, asset:editorialAsset},
+  ]};
+  write(editorialPath, editorialManifest);
+  const withEditorial = loadContent(fixture);
+  assert.notEqual(withEditorial.catalog.revision, revised.catalog.revision);
+  assert.deepEqual(withEditorial.catalog.looks.find(look => look.id === 1).editorial_asset, editorialAsset);
+  assert.deepEqual(withEditorial.catalog.looks.find(look => look.id === 1).versions, revisedLook.versions);
+  assert.deepEqual(withEditorial.catalog.home, revised.catalog.home);
+  assert.ok(withEditorial.publicAssets.some(asset => asset.asset_id === editorialAsset.asset_id));
+  for (const [label, mutate] of [
+    ['duplicate look target', m => m.editorials.push(structuredClone(m.editorials[0]))],
+    ['daily look target', m => m.editorials[0].look_id = 101],
+    ['stale grid reference', m => m.editorials[0].reference_asset_id = originalAsset.asset_id],
+    ['private editorial', m => m.editorials[0].asset.visibility = 'private'],
+    ['preexisting collage', m => m.editorials[0].asset = {...otherAsset, asset_id:'fixture-collage', file:newFile, layout:null}],
+    ['unexpected asset metadata', m => m.editorials[0].asset.layout = originalAsset.layout],
+  ]) {
+    const invalid = structuredClone(editorialManifest);
+    mutate(invalid);
+    write(editorialPath, invalid);
+    assert.throws(() => loadContent(fixture), undefined, label);
+  }
+  write(editorialPath, editorialManifest);
   write('content/products.json', {schema_version:1, products:[linkedProduct]});
   assert.deepEqual(loadContent(fixture).catalog.products[0].appearances, linkedProduct.appearances);
   const builtRevision = spawnSync(process.execPath, ['scripts/build.mjs'], {cwd:fixture, encoding:'utf8', timeout:30000});
@@ -198,6 +227,7 @@ try {
   const publicCatalog = fs.readFileSync(publicCatalogPath, 'utf8');
   assert.ok(fs.existsSync(path.join(fixture, 'public', originalAsset.file)));
   assert.ok(fs.existsSync(path.join(fixture, 'public', newFile)));
+  assert.ok(fs.existsSync(path.join(fixture, 'public', editorialFile)));
   linkedProduct.appearances[0].reference_asset_id = originalAsset.asset_id;
   write('content/products.json', {schema_version:1, products:[linkedProduct]});
   assert.throws(() => loadContent(fixture), /product appearance/);
@@ -223,5 +253,5 @@ try {
   const invalidBuild = spawnSync(process.execPath, ['scripts/build.mjs'], {cwd:fixture, encoding:'utf8', timeout:30000});
   assert.notEqual(invalidBuild.status, 0);
   assert.equal(fs.readFileSync(publicCatalogPath, 'utf8'), publicCatalog);
-  console.log('PASS historical revision retains original assets and homepage order, requires current product links, and rejects invalid builds atomically');
+  console.log('PASS historical revisions and editorials bind source assets, retain homepage order, and reject invalid builds atomically');
 } finally {fs.rmSync(fixture,{recursive:true,force:true});}

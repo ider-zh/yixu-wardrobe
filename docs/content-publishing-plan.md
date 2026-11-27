@@ -10,7 +10,10 @@
 | 系统模特 | [content/models.json](../content/models.json) 记录稳定 `model_id`、显示名、参考资源和可选制作 SOP，由 [resolve-model.mjs](../scripts/resolve-model.mjs) 解析。 |
 | 日更 | [content/batches/](../content/batches/) 按 [batch.schema.json](../content/batch.schema.json) 追加，图存入 `assets/looks/YYYY-MM-DD/`。 |
 | 基础写真修订 | [content/look-revisions.json](../content/look-revisions.json) 每个基础穿搭最多登记一个当前修订，`replaces_asset_id` 指向原生动资产。修订使用新 WebP 和资产 ID，原版仍可按资源链接访问，同步更新单品的写真引用。 |
+| 画册主图 | 日更穿搭在批次的单套记录填写 `editorial_asset`。历史穿搭使用 `content/look-editorials.json`，文件包含 `schema_version: 1` 和 `editorials` 数组。每条包含 `look_id`、指向当前九宫格的 `reference_asset_id` 以及主图 `asset`。 |
 | 单品 | [content/products.json](../content/products.json) 与 [products.schema.json](../content/products.schema.json)，图存入 `assets/products/`。以 `look_id`、`piece_index`、`reference_asset_id` 和 `shot_index` 精确关联当前成片。 |
+
+画册主图使用 `assets/looks/` 下独立的公开 2:3 单帧 WebP，登记标准资源元数据。历史条目如有写真修订，以新九宫格作为主图和单品的制作参考。已有登记模特使用对应身份参考，历史未登记模特保留空值。使用已有九宫格核对人物和衣装，缺少可确认的面部参考时沿用画册的写真封面镜头。
 
 ## 从清单到前端
 

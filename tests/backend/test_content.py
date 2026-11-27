@@ -551,6 +551,53 @@ def test_invalid_historical_revision_never_activates(content_fixture, invalid):
     assert "legacy-1-r2" not in {record["asset_id"] for record in service.asset_records()}
 
 
+def test_historical_editorial_registers_public_asset_without_model_attribution(content_fixture):
+    settings, _, _ = content_fixture
+    service = ContentService(settings)
+    before = service.catalog()
+    portrait = metadata(
+        settings.catalog_image_root,
+        "assets/looks/historical/look-002-editorial.webp",
+        "legacy-2-editorial",
+        (80, 120),
+        False,
+    )
+    manifest = settings.content_root / "look-editorials.json"
+    entry = {"look_id": 2, "reference_asset_id": "legacy-2", "asset": portrait}
+    write_json(manifest, {"schema_version": 1, "editorials": [entry]})
+    assert service.import_content()
+    service.set_delivery_resolver(
+        lambda key, source: (
+            "https://cdn.example.com/cover.webp" if key == portrait["asset_id"] else source
+        )
+    )
+    after = service.catalog()
+    assert after["revision"] != before["revision"]
+    for key in ("counts", "home", "latestOrder", "displayOrder", "batches"):
+        assert after[key] == before[key]
+    look = next(item for item in after["looks"] if item["id"] == 2)
+    assert look["model_id"] is None and look["published_at"] is None
+    assert look["versions"] == before["looks"][1]["versions"]
+    assert look["editorial_asset"] == {
+        **portrait,
+        "source_url": "/api/content/assets/legacy-2-editorial",
+        "image_url": "https://cdn.example.com/cover.webp",
+    }
+    delivery = service.public_look_delivery(2)
+    assert [item["role"] for item in delivery["assets"]] == ["current_photo", "editorial_photo"]
+    assert delivery["assets"][1]["image_url"] == look["editorial_asset"]["image_url"]
+    assert service.asset("legacy-2-editorial") == (
+        (settings.catalog_image_root / portrait["file"]).read_bytes(),
+        portrait,
+    )
+
+    # A stale source association cannot replace the active release.
+    entry["reference_asset_id"] = "legacy-1"
+    write_json(manifest, {"schema_version": 1, "editorials": [entry]})
+    assert not service.import_content()
+    assert service.catalog() == after
+
+
 def test_products_are_public_archived_and_linked_to_exact_outfit(content_fixture):
     from pathlib import Path
 

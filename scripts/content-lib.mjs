@@ -5,6 +5,8 @@ import path from 'node:path';
 
 export const digest = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 const object = value => value && typeof value === 'object' && !Array.isArray(value);
+const exactFields = (value, fields) => object(value) &&
+  Object.keys(value).length === fields.length && fields.every(key => Object.hasOwn(value, key));
 const text = value => typeof value === 'string' && value.trim().length > 0;
 const assetId = value => typeof value === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(value);
 const fail = (condition, message) => assert.ok(condition, message);
@@ -68,8 +70,6 @@ export function verifyWebp(root, record) {
 }
 
 function lookRevisions(manifest, models) {
-  const exactFields = (value, fields) => object(value) &&
-    Object.keys(value).length === fields.length && fields.every(key => Object.hasOwn(value, key));
   const boundedText = (value, limit) => text(value) && [...value].length <= limit;
   fail(exactFields(manifest, ['schema_version', 'revisions']) && manifest.schema_version === 1 &&
     Array.isArray(manifest.revisions) && manifest.revisions.length >= 1 && manifest.revisions.length <= 100,
@@ -96,6 +96,22 @@ function lookRevisions(manifest, models) {
     revisions.set(id, revision);
   }
   return revisions;
+}
+
+function lookEditorials(manifest) {
+  fail(exactFields(manifest, ['schema_version', 'editorials']) && manifest.schema_version === 1 &&
+    Array.isArray(manifest.editorials) && manifest.editorials.length <= 100,
+  'Invalid historical editorial manifest');
+  const editorials = new Map();
+  for (const entry of manifest.editorials) {
+    fail(exactFields(entry, ['look_id', 'reference_asset_id', 'asset']), 'Invalid historical editorial fields');
+    const {look_id: id, reference_asset_id: reference, asset} = entry;
+    fail(Number.isInteger(id) && id >= 1 && id <= 100 && !editorials.has(id) && assetId(reference),
+      'Invalid or duplicate historical editorial target');
+    fail(object(asset), 'Historical editorial asset required');
+    editorials.set(id, entry);
+  }
+  return editorials;
 }
 
 export function loadContent(root) {
@@ -131,6 +147,17 @@ export function loadContent(root) {
     }
     return record;
   }
+  function registerEditorial(record, grids) {
+    const fields = ['asset_id', 'file', 'mime', 'width', 'height', 'bytes', 'sha256', 'visibility'];
+    if (object(record) && Object.hasOwn(record, 'layout')) fields.push('layout');
+    fail(exactFields(record, fields) && record.visibility === 'public' && record.layout == null &&
+      typeof record.file === 'string' && record.file.startsWith('assets/looks/') &&
+      record.width * 3 === record.height * 2 && grids.every(grid =>
+        record.file !== grid.file && record.sha256 !== grid.sha256),
+    'Editorial image must be an independent public 2:3 single portrait');
+    const {layout, ...portrait} = record;
+    return registerAsset(portrait);
+  }
   for (const model of registry.models) {
     fail(object(model) && assetId(model.model_id) && !models.has(model.model_id) && text(model.name), 'Invalid or duplicate model');
     fail(model.production_sop == null || typeof model.production_sop === 'string' && /^docs\/[a-z0-9-]+\.md$/.test(model.production_sop), 'Invalid model production SOP path');
@@ -139,8 +166,11 @@ export function loadContent(root) {
     models.set(model.model_id, model);
   }
   fail(models.has('female-01'), 'The first model reference must remain registered');
-  const revisions = fs.readdirSync(path.join(root, 'content')).includes('look-revisions.json')
+  const contentEntries = fs.readdirSync(path.join(root, 'content'));
+  const revisions = contentEntries.includes('look-revisions.json')
     ? lookRevisions(json('content/look-revisions.json'), models) : new Map();
+  const editorials = contentEntries.includes('look-editorials.json')
+    ? lookEditorials(json('content/look-editorials.json')) : new Map();
   const looks = new Map();
   function addLook(input, batch = null) {
     fail(object(input) && Number.isSafeInteger(input.id) && input.id > 0 && input.id <= 2147483647 && !looks.has(input.id), 'Invalid or duplicate look ID');
@@ -157,6 +187,7 @@ export function loadContent(root) {
     } else {
       fail(object(input.versions) && Object.keys(input.versions).length === 1 &&
         Object.hasOwn(input.versions, 'v2'), 'Baseline outfits must be expressive only');
+      fail(!Object.hasOwn(input, 'editorial_asset'), 'Historical editorial must use the separate manifest');
     }
     let version = batch ? {
       image: input.asset?.file, asset: input.asset, shots: input.shots,
@@ -167,13 +198,6 @@ export function loadContent(root) {
     fail(version.shots.every((shot, i) => object(shot) && text(shot.title) && (!batch || (shot.index === i + 1 && text(shot.emotion) && text(shot.pose) && text(shot.framing)))), 'Invalid expressive shot descriptions');
     registerAsset(version.asset, true);
     fail(version.image === version.asset.file, 'Look image and asset must agree');
-    const editorial = batch && Object.hasOwn(input, 'editorial_asset') ? input.editorial_asset : undefined;
-    if (editorial != null) {
-      fail(object(editorial) && editorial.visibility === 'public' && editorial.layout == null &&
-        editorial.file?.startsWith('assets/looks/') && editorial.width * 3 === editorial.height * 2,
-      'Editorial image must be a public 2:3 single portrait');
-      registerAsset(editorial);
-    }
     const revised = batch ? undefined : revisions.get(input.id);
     let previousPhoto;
     if (revised) {
@@ -186,6 +210,14 @@ export function loadContent(root) {
       previousPhoto = {asset: structuredClone(old), image: old.file, image_url: old.file, source_url: old.file, download_url: old.file};
       version = {image: asset.file, asset, shots, story, summary, moods};
     }
+    const historicalEditorial = batch ? undefined : editorials.get(input.id);
+    if (historicalEditorial) {
+      fail(historicalEditorial.reference_asset_id === version.asset.asset_id,
+        'Historical editorial must reference the current nine-grid asset');
+    }
+    const portrait = batch ? input.editorial_asset : historicalEditorial?.asset;
+    const editorial = portrait == null ? null
+      : registerEditorial(portrait, previousPhoto ? [version.asset, previousPhoto.asset] : [version.asset]);
     const source = version.asset.file;
     const out = {};
     for (const key of ['id', 'title', 'category', 'season', 'palette', 'description', 'pieces', 'details', 'tags', 'scene', 'editorialOrder']) {
@@ -217,6 +249,7 @@ export function loadContent(root) {
   }
   for (const look of base.looks) addLook(look);
   fail([...revisions.keys()].every(id => looks.has(id)), 'Historical revision target missing from baseline');
+  fail([...editorials.keys()].every(id => looks.has(id)), 'Historical editorial target missing from baseline');
   const batches = [];
   const batchIds = new Set();
   const dates = new Set();
