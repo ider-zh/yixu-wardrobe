@@ -83,6 +83,16 @@
       "mood": "进门前招手，走到门廊抬头追一道光，在石凳歇脚，又被同伴逗笑。",
       "scene": "取景灵感来自上海博物馆东馆“环宇璀璨”珠宝展。虚构的博物馆里，午后日光掠过浅石墙、高玻璃门和古铜色栏杆。",
       "edition": "v2",
+      "editorial_asset": {
+        "asset_id": "look-112-female-01-editorial-r1",
+        "file": "assets/looks/2026-11-27/look-112-female-01-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 50184,
+        "sha256": "3793526d898490c182ec679db0779a00a0c56045fe1b5df4e7a9201c391015a4",
+        "visibility": "public"
+      },
       "shots": [
         {
           "index": 1,

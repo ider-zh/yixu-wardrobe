@@ -204,6 +204,7 @@ class BatchLook(Strict):
     scene: str = Field(min_length=1, max_length=1000)
     edition: Literal["v2"]
     asset: Asset
+    editorial_asset: Asset | None = None
     shots: list[Shot] = Field(min_length=9, max_length=9)
     palette: list[str] = Field(default_factory=lambda: ["#d1c3ac", "#f6f0e4", "#594033"])
     details: list[str] = Field(default_factory=list)
@@ -663,7 +664,17 @@ class ContentService:
                 ):
                     raise ValueError("Invalid look/model identity")
                 asset = register(item.asset.model_dump(exclude_none=True), grid=True)
-                look = item.model_dump(mode="json", exclude={"edition", "asset", "shots"})
+                look = item.model_dump(
+                    mode="json", exclude={"edition", "asset", "editorial_asset", "shots"}
+                )
+                if editorial := item.editorial_asset:
+                    if (
+                        editorial.layout is not None
+                        or not editorial.file.startswith("assets/looks/")
+                        or editorial.width * 3 != editorial.height * 2
+                    ):
+                        raise ValueError("Expected a 2:3 single editorial portrait")
+                    look["editorial_asset"] = register(editorial.model_dump(exclude_none=True))
                 if not item.model_only:
                     look.pop("model_only")
                 look.update(
@@ -787,6 +798,8 @@ class ContentService:
             for image in product.get("gallery", []):
                 image["asset"] = self._public_asset(image["asset"])
         for look in snapshot["looks"]:
+            if editorial := look.get("editorial_asset"):
+                look["editorial_asset"] = self._public_asset(editorial)
             version = look["versions"]["v2"]
             version["asset"] = asset = self._public_asset(version["asset"])
             version.update(
@@ -854,6 +867,8 @@ class ContentService:
             )
 
         append("current_photo", "当前写真", look["versions"]["v2"]["asset"])
+        if editorial := look.get("editorial_asset"):
+            append("editorial_photo", "穿搭特辑写真", editorial)
         if previous := look.get("previous_photo"):
             append("previous_photo", "上一版写真", previous["asset"])
         for product in snapshot.get("products", []):

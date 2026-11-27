@@ -506,7 +506,7 @@ export function createAdminApp({ document, fetch, confirm, applySiteTheme = them
   $('#refresh-overview').addEventListener('click', () => run(loadOverview));
   const cdnStatusNames = { queued: '待同步', uploading: '上传中', verified: '已验证', failed: '失败', unknown: '待人工核对', unconfigured: '未配置' };
   const deliveryRoles = new Map([
-    ['current_photo', '当前写真'], ['previous_photo', '上一版写真'],
+    ['current_photo', '当前写真'], ['editorial_photo', '穿搭特辑写真'], ['previous_photo', '上一版写真'],
     ['product_main', '单品主图'], ['product_gallery', '单品附图'],
   ]);
   const deliveryTaskNames = {...cdnStatusNames, not_queued:'未排队', source_only:'仅回源'};

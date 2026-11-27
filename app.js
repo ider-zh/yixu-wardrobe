@@ -636,6 +636,7 @@ function openDetail(id,preserveNavigation=false,{view=0,routed=false,hydrating=f
   else history.pushState(entry,'',hash);
   state.active=id;
   $('detail-number').textContent='LOOK '+number(id)+' / '+l.category+' / '+l.season;
+  $('detail-editorial').hidden=id!==112||!l.editorial_asset;
   $('detail-title').textContent=l.title;$('detail-story-title').textContent=versionOf(l).story;$('detail-story-summary').textContent=versionOf(l).summary;
   $('detail-palette').innerHTML=palette(l);
   $('detail-description').textContent=l.description;

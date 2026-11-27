@@ -157,6 +157,13 @@
         "asset": {
           "$ref": "#/$defs/Asset"
         },
+        "editorial_asset": {
+          "anyOf": [
+            {"$ref": "#/$defs/Asset"},
+            {"type": "null"}
+          ],
+          "default": null
+        },
         "shots": {
           "items": {
             "$ref": "#/$defs/Shot"

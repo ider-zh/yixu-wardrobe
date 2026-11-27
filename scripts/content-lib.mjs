@@ -167,6 +167,13 @@ export function loadContent(root) {
     fail(version.shots.every((shot, i) => object(shot) && text(shot.title) && (!batch || (shot.index === i + 1 && text(shot.emotion) && text(shot.pose) && text(shot.framing)))), 'Invalid expressive shot descriptions');
     registerAsset(version.asset, true);
     fail(version.image === version.asset.file, 'Look image and asset must agree');
+    const editorial = batch && Object.hasOwn(input, 'editorial_asset') ? input.editorial_asset : undefined;
+    if (editorial != null) {
+      fail(object(editorial) && editorial.visibility === 'public' && editorial.layout == null &&
+        editorial.file?.startsWith('assets/looks/') && editorial.width * 3 === editorial.height * 2,
+      'Editorial image must be a public 2:3 single portrait');
+      registerAsset(editorial);
+    }
     const revised = batch ? undefined : revisions.get(input.id);
     let previousPhoto;
     if (revised) {
@@ -186,6 +193,7 @@ export function loadContent(root) {
     }
     Object.assign(out, {
       ...(batch && input.model_only ? {model_only: true} : {}),
+      ...(editorial ? {editorial_asset: structuredClone(editorial)} : {}),
       ...(previousPhoto ? {previous_photo: previousPhoto} : {}),
       model_id: revised?.model_id ?? input.model_id ?? null,
       model_reference_sha256: revised?.model_reference_sha256 ?? input.model_reference_sha256 ?? null,
