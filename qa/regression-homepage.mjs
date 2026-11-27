@@ -106,10 +106,13 @@ try{
    await activate(selector,viewport.width<801);
    await wait('document.getElementById("detail-dialog").open');
    assert.equal(await evaluate('document.getElementById("detail-title").textContent'),featured.title,'Home action opens its featured outfit without a reload');
+   await wait('document.querySelector("#detail-dialog .lookbook-cover img").naturalWidth>0');
+   assert.equal(await evaluate('document.querySelector("#lookbook-cover").classList.contains("lookbook-panel-cover")'),!featured.editorial_asset);
+   assert.equal(await evaluate('document.querySelector("#lookbook-album").hidden'),false);
    await evaluate('document.getElementById("close-detail").click()');
    await wait('!document.getElementById("detail-dialog").open');
   }
-  assert.match(await evaluate('document.getElementById("hero-detail").textContent'),/查看穿搭/);
+  assert.match(await evaluate('document.getElementById("hero-detail").textContent'),/看穿搭画册/);
   await evaluate('document.getElementById("hero-detail").focus()');
   await client('Input.dispatchKeyEvent',{type:'keyDown',key:'Enter',code:'Enter',windowsVirtualKeyCode:13,text:'\r',unmodifiedText:'\r'});
   await client('Input.dispatchKeyEvent',{type:'keyUp',key:'Enter',code:'Enter',windowsVirtualKeyCode:13});
@@ -232,7 +235,7 @@ try{
   await client('Emulation.setDeviceMetricsOverride',{width,height:844,deviceScaleFactor:1,mobile:true});
   await navigate();await wait(`window.WARDROBE.looks.find(look=>look.id===${featured.id}).tags.includes(${JSON.stringify(specialTag)})`);
   await evaluate('document.getElementById("hero-detail").click()');await wait('document.getElementById("detail-dialog").open');
-  assert.equal(await evaluate(`document.querySelector('[data-view="0"]').getAttribute("aria-pressed")`),'true','Grid remains the default');
+  assert.equal(await evaluate(`document.querySelector('#view-selector [aria-pressed="true"]').dataset.view`),String(featured.versions.v2.previewPanel),'The album opens on the published cover shot');
   assert.deepEqual(await evaluate('[...document.querySelectorAll("#view-selector .shot-number")].map(node=>node.textContent)'),['01','02','03','04','05','06','07','08','09']);
   assert.equal(await evaluate(`document.querySelector('[data-view="1"] .shot-title').textContent`),longTitle+'1');
   assert.equal(await evaluate('document.querySelector("#detail-dialog").scrollWidth<=document.querySelector("#detail-dialog").clientWidth+1'),true,'Long titles fit the '+width+'px dialog');
@@ -305,9 +308,9 @@ try{
  ];
  for(const query of invalidShots){
   await navigate(origin+'/#look-'+featured.id+'?'+query);
-  await wait('document.querySelector(\'[data-view="0"]\')?.getAttribute("aria-pressed")==="true"');
+  await wait(`document.querySelector('[data-view="${featured.versions.v2.previewPanel}"]')?.getAttribute('aria-pressed')==='true'`);
   assert.equal(await evaluate('location.hash'),'#look-'+featured.id);
-  assert.equal(await evaluate('document.getElementById("share-shot").hidden'),true);
+  assert.equal(await evaluate('document.getElementById("share-shot").hidden'),false);
  }
  await navigate(pathToFileURL(path.join(output,'index.html')).href+sharedShot);
  await wait(selectedFourth);
@@ -509,7 +512,7 @@ try{
     assert.equal(source.x,-((appearance.shot_index-1)%3)*100+'%');assert.equal(source.y,-Math.floor((appearance.shot_index-1)/3)*100+'%');
     await evaluate(`document.querySelectorAll('#product-worn-section .product-worn')[${index}].click()`);await wait('document.getElementById("detail-dialog").open');
     assert.equal(await evaluate('document.getElementById("detail-title").textContent'),look.title);
-    assert.equal(await evaluate(`document.querySelector('#view-selector button[aria-pressed="true"]').dataset.view`),String(look.model_only?0:appearance.shot_index));
+    assert.equal(await evaluate(`document.querySelector('#view-selector button[aria-pressed="true"]').dataset.view`),String(look.model_only?version.previewPanel:appearance.shot_index));
     assert.equal(await evaluate('document.getElementById("detail-image").getAttribute("src")'),version.source_url);
     const piece=await evaluate(`(()=>{const row=document.querySelectorAll('#detail-pieces>li')[${appearance.piece_index-1}];return {number:row.querySelector('.piece-number').textContent,role:row.querySelector('.piece-role').textContent,name:row.lastElementChild.textContent};})()`);
     assert.deepEqual(piece,{number:String(appearance.piece_index).padStart(2,'0'),...look.pieces[appearance.piece_index-1]},'The source outfit keeps its original piece ordering and identity');
