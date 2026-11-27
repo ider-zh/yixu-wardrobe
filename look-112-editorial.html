@@ -37,7 +37,10 @@
       </figure>
       <h2 id="item-name">深樱红圆领短外套</h2>
       <p id="item-note" aria-live="polite">圆领贴近半高领，门襟敞开。古铜色圆扣和细开线口袋在哑光深樱红上若隐若现。</p>
-      <button class="toggle" id="toggle" type="button">看单品全貌 ↗</button>
+      <div class="sample-actions">
+        <button class="toggle" id="toggle" type="button">看单品全貌</button>
+        <a id="product-link" href="index.html#/product/black-cherry-collarless-jacket-112?look=112">进入单品页 ↗</a>
+      </div>
     </aside>
   </section>
   <ul class="look-items" aria-label="四件单品">
@@ -48,11 +51,28 @@
   </ul>
   <section class="story" aria-label="搭配说明">
     <div><p>这套穿搭由上海博物馆东馆观展场景启发。短外套留出腰线，裤脚留出脚踝，也让鞋面的细搭带看得更清楚。</p><p class="disclosure">AI 穿搭展示。独立单品图含设计推演。</p></div>
-    <a href="#original">原始九宫格 ↓</a>
+    <a href="#original">看写真相册 ↓</a>
   </section>
   <section id="original" class="original" aria-labelledby="original-title">
-    <h2 id="original-title">原始九宫格</h2>
-    <img src="assets/looks/2026-11-27/look-112-female-01-v2-r1.webp" alt="林知棠《东馆·樱红拾光》原始九宫格" width="1024" height="1536" loading="lazy">
+    <div class="album-layout">
+      <figure class="album-frame" aria-label="当前写真">
+        <img id="album-image" src="assets/looks/2026-11-27/look-112-female-01-v2-r1.webp" alt="门口打个招呼" width="1024" height="1536" loading="lazy">
+      </figure>
+      <div class="album-info">
+        <h2 id="original-title">写真相册</h2>
+        <div class="album-caption" id="album-caption" aria-live="off">
+          <span class="meta" id="album-count">01 / 09</span>
+          <h3 id="album-title">门口打个招呼</h3>
+          <p id="album-note">正面全身，双鞋可见</p>
+        </div>
+        <div class="album-controls" role="group" aria-label="相册播放控制">
+          <button id="album-play" type="button">暂停轮播</button>
+          <button id="album-previous" type="button" aria-label="上一张">←</button>
+          <button id="album-next" type="button" aria-label="下一张">→</button>
+        </div>
+        <div class="album-thumbnails" id="album-thumbnails" role="group" aria-label="选择照片"></div>
+      </div>
+    </div>
   </section>
 </main>
 </div>
