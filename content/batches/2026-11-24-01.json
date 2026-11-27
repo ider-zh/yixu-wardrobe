@@ -88,6 +88,16 @@
       "mood": "原本只是并肩慢走，听见芦苇一阵响，两人留神去听，坐下时笑作一团，起身继续往前。",
       "scene": "以杭州西溪湿地为灵感的虚构木栈道。水面、淡色芦穗和木凳旁有午后斜光，微风吹动发丝。",
       "edition": "v2",
+      "editorial_asset": {
+        "asset_id": "look-107-female-01-editorial-r1",
+        "file": "assets/looks/2026-11-24/look-107-female-01-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 69558,
+        "sha256": "2aaa57ab601c607abbf573fb13fb55ee8757893c710b5831cdff19a155cb6da7",
+        "visibility": "public"
+      },
       "shots": [
         {
           "index": 1,

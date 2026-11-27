@@ -100,6 +100,16 @@
           "preview_panel": 2
         }
       },
+      "editorial_asset": {
+        "asset_id": "look-104-female-01-editorial-r1",
+        "file": "assets/looks/2026-11-20/look-104-female-01-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 72448,
+        "sha256": "f62a314b445aeef8ae9d92124c72ced04e529402903a7ebe4c0cb75b2523e587",
+        "visibility": "public"
+      },
       "shots": [
         {
           "index": 1,

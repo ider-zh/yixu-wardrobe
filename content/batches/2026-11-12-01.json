@@ -119,6 +119,16 @@
           "preview_panel": 1
         }
       },
+      "editorial_asset": {
+        "asset_id": "look-101-female-01-editorial-r1",
+        "file": "assets/looks/2026-11-12/look-101-female-01-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 55186,
+        "sha256": "99bceb2746b76590d7a499596e3b0aae27e265288a3a49c10d2bb8699fe566df",
+        "visibility": "public"
+      },
       "shots": [
         {
           "index": 1,
@@ -256,6 +266,16 @@
           "columns": 3,
           "preview_panel": 1
         }
+      },
+      "editorial_asset": {
+        "asset_id": "look-102-female-01-editorial-r1",
+        "file": "assets/looks/2026-11-12/look-102-female-01-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 60072,
+        "sha256": "e555829e5f4f1d2e99565aacbb1c148438393094798e6d20aa5c455078dec504",
+        "visibility": "public"
       },
       "shots": [
         {

@@ -233,6 +233,16 @@
       "mood": "从窗边快步走进馆内，翻开折页，看到模型后停步，再抬手与同伴告别。",
       "scene": "场景灵感来自上海当代艺术博物馆的《刘家琨：明月构想》。午间窗光落在工业框架、灰色地面和浅色建筑模型上。",
       "edition": "v2",
+      "editorial_asset": {
+        "asset_id": "look-113-male-01-editorial-r1",
+        "file": "assets/looks/2026-11-27/look-113-male-01-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 60644,
+        "sha256": "9088d3cc3c8352ff412e64c07afa1e3b67317810f3eff21bc3ff184340f5718c",
+        "visibility": "public"
+      },
       "shots": [
         {
           "index": 1,

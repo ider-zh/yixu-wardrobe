@@ -9704,6 +9704,204 @@
           "shot_index": 7
         }
       ]
+    },
+    {
+      "product_id": "olive-gray-short-trench-101",
+      "name": "橄榄灰短风衣",
+      "category": "外套",
+      "color_name": "橄榄灰",
+      "color_hex": "#69665A",
+      "subtitle": "尖领短风衣，敞开露出内搭。",
+      "description": "尖领、深色纽扣、肩袢和腰间无带的短风衣轮廓来自写真。第 7 镜头可见后背挡片。主图对袋口、领内侧和缝线做了设计推演。",
+      "design_material": "低反光细斜纹布面观感",
+      "notes": [
+        "宽尖领",
+        "扣合肩袢与袖袢",
+        "无腰带短衣身"
+      ],
+      "asset": {
+        "asset_id": "product-olive-gray-short-trench-101-main-r1",
+        "file": "assets/products/look-101/olive-gray-short-trench-101-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 91732,
+        "sha256": "40ec9c509eafab8370b9d5818f3be9881cc33624804078269d76db2062de4c92",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 101,
+          "piece_index": 1,
+          "reference_asset_id": "look-101-female-01-v2-r2",
+          "shot_index": 2
+        }
+      ]
+    },
+    {
+      "product_id": "gray-burgundy-argyle-knit-101",
+      "name": "柔灰酒红菱格针织衫",
+      "category": "上装",
+      "color_name": "柔灰",
+      "color_hex": "#8A8582",
+      "subtitle": "酒红和米白的大菱格落在柔灰底上。",
+      "description": "柔灰圆领、酒红米白菱格和细交叉线取自写真；外套遮住的袖身和完整图案排布为设计推演。",
+      "design_material": "细密针织与罗纹的视觉观感",
+      "notes": [
+        "柔灰圆领",
+        "酒红与米白大菱格",
+        "细斜线交叉"
+      ],
+      "asset": {
+        "asset_id": "product-gray-burgundy-argyle-knit-101-main-r1",
+        "file": "assets/products/look-101/gray-burgundy-argyle-knit-101-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 258616,
+        "sha256": "7697dabc5bd0357dfbf3979a171249492b7bff1990b9147d4b00b9d1e67e9f44",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 101,
+          "piece_index": 2,
+          "reference_asset_id": "look-101-female-01-v2-r2",
+          "shot_index": 8
+        }
+      ]
+    },
+    {
+      "product_id": "charcoal-high-rise-straight-trousers-101",
+      "name": "炭灰高腰直筒西装裤",
+      "category": "下装",
+      "color_name": "炭灰",
+      "color_hex": "#343536",
+      "subtitle": "炭灰直裤腿落到靴口上方。",
+      "description": "从写真提取高腰、炭灰和顺直裤腿。毛衣和风衣遮住的腰头、门襟与完整袋口为设计推演。",
+      "design_material": "平整微哑的西装布面观感",
+      "notes": [
+        "高腰比例",
+        "炭灰直筒裤线",
+        "裤脚离地"
+      ],
+      "asset": {
+        "asset_id": "product-charcoal-high-rise-straight-trousers-101-main-r1",
+        "file": "assets/products/look-101/charcoal-high-rise-straight-trousers-101-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 57086,
+        "sha256": "2672065398632473b0bae8b6b00c1510b1495485d6a1f4b4b468e0cfd0e86092",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 101,
+          "piece_index": 3,
+          "reference_asset_id": "look-101-female-01-v2-r2",
+          "shot_index": 1
+        }
+      ]
+    },
+    {
+      "product_id": "chocolate-round-toe-ankle-boots-101",
+      "name": "深巧克力棕圆头短靴",
+      "category": "鞋履",
+      "color_name": "深巧克力棕",
+      "color_hex": "#392B27",
+      "subtitle": "圆头、短筒和稳实的低粗跟。",
+      "description": "深棕、圆头和低粗跟来自写真侧前方全身镜头。被裤脚遮住的靴筒上缘、内侧开合与接缝为设计推演。",
+      "design_material": "细纹低光泽皮面观感",
+      "notes": [
+        "深巧克力棕",
+        "圆头短靴",
+        "低粗跟"
+      ],
+      "asset": {
+        "asset_id": "product-chocolate-round-toe-ankle-boots-101-main-r1",
+        "file": "assets/products/look-101/chocolate-round-toe-ankle-boots-101-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 51044,
+        "sha256": "1422017e08ae14d5e5d4cacd5089cd8fbe774f9c84f8fa7c49c0396a2dd52994",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 101,
+          "piece_index": 4,
+          "reference_asset_id": "look-101-female-01-v2-r2",
+          "shot_index": 4
+        }
+      ]
+    },
+    {
+      "product_id": "chocolate-rounded-shoulder-bag-101",
+      "name": "深巧克力棕圆角肩包",
+      "category": "包袋",
+      "color_name": "深巧克力棕",
+      "color_hex": "#4C382F",
+      "subtitle": "宽肩带搭配柔软的圆角包身。",
+      "description": "写真中的深棕圆角包身与单宽肩带用于主图。包口弧度、侧片纵深和肩带缝接为设计推演。",
+      "design_material": "柔软低光泽皮面观感",
+      "notes": [
+        "一条宽肩带",
+        "柔软圆角侧边",
+        "简洁深棕包身"
+      ],
+      "asset": {
+        "asset_id": "product-chocolate-rounded-shoulder-bag-101-main-r1",
+        "file": "assets/products/look-101/chocolate-rounded-shoulder-bag-101-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 70334,
+        "sha256": "30abcf436ed2e7b6bbd31db503480692ac6165cc2028dabd104e3077a4c893bb",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 101,
+          "piece_index": 5,
+          "reference_asset_id": "look-101-female-01-v2-r2",
+          "shot_index": 5
+        }
+      ]
+    },
+    {
+      "product_id": "small-gold-tone-round-ear-studs-101",
+      "name": "小号金色圆耳钉",
+      "category": "饰品",
+      "color_name": "暖金色",
+      "color_hex": "#B89550",
+      "subtitle": "小圆面在耳边留下克制的暖金亮点。",
+      "description": "写真可见小号暖金色耳饰。正面弧度、反光与成对展示为设计推演，主图省略耳针和耳堵。",
+      "design_material": "暖金色抛光金属观感",
+      "notes": [
+        "小号圆形",
+        "暖金色",
+        "微拱圆面"
+      ],
+      "asset": {
+        "asset_id": "product-small-gold-tone-round-ear-studs-101-main-r1",
+        "file": "assets/products/look-101/small-gold-tone-round-ear-studs-101-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 16240,
+        "sha256": "38976314c08c59de8248de78948fd40ac29269c05212b57c9651303ebd553df4",
+        "visibility": "public"
+      },
+      "appearances": [
+        {
+          "look_id": 101,
+          "piece_index": 6,
+          "reference_asset_id": "look-101-female-01-v2-r2",
+          "shot_index": 3
+        }
+      ]
     }
   ]
 }

@@ -88,6 +88,16 @@
       "mood": "从进门相认、发现纱线的新鲜感，到坐下听一句笑话，再招呼观者继续逛。",
       "scene": "以上海青浦纺织展为灵感的虚构现代门厅。雨水玻璃、焦糖色木凳、素色挂布与小型纱线展台，雨天窗光和室内微暖灯。",
       "edition": "v2",
+      "editorial_asset": {
+        "asset_id": "look-106-female-01-editorial-r1",
+        "file": "assets/looks/2026-11-23/look-106-female-01-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 86878,
+        "sha256": "d250b7cda6baafd9b3214ed659a205022c5afa07baa4bb2509a4f934b1ecd02d",
+        "visibility": "public"
+      },
       "shots": [
         {
           "index": 1,

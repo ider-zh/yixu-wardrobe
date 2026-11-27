@@ -109,6 +109,16 @@
       "mood": "沿展厅稳步前行，在画前收步驻足。坐下与同伴短暂交流，再起身继续看展。",
       "scene": "以上海徐汇滨江观展为灵感的虚构版画展厅。浅灰米色墙面、木长凳、无字装裱的墨色画作，午后窗光落在地面。",
       "edition": "v2",
+      "editorial_asset": {
+        "asset_id": "look-109-male-01-editorial-r1",
+        "file": "assets/looks/2026-11-26/look-109-male-01-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 76356,
+        "sha256": "92bd55a37853db29d0b5909cf462d6ce273b9dde28ee897568cf523ff3f9aa06",
+        "visibility": "public"
+      },
       "shots": [
         {
           "index": 1,
@@ -233,6 +243,16 @@
       "mood": "见面时笑着招手，走着走着停下来捡叶，最后伸手招呼同伴一起往前走。",
       "scene": "取景灵感来自上海徐汇武康路至安福路的梧桐街区。午后光斑落在砖墙和人行道上，墙边散落着几片梧桐叶。",
       "edition": "v2",
+      "editorial_asset": {
+        "asset_id": "look-110-female-01-editorial-r1",
+        "file": "assets/looks/2026-11-26/look-110-female-01-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 60934,
+        "sha256": "58f74be113d08fd1ef67292fee6ad036e6d9e19ed99a813927a802f5596b2e21",
+        "visibility": "public"
+      },
       "shots": [
         {
           "index": 1,
@@ -362,6 +382,16 @@
       "mood": "沿花径快步前行，跨上矮石阶，再放慢步幅，在花径尽头自然站定。",
       "scene": "取景灵感来自上海黄浦复兴公园菊展。午后花径两侧摆着浅黄与奶白色菊花，石凳和轻纱环形装置在树影下。",
       "edition": "v2",
+      "editorial_asset": {
+        "asset_id": "look-111-male-01-editorial-r1",
+        "file": "assets/looks/2026-11-26/look-111-male-01-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 92308,
+        "sha256": "b8eb05dbb50a47482322bb9bc5a5570a7b6d64feae63300e4b13704c9f1f7017",
+        "visibility": "public"
+      },
       "shots": [
         {
           "index": 1,

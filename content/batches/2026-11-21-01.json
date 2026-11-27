@@ -103,6 +103,16 @@
           "preview_panel": 4
         }
       },
+      "editorial_asset": {
+        "asset_id": "look-105-female-01-editorial-r1",
+        "file": "assets/looks/2026-11-21/look-105-female-01-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 63986,
+        "sha256": "b00e21b5d5e0f29ff708b75a339fd35b9a75317b59e9ff10b250402600bc95fe",
+        "visibility": "public"
+      },
       "shots": [
         {
           "index": 1,

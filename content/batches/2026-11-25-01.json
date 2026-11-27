@@ -84,6 +84,16 @@
       "mood": "相约喝茶，从门前相认、坐下笑开，到揭盖闻香，最后在竹椅旁道别。",
       "scene": "受成都银杏时节启发的虚构茶院。竹椅、旧木柱、青瓷盖碗和灰色石板承接多云天的柔光。",
       "edition": "v2",
+      "editorial_asset": {
+        "asset_id": "look-108-female-01-editorial-r1",
+        "file": "assets/looks/2026-11-25/look-108-female-01-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 74976,
+        "sha256": "f7a832fe3f3436cb4160b988bb586f7ebd44b7f10ee73b8cdceda8e153d709b9",
+        "visibility": "public"
+      },
       "shots": [
         {
           "index": 1,
