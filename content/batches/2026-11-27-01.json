@@ -1,0 +1,170 @@
+{
+  "schema_version": 1,
+  "batch_id": "2026-11-27-01",
+  "publish_date": "2026-11-27",
+  "published_at": "2026-11-27T08:08:01+08:00",
+  "timezone": "Asia/Shanghai",
+  "title": "上海东馆 · 樱红拾光",
+  "region": {
+    "country": "CN",
+    "city": "上海"
+  },
+  "research": {
+    "checked_at": "2026-11-27T08:02:00+08:00",
+    "trend_sources": [
+      {
+        "url": "https://www.shanghaimuseum.cn/mu/frontend/pg/m/article/id/I00005314",
+        "published_at": "2026-11-16",
+        "summary": "上海博物馆发布东馆“环宇璀璨”珠宝展信息，展览从11月18日持续至次年5月5日。展览中的色彩与明暗为写真里的窗光和古铜色圆扣提供灵感。"
+      },
+      {
+        "url": "https://www.thepaper.cn/newsDetail_forward_34526818",
+        "published_at": "2026-11-23",
+        "summary": "澎湃新闻记者梁佳的当周展讯确认上博东馆珠宝展；写真由此策划从室外步行进入门厅的观展动线。"
+      },
+      {
+        "url": "https://wap.xinmin.cn/content/32908231.html",
+        "published_at": "2026-11-16",
+        "summary": "新民晚报记者徐翌晟报道了珠宝展的开放日期、地点与金饰展品，用于核对在地活动并参考金属光泽。"
+      }
+    ],
+    "weather": {
+      "url": "https://www.weather.com.cn/textFC/shanghai.shtml",
+      "forecast_date": "2026-11-27",
+      "checked_at": "2026-11-27T08:02:00+08:00",
+      "summary": "中国天气网预报11月27日上海市白天晴，西风小于3级，最高20℃；夜间晴，西北风小于3级，最低10℃。预报无降水。",
+      "styling_reason": "日间以室内观展和短程步行为主。室内可敞开短外套，凉处可扣合，细针织便于调节体感。搭带平底鞋便于短程步行。"
+    }
+  },
+  "looks": [
+    {
+      "id": 112,
+      "model_id": "female-01",
+      "model_reference_sha256": "dc0a221ff81250415bcfa3b320bc916dc02e2873f030e707083928505ca75066",
+      "title": "东馆·樱红拾光",
+      "category": "都市层次",
+      "season": "冬季",
+      "description": "敞开的深樱红短外套露出奶油白半高领，古铜色圆扣随门厅光线轻轻发亮。墨灰九分裤留出一点脚踝，黑色搭带平底鞋适合从地铁走到展馆，再慢慢逛一圈。",
+      "pieces": [
+        {
+          "role": "外套",
+          "name": "深樱红圆领短外套"
+        },
+        {
+          "role": "上装",
+          "name": "奶油白半高领细针织衫"
+        },
+        {
+          "role": "下装",
+          "name": "墨灰微锥九分裤"
+        },
+        {
+          "role": "鞋履",
+          "name": "黑色搭带平底鞋"
+        }
+      ],
+      "tags": [
+        "深樱红",
+        "半高领",
+        "短外套",
+        "搭带平底鞋",
+        "上海观展"
+      ],
+      "mood": "进门前招手，走到门廊抬头追一道光，在石凳歇脚，又被同伴逗笑。",
+      "scene": "取景灵感来自上海博物馆东馆“环宇璀璨”珠宝展。虚构的博物馆里，午后日光掠过浅石墙、高玻璃门和古铜色栏杆。",
+      "edition": "v2",
+      "shots": [
+        {
+          "index": 1,
+          "title": "门口打个招呼",
+          "emotion": "看向观者，露齿笑",
+          "pose": "站在玻璃门外抬手招呼",
+          "framing": "正面全身，双鞋可见"
+        },
+        {
+          "index": 2,
+          "title": "把碎发拨开",
+          "emotion": "略偏头，直视观者，闭唇浅笑",
+          "pose": "一手拨开额前的长发",
+          "framing": "腰部以上，圆领和门襟清楚"
+        },
+        {
+          "index": 3,
+          "title": "跨过有光的广场",
+          "emotion": "侧看前方，神情专注",
+          "pose": "迈开步幅，双臂随着步态摆动",
+          "framing": "侧面全身，双鞋可见"
+        },
+        {
+          "index": 4,
+          "title": "抬手接光",
+          "emotion": "抬眼朝上，惊讶微张嘴",
+          "pose": "摊开一只手，掌心朝上",
+          "framing": "腰部以上，左侧斜光"
+        },
+        {
+          "index": 5,
+          "title": "在石凳歇一会",
+          "emotion": "直视观者，闭唇微笑",
+          "pose": "斜坐在石凳上，一手搭膝，一手撑住凳面",
+          "framing": "坐姿全身，搭带和鞋头清楚"
+        },
+        {
+          "index": 6,
+          "title": "在门廊笑出声",
+          "emotion": "望向观者，张口大笑",
+          "pose": "肩膀放松，身体朝向镜头",
+          "framing": "上半身近景，半高领清楚"
+        },
+        {
+          "index": 7,
+          "title": "扶栏看向大厅",
+          "emotion": "转头望向右侧，安静出神",
+          "pose": "站在石阶边，单手搭住栏杆",
+          "framing": "全身，侧前方"
+        },
+        {
+          "index": 8,
+          "title": "回身邀同伴",
+          "emotion": "回头看向观者，带着笑意",
+          "pose": "沿原路转身，将一只手伸向同伴",
+          "framing": "大腿以上，侧身回头"
+        },
+        {
+          "index": 9,
+          "title": "走回日光里",
+          "emotion": "望向观者，露齿微笑",
+          "pose": "从玻璃门前走近，双手自然垂放",
+          "framing": "正面全身，后脚部分遮挡"
+        }
+      ],
+      "palette": [
+        "#53222c",
+        "#e4d1b2",
+        "#383838",
+        "#1d1a1a"
+      ],
+      "details": [
+        "古铜色圆扣点亮圆领短外套的门襟。",
+        "奶油白半高领露在敞开的外套之间。",
+        "九分裤落在脚踝之上，留出细搭带的轮廓。"
+      ],
+      "asset": {
+        "asset_id": "look-112-female-01-v2-r1",
+        "file": "assets/looks/2026-11-27/look-112-female-01-v2-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 198162,
+        "sha256": "44d558a8fbafdae08dd1806b6e1fede36fbbc513915e6129e7c2fe0e97a7ee80",
+        "visibility": "public",
+        "layout": {
+          "rows": 3,
+          "columns": 3,
+          "preview_panel": 1
+        }
+      }
+    }
+  ],
+  "cover_look_id": 112
+}

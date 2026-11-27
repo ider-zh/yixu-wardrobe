@@ -9296,6 +9296,210 @@
           "shot_index": 3
         }
       ]
+    },
+    {
+      "product_id": "black-cherry-collarless-jacket-112",
+      "name": "深樱红圆领短外套",
+      "category": "外套",
+      "color_name": "深樱红",
+      "color_hex": "#53222c",
+      "subtitle": "古铜色圆扣落在深樱红门襟上。",
+      "description": "圆领、直身短衣摆和细开线口袋来自写真。主图对内侧、口袋开口及缝线做了设计推演。",
+      "design_material": "低反光细绒呢面观感",
+      "notes": [
+        "无翻领圆领",
+        "古铜色圆扣",
+        "前身细开线口袋"
+      ],
+      "asset": {
+        "asset_id": "product-black-cherry-collarless-jacket-112-main-r1",
+        "file": "assets/products/look-112/black-cherry-collarless-jacket-112-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 74940,
+        "sha256": "b91230dd0d93c9e4f9bf8a22b353e473e2f4ed16b26383a7bb0d01f369cadb42",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "圆扣与开线口袋",
+          "caption": "近看门襟下方的古铜色圆扣和细开线口袋。写真无法辨清的扣面、袋口和绒面纹理为设计推演。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-black-cherry-collarless-jacket-112-detail-r1",
+            "file": "assets/products/look-112/black-cherry-collarless-jacket-112-detail-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 173708,
+            "sha256": "aa63862682ff7a3156272ef81da7fa37eedd41da0215b5bce5cd32db5771d4b9",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 112,
+          "piece_index": 1,
+          "reference_asset_id": "look-112-female-01-v2-r1",
+          "shot_index": 2
+        }
+      ]
+    },
+    {
+      "product_id": "cream-mock-neck-knit-112",
+      "name": "奶油白半高领细针织衫",
+      "category": "上装",
+      "color_name": "奶油白",
+      "color_hex": "#e4d1b2",
+      "subtitle": "薄薄的半高领承接深色外套。",
+      "description": "写真中露出的奶油白半高领和细密针织作为主图依据。被外套遮挡的袖口、下摆和织边为设计推演。",
+      "design_material": "平整的细针织观感",
+      "notes": [
+        "奶油白",
+        "半高领",
+        "贴身长袖"
+      ],
+      "asset": {
+        "asset_id": "product-cream-mock-neck-knit-112-main-r1",
+        "file": "assets/products/look-112/cream-mock-neck-knit-112-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 100084,
+        "sha256": "eb4ad030eadd82ad1d00854ca370e3715373b0ef19eb17a4f640ead76f088134",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "半高领与织纹",
+          "caption": "贴近看半高领和衣身织纹的衔接。领口内缘、针目和接缝为设计推演。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-cream-mock-neck-knit-112-detail-r1",
+            "file": "assets/products/look-112/cream-mock-neck-knit-112-detail-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 199816,
+            "sha256": "3a491d6939e76182104808cc56c1be0c6c3d3572c0431e87b8e937fec2396e05",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 112,
+          "piece_index": 2,
+          "reference_asset_id": "look-112-female-01-v2-r1",
+          "shot_index": 6
+        }
+      ]
+    },
+    {
+      "product_id": "ink-gray-tapered-trousers-112",
+      "name": "墨灰微锥九分裤",
+      "category": "下装",
+      "color_name": "墨灰",
+      "color_hex": "#383838",
+      "subtitle": "利落的裤线停在搭带上方。",
+      "description": "裤腿向下略收，九分长度露出脚踝。独立图的腰头闭合、口袋和缝线属于设计推演。",
+      "design_material": "低反光平整织物观感",
+      "notes": [
+        "墨灰裤身",
+        "微锥裤腿",
+        "露踝长度"
+      ],
+      "asset": {
+        "asset_id": "product-ink-gray-tapered-trousers-112-main-r1",
+        "file": "assets/products/look-112/ink-gray-tapered-trousers-112-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 39566,
+        "sha256": "60d7a1143d81a965e891f83cdd917d5cdee677682f25b0bd859c0780f299b156",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "裤线与裤脚",
+          "caption": "顺着裤线看到没有反折的裤脚。侧缝、裤脚收边与织纹是设计推演。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-ink-gray-tapered-trousers-112-detail-r1",
+            "file": "assets/products/look-112/ink-gray-tapered-trousers-112-detail-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 103484,
+            "sha256": "04d5c5f7090c859bb5845911643e4bde72ac6b5ade7e7bef1493f18ffe3dcb11",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 112,
+          "piece_index": 3,
+          "reference_asset_id": "look-112-female-01-v2-r1",
+          "shot_index": 3
+        }
+      ]
+    },
+    {
+      "product_id": "black-strap-flats-112",
+      "name": "黑色搭带平底鞋",
+      "category": "鞋履",
+      "color_name": "黑色",
+      "color_hex": "#1d1a1a",
+      "subtitle": "细搭带横过脚背，低底便于步行。",
+      "description": "黑色细搭带、圆中略尖的鞋头与低底取自写真。鞋扣、鞋口和接缝细部为设计推演。",
+      "design_material": "光滑低光泽皮革观感",
+      "notes": [
+        "单根细搭带",
+        "黑色鞋面",
+        "低鞋底"
+      ],
+      "asset": {
+        "asset_id": "product-black-strap-flats-112-main-r1",
+        "file": "assets/products/look-112/black-strap-flats-112-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 50252,
+        "sha256": "cf1e92af47c69ee27536f2b2e4bb1299108990283a701ca3f6ae7be429b03d27",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "细搭带与鞋头",
+          "caption": "从斜前方展示鞋头、细搭带与低底。扣型、鞋口车线与露出的内侧为设计推演。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-black-strap-flats-112-detail-r1",
+            "file": "assets/products/look-112/black-strap-flats-112-detail-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 106218,
+            "sha256": "627723dbf7461f69c30812759ac71db519b92a64aa1ce9ff3b069abd3e68794d",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 112,
+          "piece_index": 4,
+          "reference_asset_id": "look-112-female-01-v2-r1",
+          "shot_index": 5
+        }
+      ]
     }
   ]
 }
