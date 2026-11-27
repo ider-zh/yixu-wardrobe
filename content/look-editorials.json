@@ -646,6 +646,48 @@
       }
     },
     {
+      "look_id": 47,
+      "reference_asset_id": "look-047-v2-r1",
+      "asset": {
+        "asset_id": "look-047-editorial-r1",
+        "file": "assets/looks/historical/look-047-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 89006,
+        "sha256": "c1f37bc6bfc1896a84f6752d1f4bc9e5025b2beaa50c16abe91378a2c65e1b87",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 48,
+      "reference_asset_id": "look-048-v2-r1",
+      "asset": {
+        "asset_id": "look-048-editorial-r1",
+        "file": "assets/looks/historical/look-048-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 68880,
+        "sha256": "2311d25124f253fd503308d7dd2e7c896e6675ed9c4a728e564d75dae79f3ac8",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 49,
+      "reference_asset_id": "look-049-v2-r1",
+      "asset": {
+        "asset_id": "look-049-editorial-r1",
+        "file": "assets/looks/historical/look-049-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 81722,
+        "sha256": "f381b4a4207a69435d10f7286bc2567ef71911494ecc93aff3b59a62752a57bb",
+        "visibility": "public"
+      }
+    },
+    {
       "look_id": 50,
       "reference_asset_id": "look-050-female-01-v2-r2",
       "asset": {
@@ -716,6 +758,76 @@
       }
     },
     {
+      "look_id": 55,
+      "reference_asset_id": "look-055-v2-r1",
+      "asset": {
+        "asset_id": "look-055-editorial-r1",
+        "file": "assets/looks/historical/look-055-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 67238,
+        "sha256": "86902fa1ca06ae757f4c17a08f39a5675146d9831498d2398f1dc1157ca41518",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 56,
+      "reference_asset_id": "look-056-v2-r1",
+      "asset": {
+        "asset_id": "look-056-editorial-r1",
+        "file": "assets/looks/historical/look-056-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 77616,
+        "sha256": "51c66040e97a956378e351f986e825110d99efb84a94d94ec054c469f0a9d397",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 57,
+      "reference_asset_id": "look-057-v2-r1",
+      "asset": {
+        "asset_id": "look-057-editorial-r1",
+        "file": "assets/looks/historical/look-057-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 57426,
+        "sha256": "d43f824d3dd4cbf0a3f26819e6d88ee2d83ac0f7001ed1b2290cec438f1f0bc6",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 58,
+      "reference_asset_id": "look-058-v2-r1",
+      "asset": {
+        "asset_id": "look-058-editorial-r1",
+        "file": "assets/looks/historical/look-058-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 92884,
+        "sha256": "78578c357b9494f56bc32a62f56e1b9bbea6ee1ef66ff9e638ddcd30e9d68ce9",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 59,
+      "reference_asset_id": "look-059-v2-r1",
+      "asset": {
+        "asset_id": "look-059-editorial-r1",
+        "file": "assets/looks/historical/look-059-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 135680,
+        "sha256": "905e5a214528597817651ddb37d4e8e80eb55e9543cab3fbc049b3f1488bb3c2",
+        "visibility": "public"
+      }
+    },
+    {
       "look_id": 60,
       "reference_asset_id": "look-060-female-01-v2-r2",
       "asset": {
@@ -730,6 +842,132 @@
       }
     },
     {
+      "look_id": 61,
+      "reference_asset_id": "look-061-v2-r1",
+      "asset": {
+        "asset_id": "look-061-editorial-r1",
+        "file": "assets/looks/historical/look-061-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 68108,
+        "sha256": "bc4651b0a1d43e4e0d92b4d37d76c3a0aba76b590adf89a3cce542912b858e3c",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 62,
+      "reference_asset_id": "look-062-v2-r1",
+      "asset": {
+        "asset_id": "look-062-editorial-r1",
+        "file": "assets/looks/historical/look-062-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 50680,
+        "sha256": "b5cb636a3816feb7e162d36728a8c176810e587705f98e6b12d87a2a1e317393",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 63,
+      "reference_asset_id": "look-063-v2-r1",
+      "asset": {
+        "asset_id": "look-063-editorial-r1",
+        "file": "assets/looks/historical/look-063-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 51248,
+        "sha256": "cdb1338c4e35a5cb1324fe21f4199582686d8b3b00c1c9703dc6e1124c774537",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 64,
+      "reference_asset_id": "look-064-v2-r1",
+      "asset": {
+        "asset_id": "look-064-editorial-r1",
+        "file": "assets/looks/historical/look-064-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 52420,
+        "sha256": "1ae525a34f7a6b33b905875427059289ec6f2b0e2ed5918647bbff8833a49d82",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 65,
+      "reference_asset_id": "look-065-v2-r1",
+      "asset": {
+        "asset_id": "look-065-editorial-r1",
+        "file": "assets/looks/historical/look-065-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 61812,
+        "sha256": "4dc719b2bd110105471027d9f307eb3541f3f36a037d414adae859266948d61f",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 66,
+      "reference_asset_id": "look-066-v2-r1",
+      "asset": {
+        "asset_id": "look-066-editorial-r1",
+        "file": "assets/looks/historical/look-066-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 68896,
+        "sha256": "3e9ad79c3a80e715ace6af50b55abed854035b49e257d01cc47e5b4ed4702d3a",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 67,
+      "reference_asset_id": "look-067-v2-r1",
+      "asset": {
+        "asset_id": "look-067-editorial-r1",
+        "file": "assets/looks/historical/look-067-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 97028,
+        "sha256": "dd37a42861092df846b7309a7b5cbb2cb7b7e5238a55b51abb7f7082e2f696dc",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 68,
+      "reference_asset_id": "look-068-v2-r1",
+      "asset": {
+        "asset_id": "look-068-editorial-r1",
+        "file": "assets/looks/historical/look-068-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 67574,
+        "sha256": "e7c0c00894d64d1f414179acb3c4e7add83b6d50ff446723d4a0d3e14ed16489",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 69,
+      "reference_asset_id": "look-069-v2-r1",
+      "asset": {
+        "asset_id": "look-069-editorial-r1",
+        "file": "assets/looks/historical/look-069-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 96152,
+        "sha256": "2b74c8da70cc1ac610b11dd836b11ac454820f57d056a845d34f6351135f71df",
+        "visibility": "public"
+      }
+    },
+    {
       "look_id": 70,
       "reference_asset_id": "look-070-female-01-v2-r2",
       "asset": {
@@ -740,6 +978,132 @@
         "height": 1536,
         "bytes": 64834,
         "sha256": "f5b1d971ad0b4137557a4c823194dce8baaf7cca77a33ae7b4c622dd61fc5084",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 71,
+      "reference_asset_id": "look-071-v2-r1",
+      "asset": {
+        "asset_id": "look-071-editorial-r1",
+        "file": "assets/looks/historical/look-071-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 78256,
+        "sha256": "104b2233ec878ec996d8882585f7a6f37dabc4ae0f4d2e85d6cca2cc3c74bb38",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 72,
+      "reference_asset_id": "look-072-v2-r1",
+      "asset": {
+        "asset_id": "look-072-editorial-r1",
+        "file": "assets/looks/historical/look-072-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 72030,
+        "sha256": "f177f07f8d67fe9e3d6d2f907dedd245cff24f415a5f9474742b5389c0a31dad",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 73,
+      "reference_asset_id": "look-073-v2-r1",
+      "asset": {
+        "asset_id": "look-073-editorial-r1",
+        "file": "assets/looks/historical/look-073-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 85474,
+        "sha256": "093464104dc86827ecc3409b3638dc41cec366e8c58f16b55c9baa4b7bfbf614",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 74,
+      "reference_asset_id": "look-074-v2-r1",
+      "asset": {
+        "asset_id": "look-074-editorial-r1",
+        "file": "assets/looks/historical/look-074-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 86940,
+        "sha256": "d089cc308dd2571ca922db1553311848a49b47673d64c71c4575040975664945",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 75,
+      "reference_asset_id": "look-075-v2-r1",
+      "asset": {
+        "asset_id": "look-075-editorial-r1",
+        "file": "assets/looks/historical/look-075-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 72910,
+        "sha256": "2b3036da43b77eba2aa809ed596047d328a608f58c44b79e39f3e39372cf6aa8",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 76,
+      "reference_asset_id": "look-076-v2-r1",
+      "asset": {
+        "asset_id": "look-076-editorial-r1",
+        "file": "assets/looks/historical/look-076-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 76784,
+        "sha256": "fd1a8fc97a81e60f014316709476fb2a2d58a42bec99a3baac45297b52934dce",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 77,
+      "reference_asset_id": "look-077-v2-r1",
+      "asset": {
+        "asset_id": "look-077-editorial-r1",
+        "file": "assets/looks/historical/look-077-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 73194,
+        "sha256": "ea2c9885c53c1c6412f9ed3dd3a2cdf21444ea4e2ae016db970ff7c7d91c09cd",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 78,
+      "reference_asset_id": "look-078-v2-r1",
+      "asset": {
+        "asset_id": "look-078-editorial-r1",
+        "file": "assets/looks/historical/look-078-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 82664,
+        "sha256": "2b11ff69061c6675b07919f41afca8cc0f7cb1151a579e7e93dc1d956b72387c",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 79,
+      "reference_asset_id": "look-079-v2-r1",
+      "asset": {
+        "asset_id": "look-079-editorial-r1",
+        "file": "assets/looks/historical/look-079-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 69434,
+        "sha256": "8d6702a860ab9a78074cc6bc82eece71a876a0af3271abc2ea0e4c3b4c61a2dd",
         "visibility": "public"
       }
     },
@@ -772,6 +1136,118 @@
       }
     },
     {
+      "look_id": 82,
+      "reference_asset_id": "look-082-v2-r1",
+      "asset": {
+        "asset_id": "look-082-editorial-r1",
+        "file": "assets/looks/historical/look-082-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 90050,
+        "sha256": "b0136e78fc4292cf2e4d5bdd1f0a27dc3f52cb56762448021bfe95e670b67b88",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 83,
+      "reference_asset_id": "look-083-v2-r1",
+      "asset": {
+        "asset_id": "look-083-editorial-r1",
+        "file": "assets/looks/historical/look-083-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 63088,
+        "sha256": "e6ec80e47df9946e931face77f4bf88e1c30af4012d57aa382a33a703a705167",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 84,
+      "reference_asset_id": "look-084-v2-r1",
+      "asset": {
+        "asset_id": "look-084-editorial-r1",
+        "file": "assets/looks/historical/look-084-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 89464,
+        "sha256": "73c81fd0907301f3049d0fa6cf08bc76a29c2b4ce5e0a19c5122198e3970214a",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 85,
+      "reference_asset_id": "look-085-v2-r1",
+      "asset": {
+        "asset_id": "look-085-editorial-r1",
+        "file": "assets/looks/historical/look-085-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 121360,
+        "sha256": "38a0626980155d32af3b019db92abbc45b17c4b5b13b3781ec060b5de093a6ca",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 86,
+      "reference_asset_id": "look-086-v2-r1",
+      "asset": {
+        "asset_id": "look-086-editorial-r1",
+        "file": "assets/looks/historical/look-086-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 81424,
+        "sha256": "b6adf51f0e45c9a3abe334636f57e10798658aa5cd89b07adedc33c5c9b82cbb",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 87,
+      "reference_asset_id": "look-087-v2-r1",
+      "asset": {
+        "asset_id": "look-087-editorial-r1",
+        "file": "assets/looks/historical/look-087-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 79104,
+        "sha256": "d9bbcf100c597d45449eb1f92b99fef19d29b0e7f8b834cbf181686bc7dc9c7f",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 88,
+      "reference_asset_id": "look-088-v2-r1",
+      "asset": {
+        "asset_id": "look-088-editorial-r1",
+        "file": "assets/looks/historical/look-088-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 109736,
+        "sha256": "c126ea3611728ea736c9c9f6239efbcf4fdc71824a84396e7314b5c15772f058",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 89,
+      "reference_asset_id": "look-089-v2-r1",
+      "asset": {
+        "asset_id": "look-089-editorial-r1",
+        "file": "assets/looks/historical/look-089-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 69562,
+        "sha256": "b6dda19155767b02fe4acd74e5ad9158a0b0d19c9c5b8f660ae4f396d778a9f0",
+        "visibility": "public"
+      }
+    },
+    {
       "look_id": 90,
       "reference_asset_id": "look-090-female-01-v2-r2",
       "asset": {
@@ -782,6 +1258,146 @@
         "height": 1536,
         "bytes": 106214,
         "sha256": "f2dffe5f0fcad3466c3eedee5b9ea8cdcb7b25e50279424922bbfbfed6be91b3",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 91,
+      "reference_asset_id": "look-091-v2-r1",
+      "asset": {
+        "asset_id": "look-091-editorial-r1",
+        "file": "assets/looks/historical/look-091-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 79246,
+        "sha256": "664c4e9de44fbf63c54d1c79e458a704e787cd64aec62ccd580b2478d5f95598",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 92,
+      "reference_asset_id": "look-092-v2-r1",
+      "asset": {
+        "asset_id": "look-092-editorial-r1",
+        "file": "assets/looks/historical/look-092-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 90232,
+        "sha256": "596d3016782e8964ca86c60dcf5d5eb8edeb916c7a96bd11c832f8e9a3b7478c",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 93,
+      "reference_asset_id": "look-093-v2-r1",
+      "asset": {
+        "asset_id": "look-093-editorial-r1",
+        "file": "assets/looks/historical/look-093-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 73028,
+        "sha256": "96afa7de8419e035f672bc445459deb5eb5fd9cc2847e4dbb2e006212e1bd157",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 94,
+      "reference_asset_id": "look-094-v2-r1",
+      "asset": {
+        "asset_id": "look-094-editorial-r1",
+        "file": "assets/looks/historical/look-094-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 66396,
+        "sha256": "05a39b8569a136182deb92fdf36cbe345054980fe3006b9f99c4be4cfbb4a91f",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 95,
+      "reference_asset_id": "look-095-v2-r1",
+      "asset": {
+        "asset_id": "look-095-editorial-r1",
+        "file": "assets/looks/historical/look-095-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 93240,
+        "sha256": "235631ac6a868beef0be4121941e05c86dab2d8a4d4d72177591ffcc5ae3e6ae",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 96,
+      "reference_asset_id": "look-096-v2-r1",
+      "asset": {
+        "asset_id": "look-096-editorial-r1",
+        "file": "assets/looks/historical/look-096-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 67108,
+        "sha256": "22e0293cd004394a353a71720ee6331632838676e70ed26345020055380424b9",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 97,
+      "reference_asset_id": "look-097-v2-r1",
+      "asset": {
+        "asset_id": "look-097-editorial-r1",
+        "file": "assets/looks/historical/look-097-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 97692,
+        "sha256": "11eed5b896e86bca235dca8bbde4db49429987cecd790450b8fe2029dff18a59",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 98,
+      "reference_asset_id": "look-098-v2-r1",
+      "asset": {
+        "asset_id": "look-098-editorial-r1",
+        "file": "assets/looks/historical/look-098-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 106582,
+        "sha256": "97c79e8c80bca37abafabe4a9cf0a4ae8ce33a5fcdf57d839e975e56b3bfadd9",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 99,
+      "reference_asset_id": "look-099-v2-r1",
+      "asset": {
+        "asset_id": "look-099-editorial-r1",
+        "file": "assets/looks/historical/look-099-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 80814,
+        "sha256": "fa67a7531379202ee9a337ffb69c3aaa749d3be2ef8e3ff3174d80e0d45930e5",
+        "visibility": "public"
+      }
+    },
+    {
+      "look_id": 100,
+      "reference_asset_id": "look-100-v2-r1",
+      "asset": {
+        "asset_id": "look-100-editorial-r1",
+        "file": "assets/looks/historical/look-100-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 66428,
+        "sha256": "5ba06e0691745b1f77b95d90672f0e86cd4f9570cb59e193d173953f05ac5bf4",
         "visibility": "public"
       }
     }
