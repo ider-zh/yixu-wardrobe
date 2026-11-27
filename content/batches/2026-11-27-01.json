@@ -26,6 +26,16 @@
         "url": "https://wap.xinmin.cn/content/32908231.html",
         "published_at": "2026-11-16",
         "summary": "新民晚报记者徐翌晟报道了珠宝展的开放日期、地点与金饰展品，用于核对在地活动并参考金属光泽。"
+      },
+      {
+        "url": "https://www1.meet-in-shanghai.net/cn/news/four-exhibitions-open-together-the-great-chimney-invites-you-to-wander-between-architecture-and-art-494657/",
+        "published_at": "2026-11-23",
+        "summary": "上海市文旅推广网介绍上海当代艺术博物馆同期展览及刘家琨个展中的建筑模型、手稿与装置。"
+      },
+      {
+        "url": "https://m.thepaper.cn/newsDetail_forward_34470434",
+        "published_at": "2026-11-13",
+        "summary": "澎湃新闻现场记录刘家琨介绍《明月构想》，为导览与建筑模型场景提供选题依据。"
       }
     ],
     "weather": {
@@ -162,6 +172,135 @@
           "rows": 3,
           "columns": 3,
           "preview_panel": 1
+        }
+      }
+    },
+    {
+      "id": 113,
+      "model_id": "male-01",
+      "model_reference_sha256": "a3aa1c54981d036fd6a81f9456911bbdb6f4fb075359517d2223746be9cd9208",
+      "model_only": true,
+      "title": "当代艺术博物馆·杉绿观展",
+      "category": "都市层次",
+      "season": "秋冬",
+      "description": "杉绿立领夹克敞开，露出暖象牙色圆领针织。炭灰直筒裤和深棕德比鞋适合短程步行。周行远带着折页走过大窗，在建筑模型前停下来。",
+      "pieces": [
+        {
+          "role": "外套",
+          "name": "深杉绿立领拉链短夹克"
+        },
+        {
+          "role": "上装",
+          "name": "暖象牙圆领罗纹针织衫"
+        },
+        {
+          "role": "下装",
+          "name": "炭灰直筒压褶长裤"
+        },
+        {
+          "role": "鞋履",
+          "name": "深棕素面德比鞋"
+        }
+      ],
+      "palette": [
+        "#282c24",
+        "#e7dac1",
+        "#42413f",
+        "#392a21"
+      ],
+      "details": [
+        "短夹克敞开穿，立领和斜插拉链袋保留清楚的外轮廓。",
+        "暖象牙色细罗纹把脸侧与门襟之间的窗光接起来。",
+        "炭灰长裤的压线落在素面系带鞋上方。"
+      ],
+      "tags": [
+        "立领夹克",
+        "圆领针织",
+        "直筒长裤",
+        "德比鞋",
+        "上海观展"
+      ],
+      "mood": "从窗边快步走进馆内，翻开折页，看到模型后停步，再抬手与同伴告别。",
+      "scene": "场景灵感来自上海当代艺术博物馆的《刘家琨：明月构想》。午间窗光落在工业框架、灰色地面和浅色建筑模型上。",
+      "edition": "v2",
+      "shots": [
+        {
+          "index": 1,
+          "title": "从高窗边走来",
+          "emotion": "看向观者，露齿微笑",
+          "pose": "带着折页迈步，另一只手随步摆动",
+          "framing": "正面全身，双鞋可见"
+        },
+        {
+          "index": 2,
+          "title": "展开折页",
+          "emotion": "垂眼抿嘴，仔细看纸页",
+          "pose": "双手撑开折页",
+          "framing": "正面中景，圆领与衣身罗纹清楚"
+        },
+        {
+          "index": 3,
+          "title": "抬眼看见模型",
+          "emotion": "眉毛抬起，微张嘴看向观者",
+          "pose": "站定，把折页垂在身旁",
+          "framing": "正面全身，双鞋可见"
+        },
+        {
+          "index": 4,
+          "title": "扶栏笑出声",
+          "emotion": "看向观者张口大笑",
+          "pose": "以前臂搭住栏杆，肩膀放松",
+          "framing": "斜侧近景"
+        },
+        {
+          "index": 5,
+          "title": "指向模型一角",
+          "emotion": "侧头看向模型，神情专注",
+          "pose": "一手插袋，另一手伸向模型",
+          "framing": "斜侧中景，夹克衣摆和口袋可见"
+        },
+        {
+          "index": 6,
+          "title": "理一理立领",
+          "emotion": "平视观者，闭唇微笑",
+          "pose": "用一只手轻拢领口",
+          "framing": "上身近景，立领和圆领可见"
+        },
+        {
+          "index": 7,
+          "title": "沿窗回头",
+          "emotion": "回望观者，嘴角微扬",
+          "pose": "侧身跨步，手持折页",
+          "framing": "侧向全身，双鞋可见"
+        },
+        {
+          "index": 8,
+          "title": "伸手招呼同伴",
+          "emotion": "看向观者，露齿笑",
+          "pose": "向镜头伸出一只手，掌心向上",
+          "framing": "斜前方中景"
+        },
+        {
+          "index": 9,
+          "title": "在门边道别",
+          "emotion": "看向观者，闭唇微笑",
+          "pose": "一手插袋，另一手举起挥别",
+          "framing": "正面全身，双鞋可见"
+        }
+      ],
+      "asset": {
+        "asset_id": "look-113-male-01-v2-r1",
+        "file": "assets/looks/2026-11-27/look-113-male-01-v2-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 162596,
+        "sha256": "410268d417023e77dad496e7642f946ccea235cd50883dbf6c8d2139e7fd8c6e",
+        "visibility": "public",
+        "layout": {
+          "rows": 3,
+          "columns": 3,
+          "preview_panel": 3
         }
       }
     }

@@ -9500,6 +9500,210 @@
           "shot_index": 5
         }
       ]
+    },
+    {
+      "product_id": "fir-green-stand-collar-jacket-113",
+      "name": "深杉绿立领拉链短夹克",
+      "category": "外套",
+      "subtitle": "立领、短衣摆和斜插袋拉出清楚的线条。",
+      "description": "深杉绿短夹克配立领、中心拉链和两侧斜插拉链袋。写真中的穿法为敞开，主图的闭合状态、内领压线与拉链头细部为设计推演。",
+      "color_name": "深杉绿",
+      "color_hex": "#2c3027",
+      "design_material": "哑光斜纹布面观感",
+      "notes": [
+        "立领",
+        "短平衣摆",
+        "斜插拉链袋"
+      ],
+      "asset": {
+        "asset_id": "product-fir-green-stand-collar-jacket-113-main-r1",
+        "file": "assets/products/look-113/fir-green-stand-collar-jacket-113-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 84422,
+        "sha256": "21ebac0c19fc087b8bf6d6ac728b14bce7ff04360d60fdf532b15c59ad63c4b1",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "立领与门襟拉链",
+          "caption": "圆角立领沿门襟收拢。领内压线、拉片细部与放大的织纹尺度为设计推演。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-fir-green-stand-collar-jacket-113-detail-r1",
+            "file": "assets/products/look-113/fir-green-stand-collar-jacket-113-detail-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 122036,
+            "sha256": "8f5a58e85139a9951bb3cdb3ce91297e60913c25384708de4524da7ca3c8c792",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 113,
+          "piece_index": 1,
+          "reference_asset_id": "look-113-male-01-v2-r1",
+          "shot_index": 5
+        }
+      ]
+    },
+    {
+      "product_id": "ivory-ribbed-crewneck-knit-113",
+      "name": "暖象牙圆领罗纹针织衫",
+      "category": "上装",
+      "subtitle": "暖象牙色细罗纹从圆领延续到直下摆。",
+      "description": "暖象牙色圆领针织以细密纵向罗纹贯穿衣身，直下摆同色收边。夹克遮挡的袖形、袖口和肩袖接缝为设计推演。",
+      "color_name": "暖象牙",
+      "color_hex": "#e7dac1",
+      "design_material": "细密纵向罗纹针织观感",
+      "notes": [
+        "圆领",
+        "纵向细罗纹",
+        "直下摆"
+      ],
+      "asset": {
+        "asset_id": "product-ivory-ribbed-crewneck-knit-113-main-r1",
+        "file": "assets/products/look-113/ivory-ribbed-crewneck-knit-113-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 242198,
+        "sha256": "aabbd2ef6ec91f8fa6dcf5ef0bf5a8044fbf1432d4d6ade14b2f28e40af1ccac",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "圆领与细罗纹",
+          "caption": "暖象牙色领圈与纵向罗纹相接。写真无法确认的领内接缝和微观针距为设计推演。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-ivory-ribbed-crewneck-knit-113-detail-r1",
+            "file": "assets/products/look-113/ivory-ribbed-crewneck-knit-113-detail-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 347716,
+            "sha256": "e95966806e2a6cbf2c6033283c5238de1c2739835ef7290b18d48b1fab163b2f",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 113,
+          "piece_index": 2,
+          "reference_asset_id": "look-113-male-01-v2-r1",
+          "shot_index": 8
+        }
+      ]
+    },
+    {
+      "product_id": "charcoal-crease-straight-trousers-113",
+      "name": "炭灰直筒压褶长裤",
+      "category": "下装",
+      "subtitle": "深灰裤线垂到素面系带鞋上方。",
+      "description": "炭灰直筒长裤配清晰的裤线和平整无翻边裤脚。写真遮住的腰头、袢带、闭合和口袋细部为设计推演。",
+      "color_name": "炭灰",
+      "color_hex": "#42413f",
+      "design_material": "细纹理哑光布面观感",
+      "notes": [
+        "单条前压线",
+        "直筒裤腿",
+        "平直无翻边裤脚"
+      ],
+      "asset": {
+        "asset_id": "product-charcoal-crease-straight-trousers-113-main-r1",
+        "file": "assets/products/look-113/charcoal-crease-straight-trousers-113-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 94814,
+        "sha256": "3d1b210f0d697367666eba0f0a2cfac8776dc422687bd0fda36844a92bf4b360",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "平口裤脚与前压线",
+          "caption": "前压线延伸至平口裤脚。放大后的织纹和收边细节为设计推演。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-charcoal-crease-straight-trousers-113-detail-r1",
+            "file": "assets/products/look-113/charcoal-crease-straight-trousers-113-detail-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 114812,
+            "sha256": "0b6fec96eab06a4e5f0593ca093ea5171709f9b4223e9f45578222aadaec1162",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 113,
+          "piece_index": 3,
+          "reference_asset_id": "look-113-male-01-v2-r1",
+          "shot_index": 9
+        }
+      ]
+    },
+    {
+      "product_id": "espresso-plain-toe-derby-113",
+      "name": "深棕素面德比鞋",
+      "category": "鞋履",
+      "subtitle": "低跟和圆润素面鞋头收住炭灰裤脚。",
+      "description": "深咖棕鞋面带轻微光泽，鞋头圆润，侧面可见深色低跟。写真角度未能确认的鞋眼数量、内里边缘和沿条细部为设计推演。",
+      "color_name": "深咖棕",
+      "color_hex": "#392a21",
+      "design_material": "细纹、低光泽皮面观感",
+      "notes": [
+        "圆润素面鞋头",
+        "开放式系带",
+        "深色低跟"
+      ],
+      "asset": {
+        "asset_id": "product-espresso-plain-toe-derby-113-main-r1",
+        "file": "assets/products/look-113/espresso-plain-toe-derby-113-main-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 75790,
+        "sha256": "721118553243b05b348da1b34301acf2dcbad08a92ba2962b569d0e418616894",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "开放式系带与素面鞋面",
+          "caption": "鞋带穿过同色鞋眼，向前连着无饰的鞋面。鞋眼数量、接缝及放大的皮纹为设计推演。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-espresso-plain-toe-derby-113-detail-r1",
+            "file": "assets/products/look-113/espresso-plain-toe-derby-113-detail-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 129188,
+            "sha256": "d88eb69c065fe1d8587553123ffade202342321429f77cf8bd6bfbd4a21a929f",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 113,
+          "piece_index": 4,
+          "reference_asset_id": "look-113-male-01-v2-r1",
+          "shot_index": 7
+        }
+      ]
     }
   ]
 }
