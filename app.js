@@ -163,12 +163,14 @@ function updateHeroCover(look, theme) {
  frame.style.setProperty('--panel-y',-Math.floor((panel-1)/3)*100+'%');
  $('hero-edition-note').textContent='LOOK '+number(look.id)+' / '+caption;
 }
+function hasEditorialPage(look){return look?.id===112&&Boolean(look.editorial_asset);}
 function updateEditionUI(){
  renderHomeProducts();
  $('completion-note').textContent=indexedLooks.length+' 套生动穿搭';
  $('hero-total').textContent=indexedLooks.length+' 套穿搭，持续更新';
  const look=featuredLook();
  $('latest-feature').hidden=!look;
+ $('hero-editorial').hidden=!hasEditorialPage(look);
  if(!look){$('recent-gallery').innerHTML='';$('recent-gallery').parentElement.hidden=true;return;}
  const v=versionOf(look);
  $('hero-title').textContent=look.title;
@@ -636,7 +638,7 @@ function openDetail(id,preserveNavigation=false,{view=0,routed=false,hydrating=f
   else history.pushState(entry,'',hash);
   state.active=id;
   $('detail-number').textContent='LOOK '+number(id)+' / '+l.category+' / '+l.season;
-  $('detail-editorial').hidden=id!==112||!l.editorial_asset;
+  $('detail-editorial').hidden=!hasEditorialPage(l);
   $('detail-title').textContent=l.title;$('detail-story-title').textContent=versionOf(l).story;$('detail-story-summary').textContent=versionOf(l).summary;
   $('detail-palette').innerHTML=palette(l);
   $('detail-description').textContent=l.description;
