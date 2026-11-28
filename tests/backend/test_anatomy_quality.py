@@ -18,7 +18,7 @@ def test_worker_requests_coherent_anatomical_redraw_and_versions_generated_prove
 
     app, client, headers, bootstrap, provider, _detector, _clock = setup
     consent(client, headers, bootstrap)
-    job = submit(client, headers, bootstrap).json()
+    job = submit(client, headers, bootstrap, pose_mode="original").json()
     with Worker(app) as worker:
         assert worker.run_once()
     assert len(provider.calls) == 1
