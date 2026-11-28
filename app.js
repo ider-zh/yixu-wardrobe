@@ -1002,7 +1002,8 @@ function renderLookProducts(id,resetSelection=false){
  $('detail-products').hidden=!linked.length;
  $('detail-product-gallery').innerHTML=linked.map(product=>productCard(product,{lookId:id,inspect:true})).join('');
  const pins=$('lookbook-pins');
- const coverId=byId.get(id)?.editorial_asset?.asset_id;
+ const look=byId.get(id),version=versionOf(look);
+ const coverId=look.editorial_asset?.asset_id||(version.asset && `${version.asset.asset_id}#${version.previewPanel||1}`);
  const placements=window.WardrobeLookbookPins?.[coverId];
  pins.innerHTML=placements?linked.map(product=>{
   const {piece_index:index}=product.appearances.find(appearance=>appearance.look_id===id);

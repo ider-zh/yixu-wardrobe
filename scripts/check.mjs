@@ -21,14 +21,15 @@ for (const look of baseline.looks) {
 const siteResources = readSiteResources(root);
 const pinsContext = {window: {}};
 vm.runInNewContext(read('wardrobe-lookbook-pins.js'), pinsContext, {filename: 'wardrobe-lookbook-pins.js'});
-const portraits = new Map(content.catalog.looks
-  .filter(look => look.editorial_asset)
-  .map(look => [look.editorial_asset.asset_id, look.id]));
+const covers = new Map(content.catalog.looks.map(look => {
+  const version = look.versions.v2;
+  return [look.editorial_asset?.asset_id || `${version.asset.asset_id}#${version.previewPanel || 1}`, look.id];
+}));
 const linkedPieces = new Set(content.catalog.products.flatMap(product =>
   product.appearances.map(({look_id, piece_index}) => `${look_id}:${piece_index}`)));
 for (const [assetId, points] of Object.entries(pinsContext.window.WardrobeLookbookPins)) {
-  const lookId = portraits.get(assetId);
-  assert.ok(lookId && Object.keys(points).length, `Missing portrait or placements: ${assetId}`);
+  const lookId = covers.get(assetId);
+  assert.ok(lookId && Object.keys(points).length, `Missing cover or placements: ${assetId}`);
   for (const [piece, point] of Object.entries(points)) {
     assert.ok(linkedPieces.has(`${lookId}:${piece}`), `Missing linked piece: ${assetId}/${piece}`);
     assert.ok(Array.isArray(point) && point.length === 2 &&

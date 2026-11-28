@@ -1,5 +1,6 @@
-// Coordinates are percentages of the full editorial portrait, keyed by asset ID and piece number.
+// Coordinates are percentages of the displayed cover. Grid covers append #panel to the asset ID.
 window.WardrobeLookbookPins = {
+  "look-114-female-01-v2-r1#3": {"1": [35, 40], "2": [54, 32], "3": [44, 58], "4": [45, 91]},
   "look-001-female-01-editorial-r1": {"1": [36, 43], "2": [55, 66], "3": [53, 27], "4": [55, 39], "5": [57, 94]},
   "look-002-female-01-editorial-r1": {"1": [58, 27], "2": [53, 62], "3": [47, 40], "4": [30, 93]},
   "look-003-editorial-r1": {"1": [57, 56], "2": [38, 96]},

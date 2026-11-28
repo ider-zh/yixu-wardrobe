@@ -279,7 +279,7 @@ check('packing expands outfits and only merges explicit product appearances',()=
   assert.equal(restricted.entries.length,0);
   assert.deepEqual(JSON.parse(JSON.stringify(restricted.missing)),unavailable);
 });
-check('editorial portraits show their own product pins and empty covers clear them',()=>{
+check('portraits and selected grid covers show their own product pins',()=>{
   vm.runInContext(fs.readFileSync(path.join(root,'wardrobe-lookbook-pins.js'),'utf8'),context);
   const {catalog}=loadContent(root);
   assert.equal(a.adoptCatalog(catalog),true);
@@ -293,9 +293,16 @@ check('editorial portraits show their own product pins and empty covers clear th
   pins.events.click[0]({currentTarget:pins,target:{closest:()=>({dataset:{lookbookPiece:product.product_id}})}});
   assert.equal(node('lookbook-piece-name').textContent,product.name);
   assert.equal(node('lookbook-piece-link').href,'#/product/'+product.product_id+'?look='+look.id);
-  a.openDetail(catalog.looks.find(item=>!item.editorial_asset).id);
+  a.openDetail(114);
+  assert.equal(pins.hidden,false);
+  assert.equal((pins.innerHTML.match(/data-lookbook-piece=/g)||[]).length,4);
+  const gridCover=a.byId.get(114).versions.v2;
+  const panel=gridCover.previewPanel;
+  gridCover.previewPanel=panel===1?2:1;
+  a.openDetail(114);
   assert.equal(pins.hidden,true);
   assert.equal(pins.innerHTML,'');
+  gridCover.previewPanel=panel;
 });
 check('outfit-specific layouts load and the pilot restores its original design',()=>{
   vm.runInContext(fs.readFileSync(path.join(root,'wardrobe-lookbook-designs.js'),'utf8'),context);
