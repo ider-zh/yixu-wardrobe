@@ -2,18 +2,35 @@
   'use strict';
 
   function create({
-    dialog, frame, image, stage, previous, next, play, caption, selectView,
+    dialog, frame, image, stage, previous, next, play, progress, caption, selectView,
     reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
   }) {
     const documentRoot = dialog.ownerDocument;
     let playing = !reducedMotion.matches;
     let visible = false;
     let timer;
+    let cycle;
     let outgoing;
     let swipeStart;
 
-    function sync({reset = false} = {}) {
+    function stopClock() {
       clearTimeout(timer);
+      cycle?.cancel();
+      cycle = undefined;
+    }
+
+    function canPlay() {
+      return playing && visible && dialog.open && !documentRoot.hidden && frame.dataset.imageState === 'ready';
+    }
+
+    function advance() {
+      stopClock();
+      if (canPlay()) selectView(1, false);
+    }
+
+    function sync({reset = false, restart = false} = {}) {
+      clearTimeout(timer);
+      if (reset || restart || !dialog.open) stopClock();
       if (reset || !dialog.open) outgoing?.remove();
       if (reset) playing = !reducedMotion.matches;
 
@@ -23,11 +40,21 @@
       play.title = label;
       caption?.setAttribute('aria-live', playing ? 'off' : 'polite');
 
-      if (!playing || !visible || !dialog.open || documentRoot.hidden || frame.dataset.imageState !== 'ready') return;
-      timer = setTimeout(() => {
-        if (dialog.open && visible && !documentRoot.hidden) selectView(1, false);
-        sync();
-      }, 4000);
+      if (!canPlay()) {
+        cycle?.pause();
+        return;
+      }
+      if (cycle) {
+        if (cycle.playState === 'paused') cycle.play();
+      } else if (progress.animate) {
+        cycle = progress.animate(
+          [{transform: 'scaleX(0)'}, {transform: 'scaleX(1)'}],
+          {duration: 4000, fill: 'forwards'}
+        );
+        cycle.onfinish = advance;
+      } else {
+        timer = setTimeout(advance, 4000);
+      }
     }
 
     function pause() {
