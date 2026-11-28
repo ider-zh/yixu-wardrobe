@@ -50,7 +50,7 @@ const candidates=[process.env.CHROME_BIN,'/usr/bin/chromium','/usr/bin/google-ch
 const chrome=candidates.find(p=>fs.existsSync(p));
 assert.ok(chrome,'Chromium is required; set CHROME_BIN.');
 const profile=fs.mkdtempSync(path.join(scratch,'yixu-home-chrome-'));
-const processChrome=spawn(chrome,['--headless','--no-sandbox','--disable-dev-shm-usage','--remote-debugging-port=0',`--user-data-dir=${profile}`,'about:blank'],{stdio:['ignore','ignore','pipe'],detached:true,env:{...process.env,TMPDIR:process.env.CHROME_TMPDIR||scratch}});
+const processChrome=spawn(chrome,['--headless','--no-sandbox','--disable-dev-shm-usage','--remote-debugging-port=0','--blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4',`--user-data-dir=${profile}`,'about:blank'],{stdio:['ignore','ignore','pipe'],detached:true,env:{...process.env,TMPDIR:process.env.CHROME_TMPDIR||scratch}});
 let client,socket;
 try{
  let stderr='';
@@ -90,6 +90,41 @@ try{
  // LAN HTTP lacks secure-context randomUUID even though getRandomValues works.
  // Use the same capability boundary on loopback so this check runs in every CI.
  await client('Page.addScriptToEvaluateOnNewDocument',{source:'Object.defineProperty(globalThis.crypto,"randomUUID",{value:undefined,configurable:true});'});
+ await client('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
+ await client('Emulation.setTouchEmulationEnabled',{enabled:true});
+ await navigate();
+ assert.equal(await evaluate('matchMedia("(pointer: coarse)").matches && !document.documentElement.classList.contains("lenis")'),true,'Touch keeps native scrolling');
+ await client('Emulation.setTouchEmulationEnabled',{enabled:false});
+ await client('Emulation.setDeviceMetricsOverride',{width:1440,height:900,deviceScaleFactor:1,mobile:false});
+ await navigate();
+ assert.equal(await evaluate('matchMedia("(hover: hover) and (pointer: fine)").matches'),true,'Chromium fixture provides a desktop pointer');
+ await wait('document.documentElement.classList.contains("lenis")');
+ const wheel=(x,y,deltaY)=>client('Input.dispatchMouseEvent',{type:'mouseWheel',x,y,deltaX:0,deltaY});
+ await wheel(720,450,350);
+ await wait('scrollY>0 && document.documentElement.classList.contains("lenis-smooth")');
+ await wait('scrollY>=345 && !document.documentElement.classList.contains("lenis-smooth")');
+ await evaluate('document.getElementById("hero-detail").click()');
+ await wait('document.getElementById("detail-dialog").open');
+ await wait('Number.parseFloat(document.querySelector(".lookbook-intro").style.opacity) < 1');
+ const backgroundScroll=await evaluate('scrollY');
+ await wheel(720,450,400);
+ await wait('document.getElementById("detail-dialog").scrollTop>=100');
+ assert.equal(await evaluate('scrollY'),backgroundScroll,'Wheel in the lookbook cannot move the page behind it');
+ await evaluate('document.getElementById("detail-dialog").close()');
+ await wait('location.hash==="#/home"');
+ await route('#/looks');
+ assert.equal(await evaluate('scrollY'),0,'Routing resets the scroll position immediately');
+ await client('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'}]});
+ await wait('!document.documentElement.classList.contains("lenis")');
+ await route('#/home');
+ await evaluate('document.getElementById("hero-detail").click()');
+ await wait('document.getElementById("detail-dialog").open');
+ assert.equal(await evaluate('document.querySelector(".lookbook-intro").style.transform'),'', 'Reduced motion leaves the lookbook intro unanimated');
+ await evaluate('document.getElementById("detail-dialog").close()');
+ await wait('location.hash==="#/home"');
+ await client('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'no-preference'}]});
+ await wait('document.documentElement.classList.contains("lenis")');
+ console.log('PASS desktop wheel, native touch and modal scroll, route reset and live reduced-motion preference');
  for(const viewport of [{width:390,height:844},{width:1440,height:900}]){
   await client('Emulation.setDeviceMetricsOverride',{...viewport,deviceScaleFactor:1,mobile:viewport.width<600});
   await navigate();await wait('document.getElementById("hero-image-0").naturalWidth>0 && !document.getElementById("tryon-refresh").disabled');

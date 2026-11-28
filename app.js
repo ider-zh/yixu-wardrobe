@@ -185,7 +185,7 @@ function updateEditionUI(){
  updateHeroCover(look,window.YixuSiteTheme?.resolve());
  const recentIds=Array.isArray(data.home?.recent_look_ids)?data.home.recent_look_ids:null;
  const recent=(recentIds?recentIds.map(id=>byId.get(id)):latestLooks()).filter(l=>l&&!l.model_only&&l.id!==look.id).slice(0,6);
- $('recent-gallery').innerHTML=recent.map((look,index)=>renderCard(look,index)).join('');
+ $('recent-gallery').innerHTML=recent.map(look=>renderCard(look)).join('');
  $('recent-note').textContent=recent.some(l=>!l.published_at&&!l.publish_date)?'最新一期之后，接着翻阅历史档案。':'';
  $('recent-gallery').parentElement.hidden=!recent.length;
 }
@@ -202,7 +202,7 @@ function renderModelProfile(id) {
   const model=models.find(item=>item.id===id),owned=model?modelLooks(id):[];
   $('model-directory').hidden=!!owned.length;
   $('model-profile').hidden=!owned.length;
-  $('model-looks-gallery').innerHTML=owned.map((look,index)=>renderCard(look,index)).join('');
+  $('model-looks-gallery').innerHTML=owned.map(look=>renderCard(look)).join('');
   if(!owned.length)return;
   $('model-profile-id').textContent=model.id;
   $('model-profile-title').textContent=model.name+'的穿搭';
@@ -431,7 +431,7 @@ function renderSceneControls() {
   $('archive-toolbar').hidden=!!scene;
   $('collection-title').innerHTML=esc(scene?.title||(state.page==='favorites'?'我的收藏':'全部穿搭'))+'<span class="heading-period">.</span>';
 }
-function renderCard(l,index,{tip,matchingPieces=[],matchingColors}={}) {
+function renderCard(l,{tip,matchingPieces=[],matchingColors}={}) {
   const liked=favorites.has(l.id), picked=compare.has(l.id);
   const compareAction=l.model_only?'':'<button class="icon-button compare'+(picked?' selected':'')+'" data-compare="'+l.id+'" aria-pressed="'+picked+'" aria-label="'+(picked?'移出对比':'加入对比')+' '+esc(l.title)+'">'+comparison+'</button>';
   const match=matchingPieces.length?'<p class="card-piece-match">匹配单品 · '+matchingPieces.map(esc).join('、')+'</p>':'';
@@ -443,14 +443,14 @@ function renderCard(l,index,{tip,matchingPieces=[],matchingColors}={}) {
   const paletteEvidence=colors?'<div class="card-color-evidence" aria-label="色板匹配">'+colors+'</div>':'';
   const notes=tip?'<p class="scene-tip">'+esc(tip)+'</p>'
     :match+paletteEvidence+'<p class="card-publication">'+esc(publication(l))+'</p><p class="card-tags">'+(versionOf(l).moods||l.tags||[]).slice(0,4).map(esc).join(' · ')+'</p>';
-  return '<article class="look-card" style="animation-delay:'+Math.min(index,8)*25+'ms" data-look-card="'+l.id+'"><div class="image-zone"><button class="look-photo-button" data-open="'+l.id+'" aria-label="查看 '+esc(l.title)+' 的九宫格写真和搭配设计">'+(versionOf(l).ready?photo(l):'<div class="card-pending"><span>'+number(l.id)+'</span><small>写真准备中</small></div>')+'<span class="card-number">'+number(l.id)+'</span>'+'<span class="open-caption">查看写真与设计 <span>↗</span></span></button><div class="card-actions"><button class="icon-button favorite'+(liked?' selected':'')+'" data-favorite="'+l.id+'" aria-pressed="'+liked+'" aria-label="'+(liked?'取消收藏':'收藏')+' '+esc(l.title)+'">'+heart+'</button>'+compareAction+'</div></div><div class="card-meta"><div class="card-topline"><span>'+esc(l.category)+' / '+esc(l.season)+' · '+l.pieces.length+' 件搭配</span><div class="palette" aria-label="造型配色">'+palette(l)+'</div></div><button class="card-title" data-open="'+l.id+'">'+esc(l.title)+'</button>'+notes+'</div></article>';
+  return '<article class="look-card" data-look-card="'+l.id+'"><div class="image-zone"><button class="look-photo-button" data-open="'+l.id+'" aria-label="查看 '+esc(l.title)+' 的九宫格写真和搭配设计">'+(versionOf(l).ready?photo(l):'<div class="card-pending"><span>'+number(l.id)+'</span><small>写真准备中</small></div>')+'<span class="card-number">'+number(l.id)+'</span>'+'<span class="open-caption">查看写真与设计 <span>↗</span></span></button><div class="card-actions"><button class="icon-button favorite'+(liked?' selected':'')+'" data-favorite="'+l.id+'" aria-pressed="'+liked+'" aria-label="'+(liked?'取消收藏':'收藏')+' '+esc(l.title)+'">'+heart+'</button>'+compareAction+'</div></div><div class="card-meta"><div class="card-topline"><span>'+esc(l.category)+' / '+esc(l.season)+' · '+l.pieces.length+' 件搭配</span><div class="palette" aria-label="造型配色">'+palette(l)+'</div></div><button class="card-title" data-open="'+l.id+'">'+esc(l.title)+'</button>'+notes+'</div></article>';
 }
 function renderGallery() {
   const scene=scenes.get(state.scene);
   const tips=scene?new Map(scene.entries.map(entry=>[entry.lookId,entry.tip])):null;
   if(scene)filtered=scene.entries.map(entry=>sceneLook(entry.lookId)).filter(Boolean);
   else matchLooks();
-  $('gallery').innerHTML=filtered.slice(0,state.limit).map((look,index)=>renderCard(look,index,{
+  $('gallery').innerHTML=filtered.slice(0,state.limit).map(look=>renderCard(look,{
     tip:tips?.get(look.id),matchingPieces:state.piece?pieceMatch.matchingPieces(look,state.piece):[],
     matchingColors:state.colors.length?colorMatch.matchPalette(look.palette,state.colors):null,
   })).join('');

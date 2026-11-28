@@ -21,9 +21,16 @@ node scripts/build.mjs
 | 首页、全部穿搭、模特、收藏、路由、九宫格 | [index.html](index.html)、[app.js](app.js)、[style.css](style.css)、[expressive.css](expressive.css) |
 | 单品详情、图集、布局 | [product-page.js](product-page.js)、[product-themes.js](product-themes.js)、[product-themes.css](product-themes.css) |
 | 全站主题、后台设置和共享资源 | [主题规范](docs/site-theme-architecture.md)、[site-theme.js](site-theme.js)、[site-theme.css](site-theme.css)、[site-resources.json](site-resources.json) |
+| 首页、卡片与画册动效、桌面滚轮 | [site-motion.js](site-motion.js)、[site-motion.css](site-motion.css) |
 | 试穿界面、同源浏览器副本、后端队列 | [tryon.js](tryon.js)、[tryon-storage.js](tryon-storage.js)、[tryon.css](tryon.css)、[backend/jobs.py](backend/jobs.py)、[backend/worker.py](backend/worker.py) |
 | 内容清单、构建与资源 API | [内容架构与发布](docs/content-publishing-plan.md)、[scripts/content-lib.mjs](scripts/content-lib.mjs)、[backend/content.py](backend/content.py) |
 | 后台、访问分析、CDN 与运行配置 | [admin/](admin/)、[后端说明](backend/README.md)、[backend/analytics.py](backend/analytics.py)、[backend/cdn.py](backend/cdn.py) |
+
+## 浏览动效
+
+[GSAP 3.15.1](https://www.npmjs.com/package/gsap/v/3.15.1) 和 [Lenis 1.3.29](https://www.npmjs.com/package/lenis/v/1.3.29) 使用官方 npm 包内的浏览器压缩发行文件，通过相对路径加载，支持离线浏览。升级时保留 GSAP 的原始许可声明及 Lenis 的 MIT 许可，更新 [静态资源白名单](site-resources.json) 与 HTML 引用。卡片参考 [React Bits Animated Content](https://reactbits.dev/animations/animated-content) 的进入视口、短距离上移、错峰呈现方式，由站点的 GSAP 代码实现。
+
+使用 `node qa/regression-homepage.mjs` 验证动效及浏览行为，覆盖桌面滚轮、触屏原生滚动、弹窗内部滚动、路由复位和实时切换系统减少动态效果设置。
 
 ## 内容与发布
 

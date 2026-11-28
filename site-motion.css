@@ -1,0 +1,31 @@
+html.lenis {
+  scroll-behavior: auto;
+}
+
+#hero-detail > span {
+  display: inline-block;
+}
+
+#hero-detail > span,
+.product-image-hint {
+  transition: translate 220ms ease-out;
+}
+
+#hero-detail:focus-visible > span,
+[data-product-zoom]:focus-visible .product-image-hint {
+  translate: 3px -3px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  #hero-detail:hover > span,
+  [data-product-zoom]:hover .product-image-hint {
+    translate: 3px -3px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #hero-detail > span,
+  .product-image-hint {
+    translate: none !important;
+  }
+}
