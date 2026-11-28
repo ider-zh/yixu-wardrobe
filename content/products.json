@@ -28727,6 +28727,211 @@
           "shot_index": 7
         }
       ]
+    },
+    {
+      "name": "蘑菇棕灯芯绒工装夹克",
+      "category": "外套",
+      "subtitle": "尖翻领和三只贴袋勾出平直的工装轮廓。",
+      "description": "蘑菇棕细灯芯绒呈纵向细条，左胸设一只贴袋，腰侧设两只。第 5 格展示夹克敞开时的长度和层次。主图的门襟扣合效果、内领、袖口及扣眼细部为设计推演。",
+      "color_name": "蘑菇棕",
+      "color_hex": "#756354",
+      "design_material": "细纵条灯芯绒观感",
+      "notes": [
+        "尖翻领",
+        "深棕纽扣",
+        "三只前贴袋"
+      ],
+      "gallery": [
+        {
+          "title": "左胸贴袋与细纵条",
+          "caption": "胸前贴袋沿细纵条布面排列。放大的绒条间距、明线与扣孔细部为设计推演。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-look-115-piece-01-detail-r1",
+            "file": "assets/products/look-115/piece-01-detail-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 444500,
+            "sha256": "7a8385661040cd240e3c622bd187b5927eec7f8555c0daf1a15a00a6f442a4d0",
+            "visibility": "public"
+          }
+        }
+      ],
+      "asset": {
+        "asset_id": "product-look-115-piece-01-r1",
+        "file": "assets/products/look-115/piece-01-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 233088,
+        "sha256": "0621c463f58f2ce9318a40b77868686bc5b9c6cbfc6a34f64b7fcda09ae509f0",
+        "visibility": "public"
+      },
+      "product_id": "look-115-piece-01",
+      "appearances": [
+        {
+          "look_id": 115,
+          "piece_index": 1,
+          "reference_asset_id": "look-115-male-01-v2-r1",
+          "shot_index": 5
+        }
+      ]
+    },
+    {
+      "name": "酒红圆领细针织衫",
+      "category": "上装",
+      "subtitle": "窄罗纹收住圆领，深酒红从敞开的门襟间露出。",
+      "description": "深酒红针织衫带同色窄罗纹圆领和平直收边，第 8 格可见领口、衣身和下摆。写真中被外套遮住的肩缝、袖形和袖口为设计推演。",
+      "color_name": "深酒红",
+      "color_hex": "#50292b",
+      "design_material": "细密平针织面观感",
+      "notes": [
+        "窄罗纹圆领",
+        "细针织衣身",
+        "同色收边"
+      ],
+      "gallery": [
+        {
+          "title": "窄罗纹圆领与针织面",
+          "caption": "同色罗纹围绕圆领。写真里不可见的领后接缝和微观针距为设计推演。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-look-115-piece-02-detail-r1",
+            "file": "assets/products/look-115/piece-02-detail-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 294404,
+            "sha256": "9e9f03da4bba832393cb16b36dffc8fc3d15187820f039eadeace3e88c5e3de9",
+            "visibility": "public"
+          }
+        }
+      ],
+      "asset": {
+        "asset_id": "product-look-115-piece-02-r1",
+        "file": "assets/products/look-115/piece-02-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 165950,
+        "sha256": "039e41bef0dfff6ef43a2328ce0d6bbfc235e949041b61ea9ca65d2290fa2b48",
+        "visibility": "public"
+      },
+      "product_id": "look-115-piece-02",
+      "appearances": [
+        {
+          "look_id": 115,
+          "piece_index": 2,
+          "reference_asset_id": "look-115-male-01-v2-r1",
+          "shot_index": 8
+        }
+      ]
+    },
+    {
+      "name": "暖象牙直筒斜纹长裤",
+      "category": "下装",
+      "subtitle": "浅色直筒裤腿垂在深棕鞋面上方。",
+      "description": "暖象牙色裤身呈细斜纹观感，直筒裤腿在步行时自然弯折，平整裤脚落在鞋面上方。写真遮挡的腰头、袢带、门襟扣合和口袋开口为设计推演。",
+      "color_name": "暖象牙",
+      "color_hex": "#ded2bc",
+      "design_material": "细斜纹布面观感",
+      "notes": [
+        "直筒裤腿",
+        "全长裤型",
+        "平整裤脚"
+      ],
+      "asset": {
+        "asset_id": "product-look-115-piece-03-r1",
+        "file": "assets/products/look-115/piece-03-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 48920,
+        "sha256": "5980d6450336302a4208decf7e8c400fa71619ffecf5693dac5f4a2d02162526",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "平口裤脚与细斜纹",
+          "caption": "自然弯折处可见布面纹理。写真无法核实的织纹尺度和裤脚压线为设计推演。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-look-115-piece-03-detail-r1",
+            "file": "assets/products/look-115/piece-03-detail-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 121234,
+            "sha256": "ff0bb665193fca5add18f7dd7e1b514f8b68539b41e61086af5d314cb584c508",
+            "visibility": "public"
+          }
+        }
+      ],
+      "product_id": "look-115-piece-03",
+      "appearances": [
+        {
+          "look_id": 115,
+          "reference_asset_id": "look-115-male-01-v2-r1",
+          "piece_index": 3,
+          "shot_index": 5
+        }
+      ]
+    },
+    {
+      "name": "深棕绒面低帮系带鞋",
+      "category": "鞋履",
+      "subtitle": "圆润鞋头配同色鞋带和薄底。",
+      "description": "深棕鞋面带细绒感，低帮轮廓以同色鞋带和薄底收住。写真无法确认的鞋眼、鞋口内缘和后帮接缝为设计推演。",
+      "color_name": "深棕",
+      "color_hex": "#463328",
+      "design_material": "细绒面观感",
+      "notes": [
+        "低帮",
+        "圆润鞋头",
+        "同色系带",
+        "薄底"
+      ],
+      "asset": {
+        "asset_id": "product-look-115-piece-04-r1",
+        "file": "assets/products/look-115/piece-04-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 79130,
+        "sha256": "3c6731a8048aad365e7ea77f7784a39e73e86011db947ad7d22acfb693ef65dd",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "同色系带与薄底边缘",
+          "caption": "圆头上方是深棕绒面与同色系带。鞋眼、绒纹尺度和鞋底侧边微纹为设计推演。",
+          "role": "detail",
+          "design_study": true,
+          "asset": {
+            "asset_id": "product-look-115-piece-04-detail-r1",
+            "file": "assets/products/look-115/piece-04-detail-r1.webp",
+            "mime": "image/webp",
+            "width": 1122,
+            "height": 1402,
+            "bytes": 166050,
+            "sha256": "072d8fdce0b913a2b00f60462d2b5911627e1b20f8ac12f9dd8fd3514e63055d",
+            "visibility": "public"
+          }
+        }
+      ],
+      "product_id": "look-115-piece-04",
+      "appearances": [
+        {
+          "look_id": 115,
+          "reference_asset_id": "look-115-male-01-v2-r1",
+          "piece_index": 4,
+          "shot_index": 7
+        }
+      ]
     }
   ]
 }

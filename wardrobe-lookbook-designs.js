@@ -113,4 +113,5 @@ window.WardrobeLookbookDesigns = {
   111: {"layout": "right", "mood": "rings", "type": "song", "frame": "mat", "ink": "#333C4B", "paper": "#F4EBDC", "accent": "#495D75", "glow": "#CABC90", "scale": 0.95, "tracking": 0.075, "portraitWeight": 1.12, "titleMeasure": 7.2},
   113: {"layout": "folio", "mood": "grid", "type": "hei", "frame": "line", "ink": "#292F28", "paper": "#F2ECE0", "accent": "#4B5A45", "glow": "#8E937D", "scale": 0.96, "tracking": 0.035, "portraitWeight": 1.19, "titleMeasure": 7.15},
   114: {"layout": "right", "mood": "stripe", "type": "hei", "frame": "flush", "ink": "#293446", "paper": "#EFF1F3", "accent": "#865038", "glow": "#CE8B62", "scale": 1.07, "tracking": -0.02, "portraitWeight": 1.22, "titleMeasure": 8.1},
+  115: {"layout": "left", "mood": "rings", "type": "song", "frame": "line", "ink": "#362823", "paper": "#F2EADF", "accent": "#763A43", "glow": "#A9B6A4", "scale": 1.06, "tracking": 0.065, "portraitWeight": 1.28, "titleMeasure": 6.6},
 };

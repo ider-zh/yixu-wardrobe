@@ -163,6 +163,145 @@
           "preview_panel": 3
         }
       }
+    },
+    {
+      "id": 115,
+      "model_id": "male-01",
+      "model_only": true,
+      "model_reference_sha256": "a3aa1c54981d036fd6a81f9456911bbdb6f4fb075359517d2223746be9cd9208",
+      "title": "蟠龙桥上赶集",
+      "category": "都市层次",
+      "season": "秋冬",
+      "description": "蘑菇棕灯芯绒夹克敞开，露出酒红圆领针织。暖象牙长裤落在深棕系带鞋上，周行远沿着蟠龙的石桥和水巷走到市集摊前。",
+      "pieces": [
+        {
+          "role": "外套",
+          "name": "蘑菇棕灯芯绒工装夹克"
+        },
+        {
+          "role": "上装",
+          "name": "酒红圆领细针织衫"
+        },
+        {
+          "role": "下装",
+          "name": "暖象牙直筒斜纹长裤"
+        },
+        {
+          "role": "鞋履",
+          "name": "深棕绒面低帮系带鞋"
+        }
+      ],
+      "palette": [
+        "#756354",
+        "#50292b",
+        "#ded2bc",
+        "#463328"
+      ],
+      "details": [
+        "尖翻领与三只贴袋让夹克在敞穿时仍有清楚轮廓。",
+        "酒红圆领从蘑菇棕门襟之间露出，和暖象牙直筒长裤形成明暗对比。",
+        "薄底系带鞋适合沿石板路和短桥步行。"
+      ],
+      "tags": [
+        "灯芯绒夹克",
+        "圆领针织",
+        "直筒长裤",
+        "低帮系带鞋",
+        "上海市集"
+      ],
+      "mood": "过桥看路，在摊位前托起折纸船，歇脚时把导览折页递给同行的人。",
+      "scene": "灵感来自上海青浦蟠龙新天地周末的「看见江南」国潮市集。午后日光落在石桥、白墙和纸艺摊位上。",
+      "edition": "v2",
+      "asset": {
+        "asset_id": "look-115-male-01-v2-r1",
+        "file": "assets/looks/2026-11-28/look-115-male-01-v2-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 362542,
+        "sha256": "8d8cb3971bb19c491aa2e04afad2b5e59ffedf1a17c8bb39bfa15c5bba324939",
+        "visibility": "public",
+        "layout": {
+          "rows": 3,
+          "columns": 3,
+          "preview_panel": 5
+        }
+      },
+      "editorial_asset": {
+        "asset_id": "look-115-male-01-editorial-r1",
+        "file": "assets/looks/2026-11-28/look-115-male-01-editorial-r1.webp",
+        "mime": "image/webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 316650,
+        "sha256": "e10c4b51e7e401b463af173b9cea7f89f23cab9ec561500ba8da6dd1bb1d018d",
+        "visibility": "public"
+      },
+      "shots": [
+        {
+          "index": 1,
+          "title": "桥头迈步",
+          "emotion": "看向同伴，闭唇微笑",
+          "pose": "迎面过桥，双臂随步自然摆动",
+          "framing": "正面全身，后脚部分遮挡"
+        },
+        {
+          "index": 2,
+          "title": "摊前看地图",
+          "emotion": "低头看图，神情专注",
+          "pose": "双手展开折页",
+          "framing": "侧面中景"
+        },
+        {
+          "index": 3,
+          "title": "侧身过桥",
+          "emotion": "顺着步道平视，神情平静",
+          "pose": "跨步向前，重心从后脚移向前脚",
+          "framing": "斜侧全身，双鞋完整"
+        },
+        {
+          "index": 4,
+          "title": "托起纸船",
+          "emotion": "眉毛微抬、嘴微张，看向观者",
+          "pose": "在摊前展开手掌托起折纸船",
+          "framing": "斜前方中景"
+        },
+        {
+          "index": 5,
+          "title": "白墙边停步",
+          "emotion": "看向观者露齿笑",
+          "pose": "双脚落稳，双臂自然下垂",
+          "framing": "正面全身，双鞋完整"
+        },
+        {
+          "index": 6,
+          "title": "在摊位旁笑出声",
+          "emotion": "看向观者，张口大笑",
+          "pose": "肩膀放松，转向正在说话的同伴",
+          "framing": "胸部以上近景"
+        },
+        {
+          "index": 7,
+          "title": "有空坐一会儿",
+          "emotion": "直视观者，神情沉静",
+          "pose": "坐在石凳上，一手扶凳、一手搭膝",
+          "framing": "斜侧全身，双鞋完整"
+        },
+        {
+          "index": 8,
+          "title": "把折页递过来",
+          "emotion": "看着观者轻轻一笑",
+          "pose": "伸手递出折页",
+          "framing": "斜前方中景"
+        },
+        {
+          "index": 9,
+          "title": "走到水巷回头",
+          "emotion": "回头看向观者，嘴角微扬",
+          "pose": "侧身继续前行，一手插袋",
+          "framing": "三分之四全身"
+        }
+      ]
     }
   ],
   "cover_look_id": 114
