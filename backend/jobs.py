@@ -32,7 +32,7 @@ class Submission(BaseModel):
     shot_index: int = Field(ge=1, le=9)
     idempotency_key: str = Field(min_length=8, max_length=128, pattern=r"^[A-Za-z0-9_-]+$")
     disclosure_version: str
-    pose_mode: Literal["original", "pose_grid"] = "original"
+    pose_mode: Literal["original", "pose_grid"] = "pose_grid"
 
 
 def timestamp(value):
@@ -172,23 +172,33 @@ class Jobs:
         }
 
     def accept(self, owner, data, raw, received):
-        selection = data.model_dump(exclude={"idempotency_key"})
-        if data.pose_mode == "original":
-            selection.pop("pose_mode")  # Keep existing single-image request keys compatible.
-        fingerprint = hashlib.sha256(
-            raw + json.dumps(selection, sort_keys=True).encode()
-        ).hexdigest()
+        selection = data.model_dump(exclude={"idempotency_key", "pose_mode"})
+
+        def fingerprint_for(pose_mode):
+            # Single-image fingerprints historically omitted the pose mode.
+            fields = selection if pose_mode == "original" else {**selection, "pose_mode": pose_mode}
+            return hashlib.sha256(raw + json.dumps(fields, sort_keys=True).encode()).hexdigest()
+
+        fingerprint = fingerprint_for(data.pose_mode)
+
+        def replay(old):
+            expected = fingerprint
+            if old["pose_mode"] == "original" and "pose_mode" not in data.model_fields_set:
+                # An older client may retry the same original-mode request without a pose field.
+                expected = fingerprint_for("original")
+            if old["fingerprint"] != expected:
+                raise HTTPException(
+                    409, "idempotency_conflict:This request key has different content"
+                )
+            return self.shape(dict(old), include_reference=True)
+
         with self.store.connect() as db:
             old = db.execute(
                 "SELECT * FROM jobs WHERE owner=? AND idempotency_key=?",
                 (owner, data.idempotency_key),
             ).fetchone()
         if old:
-            if old["fingerprint"] != fingerprint:
-                raise HTTPException(
-                    409, "idempotency_conflict:This request key has different content"
-                )
-            return self.shape(dict(old), include_reference=True)
+            return replay(old)
         # Existing requests need neither fresh inference readiness nor input writes.
         if not self.available():
             raise HTTPException(503, "unavailable:Provider, detector or catalog is not configured")
@@ -210,11 +220,7 @@ class Jobs:
                 (owner, data.idempotency_key),
             ).fetchone()
             if old:
-                if old["fingerprint"] != fingerprint:
-                    raise HTTPException(
-                        409, "idempotency_conflict:This request key has different content"
-                    )
-                return self.shape(dict(old), include_reference=True)
+                return replay(old)
             db.execute(
                 """INSERT INTO jobs (id,owner,idempotency_key,fingerprint,status,
                        look_id,look_title,edition,shot_index,reference_asset_id,reference_source_url,

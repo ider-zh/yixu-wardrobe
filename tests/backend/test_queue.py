@@ -11,9 +11,11 @@ def test_accepted_queue_is_persistent_idempotent_owned_and_has_no_three_job_limi
     assert first.status_code == 202, first.text
     job = first.json()
     assert job["status"] == "queued"
+    assert job["pose_mode"] == "pose_grid"
     assert job["queue_position"] == 0
     assert job["image_url"] is None and job["download_url"] is None
     assert submit(c, h, b).json()["id"] == job["id"]
+    assert submit(c, h, b, pose_mode="pose_grid").json()["id"] == job["id"]
     assert submit(c, h, b, image=picture("green")).status_code == 409
     for n in range(1, 5):
         result = submit(c, h, b, key=f"next-request-{n:03}")
@@ -27,6 +29,18 @@ def test_accepted_queue_is_persistent_idempotent_owned_and_has_no_three_job_limi
         assert other.get("/api/tryons/" + job["id"] + "/image").status_code == 404
     assert not provider.calls
     assert not list(app.state.settings.data_dir.rglob("*selfie*"))
+
+
+def test_omitted_pose_can_replay_a_historical_single_image_request(setup):
+    _app, c, h, b, _provider, _detector, _clock = setup
+    consent(c, h, b)
+    legacy = submit(c, h, b, pose_mode="original")
+    assert legacy.status_code == 202
+    assert legacy.json()["pose_mode"] == "original"
+    assert submit(c, h, b).json() == legacy.json()
+    assert submit(c, h, b, pose_mode="pose_grid").status_code == 409
+    assert submit(c, h, b, shot_index="2").status_code == 409
+    assert len(c.get("/api/tryons").json()["items"]) == 1
 
 
 def test_missing_provider_does_not_receive_photo(tmp_path):

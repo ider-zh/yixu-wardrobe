@@ -11,7 +11,7 @@ def test_worker_publishes_private_labelled_webp_and_frozen_reference(setup):
 
     app, c, h, b, provider, _detector, _clock = setup
     consent(c, h, b)
-    job = submit(c, h, b, shot_index="9", edition="v2").json()
+    job = submit(c, h, b, shot_index="9", edition="v2", pose_mode="original").json()
     with Worker(app) as worker:
         assert worker.run_once()
         assert not worker.run_once()
@@ -44,13 +44,13 @@ def test_worker_publishes_private_labelled_webp_and_frozen_reference(setup):
     assert not list((app.state.settings.data_dir / "results").iterdir())
 
 
-def test_pose_grid_shows_generated_center_to_visitor_and_admin(setup):
+def test_default_pose_grid_shows_generated_center_to_visitor_and_admin(setup):
     from backend.worker import Worker
 
     app, c, headers, bootstrap, provider, _detector, _clock = setup
     consent(c, headers, bootstrap)
     photo = picture("red", (400, 200))
-    job = submit(c, headers, bootstrap, image=photo, pose_mode="pose_grid").json()
+    job = submit(c, headers, bootstrap, image=photo).json()
     assert job["pose_mode"] == "pose_grid"
     with Worker(app) as worker:
         assert worker.run_once()

@@ -59,7 +59,7 @@ const server = http.createServer(async (req,res) => {
     if(/^\/api\/tryons\/fixture-[a-z0-9-]+$/.test(req.url)&&req.method==='DELETE'){
       assert.equal(req.headers['x-csrf-token'],'test-csrf');jobs=jobs.filter(job=>job.id!==req.url.split('/').at(-1));res.end('{"deleted":true}');return;
     }
-    if(req.url==='/api/tryons/fixture-job-1/image'||req.url==='/api/tryons/fixture-job-1/download'||/^\/api\/tryons\/fixture-aspect-\d+-(portrait|landscape|square)\/(image|download)$/.test(req.url)){
+    if(/^\/api\/tryons\/fixture-(job-1|album|aspect-\d+-(portrait|landscape|square))\/(image|download)$/.test(req.url)){
       assert.match(req.headers.cookie||'',/visitor_fixture=/);res.setHeader('Content-Type','image/webp');
       if(req.url.endsWith('/download'))res.setHeader('Content-Disposition','attachment; filename="synthetic-test-output.webp"');
       res.end(resultImage || fs.readFileSync(path.join(root,'images-v2/look-001.webp')));return;
@@ -74,7 +74,8 @@ const server = http.createServer(async (req,res) => {
       assert.equal(accept,true,'Consent must precede reception of photo');
       assert.equal(req.headers['x-csrf-token'],'test-csrf');assert.match(req.headers.cookie||'',/visitor_fixture=/);
       const data=await new Request('http://fixture',{method:'POST',headers:{'content-type':req.headers['content-type']},body}).formData();
-      const job={id:nextJobId,status:'queued',look_id:Number(data.get('look_id')),edition:data.get('edition'),shot_index:Number(data.get('shot_index')),pose_mode:data.get('pose_mode')||'original',queue_position:7,created_at:'2026-11-11T00:00:00Z',original_expires_at:'2026-11-11T01:00:00Z',image_url:null,download_url:null,error_code:null,error_message:null};
+      assert.equal(data.get('pose_mode'),'pose_grid','All new submissions explicitly request nine poses');
+      const job={id:nextJobId,status:'queued',look_id:Number(data.get('look_id')),edition:data.get('edition'),shot_index:Number(data.get('shot_index')),pose_mode:data.get('pose_mode'),queue_position:7,created_at:'2026-11-11T00:00:00Z',original_expires_at:'2026-11-11T01:00:00Z',image_url:null,download_url:null,error_code:null,error_message:null};
       jobs=[job,...jobs.filter(item=>item.id!==job.id&&item.status==='unknown')];res.statusCode=202;
       const finish=()=>res.end(JSON.stringify(job));
       if(holdUpload){holdUpload=false;heldUpload=finish;return;}
@@ -292,10 +293,8 @@ try {
   await evaluate('document.getElementById("tryon-consent").click()');
   assert.equal(await evaluate('document.getElementById("tryon-submit").disabled'),false,'Photo and consent are sufficient for submission');
   assert.equal(await evaluate('document.getElementById("tryon-reference-options").open'),false,'Submission needs no interaction with outfit reference options');
-  await evaluate('const mode=document.getElementById("tryon-pose-mode");mode.value="pose_grid";mode.dispatchEvent(new Event("change"))');
-  assert.match(await evaluate('document.getElementById("tryon-pose-description").textContent'),/统一棚拍场景中生成九种全身站姿/);
-  await evaluate('document.getElementById("tryon-pose-mode").value="original";document.getElementById("tryon-pose-mode").dispatchEvent(new Event("change"))');
-  assert.match(await evaluate('document.getElementById("tryon-pose-description").textContent'),/原照片的姿态生成一张/);
+  assert.equal(await evaluate('document.getElementById("tryon-pose-mode")'),null,'New try-ons have one generation mode');
+  assert.match(await evaluate('document.getElementById("tryon-pose-description").textContent'),/九种全身站姿/);
   holdUpload=true;
   await evaluate('document.getElementById("tryon-submit").click();document.getElementById("tryon-submit").click()');
   for(let attempt=0;attempt<100&&!heldUpload;attempt++)await new Promise(resolve=>setTimeout(resolve,20));
@@ -307,7 +306,7 @@ try {
   await wait('document.getElementById("tryon-status").textContent.includes("已提交")');
   const upload=requests.filter(r=>r.url==='/api/tryons'&&r.method==='POST');assert.equal(upload.length,1,'Double click cannot duplicate upload');
   const multipart=await new Request(origin,{method:'POST',headers:{'content-type':upload[0].headers['content-type']},body:upload[0].body}).formData();
-  assert.deepEqual([...multipart.keys()].sort(),['disclosure_version','edition','idempotency_key','look_id','photo','shot_index']);
+  assert.deepEqual([...multipart.keys()].sort(),['disclosure_version','edition','idempotency_key','look_id','photo','pose_mode','shot_index']);
   assert.equal(multipart.get('look_id'),'100');assert.equal(multipart.get('edition'),'v2');assert.equal(multipart.get('shot_index'),'1');
   assert.equal(multipart.get('disclosure_version'),'test-v1');assert.match(multipart.get('idempotency_key'),/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/);
   assert.equal(multipart.get('photo').type,'image/png');assert.ok(multipart.get('photo').size>0);
@@ -336,7 +335,8 @@ try {
   assert.match(await evaluate('document.getElementById("tryon-jobs").textContent'),/100.*参考.*01/,'Restored request keeps the automatic reference submitted with the job');
   assert.equal(await evaluate('document.getElementById("tryon-selection").hidden'),true,'History does not invent a new selection');
   assert.ok(!(await evaluate('document.getElementById("tryon-jobs").textContent')).includes('%'));
-  jobs[0]={...jobs[0],status:'succeeded',image_url:'/api/tryons/fixture-job-1/image',download_url:'/api/tryons/fixture-job-1/download'};
+  // Cover the pre-existing single-photo display with its original image aspect ratios.
+  jobs[0]={...jobs[0],pose_mode:'original',status:'succeeded',image_url:'/api/tryons/fixture-job-1/image',download_url:'/api/tryons/fixture-job-1/download'};
   await evaluate('document.getElementById("tryon-refresh").click()');
   await wait('document.querySelector("[data-job-id=fixture-job-1] img")?.naturalWidth > 0 && document.querySelector("[data-job-id=fixture-job-1] img").src.startsWith("blob:")');
   await evaluate('document.querySelector("[data-job-action=download]").focus();document.getElementById("tryon-refresh").click()');
@@ -727,7 +727,7 @@ try {
   assert.equal(await evaluate(`Boolean(document.querySelector('${cachedResult}'))`),false,'A remotely listed copy cannot resurrect a locally deleted result');
   assert.equal(requests.filter(r=>r.method==='POST'&&r.url==='/api/tryons').length,postsBeforeDashboard,'Adding, reopening and deleting local data does not submit a try-on');
 
-  jobs=[{id:'fixture-delivery-unknown',status:'unknown',pose_mode:'pose_grid',look_id:100,edition:'v2',shot_index:4,created_at:'2026-11-11T00:00:00Z',error_code:'delivery_unknown',error_message:'Provider delivery is uncertain; this request will not be replayed'}];
+  jobs=[{id:'fixture-delivery-unknown',status:'unknown',pose_mode:'original',look_id:100,edition:'v2',shot_index:4,created_at:'2026-11-11T00:00:00Z',error_code:'delivery_unknown',error_message:'Provider delivery is uncertain; this request will not be replayed'}];
   await evaluate('document.getElementById("tryon-refresh").click()');
   await wait('document.querySelector("[data-job-retry=fixture-delivery-unknown]")');
   await evaluate('document.querySelector("[data-job-retry=fixture-delivery-unknown]").click()');
@@ -751,7 +751,7 @@ try {
   assert.equal(reused.get('look_id'),'100');
   assert.equal(reused.get('edition'),'v2');
   assert.equal(reused.get('shot_index'),'4');
-  assert.equal(reused.get('pose_mode'),'pose_grid','Retry preserves the original pose mode');
+  assert.equal(reused.get('pose_mode'),'pose_grid','A new attempt uses the album mode even for a historical single photo');
   assert.notEqual(reused.get('idempotency_key'),multipart.get('idempotency_key'),'The new attempt uses an independent request key');
   assert.deepEqual(Buffer.from(await reused.get('photo').arrayBuffer()),Buffer.from(saved.bytes),'Reused photo uploads the original bytes');
   assert.equal(requests.filter(r=>r.method==='POST'&&r.url==='/api/tryons').length,postsBeforeDashboard+1);
@@ -859,6 +859,94 @@ try {
   await wait(`window.WardrobeTryOnStorage.listJobs().then(rows=>rows.some(job=>job.id==='${frozenId}'&&job.cachedImage))`);
   assert.equal(requests.filter(request=>request.url.startsWith('/api/tryons')&&['POST','DELETE'].includes(request.method)).length,writesBeforeCleanup);
   console.log('PASS local trial copies clear offline, stay cleared on reconnect, and cache again only after explicit resume.');
+
+  const albumId='fixture-album';
+  const tileWidth=122,tileHeight=183,gridWidth=tileWidth*3-1,gridHeight=tileHeight*3-1,footerHeight=30;
+  const albumData=await evaluate(`(()=>{
+    const canvas=document.createElement('canvas');canvas.width=${gridWidth};canvas.height=${gridHeight+footerHeight};
+    const context=canvas.getContext('2d');
+    const colors=['#de4962','#48194f','#26b190','#b1e03f','#7965ad','#ee932a','#398bce','#00933f','#9e3d05'];
+    const edge=(dimension,index)=>Math.floor(dimension*index/3);
+    for(let i=0;i<9;i++){
+      const column=i%3,row=Math.floor(i/3),left=edge(${gridWidth},column),top=edge(${gridHeight},row);
+      context.fillStyle=colors[i];
+      context.fillRect(left,top,edge(${gridWidth},column+1)-left,edge(${gridHeight},row+1)-top);
+    }
+    context.fillStyle='#141414';context.fillRect(0,${gridHeight},canvas.width,${footerHeight});
+    return canvas.toDataURL('image/webp');
+  })()`);
+  assert.match(albumData,/^data:image\/webp;base64,/);
+  resultImage=Buffer.from(albumData.split(',')[1],'base64');
+  jobs=[{...completeFixture(albumId),pose_mode:'pose_grid',reference}];
+  const albumCard=`[data-job-id=${albumId}]`;
+  const historyAlbum=albumCard+' .tryon-result-album';
+  const comparisonAlbum='#tryon-comparison .tryon-result-album';
+  const selector=(album,child)=>`document.querySelector(${JSON.stringify(album+' '+child)})`;
+  const position=album=>`${selector(album,'.tryon-album-position')}?.textContent.trim()`;
+  const albumButton=(album,label)=>selector(album,`button[aria-label="${label}"]`);
+  const frame=album=>selector(album,'.tryon-album-frame');
+  const assertAlbumCrop=async (album,index)=>{
+    const bounds=await evaluate(`(()=>{
+      const frame=${frame(album)},image=frame.querySelector('img');
+      const f=frame.getBoundingClientRect(),i=image.getBoundingClientRect();
+      return {
+        content:[(f.left-i.left)*image.naturalWidth/i.width,(f.top-i.top)*image.naturalHeight/i.height,
+          (f.right-i.left)*image.naturalWidth/i.width,(f.bottom-i.top)*image.naturalHeight/i.height],
+        overflow:getComputedStyle(frame).overflow,
+      };
+    })()`);
+    const column=index%3,row=Math.floor(index/3),edge=(dimension,i)=>Math.floor(dimension*i/3);
+    const expected=[edge(gridWidth,column),edge(gridHeight,row),edge(gridWidth,column+1),edge(gridHeight,row+1)];
+    assert.match(bounds.overflow,/^(clip|hidden)$/,'Only the current panel may be visible');
+    assert.ok(bounds.content.every((value,i)=>Math.abs(value-expected[i])<=1),
+      `Album pose ${index+1} shows its exact row and column without the AI label band: ${bounds.content} vs ${expected}`);
+  };
+  await setViewport(viewports[1]);
+  await evaluate('document.getElementById("tryon-refresh").click()');
+  await wait(`Boolean(${frame(historyAlbum)})`);
+  await evaluate(`${frame(historyAlbum)}.scrollIntoView({block:'center',behavior:'instant'})`);
+  await wait(`${position(historyAlbum)}==='1 / 9' && Boolean(${albumButton(historyAlbum,'暂停播放')})`);
+  await assertAlbumCrop(historyAlbum,0);
+  await wait(`${position(historyAlbum)}==='2 / 9'`,250);
+  await evaluate(`${albumButton(historyAlbum,'暂停播放')}.click()`);
+  assert.equal(await evaluate(position(historyAlbum)),'2 / 9');
+  assert.equal(await evaluate(`Boolean(${albumButton(historyAlbum,'自动播放')})`),true);
+  await assertAlbumCrop(historyAlbum,1);
+  await evaluate(`${albumButton(historyAlbum,'上一张')}.click();${albumButton(historyAlbum,'上一张')}.click()`);
+  assert.equal(await evaluate(position(historyAlbum)),'9 / 9','Previous wraps to the last pose');
+  await assertAlbumCrop(historyAlbum,8);
+  await evaluate(`${albumButton(historyAlbum,'下一张')}.click()`);
+  assert.equal(await evaluate(position(historyAlbum)),'1 / 9','Next wraps to the first pose');
+
+  const fullAlbumDownload=await evaluate(`(async()=>{
+    const response=await fetch(document.querySelector('${albumCard} a[download]').href);
+    return [response.headers.get('content-type'),(await response.arrayBuffer()).byteLength];
+  })()`);
+  assert.deepEqual(fullAlbumDownload,['image/webp',resultImage.length],'Download keeps all poses in the original WebP');
+  await evaluate(`document.querySelector('${albumCard} [data-job-action="compare"]').click()`);
+  await wait(`document.getElementById('tryon-comparison').open&&${position(comparisonAlbum)}==='1 / 9'`);
+  await evaluate(`${frame(comparisonAlbum)}.scrollIntoView({block:'center',behavior:'instant'})`);
+  await wait(`${selector(comparisonAlbum,'.tryon-album-frame img')}?.naturalWidth===${gridWidth}`);
+  await evaluate(`${albumButton(comparisonAlbum,'下一张')}.click()`);
+  assert.equal(await evaluate(position(comparisonAlbum)),'2 / 9');
+  await assertAlbumCrop(comparisonAlbum,1);
+  await evaluate('document.getElementById("tryon-comparison-close").click()');
+  await wait(`!document.getElementById('tryon-comparison').open&&!document.querySelector('${comparisonAlbum}')`);
+  await wait(`window.WardrobeTryOnStorage.listJobs().then(rows=>rows.some(job=>job.id==='${albumId}'&&job.cachedImage))`);
+
+  bootstrapError={error:{code:'fixture_offline',message:'Synthetic service outage'}};
+  jobs=[];
+  await client('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'}]});
+  await load();
+  await wait('document.getElementById("tryon-availability")?.textContent.includes("暂不可用")');
+  await evaluate('document.getElementById("tryon-history").click()');
+  await wait(`Boolean(${frame(historyAlbum)})`);
+  await evaluate(`${frame(historyAlbum)}.scrollIntoView({block:'center',behavior:'instant'})`);
+  await wait(`${position(historyAlbum)}==='1 / 9' && Boolean(${albumButton(historyAlbum,'自动播放')})`);
+  assert.match(await evaluate(`${selector(historyAlbum,'.tryon-album-frame img')}.src`),/^blob:/,'Saved albums play from the local private copy');
+  await evaluate(`${albumButton(historyAlbum,'下一张')}.click()`);
+  assert.equal(await evaluate(position(historyAlbum)),'2 / 9','Reduced motion still allows manual navigation');
+  console.log('PASS nine-pose result albums crop the private WebP, autoplay when visible, support controls and comparison, preserve downloads and reopen offline.');
 } finally {
   if(client&&socket?.readyState===1)await Promise.race([client('Browser.close').catch(()=>{}),new Promise(resolve=>setTimeout(resolve,1000))]);
   if(processChrome.exitCode===null&&processChrome.signalCode===null){const exit=once(processChrome,'exit');try{process.kill(-processChrome.pid,'SIGTERM');}catch(error){if(error.code!=='ESRCH')throw error;}await exit;}

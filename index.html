@@ -163,10 +163,11 @@
 </section>
 <div class="lookbook-notes"><div id="detail-story" class="detail-story"><h3 id="detail-story-title"></h3><p id="detail-story-summary"></p></div><section><h3>搭配单品 <small>THE COMPONENTS</small></h3><ol id="detail-pieces" class="piece-list"></ol></section><section><h3>设计思路 <small>STYLING NOTES</small></h3><ul id="detail-design" class="design-list"></ul></section><p class="detail-scene" id="detail-scene"></p><div class="detail-actions"><button id="detail-tryon" class="solid-button">上传照片试穿 ↗</button><button id="detail-revision" type="button" class="outline-button" aria-haspopup="dialog" hidden>对比写真版本</button><button id="detail-list-add" type="button" class="outline-button" aria-haspopup="dialog" hidden>加入清单</button><button id="detail-favorite" class="solid-button"></button><button id="detail-compare" class="outline-button"></button></div><div class="detail-navigation"><button id="previous-look" aria-label="上一套">← 上一套</button><span id="detail-position"></span><button id="next-look" aria-label="下一套">下一套 →</button></div></div>
 <section id="lookbook-album" class="lookbook-album" aria-labelledby="lookbook-album-title"><div class="lookbook-album-stage"><div id="detail-photo-frame" class="detail-photo-frame" data-photo-load="true"><img id="detail-image" alt=""></div><div class="lookbook-album-controls" role="group" aria-label="相册控制">
+  <div class="lookbook-progress" aria-hidden="true"><span id="lookbook-progress-fill"></span></div>
   <button id="lookbook-prev" type="button" class="lookbook-album-arrow" aria-label="上一张"></button>
   <button id="lookbook-next" type="button" class="lookbook-album-arrow" aria-label="下一张"></button>
   <button id="lookbook-play" type="button" aria-label="暂停轮播"></button>
-</div></div><div class="lookbook-album-info"><h3 id="lookbook-album-title">写真相册</h3><div class="view-selector" id="view-selector" role="group" aria-label="写真视角"></div><p id="view-moment" class="view-moment"></p><div class="detail-photo-footer"><span id="view-name">完整九宫格</span><a id="original-link" target="_blank" rel="noopener">查看原图 ↗</a><a id="download-link" download>保存图片 ↓</a><button id="share-shot" class="shot-share-button" type="button" aria-controls="share-shot-manual" hidden>复制单格链接</button></div>
+</div></div><div class="lookbook-album-info"><h3 id="lookbook-album-title">写真相册</h3><div class="view-selector" id="view-selector" role="group" aria-label="写真视角"></div><p id="view-moment" class="view-moment"></p><div class="detail-photo-footer"><span id="view-name"></span><a id="original-link" target="_blank" rel="noopener">查看原图 ↗</a><a id="download-link" download>保存图片 ↓</a><button id="share-shot" class="shot-share-button" type="button" aria-controls="share-shot-manual" hidden>复制单格链接</button></div>
 <div class="shot-share-feedback">
   <p id="share-shot-status" class="shot-share-status" role="status"></p>
   <label id="share-shot-manual" class="shot-share-manual" hidden>
@@ -241,7 +242,7 @@
         <p id="tryon-context"></p>
         <details id="tryon-reference-options" class="tryon-reference-options">
           <summary>调整服装参考（可选）</summary>
-          <p class="tryon-hint" id="tryon-reference-picker-title">已自动选取参考画面。参考画面用于服装和单品，姿态由试穿设置决定。</p>
+          <p class="tryon-hint" id="tryon-reference-picker-title">已自动选取服装参考。可切换镜头以参考不同的单品细节。</p>
           <div id="tryon-reference-picker" class="tryon-reference-picker" role="radiogroup" aria-labelledby="tryon-reference-picker-title" aria-describedby="tryon-reference-framing"></div>
           <div class="tryon-reference-summary">
             <div class="tryon-reference" id="tryon-reference"><img id="tryon-reference-image" alt="所选服装参考"></div>
@@ -251,14 +252,7 @@
         </details>
         <p id="tryon-reference-error" class="tryon-hint" role="status" hidden></p>
       </section>
-      <div id="tryon-pose-options" hidden>
-        <label for="tryon-pose-mode">试穿姿态</label>
-        <select id="tryon-pose-mode" aria-describedby="tryon-pose-description">
-          <option value="original">保留原姿态 · 单图</option>
-          <option value="pose_grid">变换姿态 · 九宫格</option>
-        </select>
-        <p id="tryon-pose-description" class="tryon-hint"></p>
-      </div>
+      <p id="tryon-pose-description" class="tryon-hint">以你的照片为人物参考，生成九种全身站姿，成片将逐张播放。</p>
       <section id="tryon-disclosure" class="tryon-disclosure" aria-labelledby="tryon-disclosure-title">
         <h3 id="tryon-disclosure-title">照片用途</h3>
         <ul id="tryon-disclosure-items"><li>照片交由第三方 AI 生成试穿图，结果可供后台评估。</li></ul>
@@ -322,6 +316,7 @@
     <figure>
       <figcaption>我的试穿成片</figcaption>
       <img id="tryon-comparison-result" alt="AI 生成的试穿成片">
+      <div id="tryon-comparison-album" hidden></div>
       <p id="tryon-comparison-result-status" role="status"></p>
     </figure>
     <figure>
