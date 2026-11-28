@@ -9,9 +9,9 @@ import {fileURLToPath} from 'node:url';
 const root = fileURLToPath(new URL('../', import.meta.url));
 const privateRoot = fs.mkdtempSync(path.join(process.env.TMPDIR || os.tmpdir(), 'yixu-verify-'));
 const env = {...process.env, YIXU_VERIFY_CHILD: '1'};
-function run(command, args) {
+function run(command, args, timeout = 180000) {
   console.log(`[verify] ${command} ${args.join(' ')}`);
-  const result = spawnSync(command, args, {cwd: root, env, stdio: 'inherit', timeout: 180000});
+  const result = spawnSync(command, args, {cwd: root, env, stdio: 'inherit', timeout});
   if (result.error || result.status !== 0) throw new Error(`Verification failed: ${command} (${result.error?.message || result.signal || result.status})`);
 }
 try {
@@ -41,7 +41,8 @@ try {
   run(process.execPath, ['qa/regression-integration.mjs']);
   run(process.execPath, ['qa/regression-catalog-export.mjs']);
   run(process.execPath, ['qa/regression-content.mjs']);
-  run(process.execPath, ['qa/regression-homepage.mjs']);
+  // Every published product and gallery image is checked at two viewports.
+  run(process.execPath, ['qa/regression-homepage.mjs'], 300000);
   run(process.execPath, ['qa/regression-site-theme.mjs']);
   run(process.execPath, ['--test', 'qa/regression-release.mjs']);
   run(process.execPath, ['qa/regression-deploy.mjs']);
