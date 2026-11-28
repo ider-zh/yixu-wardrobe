@@ -63,6 +63,7 @@ async function publicUI(t) {
   const timers = new Set();
   const schedule = (fn, ms) => { const id = setTimeout(() => { timers.delete(id); fn(); }, ms); timers.add(id); return id; };
   t.after(() => { for (const id of timers) clearTimeout(id); });
+  window.matchMedia = () => ({ matches: false, addEventListener() {} });
   window.WARDROBE = { looks: [{ id: 1, title: 'Disposable UI test', versions: { v2: { image: '', shots: Array.from({ length: 9 }, () => ({ title: 'test' })) } } }] };
   vm.runInNewContext(fs.readFileSync(path.join(root, 'tryon.js'), 'utf8'), {
     document, window, location: { protocol: 'https:' }, fetch: b.fetch, crypto: { randomUUID }, URL, URLSearchParams, FormData,

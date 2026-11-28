@@ -375,7 +375,7 @@ let canStoreJobs=Boolean(storage), savingResults=false, cacheAgain=false;
 const resultURLs = new Map(), resultFailures = new Set(), removingJobs = new Set();
 const historyAlbums = new Map();
 let comparisonAlbum;
-const reducedResultMotion = matchMedia('(prefers-reduced-motion: reduce)');
+const reducedResultMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 function createResultAlbum(owner, errorMessage) {
   const album = element('div',undefined,'tryon-result-album');
