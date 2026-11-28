@@ -376,35 +376,68 @@ const resultURLs = new Map(), resultFailures = new Set(), removingJobs = new Set
 const historyAlbums = new Map();
 let comparisonAlbum;
 const reducedResultMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+const resultFrameDuration = 4000;
+// The shot plan for generated_grid results, in the worker's row-major order.
+const resultPosePlan = [
+  '正面站立，双臂自然垂下', '向左侧身，单手扶胯', '向右侧身，前后错步，双手轻握',
+  '侧身站立，一脚脚尖向前', '正面交叉站立，单手轻触领口', '双脚分开站立，一手轻握另一侧手腕',
+  '转身回眸', '重心落在单腿上，整理另一侧袖口', '斜向站立，前膝微弯，双手轻扶胯',
+];
 
-function createResultAlbum(owner, errorMessage) {
+function createResultAlbum(owner, errorMessage, initialIndex=0) {
   const album = element('div',undefined,'tryon-result-album');
   album.setAttribute('role','group');
   album.setAttribute('aria-label','试穿相册');
   const frame = element('div',undefined,'tryon-album-frame');
+  frame.tabIndex=0;
+  frame.setAttribute('role','group');
+  frame.setAttribute('aria-label','试穿照片，可用方向键切换');
   const image = element('img');
   image.loading = owner===dialog?'lazy':'eager';
   frame.append(image);
   const controls = element('div',undefined,'tryon-album-controls');
   const position = element('span',undefined,'tryon-album-position');
+  const caption = element('span',undefined,'tryon-album-caption');
+  const info = element('div',undefined,'tryon-album-info');
+  info.append(position,caption);
   const status = element('p',undefined,'tryon-hint');
   status.setAttribute('role','status');
   const previous = button('←','上一张','album-previous');
   const next = button('→','下一张','album-next');
   const play = button('','自动播放','album-play');
-  controls.append(previous,position,next,play,element('span','AI 试穿','tryon-album-label'));
+  const nav = element('div',undefined,'tryon-album-nav');
+  nav.setAttribute('role','group');nav.setAttribute('aria-label','选择试穿照片');
+  const shots = resultPosePlan.map((_,i)=>button(String(i+1),'','album-shot-'+i));
+  nav.append(...shots);
+  const track = element('div',undefined,'tryon-album-track');
+  const progress = element('span',undefined,'tryon-album-progress');
+  track.setAttribute('aria-hidden','true');track.append(progress);
+  const actions = element('div',undefined,'tryon-album-actions');
+  actions.append(previous,play,next,element('span','AI 试穿','tryon-album-label'));
+  controls.append(track,info,nav,actions);
   album.append(frame,controls,status);
 
-  let index=0, playing=!reducedResultMotion.matches, visible=false, ready=false, timer, url;
-  let width, height;
+  let index=initialIndex, playing=!reducedResultMotion.matches, visible=false, ready=false, timer, url;
+  let width, height, hasPosePlan=false, progressAnimation, fade, swipeStart;
 
   function button(text,label,action) {
     const control=element('button',text,'outline-button');
     control.type='button';control.setAttribute('aria-label',label);control.dataset.jobAction=action;
     return control;
   }
-  function select(offset) {
-    index=(index+offset+9)%9;
+  function updateNavigation() {
+    position.textContent=`${index+1} / ${shots.length}`;
+    caption.hidden=!hasPosePlan;
+    caption.textContent=hasPosePlan?'姿态设定 · '+resultPosePlan[index]:'';
+    for(const [i,shot] of shots.entries()){
+      if(i===index)shot.setAttribute('aria-current','true');
+      else shot.removeAttribute('aria-current');
+      shot.tabIndex=i===index?0:-1;
+      shot.setAttribute('aria-label',`第 ${i+1} 张${hasPosePlan?'，姿态设定：'+resultPosePlan[i]:''}`);
+    }
+  }
+  function select(target, animate=false) {
+    index=(target+shots.length)%shots.length;
     const row=Math.floor(index/3), col=index%3;
     const left=Math.floor(col*width/3), right=Math.floor((col+1)*width/3);
     const top=Math.floor(row*height/3), bottom=Math.floor((row+1)*height/3);
@@ -413,28 +446,62 @@ function createResultAlbum(owner, errorMessage) {
       width:`${100*width/cellWidth}%`,height:`${100*image.naturalHeight/cellHeight}%`,
       left:`${-100*left/cellWidth}%`,top:`${-100*top/cellHeight}%`,
     });
-    image.alt=`试穿相册第 ${index+1} 张，共 9 张`;
-    position.textContent=`${index+1} / 9`;
+    image.alt=`试穿相册第 ${index+1} 张，共 ${shots.length} 张`;
+    updateNavigation();
+    fade?.cancel();
+    if(animate&&!reducedResultMotion.matches)fade=image.animate([{opacity:.55},{opacity:1}],220);
   }
   function sync() {
     clearTimeout(timer);
+    progressAnimation?.cancel();
     play.textContent=playing?'暂停':'播放';
     play.setAttribute('aria-label',playing?'暂停播放':'自动播放');
-    position.setAttribute('aria-live',playing?'off':'polite');
+    info.setAttribute('aria-live',playing?'off':'polite');
     if(!ready||!playing||!visible||!album.isConnected||!owner.open||document.hidden
       ||(owner===dialog&&comparisonDialog.open))return;
+    if(!reducedResultMotion.matches)progressAnimation=progress.animate(
+      [{transform:'scaleX(0)'},{transform:'scaleX(1)'}],resultFrameDuration
+    );
     timer=setTimeout(()=>{
-      select(1);
+      select(index+1,true);
       sync();
-    },4000);
+    },resultFrameDuration);
   }
   function pause() {
     playing=false;
+    fade?.cancel();
     sync();
   }
-  previous.addEventListener('click',()=>{pause();select(-1);});
-  next.addEventListener('click',()=>{pause();select(1);});
+  function choose(target) {
+    pause();
+    select(target,target!==index);
+  }
+  previous.addEventListener('click',()=>choose(index-1));
+  next.addEventListener('click',()=>choose(index+1));
+  shots.forEach((shot,i)=>shot.addEventListener('click',()=>choose(i)));
   play.addEventListener('click',()=>{playing=!playing;sync();});
+  nav.addEventListener('focusin',pause);
+  frame.addEventListener('focus',pause);
+  album.addEventListener('keydown',event=>{
+    if(!ready||event.altKey||event.ctrlKey||event.metaKey)return;
+    const target={ArrowLeft:index-1,ArrowRight:index+1,Home:0,End:shots.length-1}[event.key];
+    if(!Number.isInteger(target))return;
+    event.preventDefault();event.stopPropagation();
+    choose(target);
+    if(nav.contains(event.target))shots[index].focus({preventScroll:true});
+  });
+  frame.addEventListener('pointerdown',event=>{
+    if(!ready||event.pointerType!=='touch'||!event.isPrimary)return;
+    swipeStart={x:event.clientX,y:event.clientY};
+    frame.setPointerCapture(event.pointerId);
+  });
+  frame.addEventListener('pointerup',event=>{
+    if(!event.isPrimary||!swipeStart)return;
+    const dx=event.clientX-swipeStart.x, dy=event.clientY-swipeStart.y;
+    swipeStart=undefined;
+    if(Math.abs(dx)>=40&&Math.abs(dx)>Math.abs(dy)*1.5)choose(index+(dx<0?1:-1));
+  });
+  frame.addEventListener('pointercancel',()=>{swipeStart=undefined;});
   const observer=new IntersectionObserver(([entry])=>{
     visible=entry.intersectionRatio>=0.35;
     sync();
@@ -452,12 +519,14 @@ function createResultAlbum(owner, errorMessage) {
     height=image.naturalHeight-Math.max(30,Math.floor(width/45)+14);
     if(Math.min(width,height)<3){failed();return;}
     frame.style.setProperty('--tryon-frame-ratio',width/height);
-    select(0);
+    select(index);
     ready=true;image.style.visibility='visible';controls.hidden=false;
     sync();
   });
   image.addEventListener('error',failed);
-  function show(nextURL) {
+  function show(nextURL, generatedGrid) {
+    const hasPlan=generatedGrid===true;
+    if(hasPlan!==hasPosePlan){hasPosePlan=hasPlan;updateNavigation();}
     if(nextURL===url)return;
     url=nextURL;
     ready=false;frame.hidden=false;controls.hidden=true;image.style.visibility='hidden';
@@ -465,9 +534,10 @@ function createResultAlbum(owner, errorMessage) {
     sync();
   }
   function dispose() {
-    clearTimeout(timer);observer.disconnect();image.removeAttribute('src');album.remove();
+    clearTimeout(timer);progressAnimation?.cancel();fade?.cancel();
+    observer.disconnect();image.removeAttribute('src');album.remove();
   }
-  return {element:album, show, sync, pause, dispose};
+  return {element:album, get index(){return index;}, show, sync, pause, dispose};
 }
 document.addEventListener('visibilitychange',()=>{
   for(const album of historyAlbums.values())album.sync();
@@ -516,9 +586,9 @@ function showTryOnComparison(job,reference){
   for(const album of historyAlbums.values())album.sync();
   if(isAlbum){
     const host=$('tryon-comparison-album');host.hidden=false;
-    comparisonAlbum=createResultAlbum(comparisonDialog,'成片暂不可用，请返回试穿记录刷新。');
+    comparisonAlbum=createResultAlbum(comparisonDialog,'成片暂不可用，请返回试穿记录刷新。',historyAlbums.get(job.id)?.index);
     host.append(comparisonAlbum.element);
-    comparisonAlbum.show(url);
+    comparisonAlbum.show(url,job.generated_grid);
   }else result.src=url;
   source.src=reference.source_url;
 }
@@ -550,6 +620,7 @@ function updateJobs() {
     const local=localJobs.get(job.id);
     if(!local?.deleted)shown.set(job.id,{
       ...job,online:true,look_title:job.look_title||local?.look_title,cachedImage:local?.cachedImage,
+      generated_grid:typeof job.generated_grid==='boolean'?job.generated_grid:local?.generated_grid,
       reference:jobReference(job)||(local?jobReference(local):null),
     });
   }
@@ -591,7 +662,8 @@ async function storeRemoteJobs(rows, updatedAt, revision) {
     const reference=jobReference(job);
     return {
       id:job.id, status:job.status, look_id:job.look_id, edition:job.edition,
-      shot_index:job.shot_index, pose_mode:job.pose_mode, created_at:job.created_at, queue_position:job.queue_position,
+      shot_index:job.shot_index, pose_mode:job.pose_mode, generated_grid:job.generated_grid,
+      created_at:job.created_at, queue_position:job.queue_position,
       error_code:job.error_code, error_message:job.error_message, look_title:job.look_title||byId.get(job.look_id)?.title, updatedAt,
       ...(reference?{reference_asset_id:reference.asset_id,reference_source_url:reference.source_url,reference_shot_index:reference.shot_index}:{}),
     };
@@ -790,7 +862,7 @@ function renderJobs() {
           album=createResultAlbum(dialog,'结果暂时无法读取，请刷新确认。');
           historyAlbums.set(job.id,album);
         }
-        shownAlbums.add(job.id);card.append(album.element);album.show(imageURL);
+        shownAlbums.add(job.id);card.append(album.element);album.show(imageURL,job.generated_grid);
       }else if(imageURL&&job.pose_mode!=='pose_grid'){
         const image=element('img');image.src=imageURL;image.alt='AI 生成试穿结果 · LOOK '+job.look_id;image.loading='lazy';
         image.addEventListener('error',()=>{image.hidden=true;card.append(element('p','结果暂时无法读取，请刷新确认。'));});card.append(image);

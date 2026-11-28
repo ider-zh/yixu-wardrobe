@@ -197,6 +197,8 @@
         const value = referenceFields.includes(key) ? reference?.[key] : record[key];
         if (typeof value === 'string' || Number.isFinite(value) || value === null) snapshot[key] = value;
       }
+      const generatedGrid = typeof record.generated_grid === 'boolean' ? record.generated_grid : previous?.generated_grid;
+      if (typeof generatedGrid === 'boolean') snapshot.generated_grid = generatedGrid;
       if (reference) snapshot.shot_index = reference.reference_shot_index;
       snapshots.set(id, snapshot);
     }
@@ -207,6 +209,9 @@
           if (current?.deleted || current?.updatedAt > snapshot.updatedAt) return;
           const reference = frozenReference(current);
           const next = reference ? {...snapshot, ...reference, shot_index:reference.reference_shot_index} : snapshot;
+          if (next.generated_grid === undefined && typeof current?.generated_grid === 'boolean') {
+            next.generated_grid = current.generated_grid;
+          }
           return current?.cachedImage ? {...next, cachedImage: current.cachedImage} : next;
         }, changed);
       }

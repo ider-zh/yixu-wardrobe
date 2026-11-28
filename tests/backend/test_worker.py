@@ -17,6 +17,7 @@ def test_worker_publishes_private_labelled_webp_and_frozen_reference(setup):
         assert not worker.run_once()
     result = c.get("/api/tryons/" + job["id"]).json()
     assert result["status"] == "succeeded"
+    assert result["generated_grid"] is False
     assert result["look_id"] == 1 and result["shot_index"] == 9 and result["edition"] == "v2"
     assert len(provider.calls) == 1
     with Image.open(io.BytesIO(provider.calls[0]["reference"])) as ref:
@@ -52,6 +53,7 @@ def test_default_pose_grid_shows_generated_center_to_visitor_and_admin(setup):
     photo = picture("red", (400, 200))
     job = submit(c, headers, bootstrap, image=photo).json()
     assert job["pose_mode"] == "pose_grid"
+    assert job["generated_grid"] is False
     with Worker(app) as worker:
         assert worker.run_once()
         assert not worker.run_once()
@@ -60,6 +62,8 @@ def test_default_pose_grid_shows_generated_center_to_visitor_and_admin(setup):
     assert not list(app.state.jobs.inputs.iterdir())
     result = c.get("/api/tryons/" + job["id"]).json()
     assert result["status"] == "succeeded"
+    assert result["generated_grid"] is True
+    assert c.get("/api/tryons").json()["items"][0]["generated_grid"] is True
     data = c.get(result["image_url"]).content
     with Image.open(io.BytesIO(data)) as output:
         assert output.size == (256, 414)
@@ -92,6 +96,7 @@ def test_admin_still_masks_embedded_upload_in_historical_grid(setup):
         )
     app.state.jobs.drop_inputs(job["id"])
 
+    assert c.get(f"/api/tryons/{job['id']}").json()["generated_grid"] is False
     with Image.open(io.BytesIO(c.get(f"/api/tryons/{job['id']}/image").content)) as output:
         assert output.getpixel((128, 192)) == (255, 0, 0)
     with TestClient(app, base_url="https://admin.localhost") as admin:

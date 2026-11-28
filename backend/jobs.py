@@ -97,6 +97,7 @@ class Jobs:
             "edition": row["edition"],
             "shot_index": row["shot_index"],
             "pose_mode": row["pose_mode"],
+            "generated_grid": bool(row["generated_grid"]),
             "created_at": timestamp(row["created"]),
             "original_expires_at": timestamp(row["expires"]),
             "queue_position": position,

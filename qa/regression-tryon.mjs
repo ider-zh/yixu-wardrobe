@@ -877,7 +877,7 @@ try {
   })()`);
   assert.match(albumData,/^data:image\/webp;base64,/);
   resultImage=Buffer.from(albumData.split(',')[1],'base64');
-  jobs=[{...completeFixture(albumId),pose_mode:'pose_grid',reference}];
+  jobs=[{...completeFixture(albumId),pose_mode:'pose_grid',generated_grid:true,reference}];
   const albumCard=`[data-job-id=${albumId}]`;
   const historyAlbum=albumCard+' .tryon-result-album';
   const comparisonAlbum='#tryon-comparison .tryon-result-album';
@@ -885,6 +885,15 @@ try {
   const position=album=>`${selector(album,'.tryon-album-position')}?.textContent.trim()`;
   const albumButton=(album,label)=>selector(album,`button[aria-label="${label}"]`);
   const frame=album=>selector(album,'.tryon-album-frame');
+  const ready=album=>`${selector(album,'.tryon-album-frame img')}?.style.visibility==='visible'`;
+  const albumNav=album=>`${selector(album,'.tryon-album-nav')}.querySelectorAll('button')`;
+  const currentFrame=album=>`${selector(album,'.tryon-album-nav button[aria-current="true"]')}?.textContent.trim()`;
+  const caption=album=>`${selector(album,'.tryon-album-caption')}?.textContent.trim()`;
+  const progress=album=>`${selector(album,'.tryon-album-progress')}?.getAnimations()[0]`;
+  const key=async (name,code)=>{
+    await client('Input.dispatchKeyEvent',{type:'rawKeyDown',key:name,code:name,windowsVirtualKeyCode:code});
+    await client('Input.dispatchKeyEvent',{type:'keyUp',key:name,code:name,windowsVirtualKeyCode:code});
+  };
   const assertAlbumCrop=async (album,index)=>{
     const bounds=await evaluate(`(()=>{
       const frame=${frame(album)},image=frame.querySelector('img');
@@ -905,18 +914,42 @@ try {
   await evaluate('document.getElementById("tryon-refresh").click()');
   await wait(`Boolean(${frame(historyAlbum)})`);
   await evaluate(`${frame(historyAlbum)}.scrollIntoView({block:'center',behavior:'instant'})`);
-  await wait(`${position(historyAlbum)}==='1 / 9' && Boolean(${albumButton(historyAlbum,'暂停播放')})`);
+  await wait(`${ready(historyAlbum)} && ${position(historyAlbum)}==='1 / 9' && Boolean(${albumButton(historyAlbum,'暂停播放')})`);
+  assert.deepEqual(await evaluate(`Array.from(${albumNav(historyAlbum)},button=>button.textContent.trim())`),
+    ['1','2','3','4','5','6','7','8','9'],'The album offers a direct jump to each shot');
+  assert.equal(await evaluate(currentFrame(historyAlbum)),'1');
+  const firstCaption=await evaluate(caption(historyAlbum));
+  assert.match(firstCaption,/^姿态设定.*正面/,'The caption identifies the intended pose as a generation reference');
   await assertAlbumCrop(historyAlbum,0);
+  await wait(`${progress(historyAlbum)}?.currentTime>0`);
+  assert.equal(await evaluate(`${progress(historyAlbum)}.effect.getTiming().duration`),4000,'The progress indicator follows the playback interval');
   await wait(`${position(historyAlbum)}==='2 / 9'`,250);
   await evaluate(`${albumButton(historyAlbum,'暂停播放')}.click()`);
   assert.equal(await evaluate(position(historyAlbum)),'2 / 9');
+  assert.equal(await evaluate(currentFrame(historyAlbum)),'2','Autoplay advances the navigation selection');
+  const secondCaption=await evaluate(caption(historyAlbum));
+  assert.match(secondCaption,/^姿态设定/);
+  assert.notEqual(secondCaption,firstCaption);
   assert.equal(await evaluate(`Boolean(${albumButton(historyAlbum,'自动播放')})`),true);
+  assert.equal(await evaluate(`Boolean(${progress(historyAlbum)})`),false,'Pause stops the progress animation');
   await assertAlbumCrop(historyAlbum,1);
   await evaluate(`${albumButton(historyAlbum,'上一张')}.click();${albumButton(historyAlbum,'上一张')}.click()`);
   assert.equal(await evaluate(position(historyAlbum)),'9 / 9','Previous wraps to the last pose');
   await assertAlbumCrop(historyAlbum,8);
   await evaluate(`${albumButton(historyAlbum,'下一张')}.click()`);
   assert.equal(await evaluate(position(historyAlbum)),'1 / 9','Next wraps to the first pose');
+  await evaluate(`${albumNav(historyAlbum)}[4].click();${albumNav(historyAlbum)}[4].focus()`);
+  assert.equal(await evaluate(position(historyAlbum)),'5 / 9','Numbered navigation jumps directly to the chosen pose');
+  assert.equal(await evaluate(currentFrame(historyAlbum)),'5');
+  await assertAlbumCrop(historyAlbum,4);
+  await key('End',35);
+  assert.equal(await evaluate(currentFrame(historyAlbum)),'9','End selects the last pose');
+  await key('Home',36);
+  assert.equal(await evaluate(currentFrame(historyAlbum)),'1','Home selects the first pose');
+  await key('ArrowRight',39);
+  assert.equal(await evaluate(currentFrame(historyAlbum)),'2','Arrow keys advance the album from its navigator');
+  assert.equal(await evaluate(`document.activeElement===${albumNav(historyAlbum)}[1]`),true,'Keyboard selection moves navigation focus to the current shot');
+  assert.equal(await evaluate(`Boolean(${albumButton(historyAlbum,'自动播放')})`),true,'Manual selection leaves playback paused');
 
   const fullAlbumDownload=await evaluate(`(async()=>{
     const response=await fetch(document.querySelector('${albumCard} a[download]').href);
@@ -924,12 +957,13 @@ try {
   })()`);
   assert.deepEqual(fullAlbumDownload,['image/webp',resultImage.length],'Download keeps all poses in the original WebP');
   await evaluate(`document.querySelector('${albumCard} [data-job-action="compare"]').click()`);
-  await wait(`document.getElementById('tryon-comparison').open&&${position(comparisonAlbum)}==='1 / 9'`);
+  await wait(`document.getElementById('tryon-comparison').open&&${position(comparisonAlbum)}==='2 / 9'`);
   await evaluate(`${frame(comparisonAlbum)}.scrollIntoView({block:'center',behavior:'instant'})`);
-  await wait(`${selector(comparisonAlbum,'.tryon-album-frame img')}?.naturalWidth===${gridWidth}`);
+  await wait(ready(comparisonAlbum));
+  assert.equal(await evaluate(caption(comparisonAlbum)),secondCaption,'Comparison opens on the selected pose');
   await evaluate(`${albumButton(comparisonAlbum,'下一张')}.click()`);
-  assert.equal(await evaluate(position(comparisonAlbum)),'2 / 9');
-  await assertAlbumCrop(comparisonAlbum,1);
+  assert.equal(await evaluate(position(comparisonAlbum)),'3 / 9');
+  await assertAlbumCrop(comparisonAlbum,2);
   await evaluate('document.getElementById("tryon-comparison-close").click()');
   await wait(`!document.getElementById('tryon-comparison').open&&!document.querySelector('${comparisonAlbum}')`);
   await wait(`window.WardrobeTryOnStorage.listJobs().then(rows=>rows.some(job=>job.id==='${albumId}'&&job.cachedImage))`);
@@ -942,11 +976,23 @@ try {
   await evaluate('document.getElementById("tryon-history").click()');
   await wait(`Boolean(${frame(historyAlbum)})`);
   await evaluate(`${frame(historyAlbum)}.scrollIntoView({block:'center',behavior:'instant'})`);
-  await wait(`${position(historyAlbum)}==='1 / 9' && Boolean(${albumButton(historyAlbum,'自动播放')})`);
+  await wait(`${ready(historyAlbum)} && ${position(historyAlbum)}==='1 / 9' && Boolean(${albumButton(historyAlbum,'自动播放')})`);
   assert.match(await evaluate(`${selector(historyAlbum,'.tryon-album-frame img')}.src`),/^blob:/,'Saved albums play from the local private copy');
+  assert.equal(await evaluate(caption(historyAlbum)),firstCaption,'Cached album retains its pose description offline');
+  assert.equal(await evaluate(`Boolean(${progress(historyAlbum)})`),false,'Reduced motion starts without an animated countdown');
   await evaluate(`${albumButton(historyAlbum,'下一张')}.click()`);
   assert.equal(await evaluate(position(historyAlbum)),'2 / 9','Reduced motion still allows manual navigation');
-  console.log('PASS nine-pose result albums crop the private WebP, autoplay when visible, support controls and comparison, preserve downloads and reopen offline.');
+  assert.equal(await evaluate(caption(historyAlbum)),secondCaption);
+  await client('Emulation.setTouchEmulationEnabled',{enabled:true});
+  await evaluate(`${frame(historyAlbum)}.scrollIntoView({block:'center',behavior:'instant'})`);
+  const touch=await evaluate(`(()=>{const box=${frame(historyAlbum)}.getBoundingClientRect();
+    return {x:Math.round(box.left+box.width/2),y:Math.round(box.top+box.height/2)};
+  })()`);
+  await client('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{...touch,x:touch.x+45}]});
+  await client('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{...touch,x:touch.x-45}]});
+  await client('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+  await wait(`${position(historyAlbum)}==='3 / 9'`);
+  console.log('PASS nine-pose albums show autoplay progress, support direct jumps, keyboard, touch and pose captions, compare the selected pose and reopen offline.');
 } finally {
   if(client&&socket?.readyState===1)await Promise.race([client('Browser.close').catch(()=>{}),new Promise(resolve=>setTimeout(resolve,1000))]);
   if(processChrome.exitCode===null&&processChrome.signalCode===null){const exit=once(processChrome,'exit');try{process.kill(-processChrome.pid,'SIGTERM');}catch(error){if(error.code!=='ESRCH')throw error;}await exit;}
