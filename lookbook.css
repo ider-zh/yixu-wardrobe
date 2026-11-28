@@ -122,8 +122,9 @@
 #detail-dialog .lookbook-cover {
   position: relative;
   isolation: isolate;
-  align-self: stretch;
+  align-self: center;
   justify-self: center;
+  container-type: inline-size;
   width: 100%;
   max-width: min(100%, 500px);
   aspect-ratio: 2 / 3;
@@ -157,13 +158,14 @@
 }
 
 #detail-dialog .lookbook-pin {
+  --pin-size: clamp(24px, 10.5cqw, 36px);
   position: absolute;
-  left: var(--x, var(--pin-x, 50%));
-  top: var(--y, var(--pin-y, 50%));
+  left: var(--pin-x);
+  top: var(--pin-y);
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
+  width: var(--pin-size);
+  height: var(--pin-size);
   padding: 0;
   transform: translate(-50%, -50%);
   border: 1px solid #fffaf6;
@@ -563,8 +565,7 @@
   }
 
   #detail-dialog .lookbook-pin {
-    width: 32px;
-    height: 32px;
+    --pin-size: clamp(24px, 10.5cqw, 32px);
   }
 
   #detail-dialog .lookbook-album-stage {

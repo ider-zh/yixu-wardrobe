@@ -279,6 +279,24 @@ check('packing expands outfits and only merges explicit product appearances',()=
   assert.equal(restricted.entries.length,0);
   assert.deepEqual(JSON.parse(JSON.stringify(restricted.missing)),unavailable);
 });
+check('editorial portraits show their own product pins and empty covers clear them',()=>{
+  vm.runInContext(fs.readFileSync(path.join(root,'wardrobe-lookbook-pins.js'),'utf8'),context);
+  const {catalog}=loadContent(root);
+  assert.equal(a.adoptCatalog(catalog),true);
+  const look=catalog.looks.find(item=>item.id===89);
+  const product=catalog.products.find(item=>item.appearances.some(appearance=>
+    appearance.look_id===look.id&&appearance.piece_index===3));
+  a.openDetail(look.id);
+  const pins=node('lookbook-pins');
+  assert.equal(pins.hidden,false);
+  assert.ok(pins.innerHTML.includes('data-lookbook-piece="'+product.product_id+'"'));
+  pins.events.click[0]({currentTarget:pins,target:{closest:()=>({dataset:{lookbookPiece:product.product_id}})}});
+  assert.equal(node('lookbook-piece-name').textContent,product.name);
+  assert.equal(node('lookbook-piece-link').href,'#/product/'+product.product_id+'?look='+look.id);
+  a.openDetail(catalog.looks.find(item=>!item.editorial_asset).id);
+  assert.equal(pins.hidden,true);
+  assert.equal(pins.innerHTML,'');
+});
 for(const name of checks)console.log('PASS '+name);
 console.log('Synthetic DOM regression: '+checks.length+' checks passed.');
 await import('./regression-assets.mjs');

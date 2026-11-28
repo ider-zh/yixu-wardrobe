@@ -15,6 +15,8 @@
 
 画册主图使用 `assets/looks/` 下独立的公开 2:3 单帧 WebP，登记标准资源元数据。历史条目如有写真修订，以新九宫格作为主图和单品的制作参考。已有登记模特使用对应身份参考，历史未登记模特保留空值。使用已有九宫格核对人物和衣装，缺少可确认的面部参考时沿用画册的写真封面镜头。
 
+主图上可辨认的单品在 [wardrobe-lookbook-pins.js](../wardrobe-lookbook-pins.js) 配置锚点。以主图资源 ID 和从 1 开始的单品序号关联，`[x, y]` 是从原图左上角量起的宽、高百分比。更换主图时请按新图重新定位。被遮挡或出画的单品从画册内的单品列表进入。
+
 ## 从清单到前端
 
 - [scripts/content-lib.mjs](../scripts/content-lib.mjs) 和 [backend/content.py](../backend/content.py) 分别校验构建与服务端导入的数据。两端按清单内容生成同一 `revision`。服务端验证图片并按 SHA-256 存储，通过 SQLite 原子切换活动版本；导入失败继续提供上一个可用版本。已登记的 `asset_id` 对应固定字节。

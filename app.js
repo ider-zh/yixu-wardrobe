@@ -749,7 +749,9 @@ function chooseLookbookPiece(event){
   inspectedProduct=productsForLook(state.active).find(product=>product.product_id===button.dataset.lookbookPiece);
   showWholePiece=false;
   renderLookbookPiece();
-  if(event.currentTarget===$('detail-product-gallery'))$('lookbook-inspector').scrollIntoView({block:'nearest'});
+  if(event.currentTarget===$('detail-product-gallery')||window.matchMedia('(max-width: 720px)').matches){
+    $('lookbook-inspector').scrollIntoView({block:'nearest'});
+  }
 }
 $('lookbook-pins').addEventListener('click',chooseLookbookPiece);
 $('detail-product-gallery').addEventListener('click',chooseLookbookPiece);
@@ -976,14 +978,15 @@ function renderLookProducts(id,resetSelection=false){
  $('detail-products').hidden=!linked.length;
  $('detail-product-gallery').innerHTML=linked.map(product=>productCard(product,{lookId:id,inspect:true})).join('');
  const pins=$('lookbook-pins');
- const placements=[[55,34],[46,19],[58,64],[48,94]];
- const pinned=byId.get(id)?.editorial_asset?.asset_id==='look-112-female-01-editorial-r1';
- pins.hidden=!pinned||!linked.length;
- pins.innerHTML=pinned?linked.map(product=>{
-  const index=product.appearances.find(appearance=>appearance.look_id===id).piece_index-1;
-  const point=placements[index];if(!point)return '';
-  return '<button type="button" class="lookbook-pin" style="--pin-x:'+point[0]+'%;--pin-y:'+point[1]+'%" data-lookbook-piece="'+esc(product.product_id)+'" aria-label="查看'+esc(product.name)+'" aria-pressed="false">'+String(index+1).padStart(2,'0')+'</button>';
+ const coverId=byId.get(id)?.editorial_asset?.asset_id;
+ const placements=window.WardrobeLookbookPins?.[coverId];
+ pins.innerHTML=placements?linked.map(product=>{
+  const {piece_index:index}=product.appearances.find(appearance=>appearance.look_id===id);
+  const point=placements[index];
+  if(!point)return '';
+  return '<button type="button" class="lookbook-pin" style="--pin-x:'+point[0]+'%;--pin-y:'+point[1]+'%" data-lookbook-piece="'+esc(product.product_id)+'" aria-label="查看'+esc(product.name)+'" aria-pressed="false">'+String(index).padStart(2,'0')+'</button>';
  }).join(''):'';
+ pins.hidden=!pins.innerHTML;
  const selected=resetSelection?null:inspectedProduct?.product_id;
  inspectedProduct=linked.find(product=>product.product_id===selected)||linked[0]||null;
  if(!selected||inspectedProduct?.product_id!==selected)showWholePiece=false;

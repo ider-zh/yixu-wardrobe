@@ -19,6 +19,24 @@ for (const look of baseline.looks) {
   baselineImages.add(hash);
 }
 const siteResources = readSiteResources(root);
+const pinsContext = {window: {}};
+vm.runInNewContext(read('wardrobe-lookbook-pins.js'), pinsContext, {filename: 'wardrobe-lookbook-pins.js'});
+const portraits = new Map(content.catalog.looks
+  .filter(look => look.editorial_asset)
+  .map(look => [look.editorial_asset.asset_id, look.id]));
+const linkedPieces = new Set(content.catalog.products.flatMap(product =>
+  product.appearances.map(({look_id, piece_index}) => `${look_id}:${piece_index}`)));
+for (const [assetId, points] of Object.entries(pinsContext.window.WardrobeLookbookPins)) {
+  const lookId = portraits.get(assetId);
+  assert.ok(lookId && Object.keys(points).length, `Missing portrait or placements: ${assetId}`);
+  for (const [piece, point] of Object.entries(points)) {
+    assert.ok(linkedPieces.has(`${lookId}:${piece}`), `Missing linked piece: ${assetId}/${piece}`);
+    assert.ok(Array.isArray(point) && point.length === 2 &&
+      point.every(value => Number.isInteger(value) && value > 0 && value < 100),
+    `Invalid pin coordinates: ${assetId}/${piece}`);
+  }
+}
+assert.ok(siteResources.public.includes('wardrobe-lookbook-pins.js'), 'Lookbook pins must be included in the offline build');
 const sceneContext = {window: {}};
 vm.runInNewContext(read('wardrobe-scenes.js'), sceneContext, {filename: 'wardrobe-scenes.js'});
 const scenes = sceneContext.window.WARDROBE_SCENES;
