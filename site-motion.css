@@ -25,7 +25,7 @@ html.lenis {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  [data-image-state="loading"]:is(#lookbook-cover, #detail-photo-frame, :has(> img[loading="eager"]))::after {
+  [data-image-state="loading"]:is(#lookbook-cover, #detail-photo-frame, #gallery .photo-window, :has(> img[loading="eager"]))::after {
     animation: photo-loading 1.45s ease-in-out infinite;
   }
 }

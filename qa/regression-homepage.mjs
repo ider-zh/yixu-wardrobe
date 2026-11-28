@@ -197,6 +197,24 @@ try{
  assert.deepEqual(await evaluate('[...document.querySelectorAll("#gallery [data-photo-load] img")].slice(0,4).map(img=>img.loading)'),['eager','eager','eager','lazy']);
  await client('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'no-preference'}]});
  console.log('PASS delayed lookbook swaps show no stale photos and model routes prioritize photos and show placeholders');
+ await client('Network.enable');
+ await client('Network.setCacheDisabled',{cacheDisabled:true});
+ await navigate(origin+'/?archive-loading-check');
+ const delayedLook=catalog.looks.find(look=>look.id===indexedOrder[19]);
+ const releaseArchivePhoto=holdPhoto(delayedLook.versions.v2.asset.file);
+ await route('#/looks');
+ const archivePhoto=`document.querySelector('#gallery [data-look-card="${delayedLook.id}"] .photo-window')`;
+ await evaluate(`${archivePhoto}.scrollIntoView({behavior:"instant",block:"center"})`);
+ await wait(`${archivePhoto}.dataset.imageState==="loading"&&getComputedStyle(${archivePhoto},"::after").animationName==="photo-loading"`);
+ assert.equal(await evaluate(`${archivePhoto}.firstElementChild.loading`),'lazy');
+ assert.equal(await evaluate(`getComputedStyle(${archivePhoto}.firstElementChild).visibility`),'hidden');
+ const photoHeight=await evaluate(`${archivePhoto}.clientHeight`);
+ releaseArchivePhoto();
+ await wait(`${archivePhoto}.dataset.imageState==="ready"&&${archivePhoto}.firstElementChild.naturalWidth>0`);
+ assert.equal(await evaluate(`getComputedStyle(${archivePhoto},"::after").animationName`),'none');
+ assert.equal(await evaluate(`${archivePhoto}.clientHeight`),photoHeight);
+ await client('Network.setCacheDisabled',{cacheDisabled:false});
+ console.log('PASS unfiltered archive animates a lazy photo placeholder until ready without layout shift');
  for(const viewport of [{width:390,height:844},{width:1440,height:900}]){
   await client('Emulation.setDeviceMetricsOverride',{...viewport,deviceScaleFactor:1,mobile:viewport.width<600});
   await navigate();await wait('document.getElementById("hero-image-0").naturalWidth>0 && !document.getElementById("tryon-refresh").disabled');

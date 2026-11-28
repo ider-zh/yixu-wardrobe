@@ -492,7 +492,7 @@ function renderGallery() {
   $('gallery').innerHTML=filtered.slice(0,state.limit).map((look,index)=>renderCard(look,{
     tip:tips?.get(look.id),matchingPieces:state.piece?pieceMatch.matchingPieces(look,state.piece):[],
     matchingColors:state.colors.length?colorMatch.matchPalette(look.palette,state.colors):null,
-    photoLoading:state.page==='looks'&&state.model?(index<3?'eager':'lazy'):undefined,
+    photoLoading:state.page==='looks'?(index<3?'eager':'lazy'):undefined,
   })).join('');
   $('result-count').textContent=filtered.length+' 套造型';
   $('scene-result-count').textContent=scene?filtered.length+' 套穿搭':'';
