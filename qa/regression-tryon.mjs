@@ -862,10 +862,11 @@ try {
 
   const albumId='fixture-album';
   const tileWidth=122,tileHeight=183,gridWidth=tileWidth*3-1,gridHeight=tileHeight*3-1,footerHeight=30;
+  const albumColors=['#de4962','#48194f','#26b190','#b1e03f','#7965ad','#ee932a','#398bce','#00933f','#9e3d05'];
   const albumData=await evaluate(`(()=>{
     const canvas=document.createElement('canvas');canvas.width=${gridWidth};canvas.height=${gridHeight+footerHeight};
     const context=canvas.getContext('2d');
-    const colors=['#de4962','#48194f','#26b190','#b1e03f','#7965ad','#ee932a','#398bce','#00933f','#9e3d05'];
+    const colors=${JSON.stringify(albumColors)};
     const edge=(dimension,index)=>Math.floor(dimension*index/3);
     for(let i=0;i<9;i++){
       const column=i%3,row=Math.floor(i/3),left=edge(${gridWidth},column),top=edge(${gridHeight},row);
@@ -886,13 +887,35 @@ try {
   const albumButton=(album,label)=>selector(album,`button[aria-label="${label}"]`);
   const frame=album=>selector(album,'.tryon-album-frame');
   const ready=album=>`${selector(album,'.tryon-album-frame img')}?.style.visibility==='visible'`;
-  const albumNav=album=>`${selector(album,'.tryon-album-nav')}.querySelectorAll('button')`;
-  const currentFrame=album=>`${selector(album,'.tryon-album-nav button[aria-current="true"]')}?.textContent.trim()`;
+  const strip=album=>selector(album,'.tryon-album-nav');
+  const albumNav=album=>`${strip(album)}.querySelectorAll('button')`;
+  const currentFrame=album=>`(Array.from(${albumNav(album)}).findIndex(button=>button.getAttribute('aria-current')==='true')+1)`;
+  const thumbVisible=(album,index)=>`(()=>{
+    const strip=${strip(album)}, shot=${albumNav(album)}[${index}];
+    const bounds=strip.getBoundingClientRect(), target=shot.getBoundingClientRect();
+    return target.left>=bounds.left-1&&target.right<=bounds.right+1;
+  })()`;
   const caption=album=>`${selector(album,'.tryon-album-caption')}?.textContent.trim()`;
   const progress=album=>`${selector(album,'.tryon-album-progress')}?.getAnimations()[0]`;
   const key=async (name,code)=>{
     await client('Input.dispatchKeyEvent',{type:'rawKeyDown',key:name,code:name,windowsVirtualKeyCode:code});
     await client('Input.dispatchKeyEvent',{type:'keyUp',key:name,code:name,windowsVirtualKeyCode:code});
+  };
+  const assertThumbnails=async album=>{
+    const thumbnails=await evaluate(`Array.from(${albumNav(album)},button=>{
+      const thumb=button.querySelector('canvas.tryon-album-thumbnail');
+      return {
+        label:button.getAttribute('aria-label'),
+        pixels:thumb&&Array.from(thumb.getContext('2d').getImageData(Math.floor(thumb.width/2),Math.floor(thumb.height/2),1,1).data),
+      };
+    })`);
+    assert.equal(thumbnails.length,albumColors.length,'The album offers a photo preview for each pose');
+    for(const [index,{label,pixels}] of thumbnails.entries()){
+      const rgb=albumColors[index].slice(1).match(/../g).map(part=>Number.parseInt(part,16));
+      assert.match(label,new RegExp(`^第 ${index+1} 张`),'Thumbnail keeps an accessible shot label');
+      assert.ok(pixels?.[3]===255&&rgb.every((expected,channel)=>Math.abs(expected-pixels[channel])<10),
+        `Thumbnail ${index+1} draws its own panel from the WebP: ${pixels} vs ${rgb}`);
+    }
   };
   const assertAlbumCrop=async (album,index)=>{
     const bounds=await evaluate(`(()=>{
@@ -915,9 +938,13 @@ try {
   await wait(`Boolean(${frame(historyAlbum)})`);
   await evaluate(`${frame(historyAlbum)}.scrollIntoView({block:'center',behavior:'instant'})`);
   await wait(`${ready(historyAlbum)} && ${position(historyAlbum)}==='1 / 9' && Boolean(${albumButton(historyAlbum,'暂停播放')})`);
-  assert.deepEqual(await evaluate(`Array.from(${albumNav(historyAlbum)},button=>button.textContent.trim())`),
-    ['1','2','3','4','5','6','7','8','9'],'The album offers a direct jump to each shot');
-  assert.equal(await evaluate(currentFrame(historyAlbum)),'1');
+  await assertThumbnails(historyAlbum);
+  assert.ok(await evaluate(`(()=>{
+    const strip=${strip(historyAlbum)}, photo=${frame(historyAlbum)};
+    return strip.getBoundingClientRect().top>=photo.getBoundingClientRect().bottom &&
+      strip.scrollWidth>strip.clientWidth && /^(auto|scroll)$/.test(getComputedStyle(strip).overflowX);
+  })()`),'Photo previews form a horizontally scrollable strip below the large photo on mobile');
+  assert.equal(await evaluate(currentFrame(historyAlbum)),1);
   const firstCaption=await evaluate(caption(historyAlbum));
   assert.match(firstCaption,/^姿态设定.*正面/,'The caption identifies the intended pose as a generation reference');
   await assertAlbumCrop(historyAlbum,0);
@@ -926,7 +953,7 @@ try {
   await wait(`${position(historyAlbum)}==='2 / 9'`,250);
   await evaluate(`${albumButton(historyAlbum,'暂停播放')}.click()`);
   assert.equal(await evaluate(position(historyAlbum)),'2 / 9');
-  assert.equal(await evaluate(currentFrame(historyAlbum)),'2','Autoplay advances the navigation selection');
+  assert.equal(await evaluate(currentFrame(historyAlbum)),2,'Autoplay advances the selected thumbnail');
   const secondCaption=await evaluate(caption(historyAlbum));
   assert.match(secondCaption,/^姿态设定/);
   assert.notEqual(secondCaption,firstCaption);
@@ -935,19 +962,27 @@ try {
   await assertAlbumCrop(historyAlbum,1);
   await evaluate(`${albumButton(historyAlbum,'上一张')}.click();${albumButton(historyAlbum,'上一张')}.click()`);
   assert.equal(await evaluate(position(historyAlbum)),'9 / 9','Previous wraps to the last pose');
+  await wait(thumbVisible(historyAlbum,8));
   await assertAlbumCrop(historyAlbum,8);
   await evaluate(`${albumButton(historyAlbum,'下一张')}.click()`);
   assert.equal(await evaluate(position(historyAlbum)),'1 / 9','Next wraps to the first pose');
+  await wait(thumbVisible(historyAlbum,0));
+  await evaluate(`${strip(historyAlbum)}.scrollLeft=${strip(historyAlbum)}.scrollWidth`);
+  await wait(thumbVisible(historyAlbum,8));
+  assert.equal(await evaluate(currentFrame(historyAlbum)),1,'Scrolling the preview strip does not change the large photo');
+  await evaluate(`${albumNav(historyAlbum)}[8].click()`);
+  assert.equal(await evaluate(position(historyAlbum)),'9 / 9','Select a photo from the scrolled preview strip');
   await evaluate(`${albumNav(historyAlbum)}[4].click();${albumNav(historyAlbum)}[4].focus()`);
-  assert.equal(await evaluate(position(historyAlbum)),'5 / 9','Numbered navigation jumps directly to the chosen pose');
-  assert.equal(await evaluate(currentFrame(historyAlbum)),'5');
+  assert.equal(await evaluate(position(historyAlbum)),'5 / 9','Thumbnail navigation jumps directly to the chosen pose');
+  assert.equal(await evaluate(currentFrame(historyAlbum)),5);
   await assertAlbumCrop(historyAlbum,4);
   await key('End',35);
-  assert.equal(await evaluate(currentFrame(historyAlbum)),'9','End selects the last pose');
+  assert.equal(await evaluate(currentFrame(historyAlbum)),9,'End selects the last pose');
+  await wait(thumbVisible(historyAlbum,8));
   await key('Home',36);
-  assert.equal(await evaluate(currentFrame(historyAlbum)),'1','Home selects the first pose');
+  assert.equal(await evaluate(currentFrame(historyAlbum)),1,'Home selects the first pose');
   await key('ArrowRight',39);
-  assert.equal(await evaluate(currentFrame(historyAlbum)),'2','Arrow keys advance the album from its navigator');
+  assert.equal(await evaluate(currentFrame(historyAlbum)),2,'Arrow keys advance the album from its navigator');
   assert.equal(await evaluate(`document.activeElement===${albumNav(historyAlbum)}[1]`),true,'Keyboard selection moves navigation focus to the current shot');
   assert.equal(await evaluate(`Boolean(${albumButton(historyAlbum,'自动播放')})`),true,'Manual selection leaves playback paused');
 
@@ -960,6 +995,8 @@ try {
   await wait(`document.getElementById('tryon-comparison').open&&${position(comparisonAlbum)}==='2 / 9'`);
   await evaluate(`${frame(comparisonAlbum)}.scrollIntoView({block:'center',behavior:'instant'})`);
   await wait(ready(comparisonAlbum));
+  await assertThumbnails(comparisonAlbum);
+  assert.equal(await evaluate(currentFrame(comparisonAlbum)),2,'Comparison highlights the same thumbnail as history');
   assert.equal(await evaluate(caption(comparisonAlbum)),secondCaption,'Comparison opens on the selected pose');
   await evaluate(`${albumButton(comparisonAlbum,'下一张')}.click()`);
   assert.equal(await evaluate(position(comparisonAlbum)),'3 / 9');
@@ -992,7 +1029,7 @@ try {
   await client('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{...touch,x:touch.x-45}]});
   await client('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
   await wait(`${position(historyAlbum)}==='3 / 9'`);
-  console.log('PASS nine-pose albums show autoplay progress, support direct jumps, keyboard, touch and pose captions, compare the selected pose and reopen offline.');
+  console.log('PASS nine-pose albums show scrollable photo thumbnails and autoplay progress, support keyboard, touch and pose captions, compare the selected pose and reopen offline.');
 } finally {
   if(client&&socket?.readyState===1)await Promise.race([client('Browser.close').catch(()=>{}),new Promise(resolve=>setTimeout(resolve,1000))]);
   if(processChrome.exitCode===null&&processChrome.signalCode===null){const exit=once(processChrome,'exit');try{process.kill(-processChrome.pid,'SIGTERM');}catch(error){if(error.code!=='ESRCH')throw error;}await exit;}

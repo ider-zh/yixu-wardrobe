@@ -406,8 +406,14 @@ function createResultAlbum(owner, errorMessage, initialIndex=0) {
   const next = button('→','下一张','album-next');
   const play = button('','自动播放','album-play');
   const nav = element('div',undefined,'tryon-album-nav');
-  nav.setAttribute('role','group');nav.setAttribute('aria-label','选择试穿照片');
-  const shots = resultPosePlan.map((_,i)=>button(String(i+1),'','album-shot-'+i));
+  nav.setAttribute('role','group');nav.setAttribute('aria-label','试穿照片缩略图');
+  const shots = resultPosePlan.map((_,i)=>{
+    const shot=button('','','album-shot-'+i);
+    const thumbnail=element('canvas',undefined,'tryon-album-thumbnail');
+    thumbnail.setAttribute('aria-hidden','true');
+    shot.append(thumbnail);
+    return shot;
+  });
   nav.append(...shots);
   const track = element('div',undefined,'tryon-album-track');
   const progress = element('span',undefined,'tryon-album-progress');
@@ -436,18 +442,29 @@ function createResultAlbum(owner, errorMessage, initialIndex=0) {
       shot.setAttribute('aria-label',`第 ${i+1} 张${hasPosePlan?'，姿态设定：'+resultPosePlan[i]:''}`);
     }
   }
-  function select(target, animate=false) {
-    index=(target+shots.length)%shots.length;
-    const row=Math.floor(index/3), col=index%3;
+  function cropAt(shotIndex) {
+    const row=Math.floor(shotIndex/3), col=shotIndex%3;
     const left=Math.floor(col*width/3), right=Math.floor((col+1)*width/3);
     const top=Math.floor(row*height/3), bottom=Math.floor((row+1)*height/3);
-    const cellWidth=right-left, cellHeight=bottom-top;
+    return {left,top,cellWidth:right-left,cellHeight:bottom-top};
+  }
+  function revealThumbnail() {
+    // Scroll just the strip so autoplay cannot move the surrounding dialog.
+    const shot=shots[index];
+    const left=shot.offsetLeft-3, right=shot.offsetLeft+shot.offsetWidth+3;
+    if(left<nav.scrollLeft)nav.scrollLeft=left;
+    else if(right>nav.scrollLeft+nav.clientWidth)nav.scrollLeft=right-nav.clientWidth;
+  }
+  function select(target, animate=false) {
+    index=(target+shots.length)%shots.length;
+    const {left,top,cellWidth,cellHeight}=cropAt(index);
     Object.assign(image.style,{
       width:`${100*width/cellWidth}%`,height:`${100*image.naturalHeight/cellHeight}%`,
       left:`${-100*left/cellWidth}%`,top:`${-100*top/cellHeight}%`,
     });
     image.alt=`试穿相册第 ${index+1} 张，共 ${shots.length} 张`;
     updateNavigation();
+    revealThumbnail();
     fade?.cancel();
     if(animate&&!reducedResultMotion.matches)fade=image.animate([{opacity:.55},{opacity:1}],220);
   }
@@ -481,6 +498,10 @@ function createResultAlbum(owner, errorMessage, initialIndex=0) {
   shots.forEach((shot,i)=>shot.addEventListener('click',()=>choose(i)));
   play.addEventListener('click',()=>{playing=!playing;sync();});
   nav.addEventListener('focusin',pause);
+  nav.addEventListener('pointerdown',pause);
+  nav.addEventListener('wheel',event=>{
+    if(event.shiftKey||Math.abs(event.deltaX)>Math.abs(event.deltaY))pause();
+  },{passive:true});
   frame.addEventListener('focus',pause);
   album.addEventListener('keydown',event=>{
     if(!ready||event.altKey||event.ctrlKey||event.metaKey)return;
@@ -518,9 +539,17 @@ function createResultAlbum(owner, errorMessage, initialIndex=0) {
     // The server appends an AI label below the three source rows.
     height=image.naturalHeight-Math.max(30,Math.floor(width/45)+14);
     if(Math.min(width,height)<3){failed();return;}
-    frame.style.setProperty('--tryon-frame-ratio',width/height);
-    select(index);
+    album.style.setProperty('--tryon-frame-ratio',width/height);
+    for(const [i,shot] of shots.entries()){
+      const thumbnail=shot.firstElementChild;
+      const {left,top,cellWidth,cellHeight}=cropAt(i);
+      const scale=Math.min(1,144/Math.max(cellWidth,cellHeight));
+      thumbnail.width=Math.max(1,Math.round(cellWidth*scale));
+      thumbnail.height=Math.max(1,Math.round(cellHeight*scale));
+      thumbnail.getContext('2d')?.drawImage(image,left,top,cellWidth,cellHeight,0,0,thumbnail.width,thumbnail.height);
+    }
     ready=true;image.style.visibility='visible';controls.hidden=false;
+    select(index);
     sync();
   });
   image.addEventListener('error',failed);
