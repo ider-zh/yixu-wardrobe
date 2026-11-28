@@ -23,7 +23,7 @@
       play.title = label;
       caption?.setAttribute('aria-live', playing ? 'off' : 'polite');
 
-      if (!playing || !visible || !dialog.open || documentRoot.hidden) return;
+      if (!playing || !visible || !dialog.open || documentRoot.hidden || frame.dataset.imageState !== 'ready') return;
       timer = setTimeout(() => {
         if (dialog.open && visible && !documentRoot.hidden) selectView(1, false);
         sync();
@@ -37,7 +37,8 @@
 
     function transition() {
       outgoing?.remove();
-      if (reducedMotion.matches || image.hidden || !image.complete || !image.naturalWidth || !image.animate) return;
+      if (reducedMotion.matches || frame.dataset.imageState !== 'ready'
+        || image.hidden || !image.complete || !image.naturalWidth || !image.animate) return;
 
       const layer = documentRoot.createElement('img');
       layer.className = 'lookbook-outgoing';
@@ -72,6 +73,7 @@
       playing = !playing;
       sync();
     });
+    image.addEventListener('wardrobe:photo-ready', () => sync());
     previous.addEventListener('click', () => move(-1));
     next.addEventListener('click', () => move(1));
     stage.addEventListener('keydown', event => {

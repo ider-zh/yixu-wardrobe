@@ -61,18 +61,53 @@ function imageURL(version) {
 function imageAttributes(version) {
   return 'src="'+esc(imageURL(version))+'" data-source="'+esc(publicSource(version.source_url || version.image))+'" data-public-image="true"';
 }
+const photoRequests=new WeakMap();
+function clearPhoto(image) {
+  photoRequests.delete(image);
+  delete image.dataset.publicImage;
+  if(image.parentElement.dataset)delete image.parentElement.dataset.imageState;
+  image.parentElement.classList.remove('image-unavailable');
+  image.removeAttribute('src');
+  image.hidden=true;
+}
 function setImage(image,version) {
-  image.hidden=false; image.dataset.source=publicSource(version.source_url || version.image);
+  const url=imageURL(version),source=publicSource(version.source_url || version.image);
+  const frame=image.parentElement;
+  if(frame.dataset?.photoLoad==='true'){
+    const previous=photoRequests.get(image);
+    if(previous?.url===url&&previous.source===source&&!image.dataset.failed)return;
+    if(!url){clearPhoto(image);return;}
+    photoRequests.set(image,{url,source});
+    frame.dataset.imageState='loading';
+    image.removeAttribute('src');
+  }
+  image.hidden=false; image.dataset.source=source;
   image.dataset.publicImage='true'; delete image.dataset.fallback; delete image.dataset.failed;
-  image.parentElement.classList.remove('image-unavailable'); image.src=imageURL(version);
+  frame.classList.remove('image-unavailable'); image.src=url;
+}
+async function imageLoaded({target:image}) {
+  const frame=image?.parentElement;
+  if(frame?.dataset?.imageState!=='loading'||image.dataset.publicImage!=='true')return;
+  const src=image.src,request=photoRequests.get(image);
+  const matches=()=>image.isConnected&&image.src===src&&image.currentSrc===src&&image.naturalWidth>0
+    &&photoRequests.get(image)===request&&frame.dataset.imageState==='loading';
+  if(!matches())return;
+  try { if(image.decode)await image.decode(); } catch {
+    // A replaced request rejects decode. A still-current loaded image can paint natively.
+  }
+  if(!matches())return;
+  frame.dataset.imageState='ready';
+  image.dispatchEvent(new Event('wardrobe:photo-ready',{bubbles:true}));
 }
 function imageFailed(event) {
   const image=event.target;if(image?.dataset?.publicImage!=='true')return;
   const source=publicSource(image.dataset.source);
   if(!image.dataset.fallback && source && image.getAttribute('src')!==source){image.dataset.fallback='true';image.src=source;return;}
   image.dataset.failed='true';image.hidden=true;
+  if(image.parentElement.dataset?.photoLoad==='true')image.parentElement.dataset.imageState='failed';
   image.parentElement.classList.add('image-unavailable');image.parentElement.setAttribute('data-image-status','图片暂不可用');
 }
+document.addEventListener('load',imageLoaded,true);
 document.addEventListener('error',imageFailed,true);
 window.WardrobeImages={set:setImage};
 function latestBatch() {
@@ -147,10 +182,11 @@ function notify(message) {
 }
 function palette(look) { return (look.palette || []).filter(c => /^#[0-9a-f]{6}$/i.test(c)).map(c => '<span class="color-swatch" style="background:'+c+'" title="'+c+'"></span>').join(''); }
 function versionOf(look) { return look.versions.v2; }
-function photo(look, alt) {
+function photo(look, alt, loading) {
  const v=versionOf(look),p=Math.min(9,Math.max(1,v.previewPanel||1)),next=p%9+1;
  const x=-((p-1)%3)*100,y=-Math.floor((p-1)/3)*100,nx=-((next-1)%3)*100,ny=-Math.floor((next-1)/3)*100;
- return '<div class="photo-window" style="--panel-x:'+x+'%;--panel-y:'+y+'%;--next-x:'+nx+'%;--next-y:'+ny+'%"><img '+imageAttributes(v)+' alt="'+esc(alt || look.title+' · '+(v.shots[p-1]?.title||'写真'))+'" loading="lazy" decoding="async"></div>';
+ const loadState=loading?' data-photo-load="true" data-image-state="loading"':'';
+ return '<div class="photo-window"'+loadState+' style="--panel-x:'+x+'%;--panel-y:'+y+'%;--next-x:'+nx+'%;--next-y:'+ny+'%"><img '+imageAttributes(v)+' alt="'+esc(alt || look.title+' · '+(v.shots[p-1]?.title||'写真'))+'" loading="'+(loading||'lazy')+'" decoding="async"></div>';
 }
 function updateHeroCover(look, theme) {
  const v=versionOf(look),panel=Math.min(9,Math.max(1,v.previewPanel||1));
@@ -194,7 +230,7 @@ function renderModels(){
    const owned=modelLooks(model.id),cover=owned[0];
    if(!cover)return '';
    const href=owned.some(look=>look.model_only)?modelRoute(model.id):'#/looks?model='+encodeURIComponent(model.id);
-   return '<article class="model-card"><a href="'+href+'" aria-label="查看 '+esc(model.name)+' 的穿搭">'+photo(cover,model.name+' · '+cover.title)+'</a><p class="eyebrow">'+esc(model.id)+'</p><h2>'+esc(model.name)+'</h2><p>'+owned.length+' 套已发布穿搭</p><a class="model-looks-link" href="'+href+'">查看穿搭 ↗</a></article>';
+   return '<article class="model-card"><a href="'+href+'" aria-label="查看 '+esc(model.name)+' 的穿搭">'+photo(cover,model.name+' · '+cover.title,'lazy')+'</a><p class="eyebrow">'+esc(model.id)+'</p><h2>'+esc(model.name)+'</h2><p>'+owned.length+' 套已发布穿搭</p><a class="model-looks-link" href="'+href+'">查看穿搭 ↗</a></article>';
  }).join('');
  $('models-empty').hidden=!!$('model-gallery').children.length;
 }
@@ -202,8 +238,11 @@ function renderModelProfile(id) {
   const model=models.find(item=>item.id===id),owned=model?modelLooks(id):[];
   $('model-directory').hidden=!!owned.length;
   $('model-profile').hidden=!owned.length;
-  $('model-looks-gallery').innerHTML=owned.map(look=>renderCard(look)).join('');
-  if(!owned.length)return;
+  $('model-looks-gallery').innerHTML=owned.map((look,index)=>renderCard(look,{photoLoading:index<3?'eager':'lazy'})).join('');
+  if(!owned.length){
+    [...document.querySelectorAll('#model-gallery .photo-window img')].slice(0,3).forEach(image=>{image.loading='eager';});
+    return;
+  }
   $('model-profile-id').textContent=model.id;
   $('model-profile-title').textContent=model.name+'的穿搭';
 }
@@ -431,7 +470,7 @@ function renderSceneControls() {
   $('archive-toolbar').hidden=!!scene;
   $('collection-title').innerHTML=esc(scene?.title||(state.page==='favorites'?'我的收藏':'全部穿搭'))+'<span class="heading-period">.</span>';
 }
-function renderCard(l,{tip,matchingPieces=[],matchingColors}={}) {
+function renderCard(l,{tip,matchingPieces=[],matchingColors,photoLoading}={}) {
   const liked=favorites.has(l.id), picked=compare.has(l.id);
   const compareAction=l.model_only?'':'<button class="icon-button compare'+(picked?' selected':'')+'" data-compare="'+l.id+'" aria-pressed="'+picked+'" aria-label="'+(picked?'移出对比':'加入对比')+' '+esc(l.title)+'">'+comparison+'</button>';
   const match=matchingPieces.length?'<p class="card-piece-match">匹配单品 · '+matchingPieces.map(esc).join('、')+'</p>':'';
@@ -443,16 +482,17 @@ function renderCard(l,{tip,matchingPieces=[],matchingColors}={}) {
   const paletteEvidence=colors?'<div class="card-color-evidence" aria-label="色板匹配">'+colors+'</div>':'';
   const notes=tip?'<p class="scene-tip">'+esc(tip)+'</p>'
     :match+paletteEvidence+'<p class="card-publication">'+esc(publication(l))+'</p><p class="card-tags">'+(versionOf(l).moods||l.tags||[]).slice(0,4).map(esc).join(' · ')+'</p>';
-  return '<article class="look-card" data-look-card="'+l.id+'"><div class="image-zone"><button class="look-photo-button" data-open="'+l.id+'" aria-label="查看 '+esc(l.title)+' 的九宫格写真和搭配设计">'+(versionOf(l).ready?photo(l):'<div class="card-pending"><span>'+number(l.id)+'</span><small>写真准备中</small></div>')+'<span class="card-number">'+number(l.id)+'</span>'+'<span class="open-caption">查看写真与设计 <span>↗</span></span></button><div class="card-actions"><button class="icon-button favorite'+(liked?' selected':'')+'" data-favorite="'+l.id+'" aria-pressed="'+liked+'" aria-label="'+(liked?'取消收藏':'收藏')+' '+esc(l.title)+'">'+heart+'</button>'+compareAction+'</div></div><div class="card-meta"><div class="card-topline"><span>'+esc(l.category)+' / '+esc(l.season)+' · '+l.pieces.length+' 件搭配</span><div class="palette" aria-label="造型配色">'+palette(l)+'</div></div><button class="card-title" data-open="'+l.id+'">'+esc(l.title)+'</button>'+notes+'</div></article>';
+  return '<article class="look-card" data-look-card="'+l.id+'"><div class="image-zone"><button class="look-photo-button" data-open="'+l.id+'" aria-label="查看 '+esc(l.title)+' 的九宫格写真和搭配设计">'+(versionOf(l).ready?photo(l,undefined,photoLoading):'<div class="card-pending"><span>'+number(l.id)+'</span><small>写真准备中</small></div>')+'<span class="card-number">'+number(l.id)+'</span>'+'<span class="open-caption">查看写真与设计 <span>↗</span></span></button><div class="card-actions"><button class="icon-button favorite'+(liked?' selected':'')+'" data-favorite="'+l.id+'" aria-pressed="'+liked+'" aria-label="'+(liked?'取消收藏':'收藏')+' '+esc(l.title)+'">'+heart+'</button>'+compareAction+'</div></div><div class="card-meta"><div class="card-topline"><span>'+esc(l.category)+' / '+esc(l.season)+' · '+l.pieces.length+' 件搭配</span><div class="palette" aria-label="造型配色">'+palette(l)+'</div></div><button class="card-title" data-open="'+l.id+'">'+esc(l.title)+'</button>'+notes+'</div></article>';
 }
 function renderGallery() {
   const scene=scenes.get(state.scene);
   const tips=scene?new Map(scene.entries.map(entry=>[entry.lookId,entry.tip])):null;
   if(scene)filtered=scene.entries.map(entry=>sceneLook(entry.lookId)).filter(Boolean);
   else matchLooks();
-  $('gallery').innerHTML=filtered.slice(0,state.limit).map(look=>renderCard(look,{
+  $('gallery').innerHTML=filtered.slice(0,state.limit).map((look,index)=>renderCard(look,{
     tip:tips?.get(look.id),matchingPieces:state.piece?pieceMatch.matchingPieces(look,state.piece):[],
     matchingColors:state.colors.length?colorMatch.matchPalette(look.palette,state.colors):null,
+    photoLoading:state.page==='looks'&&state.model?(index<3?'eager':'lazy'):undefined,
   })).join('');
   $('result-count').textContent=filtered.length+' 套造型';
   $('scene-result-count').textContent=scene?filtered.length+' 套穿搭':'';
@@ -554,7 +594,7 @@ function renderLookbookCover(look) {
   cover.style.setProperty('--panel-y',-Math.floor(panel/3)*100+'%');
   cover.alt=look.title+' · 穿搭封面';
   if(portrait||version.ready)setImage(cover,portrait||version);
-  else {cover.hidden=true;cover.removeAttribute('src');}
+  else clearPhoto(cover);
   const model=look.model_id?modelName(look.model_id):'';
   $('lookbook-model').textContent=[model,look.region].filter(Boolean).join(' · ');
   $('lookbook-open-album').hidden=!version.ready;
@@ -735,8 +775,8 @@ function openDetail(id,preserveNavigation=false,{view=0,routed=false,hydrating=f
   renderLookProducts(id,newView);
   $('detail-design').innerHTML=l.details.map(d=>'<li>'+esc(d)+'</li>').join('');
   $('detail-scene').textContent='写真场景 / '+l.scene;
-  $('detail-image').hidden=!versionOf(l).ready;$('detail-photo-frame').classList.toggle('pending',!versionOf(l).ready);
-  if(versionOf(l).ready)setImage($('detail-image'),versionOf(l));else $('detail-image').removeAttribute('src');
+  $('detail-photo-frame').classList.toggle('pending',!versionOf(l).ready);
+  if(versionOf(l).ready)setImage($('detail-image'),versionOf(l));else clearPhoto($('detail-image'));
   $('original-link').href=imageURL(versionOf(l));$('download-link').href=publicSource(versionOf(l).download_url,true)||publicSource(versionOf(l).source_url||versionOf(l).image);$('download-link').download='LOOK-'+number(id)+'-v2-'+l.title+'.webp';
   $('original-link').hidden=!versionOf(l).ready;$('download-link').hidden=!versionOf(l).ready;
   const version=versionOf(l);

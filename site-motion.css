@@ -2,6 +2,39 @@ html.lenis {
   scroll-behavior: auto;
 }
 
+[data-photo-load] {
+  position: relative;
+}
+
+[data-image-state="loading"] > img,
+#detail-dialog [data-image-state="loading"] #lookbook-pins {
+  visibility: hidden;
+}
+
+[data-image-state="loading"]::after {
+  content: "正在载入写真";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  background: linear-gradient(110deg, #e7dfd0 28%, #f6f0e3 48%, #e7dfd0 68%) 50% / 220% 100%;
+  color: #4f493e;
+  font-size: var(--small-text-size);
+  letter-spacing: 0.12em;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-image-state="loading"]:is(#lookbook-cover, #detail-photo-frame, :has(> img[loading="eager"]))::after {
+    animation: photo-loading 1.45s ease-in-out infinite;
+  }
+}
+
+@keyframes photo-loading {
+  from { background-position: 100% 0; }
+  to { background-position: 0 0; }
+}
+
 #hero-detail > span {
   display: inline-block;
 }

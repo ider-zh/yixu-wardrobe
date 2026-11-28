@@ -24,6 +24,12 @@ assert.ok(featured,'Publication projection supplies a real hero');
 let apiCatalog=structuredClone(catalog);
 let siteTheme='editorial';
 let catalogHold;
+const heldPhotos=new Map();
+function holdPhoto(file) {
+ const gate=Promise.withResolvers(),url='/'+file;
+ heldPhotos.set(url,gate);
+ return ()=>{heldPhotos.delete(url);gate.resolve();};
+}
 const requested=[];
 const server=http.createServer(async(req,res)=>{
  requested.push(req.url);
@@ -40,6 +46,7 @@ const server=http.createServer(async(req,res)=>{
  }
  if(req.url.startsWith('/api/')){res.statusCode=503;res.setHeader('Content-Type','application/json');res.end('{"error":{"code":"fixture_unavailable","message":"测试服务未配置"}}');return;}
  let relative;try{relative=decodeURIComponent(new URL(req.url,'http://fixture').pathname);}catch{res.statusCode=400;res.end();return;}
+ if(heldPhotos.has(relative))await heldPhotos.get(relative).promise;
  const target=path.resolve(output,'.'+(relative==='/'?'/index.html':relative));
  if(!target.startsWith(output+path.sep)||!fs.existsSync(target)||!fs.statSync(target).isFile()){res.statusCode=404;res.end();return;}
  res.setHeader('Content-Type',({'.html':'text/html; charset=utf-8','.js':'text/javascript','.css':'text/css','.webp':'image/webp','.svg':'image/svg+xml'})[path.extname(target)]||'application/octet-stream');res.end(fs.readFileSync(target));
@@ -125,6 +132,46 @@ try{
  await client('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'no-preference'}]});
  await wait('document.documentElement.classList.contains("lenis")');
  console.log('PASS desktop wheel, native touch and modal scroll, route reset and live reduced-motion preference');
+ const bookPhotos='[...document.querySelectorAll("#lookbook-cover-image, #detail-image")]';
+ const bookReady=`${bookPhotos}.every(img=>img.parentElement.dataset.imageState==="ready"&&img.currentSrc===img.src)`;
+ const bookLoading=`${bookPhotos}.every(img=>img.parentElement.dataset.imageState==="loading"&&getComputedStyle(img).visibility==="hidden")`;
+ const holdLook=id=>{
+  const look=catalog.looks.find(item=>item.id===id);
+  const release=[look.versions.v2.asset.file,look.editorial_asset?.file].filter(Boolean).map(holdPhoto);
+  return ()=>release.forEach(open=>open());
+ };
+ await route('#look-1');await wait(bookReady);
+ const releaseSecond=holdLook(3),releaseThird=holdLook(5);
+ await route('#look-3');await wait(bookLoading);
+ await route('#look-5');await wait(bookLoading);
+ releaseSecond();
+ await evaluate('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');
+ assert.equal(await evaluate(bookLoading),true,'Finishing the previous request cannot reveal it under the new outfit title');
+ releaseThird();
+ await wait(bookReady);
+ for(const src of await evaluate(`${bookPhotos}.map(img=>img.currentSrc)`))assert.match(src,/look-005/);
+ assert.equal(await evaluate('document.querySelector(".lookbook-outgoing")'),null);
+ await route('#/home');
+
+ const exclusiveModel=catalog.looks.find(look=>look.model_only).model_id;
+ const firstModelLook=catalog.latestOrder.map(id=>catalog.looks.find(look=>look.id===id)).find(look=>look.model_id===exclusiveModel);
+ const releaseModel=holdPhoto(firstModelLook.versions.v2.asset.file);
+ const modelCard=`document.querySelector('#model-gallery a[href="#/models/${exclusiveModel}"] img')`;
+ await client('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'}]});
+ await route('#/models');
+ const photoWaiting=img=>`(${img})?.parentElement.dataset.imageState==="loading"&&(${img}).loading==="eager"&&getComputedStyle(${img}).visibility==="hidden"&&getComputedStyle((${img}).parentElement,"::after").animationName==="none"`;
+ await wait(photoWaiting(modelCard));
+ await route('#/models/'+exclusiveModel);
+ const profileCover='document.querySelector("#model-looks-gallery img")';
+ await wait(photoWaiting(profileCover));
+ releaseModel();
+ await wait(`${profileCover}.parentElement.dataset.imageState==="ready"`);
+ assert.equal(await evaluate(`getComputedStyle(${profileCover}).opacity`),'1','Reduced motion reveals the decoded photo immediately');
+ const indexedModel=catalog.looks.find(look=>!look.model_only&&look.model_id).model_id;
+ await route('#/looks?model='+indexedModel);
+ assert.deepEqual(await evaluate('[...document.querySelectorAll("#gallery [data-photo-load] img")].slice(0,4).map(img=>img.loading)'),['eager','eager','eager','lazy']);
+ await client('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'no-preference'}]});
+ console.log('PASS delayed lookbook swaps show no stale photos and model routes prioritize photos and show placeholders');
  for(const viewport of [{width:390,height:844},{width:1440,height:900}]){
   await client('Emulation.setDeviceMetricsOverride',{...viewport,deviceScaleFactor:1,mobile:viewport.width<600});
   await navigate();await wait('document.getElementById("hero-image-0").naturalWidth>0 && !document.getElementById("tryon-refresh").disabled');
@@ -785,6 +832,7 @@ try{
  assert.deepEqual(exceptions,[],'Browser must not report uncaught JavaScript exceptions');
  console.log('PASS stale API retains newest built version, matching API hydration, real file:// offline snapshot and expressive-only resources');
 }finally{
+ for(const gate of heldPhotos.values())gate.resolve();
  if(client&&socket?.readyState===1)await Promise.race([client('Browser.close').catch(()=>{}),new Promise(resolve=>setTimeout(resolve,1000))]);
  if(processChrome.exitCode===null&&processChrome.signalCode===null){const exit=once(processChrome,'exit');try{process.kill(-processChrome.pid,'SIGTERM');}catch(error){if(error.code!=='ESRCH')throw error;}await exit;}
  socket?.close();await new Promise(resolve=>server.close(resolve));fs.rmSync(profile,{recursive:true,force:true,maxRetries:10,retryDelay:100});fs.rmSync(workspace,{recursive:true,force:true,maxRetries:10,retryDelay:100});

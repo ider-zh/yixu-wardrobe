@@ -96,11 +96,25 @@
       }
       document.addEventListener('focusin', settleFocus);
 
+      function revealPhoto({ target }) {
+        const tween = gsap.fromTo(target, { opacity: 0.55 }, {
+          opacity: 1,
+          duration: 0.22,
+          ease: 'power2.out',
+          overwrite: 'auto',
+          clearProps: 'opacity',
+          onComplete: () => active.delete(target),
+        });
+        active.set(target, tween);
+      }
+      document.addEventListener('wardrobe:photo-ready', revealPhoto);
+
       return () => {
         visibility.disconnect();
         gridUpdates.disconnect();
         bookUpdates.disconnect();
         document.removeEventListener('focusin', settleFocus);
+        document.removeEventListener('wardrobe:photo-ready', revealPhoto);
         for (const tween of active.values()) tween.revert();
         active.clear();
       };
