@@ -297,6 +297,20 @@ check('editorial portraits show their own product pins and empty covers clear th
   assert.equal(pins.hidden,true);
   assert.equal(pins.innerHTML,'');
 });
+check('outfit-specific layouts load and the pilot restores its original design',()=>{
+  vm.runInContext(fs.readFileSync(path.join(root,'wardrobe-lookbook-designs.js'),'utf8'),context);
+  const dialog=node('detail-dialog');
+  a.openDetail(79);
+  const first=dialog.dataset.lookbookLayout;
+  assert.equal(first,context.window.WardrobeLookbookDesigns[79].layout);
+  const firstInk=dialog.style['--lookbook-theme-ink'];
+  a.openDetail(88);
+  assert.notEqual(dialog.dataset.lookbookLayout,first);
+  assert.notEqual(dialog.style['--lookbook-theme-ink'],firstInk);
+  a.openDetail(112);
+  assert.equal(dialog.dataset.lookbookLayout,undefined);
+  assert.equal(dialog.dataset.lookbookType,undefined);
+});
 for(const name of checks)console.log('PASS '+name);
 console.log('Synthetic DOM regression: '+checks.length+' checks passed.');
 await import('./regression-assets.mjs');

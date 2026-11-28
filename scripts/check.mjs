@@ -37,6 +37,35 @@ for (const [assetId, points] of Object.entries(pinsContext.window.WardrobeLookbo
   }
 }
 assert.ok(siteResources.public.includes('wardrobe-lookbook-pins.js'), 'Lookbook pins must be included in the offline build');
+const designContext = {window: {}};
+vm.runInNewContext(read('wardrobe-lookbook-designs.js'), designContext, {filename: 'wardrobe-lookbook-designs.js'});
+const knownLookIds = new Set(content.catalog.looks.map(look => String(look.id)));
+const designOptions = {
+  layout: ['center', 'left', 'right', 'masthead', 'split', 'folio'],
+  mood: ['light', 'grid', 'rings', 'stripe', 'edge', 'flat'],
+  type: ['song', 'hei', 'kai', 'classic', 'modern'],
+  frame: ['flush', 'mat', 'line', 'inset'],
+};
+for (const [lookId, design] of Object.entries(designContext.window.WardrobeLookbookDesigns)) {
+  assert.ok(knownLookIds.has(lookId), `Unknown lookbook design: ${lookId}`);
+  for (const [name, options] of Object.entries(designOptions)) {
+    assert.ok(options.includes(design[name]), `Invalid lookbook ${name}: ${lookId}`);
+  }
+  for (const color of ['ink', 'paper', 'accent', 'glow']) {
+    assert.match(design[color], /^#[0-9a-f]{6}$/i, `Invalid lookbook ${color}: ${lookId}`);
+  }
+  assert.ok(Number.isFinite(design.scale) && design.scale >= 0.9 && design.scale <= 1.18,
+    `Invalid lookbook title scale: ${lookId}`);
+  assert.ok(Number.isFinite(design.tracking) && design.tracking >= -0.045 && design.tracking <= 0.14,
+    `Invalid lookbook title tracking: ${lookId}`);
+  assert.ok(Number.isFinite(design.portraitWeight) && design.portraitWeight >= .95 && design.portraitWeight <= 1.4,
+    `Invalid lookbook portrait column: ${lookId}`);
+  assert.ok(Number.isFinite(design.titleMeasure) && design.titleMeasure >= 5 && design.titleMeasure <= 13,
+    `Invalid lookbook title measure: ${lookId}`);
+}
+for (const file of ['wardrobe-lookbook-designs.js', 'lookbook-design.css']) {
+  assert.ok(siteResources.public.includes(file), `Lookbook design requires ${file} in the offline build`);
+}
 const sceneContext = {window: {}};
 vm.runInNewContext(read('wardrobe-scenes.js'), sceneContext, {filename: 'wardrobe-scenes.js'});
 const scenes = sceneContext.window.WARDROBE_SCENES;

@@ -17,6 +17,8 @@
 
 主图上可辨认的单品在 [wardrobe-lookbook-pins.js](../wardrobe-lookbook-pins.js) 配置锚点。以主图资源 ID 和从 1 开始的单品序号关联，`[x, y]` 是从原图左上角量起的宽、高百分比。更换主图时请按新图重新定位。被遮挡或出画的单品从画册内的单品列表进入。
 
+画册视觉配置按穿搭编号写入 [wardrobe-lookbook-designs.js](../wardrobe-lookbook-designs.js)。根据每套衣装和写真场景选择版式、标题字形、画框、背景纹理和颜色。第 112 套使用原试点样式。样式规则在 [lookbook-design.css](../lookbook-design.css)。
+
 ## 从清单到前端
 
 - [scripts/content-lib.mjs](../scripts/content-lib.mjs) 和 [backend/content.py](../backend/content.py) 分别校验构建与服务端导入的数据。两端按清单内容生成同一 `revision`。服务端验证图片并按 SHA-256 存储，通过 SQLite 原子切换活动版本；导入失败继续提供上一个可用版本。已登记的 `asset_id` 对应固定字节。

@@ -43,7 +43,7 @@
   background: var(--lookbook-wine);
 }
 
-#detail-dialog .lookbook-hero:not(:has(.lookbook-inspector:not([hidden]))) {
+#detail-dialog:not([data-lookbook-layout]) .lookbook-hero:not(:has(.lookbook-inspector:not([hidden]))) {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.18fr);
 }
 
@@ -538,7 +538,7 @@
   }
 
   #detail-dialog .lookbook-hero,
-  #detail-dialog .lookbook-hero:not(:has(.lookbook-inspector:not([hidden]))),
+  #detail-dialog:not([data-lookbook-layout]) .lookbook-hero:not(:has(.lookbook-inspector:not([hidden]))),
   #detail-dialog .lookbook-notes,
   #detail-dialog #lookbook-album {
     grid-template-columns: minmax(0, 1fr);

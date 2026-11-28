@@ -525,6 +525,27 @@ function portraitAsset(look) {
   const asset=look.editorial_asset;
   return asset && {...asset,source_url:asset.file};
 }
+function applyLookbookDesign(id) {
+  const dialog=$('detail-dialog');
+  const design=window.WardrobeLookbookDesigns?.[id];
+  const attributes={
+    lookbookLayout:design?.layout,
+    lookbookMood:design?.mood,
+    lookbookType:design?.type,
+    lookbookFrame:design?.frame,
+  };
+  for(const [name,value] of Object.entries(attributes)){
+    if(value)dialog.dataset[name]=value;
+    else delete dialog.dataset[name];
+  }
+  if(!design)return;
+  for(const token of ['ink','paper','accent','glow','scale']){
+    dialog.style.setProperty('--lookbook-theme-'+token,design[token]);
+  }
+  dialog.style.setProperty('--lookbook-theme-tracking',design.tracking+'em');
+  dialog.style.setProperty('--lookbook-portrait-weight',design.portraitWeight+'fr');
+  dialog.style.setProperty('--lookbook-title-measure',design.titleMeasure+'em');
+}
 function renderLookbookCover(look) {
   const cover=$('lookbook-cover-image'),version=versionOf(look),portrait=portraitAsset(look);
   const panel=(version.previewPanel||1)-1;
@@ -691,6 +712,7 @@ function openDetail(id,preserveNavigation=false,{view=0,routed=false,hydrating=f
   if(routed||location.hash===hash||(alreadyOpen&&detailSceneOpener!==null))history.replaceState(entry,'',hash);
   else history.pushState(entry,'',hash);
   state.active=id;
+  applyLookbookDesign(id);
   $('detail-number').textContent='LOOK '+number(id)+' / '+l.category+' / '+l.season;
   $('detail-title').textContent=l.title;$('detail-story-title').textContent=versionOf(l).story;$('detail-story-summary').textContent=versionOf(l).summary;
   $('detail-palette').innerHTML=palette(l);
@@ -749,7 +771,9 @@ function chooseLookbookPiece(event){
   inspectedProduct=productsForLook(state.active).find(product=>product.product_id===button.dataset.lookbookPiece);
   showWholePiece=false;
   renderLookbookPiece();
-  if(event.currentTarget===$('detail-product-gallery')||window.matchMedia('(max-width: 720px)').matches){
+  const preview=$('lookbook-piece-name').getBoundingClientRect();
+  const dialog=$('detail-dialog').getBoundingClientRect();
+  if(event.currentTarget===$('detail-product-gallery')||preview.bottom>dialog.bottom){
     $('lookbook-inspector').scrollIntoView({block:'nearest'});
   }
 }
