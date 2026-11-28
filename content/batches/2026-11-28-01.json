@@ -1,0 +1,169 @@
+{
+  "schema_version": 1,
+  "batch_id": "2026-11-28-01",
+  "publish_date": "2026-11-28",
+  "published_at": "2026-11-28T08:07:35+08:00",
+  "timezone": "Asia/Shanghai",
+  "title": "上海浦东 · 冰场外的一抹柿橙",
+  "region": {
+    "country": "CN",
+    "city": "上海"
+  },
+  "research": {
+    "checked_at": "2026-11-28T08:02:00+08:00",
+    "trend_sources": [
+      {
+        "url": "https://isu-skating.com/en/short-track/news/isu-short-track-world-tour-shanghai-schedule/",
+        "published_at": "2026-11-25",
+        "summary": "国际滑联公布上海站赛程，11 月 28 日有复活赛和正赛。"
+      },
+      {
+        "url": "https://english.shanghai.gov.cn/en-Latest-WhatsNew/20261123/1a972b1ed36343acb89d6026284d2df8.html",
+        "published_at": "2026-11-23",
+        "summary": "上海市政府活动预告确认短道速滑上海站在浦东东方体育中心举行。"
+      },
+      {
+        "url": "https://company.bosideng.com/tc/ir/presentations/pre261125.pdf",
+        "published_at": "2026-11-25",
+        "summary": "波司登中期业绩演示中的短外套与深色长裤、步行鞋造型提供了搭配线索。"
+      }
+    ],
+    "weather": {
+      "url": "https://www.weather.com.cn/textFC/shanghai.shtml",
+      "forecast_date": "2026-11-28",
+      "checked_at": "2026-11-28T08:01:00+08:00",
+      "summary": "中国天气网预报浦东新区白天及夜间晴，最高 16℃、最低 4℃，西北风小于 3 级，预报时段无明显降水。",
+      "styling_reason": "午后场外短走与阴处等候时以绗缝夹克叠穿针织，进入场馆可开合拉链调节，低帮系带鞋用于短程步行及上下台阶。"
+    }
+  },
+  "looks": [
+    {
+      "id": 114,
+      "model_id": "female-01",
+      "model_reference_sha256": "dc0a221ff81250415bcfa3b320bc916dc02e2873f030e707083928505ca75066",
+      "title": "冰场外的一抹柿橙",
+      "category": "冬日叠穿",
+      "season": "冬季",
+      "description": "板岩蓝绗缝夹克敞开，露出柿橙细罗纹。深靛蓝直筒裤落到石墨灰系带鞋上，暖色集中在上身，从场外台阶一路走到冰场看台。",
+      "pieces": [
+        {
+          "role": "外套",
+          "name": "板岩蓝立领绗缝夹克"
+        },
+        {
+          "role": "上装",
+          "name": "柿橙半高领细罗纹针织衫"
+        },
+        {
+          "role": "下装",
+          "name": "深靛蓝全长直筒裤"
+        },
+        {
+          "role": "鞋履",
+          "name": "石墨灰系带步行鞋"
+        }
+      ],
+      "tags": [
+        "短道速滑观赛",
+        "绗缝夹克",
+        "柿橙",
+        "直筒裤",
+        "上海浦东"
+      ],
+      "mood": "进场前伸手挡光，听见欢呼就笑起来，离场时扶住门等同伴。",
+      "scene": "取景灵感来自 11 月 28 日上海短道速滑世界巡回赛。故事从浦东东方体育中心的场外台阶走到冰场栏杆，再回到日光里的玻璃门。场景为创作。",
+      "palette": [
+        "#52627b",
+        "#a74d28",
+        "#282e3b",
+        "#37393b"
+      ],
+      "details": [
+        "敞开的立领夹克让柿橙色在镜头里连成一条竖线。",
+        "直筒裤与低帮系带鞋适合场外短程步行和上下台阶。"
+      ],
+      "shots": [
+        {
+          "index": 1,
+          "title": "走过广场",
+          "emotion": "闭唇轻笑，直视观者",
+          "pose": "双臂自然摆动，朝镜头走来",
+          "framing": "全身，后鞋部分遮挡"
+        },
+        {
+          "index": 2,
+          "title": "门口挡一道光",
+          "emotion": "扬眉期待，直视观者",
+          "pose": "抬手到眉前遮住日光",
+          "framing": "半身，立领和罗纹清楚可见"
+        },
+        {
+          "index": 3,
+          "title": "台阶上回指场馆",
+          "emotion": "露齿笑，看向观者",
+          "pose": "踏下一级台阶，手指向身后的玻璃墙",
+          "framing": "全身，双鞋完整可见"
+        },
+        {
+          "index": 4,
+          "title": "扶领侧听",
+          "emotion": "抿嘴好奇，视线朝向场内",
+          "pose": "指尖抓住一侧领口，侧头",
+          "framing": "半身，翻开的领口入镜"
+        },
+        {
+          "index": 5,
+          "title": "门厅里举手招呼",
+          "emotion": "看向观者，张口大笑",
+          "pose": "边走边举手招呼，身体随步伐轻转",
+          "framing": "全身，后鞋部分遮挡"
+        },
+        {
+          "index": 6,
+          "title": "栏杆边望向冰面",
+          "emotion": "安静专注，目光投向场内",
+          "pose": "一侧前臂搭住栏杆，身体微倚",
+          "framing": "半身，领口和内搭下缘入镜"
+        },
+        {
+          "index": 7,
+          "title": "石凳上歇一会儿",
+          "emotion": "偏嘴微笑，直视观者",
+          "pose": "坐在石凳前沿，上身前倾，双手自然下垂",
+          "framing": "全身，两只系带鞋完整落地"
+        },
+        {
+          "index": 8,
+          "title": "为过弯击掌",
+          "emotion": "眼睛睁大，张口惊喜并看向观者",
+          "pose": "抬起双手击掌",
+          "framing": "胸像近景，手与脸同框"
+        },
+        {
+          "index": 9,
+          "title": "扶门等同伴",
+          "emotion": "放松轻笑，直视观者",
+          "pose": "单手扶住玻璃门，双脚稍错开站定",
+          "framing": "全身，直筒裤和双鞋完整入镜"
+        }
+      ],
+      "edition": "v2",
+      "asset": {
+        "asset_id": "look-114-female-01-v2-r1",
+        "file": "assets/looks/2026-11-28/look-114-female-01-v2-r1.webp",
+        "mime": "image/webp",
+        "width": 1020,
+        "height": 1530,
+        "bytes": 244558,
+        "sha256": "edba3c55620dbffb0856491e85f1aae7ca07f2472780f1c39c794c99bd8f97dc",
+        "visibility": "public",
+        "layout": {
+          "rows": 3,
+          "columns": 3,
+          "preview_panel": 3
+        }
+      }
+    }
+  ],
+  "cover_look_id": 114
+}

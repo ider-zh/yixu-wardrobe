@@ -28531,6 +28531,202 @@
           "shot_index": 6
         }
       ]
+    },
+    {
+      "product_id": "look-114-piece-01",
+      "name": "板岩蓝立领绗缝夹克",
+      "category": "外套",
+      "subtitle": "宽横绗线与低立领",
+      "description": "低立领接着深色中线拉链，宽横绗线给哑光蓝灰表面留出可见的起伏。写真中夹克完全敞开，独立主图半合拉链以展示正面轮廓。",
+      "color_name": "板岩蓝",
+      "color_hex": "#52627b",
+      "design_material": "哑光面料与浅鼓度横向绗缝的视觉观感",
+      "notes": [
+        "写真可见立领、拉链和正面横绗线。主图的半合拉链形态、领内短段、袋口结构与收边为设计推演，背面及完整内里省略。"
+      ],
+      "asset": {
+        "asset_id": "product-look-114-piece-01-r1",
+        "file": "assets/products/look-114/piece-01-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 92184,
+        "sha256": "c169a587fb459b8a5e7b687dd7c0df11359c9c0c670c111c43e38361389e4325",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "低立领与拉链",
+          "caption": "主图局部，展示立领、横绗线与深色拉链。拉链头、领内接合与缝线细节为设计推演。",
+          "design_study": true,
+          "role": "detail",
+          "asset": {
+            "asset_id": "product-look-114-piece-01-detail-r1",
+            "file": "assets/products/look-114/piece-01-detail-r1.webp",
+            "mime": "image/webp",
+            "width": 480,
+            "height": 600,
+            "bytes": 27034,
+            "sha256": "648213d259967fb46fed3b81ace5683ee4a91f9bbb7a689b25409b82dc4d9f64",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 114,
+          "piece_index": 1,
+          "reference_asset_id": "look-114-female-01-v2-r1",
+          "shot_index": 2
+        }
+      ]
+    },
+    {
+      "product_id": "look-114-piece-02",
+      "name": "柿橙半高领细罗纹针织衫",
+      "category": "上装",
+      "subtitle": "半高领接细直罗纹",
+      "description": "半高领连着细直罗纹，柿橙色从领口延伸到平直下摆，在敞开的蓝灰夹克里露出一条暖色。",
+      "color_name": "柿橙",
+      "color_hex": "#9d4c2f",
+      "design_material": "哑光细罗纹针织观感",
+      "notes": [
+        "写真可见半高领、前身细罗纹和平直下摆。外套遮住的肩线、袖型和袖口为设计推演，背面与内里省略。"
+      ],
+      "asset": {
+        "asset_id": "product-look-114-piece-02-r1",
+        "file": "assets/products/look-114/piece-02-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 297284,
+        "sha256": "d4bf10d8e326dc681583006fd061917f4abdfd692231788426ea1c509f94bae8",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "半高领与细罗纹",
+          "caption": "主图局部，放大领口与前胸罗纹。领边接缝未在写真中展示，接合方式为设计推演。",
+          "design_study": true,
+          "role": "detail",
+          "asset": {
+            "asset_id": "product-look-114-piece-02-detail-r1",
+            "file": "assets/products/look-114/piece-02-detail-r1.webp",
+            "mime": "image/webp",
+            "width": 432,
+            "height": 540,
+            "bytes": 76836,
+            "sha256": "6c48fb047dcd1dfd0d89c10ab06d43659e91275278ef0910151958c244bfad37",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 114,
+          "piece_index": 2,
+          "reference_asset_id": "look-114-female-01-v2-r1",
+          "shot_index": 2
+        }
+      ]
+    },
+    {
+      "product_id": "look-114-piece-03",
+      "name": "深靛蓝全长直筒裤",
+      "category": "下装",
+      "subtitle": "全长直筒与低对比车线",
+      "description": "深靛蓝直筒从胯部一直垂到鞋面。微暖的低对比车线收住裤脚，正面保留平整轮廓。",
+      "color_name": "深靛蓝",
+      "color_hex": "#242631",
+      "design_material": "深靛色牛仔斜纹观感",
+      "notes": [
+        "写真可见全长直筒与低对比车线。完整腰头、裤袢、扣合与袋口为设计推演，背面与内里省略。"
+      ],
+      "asset": {
+        "asset_id": "product-look-114-piece-03-r1",
+        "file": "assets/products/look-114/piece-03-r1.webp",
+        "mime": "image/webp",
+        "width": 1122,
+        "height": 1402,
+        "bytes": 128892,
+        "sha256": "9287ca8e758bb8646a0533cde9a4a9f718cef9f10a0e2bd9f03d890a05119a02",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "裤脚细车线",
+          "caption": "主图局部，展示裤脚、低对比车线与斜纹观感。针脚和生成纹理为视觉推演。",
+          "design_study": true,
+          "role": "detail",
+          "asset": {
+            "asset_id": "product-look-114-piece-03-detail-r1",
+            "file": "assets/products/look-114/piece-03-detail-r1.webp",
+            "mime": "image/webp",
+            "width": 448,
+            "height": 560,
+            "bytes": 27766,
+            "sha256": "cc0a13e82697c4d163a1c71baca54d83124308520b2b694284f45a52390ee5fd",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 114,
+          "piece_index": 3,
+          "reference_asset_id": "look-114-female-01-v2-r1",
+          "shot_index": 9
+        }
+      ]
+    },
+    {
+      "product_id": "look-114-piece-04",
+      "name": "石墨灰系带步行鞋",
+      "category": "鞋履",
+      "subtitle": "圆头、交叉系带与薄底缘",
+      "description": "哑光石墨灰鞋面配同色交叉系带，低帮留出脚踝活动空间，深色窄底缘贴着圆头轮廓。",
+      "color_name": "石墨灰",
+      "color_hex": "#3e3d3f",
+      "design_material": "哑光石墨灰鞋面与深色橡胶感底缘",
+      "notes": [
+        "写真以正面为主，主图的鞋侧拼片和部分缝线为设计推演，内底与外底底面省略。"
+      ],
+      "asset": {
+        "asset_id": "product-look-114-piece-04-r1",
+        "file": "assets/products/look-114/piece-04-r1.webp",
+        "mime": "image/webp",
+        "width": 1120,
+        "height": 1400,
+        "bytes": 72752,
+        "sha256": "e5ce788dde3efd06417ebec332030b429daf6fe5cb823e3f7c81b690e8ff3819",
+        "visibility": "public"
+      },
+      "gallery": [
+        {
+          "title": "鞋带与圆头",
+          "caption": "主图局部，展示交叉系带、圆头与深色底缘。鞋侧拼片和部分缝线为设计推演。",
+          "design_study": true,
+          "role": "detail",
+          "asset": {
+            "asset_id": "product-look-114-piece-04-detail-r1",
+            "file": "assets/products/look-114/piece-04-detail-r1.webp",
+            "mime": "image/webp",
+            "width": 448,
+            "height": 560,
+            "bytes": 38454,
+            "sha256": "267bba03064fc47811df29e39a2889ddc1494e165267d4120fb0de2a1cc8fdff",
+            "visibility": "public"
+          }
+        }
+      ],
+      "appearances": [
+        {
+          "look_id": 114,
+          "piece_index": 4,
+          "reference_asset_id": "look-114-female-01-v2-r1",
+          "shot_index": 7
+        }
+      ]
     }
   ]
 }
