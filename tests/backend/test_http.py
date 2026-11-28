@@ -60,21 +60,24 @@ def test_disclosure_is_concise_and_legacy_acceptance_does_not_carry_over(tmp_pat
         assert disclosure["title"] == "照片用途"
         assert disclosure["items"] == [
             "照片交由第三方 AI 生成试穿图，结果可供后台评估。",
-            "选择九宫格姿态时，原图会嵌入成片中央，随私有成片保存和删除。后台评估时会遮住中央原图。",
         ]
-        assert disclosure["version"] != "2026-11-12-v2"
+        assert (
+            b["pose_grid_description"] == "以你的照片为人物参考，在统一棚拍场景中生成九种全身站姿。"
+        )
+        legacy_version = "2026-11-23-v3"
+        assert disclosure["version"] != legacy_version
         assert disclosure["accepted"] is False
         headers = {"Origin": "https://localhost", "X-CSRF-Token": b["csrf_token"]}
         # A receipt for the old wording must never be attached to the new copy.
         with app.state.store.connect() as db:
             db.execute(
                 "UPDATE visitors SET accepted=? WHERE id=?",
-                ("2026-11-12-v2", b["visitor"]["id"]),
+                (legacy_version, b["visitor"]["id"]),
             )
         assert c.get("/api/bootstrap").json()["disclosure"]["accepted"] is False
         assert (
             c.post(
-                "/api/disclosure/accept", json={"version": "2026-11-12-v2"}, headers=headers
+                "/api/disclosure/accept", json={"version": legacy_version}, headers=headers
             ).status_code
             == 409
         )

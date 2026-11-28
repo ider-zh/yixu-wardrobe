@@ -2,7 +2,7 @@ import io
 
 from conftest import consent, picture, submit
 from fastapi.testclient import TestClient
-from PIL import Image
+from PIL import Image, ImageDraw
 from test_admin import login
 
 
@@ -44,7 +44,7 @@ def test_worker_publishes_private_labelled_webp_and_frozen_reference(setup):
     assert not list((app.state.settings.data_dir / "results").iterdir())
 
 
-def test_pose_grid_composes_original_and_hides_it_in_admin_preview(setup):
+def test_pose_grid_shows_generated_center_to_visitor_and_admin(setup):
     from backend.worker import Worker
 
     app, c, headers, bootstrap, provider, _detector, _clock = setup
@@ -60,12 +60,40 @@ def test_pose_grid_composes_original_and_hides_it_in_admin_preview(setup):
     assert not list(app.state.jobs.inputs.iterdir())
     result = c.get("/api/tryons/" + job["id"]).json()
     assert result["status"] == "succeeded"
-    with Image.open(io.BytesIO(c.get(result["image_url"]).content)) as output:
+    data = c.get(result["image_url"]).content
+    with Image.open(io.BytesIO(data)) as output:
         assert output.size == (256, 414)
-        red, green, blue = output.getpixel((128, 192))
-        assert red > 230 and green < 30 and blue < 30
-        assert min(output.getpixel((128, 140))) > 210
-        assert output.getpixel((40, 60))[2] > 100
+        assert b"yixu-tryon-pose-grid-v2" in output.info["xmp"]
+        for point in ((40, 60), (128, 192), (215, 370)):
+            red, green, blue = output.getpixel(point)
+            assert red > 100 and green < 30 and blue > 100
+    with TestClient(app, base_url="https://admin.localhost") as admin:
+        login(admin, app.state.settings.data_dir)
+        response = admin.get(f"/api/admin/results/{job['id']}/image")
+        assert response.status_code == 200
+        assert response.content == data
+
+
+def test_admin_still_masks_embedded_upload_in_historical_grid(setup):
+    app, c, headers, bootstrap, *_ = setup
+    consent(c, headers, bootstrap)
+    job = submit(c, headers, bootstrap, pose_mode="pose_grid").json()
+    # Historical results used a separate 30-pixel label band below the grid.
+    legacy = Image.new("RGB", (256, 414), "purple")
+    draw = ImageDraw.Draw(legacy)
+    draw.rectangle((85, 128, 169, 255), fill="red")
+    draw.rectangle((0, 384, 255, 413), fill=(20, 20, 20))
+    path = app.state.jobs.outputs / f"{job['id']}.webp"
+    legacy.save(path, format="WEBP", lossless=True)
+    with app.state.store.connect() as db:
+        db.execute(
+            "UPDATE jobs SET status='succeeded',output_bytes=? WHERE id=?",
+            (path.stat().st_size, job["id"]),
+        )
+    app.state.jobs.drop_inputs(job["id"])
+
+    with Image.open(io.BytesIO(c.get(f"/api/tryons/{job['id']}/image").content)) as output:
+        assert output.getpixel((128, 192)) == (255, 0, 0)
     with TestClient(app, base_url="https://admin.localhost") as admin:
         login(admin, app.state.settings.data_dir)
         response = admin.get(f"/api/admin/results/{job['id']}/image")

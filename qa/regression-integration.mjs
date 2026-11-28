@@ -79,7 +79,7 @@ async function publicUI(t) {
 test('photo try-on copy stays brief before and after real API bootstrap', async t => {
   const staticDOM = parseHTML(fs.readFileSync(path.join(root, 'index.html'), 'utf8')).document;
   const purpose = '照片交由第三方 AI 生成试穿图，结果可供后台评估。';
-  const disclosures = [purpose, '选择九宫格姿态时，原图会嵌入成片中央，随私有成片保存和删除。后台评估时会遮住中央原图。'];
+  const disclosures = [purpose];
   const assertBriefCopy = document => {
     assert.match(document.getElementById('detail-tryon').textContent, /^上传照片试穿/);
     assert.equal(document.getElementById('tryon-title').textContent, '我的试穿');

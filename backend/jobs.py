@@ -314,7 +314,7 @@ class Jobs:
             data = (self.outputs / f"{row['id']}.webp").read_bytes()
         except FileNotFoundError:
             raise HTTPException(404, "no_result:No generated result") from None
-        if for_admin and row["pose_mode"] == "pose_grid":
+        if for_admin and row["pose_mode"] == "pose_grid" and not row["generated_grid"]:
             data = hide_grid_original(data, self.settings)
         headers = {
             "Content-Disposition": ("attachment" if attachment else "inline")

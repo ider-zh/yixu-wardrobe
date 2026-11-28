@@ -178,7 +178,7 @@ def validate_photo(data, settings, detector):
     return png(image)
 
 
-def labelled_webp(data, settings, provenance, *, center_photo=None):
+def labelled_webp(data, settings, provenance, *, append_label=False):
     from xml.sax.saxutils import escape
 
     from PIL import ImageDraw, ImageFont
@@ -187,23 +187,11 @@ def labelled_webp(data, settings, provenance, *, center_photo=None):
     image.info.clear()
     font = ImageFont.load_default(size=max(14, image.width // 45))
     band = max(30, image.height // 28)
-    if center_photo is not None:
+    if append_label:
         band = max(30, image.width // 45 + 14)
         w, h = image.size
-        left, top, right, bottom = w // 3, h // 3, 2 * w // 3, 2 * h // 3
-        original = ImageOps.contain(
-            decode(center_photo, settings), (right - left, bottom - top), Image.Resampling.LANCZOS
-        )
         canvas = Image.new("RGB", (w, h + band), (20, 20, 20))
         canvas.paste(image, (0, 0))
-        ImageDraw.Draw(canvas).rectangle((left, top, right - 1, bottom - 1), fill=(240, 238, 232))
-        canvas.paste(
-            original,
-            (
-                left + (right - left - original.width) // 2,
-                top + (bottom - top - original.height) // 2,
-            ),
-        )
         image = canvas
     draw = ImageDraw.Draw(image)
     draw.rectangle((0, image.height - band, image.width, image.height), fill=(20, 20, 20))
@@ -218,7 +206,7 @@ def labelled_webp(data, settings, provenance, *, center_photo=None):
         + "</yixu:request></rdf:Description></rdf:RDF></x:xmpmeta>"
     )
     out = io.BytesIO()
-    image.save(out, format="WEBP", quality=90, lossless=center_photo is not None, xmp=xmp.encode())
+    image.save(out, format="WEBP", quality=90, xmp=xmp.encode())
     return out.getvalue()
 
 

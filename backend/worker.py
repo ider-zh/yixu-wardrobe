@@ -26,18 +26,26 @@ PROMPT = (
     "Produce one person in one natural portrait photograph, no collage, montage, extra "
     "people or text. This is a consented AI clothing try-on, not a real photograph."
 )
-POSE_GRID_PROMPT_VERSION = "yixu-tryon-pose-grid-v1"
+POSE_GRID_PROMPT_VERSION = "yixu-tryon-pose-grid-v2"
 POSE_GRID_PROMPT = (
     "Create a clean edge-to-edge 3 by 3 contact sheet of exactly nine equal-size cells, "
     "with boundaries at one-third and two-thirds of canvas width and height. No margins, "
-    "lettering, watermarks or overlapping cells. Leave the center cell plain neutral. "
-    "In all eight outer cells show the same person from Image 1. Preserve their facial "
-    "features, skin tone, hair and body build with coherent anatomy. Use Image 2 only "
-    "for the outfit; preserve visible garment design, colors and materials. Keep camera "
-    "distance sufficient to show the outfit, with consistent lighting and background. "
-    "Pose map, left to right and top to bottom: relaxed front stand, three-quarter turn, "
-    "walking toward camera; profile stand, blank center, seated upright; over-the-shoulder "
-    "turn, relaxed weight shift, and natural mid-step. Do not copy the reference model's identity."
+    "lettering, watermarks or overlapping cells. Render one new full-body fashion photograph "
+    "in every cell, including the center, with the entire figure and shoes inside the frame. "
+    "Use Image 1 as the sole reference for the person's identity and build. Preserve their "
+    "facial features, skin tone, hair and visible body proportions in all nine cells. "
+    "Do not reuse the uploaded photo, its pose, cropping, lighting or background. "
+    "Use Image 2 only for the outfit: retain garment design, colors, layering and fabric. "
+    "Use a shared neutral studio backdrop, soft even lighting and consistent camera distance. "
+    "Keep anatomy natural and give each cell a distinct standing fashion pose by varying "
+    "body angle, weight distribution, foot placement and arm position. "
+    "Pose map, left to right and top to bottom: front-facing with arms relaxed; left "
+    "three-quarter turn with one hand on hip; right three-quarter turn with staggered feet "
+    "and hands loosely clasped in front; side profile with one toe forward; front-facing "
+    "with ankles crossed and one hand at the collar; wide stance with one hand holding the "
+    "opposite wrist; turned away with a glance over the shoulder; weight on one leg with "
+    "one hand adjusting the opposite cuff; angled stance with a bent front knee and both "
+    "hands lightly on the hips. All nine poses are standing, without props."
 )
 
 
@@ -138,8 +146,8 @@ class Worker:
             os.replace(stage, self.jobs.outputs / f"{job_id}.webp")
             sync_dir(self.jobs.outputs)
             db.execute(
-                "UPDATE jobs SET status='succeeded',output_bytes=?,published=? WHERE id=?",
-                (len(data), self.clock(), job_id),
+                "UPDATE jobs SET status='succeeded',output_bytes=?,published=?,generated_grid=? WHERE id=?",
+                (len(data), self.clock(), row["pose_mode"] == "pose_grid", job_id),
             )
 
     def finish(self, job_id, status, code, message):
@@ -204,7 +212,6 @@ class Worker:
             db.execute("UPDATE jobs SET status='generating' WHERE id=?", (row["id"],))
 
         pose_grid = row["pose_mode"] == "pose_grid"
-        center_photo = photo if pose_grid else None
         try:
             result = provider.generate(
                 photo=photo,
@@ -249,7 +256,7 @@ class Worker:
                     "shot_index": row["shot_index"],
                     "pose_mode": row["pose_mode"],
                 },
-                center_photo=center_photo,
+                append_label=pose_grid,
             )
         except Exception:  # noqa: BLE001 - fail closed; never expose native/provider exceptions
             self.finish(row["id"], "failed", "invalid_output", "Provider returned an invalid image")

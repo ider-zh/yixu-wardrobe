@@ -48,7 +48,7 @@ function syncControls() {
     for(const option of poseSelect.options)option.selected=option.value===poseMode;
   }
   $('tryon-pose-description').textContent = poseMode === 'pose_grid'
-    ? '中央保留你的完整原图，外围八格展示换装后的不同姿态。原图会随私有成片保存。'
+    ? (session?.pose_grid_description || '九宫格展示换装后的多种姿态。')
     : '根据原照片的姿态生成一张试穿图。';
   $('tryon-composer').setAttribute('aria-busy',String(busy));
   submit.disabled = busy || !session?.generation_available || !photo || Boolean(photoRejection) || !frozen?.shot_index || failedReferences.has(frozen.shot_index) || (!session.disclosure.accepted && !$('tryon-consent').checked);

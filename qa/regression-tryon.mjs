@@ -25,6 +25,7 @@ let catalogFixture=null;
 let photoLimits=null;
 let resultImage = null; // Browser-encoded synthetic WebP; never a provider output.
 const bootstrap = () => ({csrf_token:'test-csrf',visitor:{id:'test-visitor'},generation_available:available,pose_grid_available:true,
+  pose_grid_description:'以你的照片为人物参考，在统一棚拍场景中生成九种全身站姿。',
   disclosure:{version:'test-v1',title:'照片用途',items:['照片交由第三方 AI 生成试穿图，结果可供后台评估。'],accepted:accept},
   ...(photoLimits?{photo_limits:photoLimits}:{}),original_retention_seconds:3600,result_max_count:1000});
 const server = http.createServer(async (req,res) => {
@@ -292,8 +293,9 @@ try {
   assert.equal(await evaluate('document.getElementById("tryon-submit").disabled'),false,'Photo and consent are sufficient for submission');
   assert.equal(await evaluate('document.getElementById("tryon-reference-options").open'),false,'Submission needs no interaction with outfit reference options');
   await evaluate('const mode=document.getElementById("tryon-pose-mode");mode.value="pose_grid";mode.dispatchEvent(new Event("change"))');
-  assert.match(await evaluate('document.getElementById("tryon-pose-description").textContent'),/中央保留你的完整原图/);
+  assert.match(await evaluate('document.getElementById("tryon-pose-description").textContent'),/统一棚拍场景中生成九种全身站姿/);
   await evaluate('document.getElementById("tryon-pose-mode").value="original";document.getElementById("tryon-pose-mode").dispatchEvent(new Event("change"))');
+  assert.match(await evaluate('document.getElementById("tryon-pose-description").textContent'),/原照片的姿态生成一张/);
   holdUpload=true;
   await evaluate('document.getElementById("tryon-submit").click();document.getElementById("tryon-submit").click()');
   for(let attempt=0;attempt<100&&!heldUpload;attempt++)await new Promise(resolve=>setTimeout(resolve,20));

@@ -72,6 +72,9 @@ class Store:
             job_columns = {row["name"] for row in db.execute("PRAGMA table_info(jobs)")}
             if "pose_mode" not in job_columns:
                 db.execute("ALTER TABLE jobs ADD COLUMN pose_mode TEXT NOT NULL DEFAULT 'original'")
+            if "generated_grid" not in job_columns:
+                # Historical grids embed the upload and must still be masked for admins.
+                db.execute("ALTER TABLE jobs ADD COLUMN generated_grid INTEGER NOT NULL DEFAULT 0")
             for column in ("look_title", "reference_asset_id", "reference_source_url"):
                 if column not in job_columns:
                     db.execute(f"ALTER TABLE jobs ADD COLUMN {column} TEXT")
